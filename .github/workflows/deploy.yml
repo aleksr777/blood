@@ -1,0 +1,36 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - development # Укажите вашу основную ветку (например, main или master)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # Используем последнюю версию Ubuntu
+
+    steps:
+      # Шаг 1: Получить код из репозитория
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Шаг 2: Установить Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16 # Укажите версию Node.js, которую используете
+
+      # Шаг 3: Установить зависимости
+      - name: Install dependencies
+        run: npm install
+
+      # Шаг 4: Собрать проект
+      - name: Build project
+        run: npm run build
+
+      # Шаг 5: Деплой на GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # Встроенный токен
+          publish_dir: ./dist # Папка, которую нужно задеплоить

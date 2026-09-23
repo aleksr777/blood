@@ -1,7 +1,5 @@
-import AppLayout from './components/app-layout/app-layout';
+import { TransfusionProtocol } from './components/transfusion-protocol/transfusion-protocol';
 
-const App = () => {
-  return <AppLayout />;
-};
+const App = () => <TransfusionProtocol />;
 
 export default App;

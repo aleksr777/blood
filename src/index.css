@@ -59,6 +59,11 @@ select {
   line-height: 1.35;
 }
 
+.print-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .print-button {
   display: inline-flex;
   align-items: center;
@@ -332,6 +337,10 @@ select {
     flex-direction: column;
   }
 
+  .print-actions {
+    flex-direction: column;
+  }
+
   .print-button {
     width: 100%;
   }
@@ -386,6 +395,16 @@ select {
   }
 
   .sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  html[data-print-page="first"] .sheet--second,
+  html[data-print-page="second"] .sheet--first {
+    display: none !important;
+  }
+
+  html[data-print-page] .sheet {
     break-after: auto;
     page-break-after: auto;
   }

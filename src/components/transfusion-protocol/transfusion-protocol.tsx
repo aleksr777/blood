@@ -1,8 +1,21 @@
 import { FirstPage } from './first-page';
 import { SecondPage } from './second-page';
 
+type PrintPage = 'first' | 'second';
+
 export const TransfusionProtocol = () => {
-  const printForm = () => window.print();
+  const printPage = (page: PrintPage) => {
+    const root = document.documentElement;
+
+    const cleanup = () => {
+      delete root.dataset.printPage;
+      window.removeEventListener('afterprint', cleanup);
+    };
+
+    root.dataset.printPage = page;
+    window.addEventListener('afterprint', cleanup);
+    window.print();
+  };
 
   return (
     <main className="app-shell">
@@ -11,14 +24,19 @@ export const TransfusionProtocol = () => {
           <h1>Протокол трансфузии</h1>
           <p>Приложение № 11 к приказу Минздрава России от 28.10.2020 № 1170н</p>
         </div>
-        <button type="button" className="print-button" onClick={printForm}>
-          Печать A4
-        </button>
+        <div className="print-actions">
+          <button type="button" className="print-button" onClick={() => printPage('first')}>
+            Печать страницы 1
+          </button>
+          <button type="button" className="print-button" onClick={() => printPage('second')}>
+            Печать страницы 2
+          </button>
+        </div>
       </div>
 
       <div className="print-hint">
-        Заполните поля и нажмите «Печать A4». В окне печати браузера рекомендуется масштаб 100% и
-        отключение колонтитулов браузера.
+        Заполните поля и выберите страницу для печати. В окне печати браузера рекомендуется масштаб
+        100% и отключение колонтитулов браузера.
       </div>
 
       <div className="sheets">

@@ -16,10 +16,16 @@ export const FirstPage = () => (
     <table className="protocol-table protocol-table--page1">
       <tbody>
         <tr>
-          <th className="document-title" colSpan={6}>ПРОТОКОЛ ТРАНСФУЗИИ</th>
+          <th className="document-title" colSpan={6}>
+            ПРОТОКОЛ ТРАНСФУЗИИ
+          </th>
         </tr>
         <tr className="row-top-data">
-          <LabeledCell colSpan={2} className="w-30" label="Фамилия, имя, отчество (при наличии) реципиента" />
+          <LabeledCell
+            colSpan={2}
+            className="w-30"
+            label="Фамилия, имя, отчество (при наличии) реципиента"
+          />
           <LabeledCell colSpan={2} className="w-31" label="Дата и время подачи заявки" />
           <LabeledCell colSpan={2} className="w-39" label="Дата трансфузии" />
         </tr>
@@ -50,7 +56,9 @@ export const FirstPage = () => (
 
         <SectionTitle>Показания к трансфузии</SectionTitle>
         <tr className="row-large-input">
-          <td colSpan={6}><TextField multiline rows={2} label="Показания к трансфузии" /></td>
+          <td colSpan={6}>
+            <TextField multiline rows={2} label="Показания к трансфузии" />
+          </td>
         </tr>
 
         <SectionTitle>Анамнез реципиента</SectionTitle>
@@ -62,12 +70,25 @@ export const FirstPage = () => (
 
         <SectionTitle>Данные о донорской крови или ее компоненте</SectionTitle>
         <tr className="row-donor-main">
-          <LabeledCell colSpan={3} className="span-3" label="Наименование компонента донорской крови" />
-          <LabeledCell colSpan={3} className="span-3" label="Наименование организации, осуществившей заготовку" />
+          <LabeledCell
+            colSpan={3}
+            className="span-3"
+            label="Наименование компонента донорской крови"
+          />
+          <LabeledCell
+            colSpan={3}
+            className="span-3"
+            label="Наименование организации, осуществившей заготовку"
+          />
         </tr>
         <tr>
           <LabeledCell colSpan={3} className="span-3" label="Группа крови донора AB0:" />
-          <LabeledCell colSpan={3} rowSpan={2} className="span-3" label="Антигены эритроцитов донора C, c, E, e, K" />
+          <LabeledCell
+            colSpan={3}
+            rowSpan={2}
+            className="span-3"
+            label="Антигены эритроцитов донора C, c, E, e, K"
+          />
         </tr>
         <tr>
           <LabeledCell colSpan={2} label="N единицы компонента крови" />
@@ -80,7 +101,11 @@ export const FirstPage = () => (
 
         <SectionTitle>Результаты индивидуального подбора</SectionTitle>
         <tr>
-          <LabeledCell colSpan={6} className="span-6" label="Наименование медицинской организации, осуществившей индивидуальный подбор" />
+          <LabeledCell
+            colSpan={6}
+            className="span-6"
+            label="Наименование медицинской организации, осуществившей индивидуальный подбор"
+          />
         </tr>
         <tr className="row-final-page1">
           <LabeledCell colSpan={6} className="span-6" label="Дата исследования" />

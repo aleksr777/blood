@@ -66,11 +66,7 @@ export const SecondPage = () => (
           </td>
         </tr>
         <tr className="doctor-row">
-          <LabeledCell
-            colSpan={6}
-            className="span-6"
-            label="Врач, осуществивший трансфузию:"
-          />
+          <LabeledCell colSpan={6} className="span-6" label="Врач, осуществивший трансфузию:" />
         </tr>
       </tbody>
     </table>

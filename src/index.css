@@ -29,7 +29,7 @@ button {
 }
 
 .print-actions {
-  width: min(100%, 210mm);
+  width: 262.5mm;
   margin: 0 auto 18px;
   display: flex;
   justify-content: flex-end;
@@ -73,6 +73,7 @@ button {
 .sheet {
   width: 210mm;
   height: 297mm;
+  zoom: 1.25;
   padding: 18mm 18mm 16mm;
   overflow: hidden;
   background: #fff;
@@ -301,6 +302,7 @@ button {
   .sheet {
     width: 210mm;
     height: 297mm;
+    zoom: 1;
     margin: 0;
     box-shadow: none;
     break-after: page;

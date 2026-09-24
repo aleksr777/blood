@@ -4,7 +4,7 @@ export const MonitorTable = () => (
   <table className="monitor-table">
     <tbody>
       <tr className="monitor-header">
-        <th className="monitor-label">Трансфузии компонентов крови</th>
+        <th>Трансфузии компонентов крови</th>
         <th>АД (мм рт.ст.)</th>
         <th>Частота пульса (уд/мин)</th>
         <th>Температура (°C)</th>

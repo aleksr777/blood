@@ -7,7 +7,7 @@ export const FirstPage = () => (
       <div>утвержденному приказом Министерства здравоохранения Российской Федерации от 28 октября 2020 г. N 1170н</div>
     </div>
 
-    <table className="protocol-table protocol-table--page1">
+    <table className="protocol-table">
       <tbody>
         <tr>
           <th className="document-title" colSpan={6}>
@@ -51,7 +51,7 @@ export const FirstPage = () => (
         <SectionTitle>Показания к трансфузии</SectionTitle>
         <tr className="row-large-input">
           <td colSpan={6}>
-            <TextField multiline rows={2} label="Показания к трансфузии" />
+            <TextField multiline label="Показания к трансфузии" />
           </td>
         </tr>
 

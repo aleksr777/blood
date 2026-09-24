@@ -3,7 +3,7 @@ import { MonitorTable } from './monitor-table';
 
 export const SecondPage = () => (
   <section className="sheet sheet--second" aria-label="Вторая страница протокола трансфузии">
-    <table className="protocol-table protocol-table--page2">
+    <table className="protocol-table">
       <tbody>
         <tr className="row-responsible">
           <LabeledCell

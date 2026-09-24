@@ -3,25 +3,16 @@ import type { ReactNode } from 'react';
 type TextFieldProps = {
   label: string;
   multiline?: boolean;
-  rows?: number;
-  className?: string;
 };
 
-export const TextField = ({
-  label,
-  multiline = false,
-  rows = 2,
-  className = '',
-}: TextFieldProps) => {
-  const classes = `form-control ${multiline ? 'form-control--multiline' : ''} ${className}`;
-
+export const TextField = ({ label, multiline = false }: TextFieldProps) => {
   if (multiline) {
     return (
       <textarea
-        className={classes}
+        className="form-control form-control--multiline"
         aria-label={label}
         title={label}
-        rows={rows}
+        rows={2}
         autoComplete="off"
         spellCheck={false}
       />
@@ -30,7 +21,7 @@ export const TextField = ({
 
   return (
     <input
-      className={classes}
+      className="form-control"
       aria-label={label}
       title={label}
       type="text"
@@ -42,7 +33,6 @@ export const TextField = ({
 
 type LabeledCellProps = {
   label: string;
-  children?: ReactNode;
   className?: string;
   centered?: boolean;
   colSpan?: number;
@@ -51,7 +41,6 @@ type LabeledCellProps = {
 
 export const LabeledCell = ({
   label,
-  children,
   className = '',
   centered = false,
   colSpan,
@@ -63,18 +52,17 @@ export const LabeledCell = ({
     rowSpan={rowSpan}
   >
     <div className="cell-label">{label}</div>
-    {children ?? <TextField label={label} />}
+    <TextField label={label} />
   </td>
 );
 
 type SectionTitleProps = {
   children: ReactNode;
-  colSpan?: number;
 };
 
-export const SectionTitle = ({ children, colSpan = 6 }: SectionTitleProps) => (
+export const SectionTitle = ({ children }: SectionTitleProps) => (
   <tr>
-    <th className="section-title" colSpan={colSpan}>
+    <th className="section-title" colSpan={6}>
       {children}
     </th>
   </tr>

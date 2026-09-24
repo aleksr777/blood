@@ -31,36 +31,11 @@ select {
   padding: 24px 20px 48px;
 }
 
-.toolbar {
-  width: min(100%, 210mm);
-  margin: 0 auto 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 16px 18px;
-  border: 1px solid #d5dbe3;
-  border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 8px 28px rgba(36, 47, 61, 0.08);
-}
-
-.toolbar h1 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-}
-
-.toolbar p {
-  margin: 5px 0 0;
-  color: #657184;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
 .print-actions {
+  width: min(100%, 210mm);
+  margin: 0 auto 18px;
   display: flex;
+  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -90,18 +65,6 @@ select {
 .form-control:focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 1px;
-}
-
-.print-hint {
-  width: min(100%, 210mm);
-  margin: 0 auto 18px;
-  padding: 10px 14px;
-  border: 1px solid #d7dee8;
-  border-radius: 8px;
-  background: #f8fafc;
-  color: #526071;
-  font-size: 13px;
-  line-height: 1.45;
 }
 
 .sheets {
@@ -332,11 +295,6 @@ select {
     padding: 14px 10px 30px;
   }
 
-  .toolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
   .print-actions {
     flex-direction: column;
   }
@@ -376,8 +334,7 @@ select {
     padding: 0;
   }
 
-  .toolbar,
-  .print-hint {
+  .print-actions {
     display: none !important;
   }
 

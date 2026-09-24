@@ -1,5 +1,3 @@
-import { TextField } from './form-controls';
-
 export const MonitorTable = () => (
   <table className="monitor-table">
     <tbody>
@@ -12,48 +10,24 @@ export const MonitorTable = () => (
       </tr>
       <tr className="monitor-row">
         <th>Перед началом переливания</th>
-        <td>
-          <TextField label="АД перед началом переливания" />
-        </td>
-        <td>
-          <TextField label="Частота пульса перед началом переливания" />
-        </td>
-        <td>
-          <TextField label="Температура перед началом переливания" />
-        </td>
-        <td>
-          <TextField label="Диурез и цвет мочи перед началом переливания" />
-        </td>
+        <td />
+        <td />
+        <td />
+        <td />
       </tr>
       <tr className="monitor-row">
         <th>Через 1 час после переливания</th>
-        <td>
-          <TextField label="АД через 1 час после переливания" />
-        </td>
-        <td>
-          <TextField label="Частота пульса через 1 час после переливания" />
-        </td>
-        <td>
-          <TextField label="Температура через 1 час после переливания" />
-        </td>
-        <td>
-          <TextField label="Диурез и цвет мочи через 1 час после переливания" />
-        </td>
+        <td />
+        <td />
+        <td />
+        <td />
       </tr>
       <tr className="monitor-row">
         <th>Через 2 часа после переливания</th>
-        <td>
-          <TextField label="АД через 2 часа после переливания" />
-        </td>
-        <td>
-          <TextField label="Частота пульса через 2 часа после переливания" />
-        </td>
-        <td>
-          <TextField label="Температура через 2 часа после переливания" />
-        </td>
-        <td>
-          <TextField label="Диурез и цвет мочи через 2 часа после переливания" />
-        </td>
+        <td />
+        <td />
+        <td />
+        <td />
       </tr>
     </tbody>
   </table>

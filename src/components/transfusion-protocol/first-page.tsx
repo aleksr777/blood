@@ -1,4 +1,4 @@
-import { LabeledCell, SectionTitle, TextField } from './form-controls';
+import { LabeledCell, SectionTitle } from './form-controls';
 
 export const FirstPage = () => (
   <section className="sheet sheet--first" aria-label="Первая страница протокола трансфузии">
@@ -34,12 +34,12 @@ export const FirstPage = () => (
           <LabeledCell colSpan={2} label="N и/б" />
           <td colSpan={2}>
             <div className="stacked-field">
-              <label>Время начала трансфузии</label>
-              <TextField label="Время начала трансфузии" />
+              <div>Время начала трансфузии</div>
+              <div className="blank-line" />
             </div>
             <div className="stacked-field stacked-field--second">
-              <label>Время окончания трансфузии</label>
-              <TextField label="Время окончания трансфузии" />
+              <div>Время окончания трансфузии</div>
+              <div className="blank-line" />
             </div>
           </td>
         </tr>
@@ -55,10 +55,8 @@ export const FirstPage = () => (
         </tr>
 
         <SectionTitle>Показания к трансфузии</SectionTitle>
-        <tr className="row-large-input">
-          <td colSpan={6}>
-            <TextField multiline label="Показания к трансфузии" />
-          </td>
+        <tr className="row-large-blank">
+          <td colSpan={6} />
         </tr>
 
         <SectionTitle>Анамнез реципиента</SectionTitle>

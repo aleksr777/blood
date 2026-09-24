@@ -133,11 +133,11 @@ select {
 }
 
 .legal-note {
-  width: 104mm;
-  margin: 0 0 5mm auto;
+  width: 140mm;
+  margin: 0 0 2mm auto;
   text-align: center;
-  font-size: 9pt;
-  line-height: 1.08;
+  font-size: 8pt;
+  line-height: 1;
 }
 
 .protocol-table {

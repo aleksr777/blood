@@ -3,10 +3,8 @@ import { LabeledCell, SectionTitle, TextField } from './form-controls';
 export const FirstPage = () => (
   <section className="sheet sheet--first" aria-label="Первая страница протокола трансфузии">
     <div className="legal-note">
-      <div>Приложение N 11 к Порядку оказания медицинской помощи населению</div>
-      <div>по профилю «трансфузиология», утвержденному приказом</div>
-      <div>Министерства здравоохранения Российской Федерации</div>
-      <div>от 28 октября 2020 г. N 1170н</div>
+      <div>Приложение N 11 к Порядку оказания медицинской помощи населению по профилю «трансфузиология»,</div>
+      <div>утвержденному приказом Министерства здравоохранения Российской Федерации от 28 октября 2020 г. N 1170н</div>
     </div>
 
     <table className="protocol-table protocol-table--page1">

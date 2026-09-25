@@ -1,7 +1,7 @@
 :root {
   --page-title-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
   --control-height: 2.75rem;
-  --scrollbar-width: clamp(8px, 6px + 0.4vw, 24px);
+  --scrollbar-width: 12px;
 
   font-family: Arial, Helvetica, sans-serif;
   color: #172033;
@@ -16,6 +16,12 @@
 
 html {
   background: #edf1f5;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 body {

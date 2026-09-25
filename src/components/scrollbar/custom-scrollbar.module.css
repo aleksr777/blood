@@ -1,0 +1,52 @@
+.track {
+  --thumb-min-height: 44px;
+
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 2147483000;
+  width: var(--scrollbar-width);
+  height: 100dvh;
+  background: rgb(219 226 236 / 88%);
+  cursor: default;
+  touch-action: none;
+  user-select: none;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.track:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+.thumb {
+  width: 100%;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background: #5b74a8;
+  background-clip: padding-box;
+  cursor: default;
+  transition: background-color 160ms ease;
+}
+
+.thumb:hover {
+  background-color: #496493;
+}
+
+.thumb:active {
+  background-color: #38527d;
+}
+
+@media print {
+  .track {
+    display: none !important;
+  }
+}

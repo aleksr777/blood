@@ -1,0 +1,100 @@
+.modal {
+  --modal-gap: clamp(0.5rem, 2vw, 2rem);
+
+  border: 1px solid #8ea6ff;
+  border-radius: 0.875rem;
+  padding: 0;
+  width: var(--modal-width, 32rem);
+  max-width: calc(100% - 2 * var(--modal-gap));
+  max-height: calc(
+    100dvh - 2 * var(--modal-gap) - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #8794bb #e9edfa;
+  background: #f8faff;
+  color: #17213f;
+  box-shadow: 0 24px 70px rgb(23 33 63 / 22%);
+  opacity: 0;
+  transform: translateY(12px) scale(0.985);
+  transform-origin: center;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+.modal[data-state='open'] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.modal::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+}
+
+.modal::-webkit-scrollbar-track {
+  background: #e9edfa;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  border: 2px solid #e9edfa;
+  border-radius: 999px;
+  background: #8794bb;
+}
+
+.modal::-webkit-scrollbar-thumb:hover {
+  background: #6878aa;
+}
+
+.modal[data-state='closing'] {
+  opacity: 0;
+  transform: translateY(8px) scale(0.99);
+}
+
+.modal::backdrop {
+  background: transparent;
+  backdrop-filter: blur(0);
+  transition:
+    background-color 0.4s ease,
+    backdrop-filter 0.4s ease;
+}
+
+.modal[data-state='open']::backdrop {
+  background: rgb(23 33 63 / 42%);
+  backdrop-filter: blur(3px);
+}
+
+.content {
+  position: relative;
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.title {
+  margin: 0 3rem 1.5rem 0;
+  font-size: var(--page-title-size);
+  line-height: 1.2;
+}
+
+.close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #17213f;
+  cursor: pointer;
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+.close:hover,
+.close:focus-visible {
+  background: rgb(142 166 255 / 18%);
+}

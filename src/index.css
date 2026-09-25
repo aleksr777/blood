@@ -119,6 +119,40 @@ button {
   text-align: center;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .fill-block > tr > th,
+  .fill-block > tr > td,
+  .fill-block .monitor-table th,
+  .fill-block .monitor-table td {
+    transition:
+      background-color 140ms ease,
+      border-color 140ms ease;
+  }
+
+  .fill-block:hover > tr > th,
+  .fill-block:hover > tr > td,
+  .fill-block:hover .monitor-table th,
+  .fill-block:hover .monitor-table td {
+    background: #eef6ff;
+  }
+
+  .fill-block:hover > tr:first-child > * {
+    border-top-color: #2563eb;
+  }
+
+  .fill-block:hover > tr:last-child > * {
+    border-bottom-color: #2563eb;
+  }
+
+  .fill-block:hover > tr > :first-child {
+    border-left-color: #2563eb;
+  }
+
+  .fill-block:hover > tr > :last-child {
+    border-right-color: #2563eb;
+  }
+}
+
 .document-title,
 .section-title {
   text-align: center;

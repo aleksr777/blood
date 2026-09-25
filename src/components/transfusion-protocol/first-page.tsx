@@ -20,6 +20,9 @@ export const FirstPage = () => (
             ПРОТОКОЛ ТРАНСФУЗИИ
           </th>
         </tr>
+      </tbody>
+
+      <tbody className="fill-block">
         <tr className="row-top-data">
           <LabeledCell
             colSpan={2}
@@ -43,7 +46,9 @@ export const FirstPage = () => (
             </div>
           </td>
         </tr>
+      </tbody>
 
+      <tbody className="fill-block">
         <SectionTitle>Данные медицинского обследования реципиента</SectionTitle>
         <tr>
           <LabeledCell colSpan={4} className="span-4" label="Группа крови реципиента AB0:" />
@@ -53,26 +58,28 @@ export const FirstPage = () => (
           <LabeledCell colSpan={4} className="span-4" label="Антигены C, c, E, e, K" />
           <LabeledCell colSpan={2} className="span-2" label="Аллоиммунные антитела" />
         </tr>
+      </tbody>
 
+      <tbody className="fill-block">
         <SectionTitle>Показания к трансфузии</SectionTitle>
         <tr className="row-large-blank">
           <td colSpan={6} />
         </tr>
+      </tbody>
 
+      <tbody className="fill-block">
         <SectionTitle>Анамнез реципиента</SectionTitle>
         <tr className="row-history">
           <LabeledCell colSpan={2} centered label="Трансфузии компонентов крови в анамнезе" />
           <LabeledCell colSpan={2} centered label="Реакции и осложнения на трансфузии в анамнезе" />
           <LabeledCell colSpan={2} centered label="Трансфузии по индивидуальному подбору" />
         </tr>
+      </tbody>
 
+      <tbody className="fill-block">
         <SectionTitle>Данные о донорской крови или ее компоненте</SectionTitle>
         <tr className="row-donor-main">
-          <LabeledCell
-            colSpan={3}
-            className="span-3"
-            label="Наименование компонента донорской крови"
-          />
+          <LabeledCell colSpan={3} className="span-3" label="Наименование компонента донорской крови" />
           <LabeledCell
             colSpan={3}
             className="span-3"
@@ -96,7 +103,9 @@ export const FirstPage = () => (
           <LabeledCell colSpan={3} className="span-3" label="Дата заготовки:" />
           <LabeledCell colSpan={3} className="span-3" label="Срок годности:" />
         </tr>
+      </tbody>
 
+      <tbody className="fill-block">
         <SectionTitle>Результаты индивидуального подбора</SectionTitle>
         <tr>
           <LabeledCell

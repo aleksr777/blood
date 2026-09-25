@@ -4,20 +4,18 @@ import { MonitorTable } from './monitor-table';
 export const SecondPage = () => (
   <section className="sheet sheet--second" aria-label="Вторая страница протокола трансфузии">
     <table className="protocol-table">
-      <tbody>
+      <tbody className="fill-block">
         <tr className="row-responsible">
           <LabeledCell
             colSpan={3}
             className="span-3"
             label="Фамилия, имя, отчество (при наличии) ответственного лица"
           />
-          <LabeledCell
-            colSpan={3}
-            className="span-3"
-            label="Заключение (совместимо/несовместимо)"
-          />
+          <LabeledCell colSpan={3} className="span-3" label="Заключение (совместимо/несовместимо)" />
         </tr>
+      </tbody>
 
+      <tbody className="fill-block">
         <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
         <tr>
           <LabeledCell colSpan={6} className="span-6" label="Наименования реагентов" />
@@ -34,19 +32,26 @@ export const SecondPage = () => (
             <div className="cell-label">Биологическая проба</div>
           </td>
         </tr>
+      </tbody>
 
+      <tbody className="fill-block">
         <SectionTitle>Реакции и осложнения</SectionTitle>
         <tr className="row-complications">
           <LabeledCell colSpan={3} className="span-3" label="Основные симптомы" />
           <LabeledCell colSpan={3} className="span-3" label="Степень тяжести" />
         </tr>
+      </tbody>
 
+      <tbody className="fill-block">
         <SectionTitle>Наблюдение за состоянием реципиента</SectionTitle>
         <tr>
           <td colSpan={6} className="monitor-wrapper">
             <MonitorTable />
           </td>
         </tr>
+      </tbody>
+
+      <tbody className="fill-block">
         <tr className="doctor-row">
           <LabeledCell colSpan={6} className="span-6" label="Врач, осуществивший трансфузию:" />
         </tr>

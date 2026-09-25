@@ -86,7 +86,11 @@ export const DonorBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
 );
 
 export const SelectionBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody className="fill-block" onClick={() => onOpenBlock('selection')}>
+  <tbody
+    className="fill-block"
+    data-logical-block="selection"
+    onClick={() => onOpenBlock('selection')}
+  >
     <SectionTitle>Результаты индивидуального подбора</SectionTitle>
     <tr>
       <LabeledCell

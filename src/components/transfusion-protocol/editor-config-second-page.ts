@@ -18,24 +18,6 @@ const monitoringFields = [
 
 export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
   {
-    id: 'responsible',
-    title: 'Ответственное лицо и заключение',
-    size: 'medium',
-    fields: [
-      {
-        name: 'responsiblePerson',
-        label: 'Фамилия, имя, отчество ответственного лица',
-        wide: true,
-      },
-      {
-        name: 'compatibilityConclusion',
-        label: 'Заключение',
-        type: 'select',
-        options: ['Совместимо', 'Несовместимо'],
-      },
-    ],
-  },
-  {
     id: 'compatibilityTests',
     title: 'Пробы на индивидуальную совместимость',
     size: 'large',

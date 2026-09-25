@@ -5,7 +5,6 @@ export type ProtocolBlockId =
   | 'history'
   | 'donor'
   | 'selection'
-  | 'responsible'
   | 'compatibilityTests'
   | 'complications'
   | 'monitoring'

@@ -92,7 +92,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
   {
     id: 'selection',
     title: 'Результаты индивидуального подбора',
-    size: 'medium',
+    size: 'large',
     fields: [
       {
         name: 'selectionOrganization',
@@ -100,6 +100,17 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
         wide: true,
       },
       { name: 'selectionDate', label: 'Дата исследования', type: 'date' },
+      {
+        name: 'responsiblePerson',
+        label: 'Фамилия, имя, отчество ответственного лица',
+        wide: true,
+      },
+      {
+        name: 'compatibilityConclusion',
+        label: 'Заключение',
+        type: 'select',
+        options: ['Совместимо', 'Несовместимо'],
+      },
     ],
   },
 ];

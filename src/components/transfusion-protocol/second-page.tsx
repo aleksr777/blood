@@ -6,7 +6,11 @@ import { formatDate } from './protocol-types';
 export const SecondPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
   <section className="sheet sheet--second" aria-label="Вторая страница протокола трансфузии">
     <table className="protocol-table">
-      <tbody className="fill-block" onClick={() => onOpenBlock('responsible')}>
+      <tbody
+        className="fill-block"
+        data-logical-block="selection"
+        onClick={() => onOpenBlock('selection')}
+      >
         <tr className="row-responsible">
           <LabeledCell
             colSpan={3}

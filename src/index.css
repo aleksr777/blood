@@ -166,6 +166,46 @@ button {
   .fill-block:hover > tr > :last-child {
     border-right-color: #2563eb;
   }
+
+  .sheets:has(.fill-block[data-logical-block='selection']:hover)
+    .fill-block[data-logical-block='selection']
+    > tr
+    > th,
+  .sheets:has(.fill-block[data-logical-block='selection']:hover)
+    .fill-block[data-logical-block='selection']
+    > tr
+    > td {
+    background: #eef6ff;
+  }
+
+  .sheets:has(.fill-block[data-logical-block='selection']:hover)
+    .fill-block[data-logical-block='selection']
+    > tr:first-child
+    > * {
+    border-top-color: #2563eb;
+  }
+
+  .sheets:has(.fill-block[data-logical-block='selection']:hover)
+    .fill-block[data-logical-block='selection']
+    > tr:last-child
+    > * {
+    border-bottom-color: #2563eb;
+  }
+
+  .sheets:has(.fill-block[data-logical-block='selection']:hover)
+    .fill-block[data-logical-block='selection']
+    > tr
+    > :first-child {
+    border-left-color: #2563eb;
+  }
+
+  .sheets:has(.fill-block[data-logical-block='selection']:hover)
+    .fill-block[data-logical-block='selection']
+    > tr
+    > :last-child {
+    border-right-color: #2563eb;
+  }
+
 }
 
 .document-title,

@@ -131,6 +131,11 @@ button {
 
 @media (hover: hover) and (pointer: fine) {
   .fill-block > tr > th,
+  .fill-block > tr > td {
+    cursor: pointer;
+  }
+
+  .fill-block > tr > th,
   .fill-block > tr > td,
   .fill-block .monitor-table th,
   .fill-block .monitor-table td {
@@ -186,6 +191,23 @@ button {
   min-height: 5mm;
   margin-bottom: 0.6mm;
   line-height: 1.08;
+}
+
+.cell-value {
+  min-height: 4.5mm;
+  margin-top: 0.8mm;
+  overflow: hidden;
+  line-height: 1.08;
+  white-space: pre-wrap;
+}
+
+.cell-value--multiline {
+  min-height: 8mm;
+}
+
+.monitor-value {
+  margin: 0;
+  text-align: center;
 }
 
 .cell--centered .cell-label {

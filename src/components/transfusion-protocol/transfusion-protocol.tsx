@@ -1,9 +1,15 @@
+import { useState } from 'react';
 import { FirstPage } from './first-page';
+import { ProtocolEditorModal } from './protocol-editor-modal';
 import { SecondPage } from './second-page';
+import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
 type PrintPage = 'first' | 'second';
 
 export const TransfusionProtocol = () => {
+  const [values, setValues] = useState<ProtocolValues>({});
+  const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(null);
+
   const printPage = (page: PrintPage) => {
     const root = document.documentElement;
 
@@ -15,6 +21,10 @@ export const TransfusionProtocol = () => {
     root.dataset.printPage = page;
     window.addEventListener('afterprint', cleanup);
     window.print();
+  };
+
+  const saveBlock = (nextValues: ProtocolValues) => {
+    setValues((current) => ({ ...current, ...nextValues }));
   };
 
   return (
@@ -29,9 +39,19 @@ export const TransfusionProtocol = () => {
       </div>
 
       <div className="sheets">
-        <FirstPage />
-        <SecondPage />
+        <FirstPage values={values} onOpenBlock={setActiveBlock} />
+        <SecondPage values={values} onOpenBlock={setActiveBlock} />
       </div>
+
+      {activeBlock && (
+        <ProtocolEditorModal
+          key={activeBlock}
+          blockId={activeBlock}
+          values={values}
+          onSave={saveBlock}
+          onClose={() => setActiveBlock(null)}
+        />
+      )}
     </main>
   );
 };

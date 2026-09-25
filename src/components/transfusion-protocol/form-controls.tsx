@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 type LabeledCellProps = {
   label: string;
+  value?: string;
   className?: string;
   centered?: boolean;
   colSpan?: number;
@@ -10,6 +11,7 @@ type LabeledCellProps = {
 
 export const LabeledCell = ({
   label,
+  value = '',
   className = '',
   centered = false,
   colSpan,
@@ -21,6 +23,7 @@ export const LabeledCell = ({
     rowSpan={rowSpan}
   >
     <div className="cell-label">{label}</div>
+    {value && <div className="cell-value">{value}</div>}
   </td>
 );
 

@@ -1,0 +1,94 @@
+.small {
+  --modal-width: 30rem;
+}
+
+.medium {
+  --modal-width: 42rem;
+}
+
+.large {
+  --modal-width: 52rem;
+}
+
+.xlarge {
+  --modal-width: 64rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.grid label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.grid input,
+.grid select,
+.grid textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid #b8c4d6;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-weight: 400;
+}
+
+.grid textarea {
+  min-height: 6.5rem;
+  resize: vertical;
+}
+
+.grid input:focus,
+.grid select:focus,
+.grid textarea:focus {
+  border-color: #2563eb;
+  outline: 2px solid rgb(37 99 235 / 16%);
+  outline-offset: 1px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.actions button {
+  min-height: 2.6rem;
+  border-radius: 0.5rem;
+  padding: 0 1.1rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.secondary {
+  border: 1px solid #aebacc;
+  background: #fff;
+  color: #334155;
+}
+
+.primary {
+  border: 1px solid #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.primary:hover {
+  border-color: #1e40af;
+  background: #1e40af;
+}

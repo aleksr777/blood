@@ -243,22 +243,6 @@ button {
   white-space: pre-wrap;
 }
 
-.cell-inline {
-  display: flex;
-  align-items: baseline;
-  gap: 1.5mm;
-}
-
-.cell-inline .cell-label,
-.cell-inline .cell-value {
-  min-height: 0;
-  margin: 0;
-}
-
-.cell-inline .cell-value {
-  flex: 1;
-}
-
 .cell-value--multiline {
   min-height: 8mm;
 }

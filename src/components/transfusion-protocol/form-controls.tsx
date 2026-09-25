@@ -5,7 +5,6 @@ type LabeledCellProps = {
   value?: string;
   className?: string;
   centered?: boolean;
-  inlineValue?: boolean;
   colSpan?: number;
   rowSpan?: number;
 };
@@ -15,7 +14,6 @@ export const LabeledCell = ({
   value = '',
   className = '',
   centered = false,
-  inlineValue = false,
   colSpan,
   rowSpan,
 }: LabeledCellProps) => (
@@ -24,17 +22,8 @@ export const LabeledCell = ({
     colSpan={colSpan}
     rowSpan={rowSpan}
   >
-    {inlineValue ? (
-      <div className="cell-inline">
-        <div className="cell-label">{label}</div>
-        {value && <div className="cell-value">{value}</div>}
-      </div>
-    ) : (
-      <>
-        <div className="cell-label">{label}</div>
-        {value && <div className="cell-value">{value}</div>}
-      </>
-    )}
+    <div className="cell-label">{label}</div>
+    {value && <div className="cell-value">{value}</div>}
   </td>
 );
 

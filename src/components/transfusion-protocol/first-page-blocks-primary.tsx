@@ -30,7 +30,6 @@ export const GeneralBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
         colSpan={2}
         label="№ медицинской карты"
         value={values.medicalRecordNumber}
-        inlineValue
       />
       <td colSpan={2}>
         <div className="stacked-field">

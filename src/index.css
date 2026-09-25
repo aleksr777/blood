@@ -252,14 +252,6 @@ button {
     padding: 14px 10px 30px;
   }
 
-  .print-actions {
-    flex-direction: column;
-  }
-
-  .print-button {
-    width: 100%;
-  }
-
   .sheets {
     align-items: flex-start;
     overflow-x: auto;

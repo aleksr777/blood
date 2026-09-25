@@ -10,7 +10,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'requestDateTime', label: 'Дата и время подачи заявки', type: 'datetime-local' },
       { name: 'transfusionDate', label: 'Дата трансфузии', type: 'date' },
       { name: 'department', label: 'Отделение' },
-      { name: 'medicalRecordNumber', label: '№ истории болезни' },
+      { name: 'medicalRecordNumber', label: '№ медицинской карты' },
       { name: 'startTime', label: 'Время начала трансфузии', type: 'time' },
       { name: 'endTime', label: 'Время окончания трансфузии', type: 'time' },
     ],

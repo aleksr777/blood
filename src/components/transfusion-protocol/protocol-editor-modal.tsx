@@ -23,7 +23,9 @@ const FieldControl = ({
 }: {
   field: ProtocolFieldConfig;
   value: string;
-  onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
+  onChange: (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => void;
 }) => {
   if (field.type === 'textarea') {
     return <textarea name={field.name} value={value} rows={4} onChange={onChange} />;

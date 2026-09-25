@@ -22,7 +22,11 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
     title: 'Ответственное лицо и заключение',
     size: 'medium',
     fields: [
-      { name: 'responsiblePerson', label: 'Фамилия, имя, отчество ответственного лица', wide: true },
+      {
+        name: 'responsiblePerson',
+        label: 'Фамилия, имя, отчество ответственного лица',
+        wide: true,
+      },
       {
         name: 'compatibilityConclusion',
         label: 'Заключение',

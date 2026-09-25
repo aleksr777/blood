@@ -80,7 +80,9 @@ export const IndicationsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => 
     <SectionTitle>Показания к трансфузии</SectionTitle>
     <tr className="row-large-blank">
       <td colSpan={6}>
-        {values.indications && <div className="cell-value cell-value--multiline">{values.indications}</div>}
+        {values.indications && (
+          <div className="cell-value cell-value--multiline">{values.indications}</div>
+        )}
       </td>
     </tr>
   </tbody>

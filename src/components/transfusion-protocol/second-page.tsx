@@ -34,7 +34,12 @@ export const SecondPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
           />
         </tr>
         <tr>
-          <LabeledCell colSpan={4} className="span-4" label="N серии реагента" value={values.reagentSeries} />
+          <LabeledCell
+            colSpan={4}
+            className="span-4"
+            label="N серии реагента"
+            value={values.reagentSeries}
+          />
           <LabeledCell
             colSpan={2}
             className="span-2"
@@ -63,8 +68,18 @@ export const SecondPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
       <tbody className="fill-block" onClick={() => onOpenBlock('complications')}>
         <SectionTitle>Реакции и осложнения</SectionTitle>
         <tr className="row-complications">
-          <LabeledCell colSpan={3} className="span-3" label="Основные симптомы" value={values.symptoms} />
-          <LabeledCell colSpan={3} className="span-3" label="Степень тяжести" value={values.severity} />
+          <LabeledCell
+            colSpan={3}
+            className="span-3"
+            label="Основные симптомы"
+            value={values.symptoms}
+          />
+          <LabeledCell
+            colSpan={3}
+            className="span-3"
+            label="Степень тяжести"
+            value={values.severity}
+          />
         </tr>
       </tbody>
 

@@ -61,34 +61,3 @@
   outline-offset: 1px;
 }
 
-.actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.actions button {
-  min-height: 2.6rem;
-  border-radius: 0.5rem;
-  padding: 0 1.1rem;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.secondary {
-  border: 1px solid #aebacc;
-  background: #fff;
-  color: #334155;
-}
-
-.primary {
-  border: 1px solid #1d4ed8;
-  background: #1d4ed8;
-  color: #fff;
-}
-
-.primary:hover {
-  border-color: #1e40af;
-  background: #1e40af;
-}

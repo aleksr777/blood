@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
-import Modal, { ModalDismissButton } from '../modal/modal';
+import Modal from '../modal/modal';
 import { getProtocolBlockConfig } from './editor-config';
 import styles from './protocol-editor.module.css';
 import type { ProtocolBlockId, ProtocolFieldConfig, ProtocolValues } from './protocol-types';
@@ -66,8 +66,13 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
     setDraft((current) => ({ ...current, [name]: value }));
   };
 
+  const handleClose = () => {
+    onSave(draft);
+    onClose();
+  };
+
   return (
-    <Modal title={config.title} onClose={onClose} className={styles[config.size]}>
+    <Modal title={config.title} onClose={handleClose} className={styles[config.size]}>
       <div className={styles.grid}>
         {config.fields.map((field) => (
           <label key={field.name} className={field.wide ? styles.wide : undefined}>
@@ -77,12 +82,6 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
         ))}
       </div>
 
-      <div className={styles.actions}>
-        <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>
-        <ModalDismissButton className={styles.primary} onClick={() => onSave(draft)}>
-          Сохранить
-        </ModalDismissButton>
-      </div>
     </Modal>
   );
 };

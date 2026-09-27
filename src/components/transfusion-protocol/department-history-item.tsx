@@ -1,19 +1,20 @@
 import { useState, type KeyboardEvent } from 'react';
+import type { DepartmentRecord } from '../../storage/repositories/departments';
 import styles from './protocol-editor.module.css';
 
 type Props = {
-  value: string;
-  onSelect: (value: string) => void;
-  onRename: (oldValue: string, newValue: string) => void;
-  onRemove: (value: string) => void;
+  item: DepartmentRecord;
+  onSelect: (item: DepartmentRecord) => void;
+  onRename: (item: DepartmentRecord, newValue: string) => void;
+  onRemove: (item: DepartmentRecord) => void;
 };
 
-export const DepartmentHistoryItem = ({ value, onSelect, onRename, onRemove }: Props) => {
+export const DepartmentHistoryItem = ({ item, onSelect, onRename, onRemove }: Props) => {
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(value);
+  const [draft, setDraft] = useState(item.name);
 
   const startEditing = () => {
-    setDraft(value);
+    setDraft(item.name);
     setEditing(true);
   };
 
@@ -22,8 +23,8 @@ export const DepartmentHistoryItem = ({ value, onSelect, onRename, onRemove }: P
 
     const nextValue = draft.trim();
     setEditing(false);
-    if (nextValue === value) return;
-    onRename(value, nextValue);
+    if (nextValue === item.name) return;
+    onRename(item, nextValue);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -33,7 +34,7 @@ export const DepartmentHistoryItem = ({ value, onSelect, onRename, onRemove }: P
     }
 
     if (event.key === 'Escape') {
-      setDraft(value);
+      setDraft(item.name);
       setEditing(false);
       event.currentTarget.blur();
     }
@@ -45,7 +46,7 @@ export const DepartmentHistoryItem = ({ value, onSelect, onRename, onRemove }: P
         <input
           autoFocus
           className={styles.historyInput}
-          aria-label={`Изменить сохранённое отделение: ${value}`}
+          aria-label={`Изменить сохранённое отделение: ${item.name}`}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onBlur={commit}
@@ -56,16 +57,16 @@ export const DepartmentHistoryItem = ({ value, onSelect, onRename, onRemove }: P
           type="button"
           className={styles.historyValue}
           title="Подставить в поле «Отделение»"
-          onClick={() => onSelect(value)}
+          onClick={() => onSelect(item)}
         >
-          {value}
+          {item.name}
         </button>
       )}
 
       <button
         type="button"
         className={styles.historyEdit}
-        aria-label={`Изменить отделение: ${value}`}
+        aria-label={`Изменить отделение: ${item.name}`}
         title="Изменить"
         onClick={startEditing}
       >
@@ -74,9 +75,9 @@ export const DepartmentHistoryItem = ({ value, onSelect, onRename, onRemove }: P
       <button
         type="button"
         className={styles.historyDelete}
-        aria-label={`Удалить отделение: ${value}`}
+        aria-label={`Удалить отделение: ${item.name}`}
         title="Удалить"
-        onClick={() => onRemove(value)}
+        onClick={() => onRemove(item)}
       >
         ×
       </button>

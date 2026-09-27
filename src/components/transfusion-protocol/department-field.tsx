@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { DepartmentHistoryItem } from './department-history-item';
 import {
-  loadDepartmentHistory,
+  loadDepartments,
   removeDepartment,
   renameDepartment,
-} from './department-history';
+  type DepartmentRecord,
+} from '../../storage/repositories/departments';
+import { DepartmentHistoryItem } from './department-history-item';
 import styles from './protocol-editor.module.css';
 
 type Props = {
@@ -13,9 +14,23 @@ type Props = {
 };
 
 export const DepartmentField = ({ value, onChange }: Props) => {
-  const [history, setHistory] = useState(loadDepartmentHistory);
+  const [history, setHistory] = useState<DepartmentRecord[]>([]);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    void loadDepartments()
+      .then((items) => {
+        if (active) setHistory(items);
+      })
+      .catch((error: unknown) => console.error('Не удалось загрузить отделения:', error));
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const closeOnOutsideClick = (event: PointerEvent) => {
@@ -26,20 +41,21 @@ export const DepartmentField = ({ value, onChange }: Props) => {
     return () => document.removeEventListener('pointerdown', closeOnOutsideClick);
   }, []);
 
-  const rename = (oldValue: string, newValue: string) => {
-    const nextValue = newValue.trim();
-    setHistory(renameDepartment(oldValue, nextValue));
-    if (value === oldValue) onChange(nextValue);
+  const rename = async (item: DepartmentRecord, name: string) => {
+    const nextName = name.trim();
+    const items = await renameDepartment(item.id, nextName);
+    setHistory(items);
+    if (value === item.name) onChange(nextName);
   };
 
-  const remove = (item: string) => {
-    const nextHistory = removeDepartment(item);
-    setHistory(nextHistory);
-    if (nextHistory.length === 0) setOpen(false);
+  const remove = async (item: DepartmentRecord) => {
+    const items = await removeDepartment(item.id);
+    setHistory(items);
+    if (items.length === 0) setOpen(false);
   };
 
-  const select = (item: string) => {
-    onChange(item);
+  const select = (item: DepartmentRecord) => {
+    onChange(item.name);
     setOpen(false);
   };
 
@@ -70,8 +86,8 @@ export const DepartmentField = ({ value, onChange }: Props) => {
         <div className={styles.historyDropdown}>
           {history.map((item) => (
             <DepartmentHistoryItem
-              key={item}
-              value={item}
+              key={item.id}
+              item={item}
               onSelect={select}
               onRename={rename}
               onRemove={remove}

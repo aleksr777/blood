@@ -27,3 +27,20 @@ npm run preview
 - отключенные колонтитулы браузера.
 
 Печатная форма разделена на две страницы A4. При печати панель управления и служебная подсказка скрываются.
+
+
+## Client database
+
+Persistent shared application data is stored in SQLite WASM using OPFS. The database runs
+inside a Web Worker and does not require a backend.
+
+The hosting environment must return these headers:
+
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+Vite development and preview servers are configured automatically. GitHub Pages does not
+support the required response headers, so OPFS-backed SQLite must be deployed to a static
+host that allows custom headers.

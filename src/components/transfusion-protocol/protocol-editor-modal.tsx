@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Modal from '../modal/modal';
 import { DepartmentField } from './department-field';
-import { rememberDepartment } from './department-history';
+import { rememberDepartment } from '../../storage/repositories/departments';
 import { getProtocolBlockConfig } from './editor-config';
 import styles from './protocol-editor.module.css';
 import type { ProtocolBlockId, ProtocolFieldConfig, ProtocolValues } from './protocol-types';
@@ -75,7 +75,7 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
   };
 
   const handleClose = () => {
-    if (blockId === 'general') rememberDepartment(draft.department ?? '');
+    if (blockId === 'general') void rememberDepartment(draft.department ?? '');
     onSave(draft);
     onClose();
   };

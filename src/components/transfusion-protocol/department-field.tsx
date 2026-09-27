@@ -65,7 +65,9 @@ export const DepartmentField = ({ value, onChange }: Props) => {
   const [history, setHistory] = useState(loadDepartmentHistory);
 
   const rename = (oldValue: string, newValue: string) => {
-    setHistory(renameDepartment(oldValue, newValue));
+    const nextValue = newValue.trim();
+    setHistory(renameDepartment(oldValue, nextValue));
+    if (value === oldValue) onChange(nextValue);
   };
 
   const remove = (item: string) => {

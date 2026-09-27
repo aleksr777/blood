@@ -18,7 +18,9 @@ export const loadDepartmentHistory = () => {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
     if (!Array.isArray(stored)) return [];
 
-    return unique(stored.filter((value): value is string => typeof value === 'string').map(normalize));
+    return unique(
+      stored.filter((value): value is string => typeof value === 'string').map(normalize),
+    );
   } catch {
     return [];
   }

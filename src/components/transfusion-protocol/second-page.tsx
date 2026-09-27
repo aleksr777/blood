@@ -98,12 +98,12 @@ export const SecondPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
 
       <tbody className="fill-block" onClick={() => onOpenBlock('doctor')}>
         <tr className="doctor-row">
-          <LabeledCell
-            colSpan={6}
-            className="span-6"
-            label="Врач, осуществивший трансфузию:"
-            value={values.doctorName}
-          />
+          <td colSpan={6} className="span-6">
+            <div className="doctor-inline">
+              <span>Врач, осуществивший трансфузию:</span>
+              {values.doctorName && <span className="doctor-value">{values.doctorName}</span>}
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>

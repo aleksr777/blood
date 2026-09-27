@@ -349,6 +349,16 @@ button {
   height: 13mm;
 }
 
+.doctor-inline {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5mm;
+}
+
+.doctor-value {
+  font-weight: 400;
+}
+
 .span-2 { width: 33.333%; }
 .span-3 { width: 50%; }
 .span-4 { width: 66.667%; }

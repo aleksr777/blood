@@ -30,17 +30,10 @@ export const DepartmentField = ({ value, onChange }: Props) => {
       <input
         name="department"
         type="text"
-        list="department-history-options"
         autoComplete="off"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       />
-      <datalist id="department-history-options">
-        {history.map((item) => (
-          <option key={item} value={item} />
-        ))}
-      </datalist>
-
       {history.length > 0 && (
         <div className={styles.history}>
           <div className={styles.historyTitle}>Ранее введённые отделения</div>

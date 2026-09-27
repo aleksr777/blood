@@ -92,8 +92,35 @@
 
 .historyRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 2.4rem;
+  grid-template-columns: minmax(0, 1fr) 2.4rem 2.4rem;
   gap: 0.4rem;
+}
+
+.historyValue,
+.historyEdit,
+.historyDelete {
+  min-height: 2.35rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.historyValue {
+  min-width: 0;
+  padding: 0.35rem 0.65rem;
+  overflow: hidden;
+  color: #334155;
+  font-size: 0.86rem;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyValue:hover,
+.historyValue:focus-visible {
+  border-color: #2563eb;
+  color: #1d4ed8;
 }
 
 .historyInput {
@@ -102,15 +129,17 @@
   font-size: 0.86rem !important;
 }
 
+.historyEdit,
 .historyDelete {
-  min-height: 2.35rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.45rem;
-  background: #fff;
   color: #64748b;
-  cursor: pointer;
   font-size: 1.15rem;
   line-height: 1;
+}
+
+.historyEdit:hover,
+.historyEdit:focus-visible {
+  border-color: #2563eb;
+  color: #1d4ed8;
 }
 
 .historyDelete:hover,

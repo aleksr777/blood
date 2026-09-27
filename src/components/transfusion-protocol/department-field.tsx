@@ -13,15 +13,25 @@ type Props = {
 
 type HistoryItemProps = {
   value: string;
+  onSelect: (value: string) => void;
   onRename: (oldValue: string, newValue: string) => void;
   onRemove: (value: string) => void;
 };
 
-const HistoryItem = ({ value, onRename, onRemove }: HistoryItemProps) => {
+const HistoryItem = ({ value, onSelect, onRename, onRemove }: HistoryItemProps) => {
+  const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
+  const startEditing = () => {
+    setDraft(value);
+    setEditing(true);
+  };
+
   const commit = () => {
+    if (!editing) return;
+
     const nextValue = draft.trim();
+    setEditing(false);
     if (nextValue === value) return;
     onRename(value, nextValue);
   };
@@ -34,20 +44,44 @@ const HistoryItem = ({ value, onRename, onRemove }: HistoryItemProps) => {
 
     if (event.key === 'Escape') {
       setDraft(value);
+      setEditing(false);
       event.currentTarget.blur();
     }
   };
 
   return (
     <div className={styles.historyRow}>
-      <input
-        className={styles.historyInput}
-        aria-label={`Изменить сохранённое отделение: ${value}`}
-        value={draft}
-        onChange={(event) => setDraft(event.target.value)}
-        onBlur={commit}
-        onKeyDown={handleKeyDown}
-      />
+      {editing ? (
+        <input
+          autoFocus
+          className={styles.historyInput}
+          aria-label={`Изменить сохранённое отделение: ${value}`}
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={commit}
+          onKeyDown={handleKeyDown}
+        />
+      ) : (
+        <button
+          type="button"
+          className={styles.historyValue}
+          title="Подставить в поле «Отделение»"
+          onClick={() => onSelect(value)}
+        >
+          {value}
+        </button>
+      )}
+
+      <button
+        type="button"
+        className={styles.historyEdit}
+        aria-label={`Изменить отделение: ${value}`}
+        title="Изменить"
+        onClick={startEditing}
+      >
+        ✎
+      </button>
+
       <button
         type="button"
         className={styles.historyDelete}
@@ -94,7 +128,13 @@ export const DepartmentField = ({ value, onChange }: Props) => {
         <div className={styles.history}>
           <div className={styles.historyTitle}>Ранее введённые отделения</div>
           {history.map((item) => (
-            <HistoryItem key={item} value={item} onRename={rename} onRemove={remove} />
+            <HistoryItem
+              key={item}
+              value={item}
+              onSelect={onChange}
+              onRename={rename}
+              onRemove={remove}
+            />
           ))}
         </div>
       )}

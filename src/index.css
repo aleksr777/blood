@@ -353,9 +353,9 @@ button {
 .doctor-inline {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 1.5mm;
-  text-align: center;
+  text-align: left;
 }
 
 .doctor-value {

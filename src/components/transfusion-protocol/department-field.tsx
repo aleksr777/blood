@@ -16,6 +16,8 @@ type Props = {
 export const DepartmentField = ({ value, onChange }: Props) => {
   const [history, setHistory] = useState<DepartmentRecord[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -23,9 +25,17 @@ export const DepartmentField = ({ value, onChange }: Props) => {
 
     void loadDepartments()
       .then((items) => {
-        if (active) setHistory(items);
+        if (!active) return;
+        setHistory(items);
+        setLoadFailed(false);
       })
-      .catch((error: unknown) => console.error('Не удалось загрузить отделения:', error));
+      .catch((error: unknown) => {
+        console.error('Не удалось загрузить отделения:', error);
+        if (active) setLoadFailed(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     return () => {
       active = false;
@@ -54,9 +64,7 @@ export const DepartmentField = ({ value, onChange }: Props) => {
 
   const remove = async (item: DepartmentRecord) => {
     try {
-      const items = await removeDepartment(item.id);
-      setHistory(items);
-      if (items.length === 0) setOpen(false);
+      setHistory(await removeDepartment(item.id));
     } catch (error) {
       console.error('Не удалось удалить отделение:', error);
     }
@@ -66,6 +74,12 @@ export const DepartmentField = ({ value, onChange }: Props) => {
     onChange(item.name);
     setOpen(false);
   };
+
+  const emptyText = loadFailed
+    ? 'Не удалось загрузить список'
+    : loading
+      ? 'Загрузка...'
+      : 'Сохранённых вариантов нет';
 
   return (
     <div ref={rootRef} className={styles.departmentField}>
@@ -77,30 +91,32 @@ export const DepartmentField = ({ value, onChange }: Props) => {
           value={value}
           onChange={(event) => onChange(event.target.value)}
         />
-        {history.length > 0 && (
-          <button
-            type="button"
-            className={styles.historyToggle}
-            aria-label="Показать ранее введённые отделения"
-            aria-expanded={open}
-            onClick={() => setOpen((current) => !current)}
-          >
-            ▾
-          </button>
-        )}
+        <button
+          type="button"
+          className={styles.historyToggle}
+          aria-label="Показать ранее введённые отделения"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          ▾
+        </button>
       </div>
 
-      {open && history.length > 0 && (
+      {open && (
         <div className={styles.historyDropdown}>
-          {history.map((item) => (
-            <DepartmentHistoryItem
-              key={item.id}
-              item={item}
-              onSelect={select}
-              onRename={rename}
-              onRemove={remove}
-            />
-          ))}
+          {history.length === 0 ? (
+            <div className={styles.historyEmpty}>{emptyText}</div>
+          ) : (
+            history.map((item) => (
+              <DepartmentHistoryItem
+                key={item.id}
+                item={item}
+                onSelect={select}
+                onRename={rename}
+                onRemove={remove}
+              />
+            ))
+          )}
         </div>
       )}
     </div>

@@ -1,15 +1,17 @@
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
+import { migrateLegacyOpfsDepartments } from './legacy-opfs-migration';
 
 const DATABASE_FILE = '/blood.sqlite3';
 
 const openDatabase = async () => {
   const sqlite3 = await sqlite3InitModule();
+  const pool = await sqlite3.installOpfsSAHPoolVfs({
+    initialCapacity: 6,
+    name: 'blood-opfs-sahpool',
+    directory: '/blood-opfs-sahpool',
+  });
+  const db = new pool.OpfsSAHPoolDb(DATABASE_FILE);
 
-  if (!('opfs' in sqlite3) || !sqlite3.oo1.OpfsDb) {
-    throw new Error('OPFS недоступен в этом браузере или контексте.');
-  }
-
-  const db = new sqlite3.oo1.OpfsDb(DATABASE_FILE);
   db.exec(`
     CREATE TABLE IF NOT EXISTS departments (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,6 +22,7 @@ const openDatabase = async () => {
     );
   `);
 
+  await migrateLegacyOpfsDepartments(sqlite3, db);
   return db;
 };
 

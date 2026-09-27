@@ -29,18 +29,13 @@ npm run preview
 Печатная форма разделена на две страницы A4. При печати панель управления и служебная подсказка скрываются.
 
 
+
 ## Client database
 
-Persistent shared application data is stored in SQLite WASM using OPFS. The database runs
-inside a Web Worker and does not require a backend.
+Persistent shared application data is stored locally in SQLite WASM using the OPFS
+SyncAccessHandle Pool VFS (`opfs-sahpool`). SQLite runs inside a Web Worker and does not
+require a backend or COOP/COEP response headers.
 
-The hosting environment must return these headers:
-
-```
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: require-corp
-```
-
-Vite development and preview servers are configured automatically. GitHub Pages does not
-support the required response headers, so OPFS-backed SQLite must be deployed to a static
-host that allows custom headers.
+The storage is persistent between sessions for the same site origin and browser profile.
+The SAH pool is intended for a single active database connection per origin, so opening the
+application in multiple tabs at the same time is not supported yet.

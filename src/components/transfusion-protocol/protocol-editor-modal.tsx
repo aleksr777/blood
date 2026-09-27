@@ -75,7 +75,11 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
   };
 
   const handleClose = () => {
-    if (blockId === 'general') void rememberDepartment(draft.department ?? '');
+    if (blockId === 'general') {
+      void rememberDepartment(draft.department ?? '').catch((error: unknown) => {
+        console.error('Не удалось сохранить отделение:', error);
+      });
+    }
     onSave(draft);
     onClose();
   };

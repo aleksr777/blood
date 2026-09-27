@@ -14,6 +14,15 @@ const worker = new Worker(new URL('./database.worker.ts', import.meta.url), { ty
 const pending = new Map<number, PendingRequest>();
 let nextRequestId = 1;
 
+const rejectPending = (error: Error) => {
+  pending.forEach(({ reject }) => reject(error));
+  pending.clear();
+};
+
+worker.addEventListener('error', (event) => {
+  rejectPending(new Error(event.message || 'Не удалось запустить SQLite worker.'));
+});
+
 worker.addEventListener('message', (event: MessageEvent<DatabaseResponse>) => {
   const request = pending.get(event.data.id);
   if (!request) return;

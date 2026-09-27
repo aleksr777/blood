@@ -42,16 +42,24 @@ export const DepartmentField = ({ value, onChange }: Props) => {
   }, []);
 
   const rename = async (item: DepartmentRecord, name: string) => {
-    const nextName = name.trim();
-    const items = await renameDepartment(item.id, nextName);
-    setHistory(items);
-    if (value === item.name) onChange(nextName);
+    try {
+      const nextName = name.trim();
+      const items = await renameDepartment(item.id, nextName);
+      setHistory(items);
+      if (value === item.name) onChange(nextName);
+    } catch (error) {
+      console.error('Не удалось изменить отделение:', error);
+    }
   };
 
   const remove = async (item: DepartmentRecord) => {
-    const items = await removeDepartment(item.id);
-    setHistory(items);
-    if (items.length === 0) setOpen(false);
+    try {
+      const items = await removeDepartment(item.id);
+      setHistory(items);
+      if (items.length === 0) setOpen(false);
+    } catch (error) {
+      console.error('Не удалось удалить отделение:', error);
+    }
   };
 
   const select = (item: DepartmentRecord) => {

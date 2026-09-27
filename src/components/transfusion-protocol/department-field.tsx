@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DepartmentHistoryItem } from './department-history-item';
 import {
   loadDepartmentHistory,
@@ -14,6 +14,17 @@ type Props = {
 
 export const DepartmentField = ({ value, onChange }: Props) => {
   const [history, setHistory] = useState(loadDepartmentHistory);
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    return () => document.removeEventListener('pointerdown', closeOnOutsideClick);
+  }, []);
 
   const rename = (oldValue: string, newValue: string) => {
     const nextValue = newValue.trim();
@@ -22,26 +33,46 @@ export const DepartmentField = ({ value, onChange }: Props) => {
   };
 
   const remove = (item: string) => {
-    setHistory(removeDepartment(item));
+    const nextHistory = removeDepartment(item);
+    setHistory(nextHistory);
+    if (nextHistory.length === 0) setOpen(false);
+  };
+
+  const select = (item: string) => {
+    onChange(item);
+    setOpen(false);
   };
 
   return (
-    <div className={styles.departmentField}>
-      <input
-        name="department"
-        type="text"
-        autoComplete="off"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
-      {history.length > 0 && (
-        <div className={styles.history}>
-          <div className={styles.historyTitle}>Ранее введённые отделения</div>
+    <div ref={rootRef} className={styles.departmentField}>
+      <div className={styles.departmentControl}>
+        <input
+          name="department"
+          type="text"
+          autoComplete="off"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        {history.length > 0 && (
+          <button
+            type="button"
+            className={styles.historyToggle}
+            aria-label="Показать ранее введённые отделения"
+            aria-expanded={open}
+            onClick={() => setOpen((current) => !current)}
+          >
+            ▾
+          </button>
+        )}
+      </div>
+
+      {open && history.length > 0 && (
+        <div className={styles.historyDropdown}>
           {history.map((item) => (
             <DepartmentHistoryItem
               key={item}
               value={item}
-              onSelect={onChange}
+              onSelect={select}
               onRename={rename}
               onRemove={remove}
             />

@@ -71,7 +71,6 @@ export const DepartmentHistoryItem = ({ value, onSelect, onRename, onRemove }: P
       >
         ✎
       </button>
-
       <button
         type="button"
         className={styles.historyDelete}

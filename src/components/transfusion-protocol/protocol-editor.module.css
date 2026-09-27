@@ -20,14 +20,22 @@
   gap: 1rem 1.25rem;
 }
 
+.grid label,
+.fieldLabel {
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .grid label {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 0.4rem;
-  color: #263552;
-  font-size: 0.9rem;
-  font-weight: 600;
+}
+
+.fieldLabel {
+  margin-bottom: 0.4rem;
 }
 
 .wide {
@@ -61,3 +69,52 @@
   outline-offset: 1px;
 }
 
+.departmentField {
+  min-width: 0;
+}
+
+.history {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.55rem;
+  padding: 0.6rem;
+  border: 1px solid #d7deea;
+  border-radius: 0.5rem;
+  background: #f1f4f9;
+}
+
+.historyTitle {
+  margin-bottom: 0.1rem;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.historyRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.4rem;
+  gap: 0.4rem;
+}
+
+.historyInput {
+  min-height: 2.35rem !important;
+  padding-block: 0.35rem !important;
+  font-size: 0.86rem !important;
+}
+
+.historyDelete {
+  min-height: 2.35rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+  background: #fff;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.historyDelete:hover,
+.historyDelete:focus-visible {
+  border-color: #b91c1c;
+  color: #b91c1c;
+}

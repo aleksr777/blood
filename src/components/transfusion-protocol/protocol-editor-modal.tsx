@@ -1,5 +1,7 @@
-import { useState, type ChangeEvent } from 'react';
+import { useState } from 'react';
 import Modal from '../modal/modal';
+import { DepartmentField } from './department-field';
+import { rememberDepartment } from './department-history';
 import { getProtocolBlockConfig } from './editor-config';
 import styles from './protocol-editor.module.css';
 import type { ProtocolBlockId, ProtocolFieldConfig, ProtocolValues } from './protocol-types';
@@ -23,17 +25,26 @@ const FieldControl = ({
 }: {
   field: ProtocolFieldConfig;
   value: string;
-  onChange: (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => void;
+  onChange: (name: string, value: string) => void;
 }) => {
   if (field.type === 'textarea') {
-    return <textarea name={field.name} value={value} rows={4} onChange={onChange} />;
+    return (
+      <textarea
+        name={field.name}
+        value={value}
+        rows={4}
+        onChange={(event) => onChange(field.name, event.target.value)}
+      />
+    );
   }
 
   if (field.type === 'select') {
     return (
-      <select name={field.name} value={value} onChange={onChange}>
+      <select
+        name={field.name}
+        value={value}
+        onChange={(event) => onChange(field.name, event.target.value)}
+      >
         <option value="">Не выбрано</option>
         {field.options?.map((option) => (
           <option key={option} value={option}>
@@ -50,7 +61,7 @@ const FieldControl = ({
       type={field.type ?? 'text'}
       step={field.step}
       value={value}
-      onChange={onChange}
+      onChange={(event) => onChange(field.name, event.target.value)}
     />
   );
 };
@@ -59,14 +70,12 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
   const config = getProtocolBlockConfig(blockId);
   const [draft, setDraft] = useState<ProtocolValues>(() => getInitialValues(blockId, values));
 
-  const handleChange = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = event.target;
+  const changeValue = (name: string, value: string) => {
     setDraft((current) => ({ ...current, [name]: value }));
   };
 
   const handleClose = () => {
+    if (blockId === 'general') rememberDepartment(draft.department ?? '');
     onSave(draft);
     onClose();
   };
@@ -74,14 +83,33 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
   return (
     <Modal title={config.title} onClose={handleClose} className={styles[config.size]}>
       <div className={styles.grid}>
-        {config.fields.map((field) => (
-          <label key={field.name} className={field.wide ? styles.wide : undefined}>
-            <span>{field.label}</span>
-            <FieldControl field={field} value={draft[field.name] ?? ''} onChange={handleChange} />
-          </label>
-        ))}
-      </div>
+        {config.fields.map((field) => {
+          const className = field.wide ? styles.wide : undefined;
 
+          if (field.name === 'department') {
+            return (
+              <div key={field.name} className={className}>
+                <div className={styles.fieldLabel}>{field.label}</div>
+                <DepartmentField
+                  value={draft[field.name] ?? ''}
+                  onChange={(value) => changeValue(field.name, value)}
+                />
+              </div>
+            );
+          }
+
+          return (
+            <label key={field.name} className={className}>
+              <span>{field.label}</span>
+              <FieldControl
+                field={field}
+                value={draft[field.name] ?? ''}
+                onChange={changeValue}
+              />
+            </label>
+          );
+        })}
+      </div>
     </Modal>
   );
 };

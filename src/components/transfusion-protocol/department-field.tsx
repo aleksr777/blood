@@ -19,7 +19,6 @@ export const DepartmentField = ({ value, onChange }: Props) => {
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     let active = true;
 
@@ -41,7 +40,6 @@ export const DepartmentField = ({ value, onChange }: Props) => {
       active = false;
     };
   }, []);
-
   useEffect(() => {
     const closeOnOutsideClick = (event: PointerEvent) => {
       if (!rootRef.current?.contains(event.target as Node)) setOpen(false);

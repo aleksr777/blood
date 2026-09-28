@@ -1,3 +1,4 @@
+import { CustomSelectField } from './custom-select-field';
 import { DepartmentField } from './department-field';
 import { getSavedOptionCategory } from './saved-field-config';
 import { SavedOptionsField } from './saved-options-field';
@@ -22,23 +23,6 @@ const BasicControl = ({ field, value, onChange }: Props) => {
     );
   }
 
-  if (field.type === 'select') {
-    return (
-      <select
-        name={field.name}
-        value={value}
-        onChange={(event) => onChange(field.name, event.target.value)}
-      >
-        <option value="">Не выбрано</option>
-        {field.options?.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    );
-  }
-
   return (
     <input
       name={field.name}
@@ -59,6 +43,21 @@ export const ProtocolFieldControl = ({ field, value, onChange }: Props) => {
       <div className={className}>
         <div className={styles.fieldLabel}>{field.label}</div>
         <DepartmentField value={value} onChange={change} />
+      </div>
+    );
+  }
+
+  if (field.type === 'select') {
+    return (
+      <div className={className}>
+        <div className={styles.fieldLabel}>{field.label}</div>
+        <CustomSelectField
+          name={field.name}
+          label={field.label}
+          options={field.options ?? []}
+          value={value}
+          onChange={change}
+        />
       </div>
     );
   }

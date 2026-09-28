@@ -48,7 +48,6 @@ export const DepartmentField = ({ value, onChange }: Props) => {
     document.addEventListener('pointerdown', closeOnOutsideClick);
     return () => document.removeEventListener('pointerdown', closeOnOutsideClick);
   }, []);
-
   const rename = async (item: DepartmentRecord, name: string) => {
     try {
       const nextName = name.trim();
@@ -59,7 +58,6 @@ export const DepartmentField = ({ value, onChange }: Props) => {
       console.error('Не удалось изменить отделение:', error);
     }
   };
-
   const remove = async (item: DepartmentRecord) => {
     const previousHistory = history;
     setHistory((current) => current.filter(({ id }) => id !== item.id));
@@ -72,12 +70,10 @@ export const DepartmentField = ({ value, onChange }: Props) => {
       console.error('Не удалось удалить отделение:', error);
     }
   };
-
   const select = (item: DepartmentRecord) => {
     onChange(item.name);
     setOpen(false);
   };
-
   const emptyText = loadFailed
     ? 'Не удалось загрузить список'
     : loading

@@ -3,6 +3,7 @@ import type {
   DatabaseRequest,
   DatabaseResponse,
   DepartmentRecord,
+  SavedOptionRecord,
 } from './database-types';
 
 type PendingRequest = {
@@ -72,4 +73,12 @@ export const database = {
     withDatabase<DepartmentRecord[]>('departments:remove', { id }),
   importDepartments: (names: string[]) =>
     withDatabase<DepartmentRecord[]>('departments:import', { names }),
+  listSavedOptions: (category: string) =>
+    withDatabase<SavedOptionRecord[]>('saved-options:list', { category }),
+  rememberSavedOption: (category: string, value: string) =>
+    withDatabase<SavedOptionRecord[]>('saved-options:remember', { category, value }),
+  renameSavedOption: (category: string, id: number, value: string) =>
+    withDatabase<SavedOptionRecord[]>('saved-options:rename', { category, id, value }),
+  removeSavedOption: (category: string, id: number) =>
+    withDatabase<SavedOptionRecord[]>('saved-options:remove', { category, id }),
 };

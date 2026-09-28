@@ -7,6 +7,12 @@ import {
   removeDepartment,
   renameDepartment,
 } from './department-store';
+import {
+  listSavedOptions,
+  rememberSavedOption,
+  removeSavedOption,
+  renameSavedOption,
+} from './saved-option-store';
 
 const handleRequest = async (request: DatabaseRequest) => {
   switch (request.action) {
@@ -25,6 +31,20 @@ const handleRequest = async (request: DatabaseRequest) => {
       return removeDepartment((request.payload as { id: number }).id);
     case 'departments:import':
       return importDepartments((request.payload as { names: string[] }).names);
+    case 'saved-options:list':
+      return listSavedOptions((request.payload as { category: string }).category);
+    case 'saved-options:remember': {
+      const payload = request.payload as { category: string; value: string };
+      return rememberSavedOption(payload.category, payload.value);
+    }
+    case 'saved-options:rename': {
+      const payload = request.payload as { category: string; id: number; value: string };
+      return renameSavedOption(payload.category, payload.id, payload.value);
+    }
+    case 'saved-options:remove': {
+      const payload = request.payload as { category: string; id: number };
+      return removeSavedOption(payload.category, payload.id);
+    }
   }
 };
 

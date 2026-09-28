@@ -3,13 +3,22 @@ export type DepartmentRecord = {
   name: string;
 };
 
+export type SavedOptionRecord = {
+  id: number;
+  value: string;
+};
+
 export type DatabaseAction =
   | 'init'
   | 'departments:list'
   | 'departments:remember'
   | 'departments:rename'
   | 'departments:remove'
-  | 'departments:import';
+  | 'departments:import'
+  | 'saved-options:list'
+  | 'saved-options:remember'
+  | 'saved-options:rename'
+  | 'saved-options:remove';
 
 export type DatabaseRequest = {
   id: number;

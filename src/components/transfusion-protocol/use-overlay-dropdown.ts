@@ -24,7 +24,13 @@ export const useOverlayDropdown = (
   const dropdownRef = useRef<HTMLDivElement>(null);
   const spaceRef = useRef(0);
   const timerRef = useRef<number | null>(null);
+  const stateRef = useRef<DropdownState>('closed');
   const [dropdownState, setDropdownState] = useState<DropdownState>('closed');
+
+  const changeState = (nextState: DropdownState) => {
+    stateRef.current = nextState;
+    setDropdownState(nextState);
+  };
 
   useEffect(() => {
     const close = (event: PointerEvent) => {
@@ -70,16 +76,16 @@ export const useOverlayDropdown = (
     clearTimer();
 
     if (open) {
-      setDropdownState('preparing');
+      changeState('preparing');
       updateSpace();
       timerRef.current = window.setTimeout(() => {
-        setDropdownState('open');
+        changeState('open');
         timerRef.current = null;
       }, OPEN_DELAY_MS);
-    } else if (dropdownState !== 'closed') {
-      setDropdownState('closing');
+    } else if (stateRef.current !== 'closed') {
+      changeState('closing');
       timerRef.current = window.setTimeout(() => {
-        setDropdownState('closed');
+        changeState('closed');
         spaceRef.current = 0;
         dialog.style.setProperty(SPACE_VARIABLE, '0px');
         timerRef.current = null;
@@ -101,7 +107,7 @@ export const useOverlayDropdown = (
       observer.disconnect();
       window.removeEventListener('resize', handleResize);
     };
-  }, [open, dropdownState]);
+  }, [open]);
 
   return { rootRef, dropdownRef, dropdownState };
 };

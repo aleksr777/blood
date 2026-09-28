@@ -9,8 +9,8 @@ import {
 
 const SPACE_VARIABLE = '--modal-dropdown-space';
 const DROPDOWN_GAP = 8;
-const OPEN_DELAY_MS = 260;
-const CLOSE_DURATION_MS = 220;
+const OPEN_DELAY_MS = 130;
+const CLOSE_DURATION_MS = 110;
 const MAX_DROPDOWN_REM = 12;
 const DROPDOWN_CHROME_PX = 10;
 

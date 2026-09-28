@@ -141,8 +141,8 @@
   transform: translateY(0) scale(1);
   pointer-events: auto;
   transition:
-    opacity 180ms ease,
-    transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    opacity 90ms ease,
+    transform 110ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .historyDropdown[data-state='closing'] {
@@ -150,8 +150,8 @@
   opacity: 0;
   transform: translateY(-0.25rem) scale(0.99);
   transition:
-    opacity 180ms ease,
-    transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    opacity 90ms ease,
+    transform 110ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .historyRow {

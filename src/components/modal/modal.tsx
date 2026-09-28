@@ -44,6 +44,7 @@ const Modal = ({
   return createPortal(
     <dialog
       ref={ref}
+      tabIndex={-1}
       className={[styles.modal, className].filter(Boolean).join(' ')}
       data-state={state}
       aria-labelledby={label}

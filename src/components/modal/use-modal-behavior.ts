@@ -32,6 +32,7 @@ export const useModalBehavior = (onClose: () => void, dismissible: boolean) => {
     if (!dialog) return;
     const priorFocus = document.activeElement as HTMLElement | null;
     dialog.showModal();
+    dialog.focus({ preventScroll: true });
     addOpenDialog(dialog);
     const unbindScrollGuards = bindModalScrollGuards(dialog);
 

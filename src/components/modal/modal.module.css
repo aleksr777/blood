@@ -22,6 +22,10 @@
     transform 0.2s ease;
 }
 
+.modal:focus {
+  outline: none;
+}
+
 .modal[data-state='open'] {
   opacity: 1;
   transform: translateY(0) scale(1);

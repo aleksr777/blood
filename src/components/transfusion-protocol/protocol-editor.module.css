@@ -159,6 +159,7 @@
 }
 
 .historyEdit,
+.historySave,
 .historyDelete {
   width: 1.85rem;
   min-height: 1.85rem;
@@ -175,6 +176,18 @@
 .historyEdit:focus-visible {
   background: #eff6ff;
   color: #1d4ed8;
+}
+
+.historySave {
+  color: #15803d;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.historySave:hover,
+.historySave:focus-visible {
+  background: #f0fdf4;
+  color: #166534;
 }
 
 .historyDelete:hover,

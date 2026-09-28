@@ -18,7 +18,7 @@ export const DepartmentHistoryItem = ({ item, onSelect, onRename, onRemove }: Pr
     setEditing(true);
   };
 
-  const commit = () => {
+  const saveEditing = () => {
     if (!editing) return;
 
     const nextValue = draft.trim();
@@ -27,16 +27,20 @@ export const DepartmentHistoryItem = ({ item, onSelect, onRename, onRemove }: Pr
     onRename(item, nextValue);
   };
 
+  const cancelEditing = () => {
+    setDraft(item.name);
+    setEditing(false);
+  };
+
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       event.preventDefault();
-      event.currentTarget.blur();
+      saveEditing();
     }
 
     if (event.key === 'Escape') {
-      setDraft(item.name);
-      setEditing(false);
-      event.currentTarget.blur();
+      event.preventDefault();
+      cancelEditing();
     }
   };
 
@@ -49,7 +53,6 @@ export const DepartmentHistoryItem = ({ item, onSelect, onRename, onRemove }: Pr
           aria-label={`Изменить сохранённое отделение: ${item.name}`}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          onBlur={commit}
           onKeyDown={handleKeyDown}
         />
       ) : (
@@ -63,15 +66,28 @@ export const DepartmentHistoryItem = ({ item, onSelect, onRename, onRemove }: Pr
         </button>
       )}
 
-      <button
-        type="button"
-        className={styles.historyEdit}
-        aria-label={`Изменить отделение: ${item.name}`}
-        title="Изменить"
-        onClick={startEditing}
-      >
-        ✎
-      </button>
+      {editing ? (
+        <button
+          type="button"
+          className={styles.historySave}
+          aria-label={`Сохранить отделение: ${draft}`}
+          title="Сохранить"
+          onClick={saveEditing}
+        >
+          ✓
+        </button>
+      ) : (
+        <button
+          type="button"
+          className={styles.historyEdit}
+          aria-label={`Изменить отделение: ${item.name}`}
+          title="Изменить"
+          onClick={startEditing}
+        >
+          ✎
+        </button>
+      )}
+
       <button
         type="button"
         className={styles.historyDelete}

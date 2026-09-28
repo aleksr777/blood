@@ -105,12 +105,8 @@
 }
 
 .historyDropdown {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 0.3rem);
-  right: 0;
-  left: 0;
   display: grid;
+  margin-top: 0.3rem;
   gap: 0.1rem;
   max-height: 12rem;
   overflow-y: auto;

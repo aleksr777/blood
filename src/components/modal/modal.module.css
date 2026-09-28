@@ -5,6 +5,7 @@
   border-radius: 0.875rem;
   padding: 0;
   width: var(--modal-width, 32rem);
+  height: auto;
   max-width: calc(100% - 2 * var(--modal-gap));
   max-height: calc(
     100dvh - 2 * var(--modal-gap) - env(safe-area-inset-top) - env(safe-area-inset-bottom)

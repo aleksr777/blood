@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   loadSavedOptions,
   removeSavedOption,
@@ -6,6 +6,7 @@ import {
   type SavedOptionRecord,
 } from '../../storage/repositories/saved-options';
 import { SavedOptionItem } from './saved-option-item';
+import { useOverlayDropdown } from './use-overlay-dropdown';
 import styles from './protocol-editor.module.css';
 
 type Props = {
@@ -20,7 +21,7 @@ export const SavedOptionsField = ({ name, label, category, value, onChange }: Pr
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const rootRef = useRef<HTMLDivElement>(null);
+  const { rootRef, dropdownRef } = useOverlayDropdown(open, setOpen);
 
   useEffect(() => {
     let active = true;
@@ -41,14 +42,6 @@ export const SavedOptionsField = ({ name, label, category, value, onChange }: Pr
       active = false;
     };
   }, [category]);
-
-  useEffect(() => {
-    const close = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    document.addEventListener('pointerdown', close);
-    return () => document.removeEventListener('pointerdown', close);
-  }, []);
 
   const rename = async (item: SavedOptionRecord, nextValue: string) => {
     try {
@@ -100,27 +93,30 @@ export const SavedOptionsField = ({ name, label, category, value, onChange }: Pr
           ▾
         </button>
       </div>
-      {open && (
-        <div className={styles.historyDropdown}>
-          {items.length === 0 ? (
-            <div className={styles.historyEmpty}>{emptyText}</div>
-          ) : (
-            items.map((item) => (
-              <SavedOptionItem
-                key={item.id}
-                item={item}
-                label={label}
-                onSelect={(selected) => {
-                  onChange(selected.value);
-                  setOpen(false);
-                }}
-                onRename={rename}
-                onRemove={remove}
-              />
-            ))
-          )}
-        </div>
-      )}
+      <div
+        ref={dropdownRef}
+        className={styles.historyDropdown}
+        data-state={open ? 'open' : 'closed'}
+        aria-hidden={!open}
+      >
+        {items.length === 0 ? (
+          <div className={styles.historyEmpty}>{emptyText}</div>
+        ) : (
+          items.map((item) => (
+            <SavedOptionItem
+              key={item.id}
+              item={item}
+              label={label}
+              onSelect={(selected) => {
+                onChange(selected.value);
+                setOpen(false);
+              }}
+              onRename={rename}
+              onRemove={remove}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 };

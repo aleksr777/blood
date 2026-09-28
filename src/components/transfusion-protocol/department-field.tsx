@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   loadDepartments,
   removeDepartment,
@@ -6,6 +6,7 @@ import {
   type DepartmentRecord,
 } from '../../storage/repositories/departments';
 import { DepartmentHistoryItem } from './department-history-item';
+import { useOverlayDropdown } from './use-overlay-dropdown';
 import styles from './protocol-editor.module.css';
 
 type Props = {
@@ -18,7 +19,7 @@ export const DepartmentField = ({ value, onChange }: Props) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const { rootRef, dropdownRef } = useOverlayDropdown(open, setOpen);
   useEffect(() => {
     let active = true;
 
@@ -39,14 +40,6 @@ export const DepartmentField = ({ value, onChange }: Props) => {
     return () => {
       active = false;
     };
-  }, []);
-  useEffect(() => {
-    const closeOnOutsideClick = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-
-    document.addEventListener('pointerdown', closeOnOutsideClick);
-    return () => document.removeEventListener('pointerdown', closeOnOutsideClick);
   }, []);
   const rename = async (item: DepartmentRecord, name: string) => {
     try {
@@ -101,23 +94,26 @@ export const DepartmentField = ({ value, onChange }: Props) => {
         </button>
       </div>
 
-      {open && (
-        <div className={styles.historyDropdown}>
-          {history.length === 0 ? (
-            <div className={styles.historyEmpty}>{emptyText}</div>
-          ) : (
-            history.map((item) => (
-              <DepartmentHistoryItem
-                key={item.id}
-                item={item}
-                onSelect={select}
-                onRename={rename}
-                onRemove={remove}
-              />
-            ))
-          )}
-        </div>
-      )}
+      <div
+        ref={dropdownRef}
+        className={styles.historyDropdown}
+        data-state={open ? 'open' : 'closed'}
+        aria-hidden={!open}
+      >
+        {history.length === 0 ? (
+          <div className={styles.historyEmpty}>{emptyText}</div>
+        ) : (
+          history.map((item) => (
+            <DepartmentHistoryItem
+              key={item.id}
+              item={item}
+              onSelect={select}
+              onRename={rename}
+              onRemove={remove}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 };

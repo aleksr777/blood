@@ -2,8 +2,8 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { addOpenDialog, removeOpenDialog } from './modal-scroll-lock';
 import { bindModalScrollGuards } from './modal-scroll-guards';
 
-const OPEN_DURATION_MS = 400;
-const CLOSE_DURATION_MS = 400;
+const OPEN_DURATION_MS = 800;
+const CLOSE_DURATION_MS = 800;
 
 export const useModalBehavior = (onClose: () => void, dismissible: boolean) => {
   const ref = useRef<HTMLDialogElement>(null);

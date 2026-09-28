@@ -18,8 +18,8 @@
   transform: translateY(12px) scale(0.985);
   transform-origin: center;
   transition:
-    opacity 0.8s ease,
-    transform 0.8s ease;
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .modal[data-state='open'] {
@@ -36,8 +36,8 @@
   background: transparent;
   backdrop-filter: blur(0);
   transition:
-    background-color 0.8s ease,
-    backdrop-filter 0.8s ease;
+    background-color 0.2s ease,
+    backdrop-filter 0.2s ease;
 }
 
 .modal[data-state='open']::backdrop {

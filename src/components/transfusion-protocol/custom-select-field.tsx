@@ -12,7 +12,7 @@ type Props = {
 
 export const CustomSelectField = ({ name, label, options, value, onChange }: Props) => {
   const [open, setOpen] = useState(false);
-  const { rootRef, dropdownRef, dropdownState } = useOverlayDropdown(open, setOpen);
+  const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
   const allOptions = ['', ...options];
 
   const select = (nextValue: string) => {
@@ -40,7 +40,6 @@ export const CustomSelectField = ({ name, label, options, value, onChange }: Pro
       </button>
 
       <div
-        ref={dropdownRef}
         className={styles.historyDropdown}
         data-state={dropdownState}
         role="listbox"

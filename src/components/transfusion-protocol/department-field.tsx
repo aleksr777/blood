@@ -19,7 +19,7 @@ export const DepartmentField = ({ value, onChange }: Props) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
-  const { rootRef, dropdownRef, dropdownState } = useOverlayDropdown(open, setOpen);
+  const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
   useEffect(() => {
     let active = true;
 
@@ -95,7 +95,6 @@ export const DepartmentField = ({ value, onChange }: Props) => {
       </div>
 
       <div
-        ref={dropdownRef}
         className={styles.historyDropdown}
         data-state={dropdownState}
         aria-hidden={dropdownState !== 'open'}

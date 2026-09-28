@@ -10,9 +10,7 @@
   max-height: calc(
     100dvh - 2 * var(--modal-gap) - env(safe-area-inset-top) - env(safe-area-inset-bottom)
   );
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #8794bb #e9edfa;
+  overflow: visible;
   background: #f8faff;
   color: #17213f;
   box-shadow: 0 24px 70px rgb(23 33 63 / 22%);
@@ -27,24 +25,6 @@
 .modal[data-state='open'] {
   opacity: 1;
   transform: translateY(0) scale(1);
-}
-
-.modal::-webkit-scrollbar {
-  width: var(--scrollbar-width);
-}
-
-.modal::-webkit-scrollbar-track {
-  background: #e9edfa;
-}
-
-.modal::-webkit-scrollbar-thumb {
-  border: 2px solid #e9edfa;
-  border-radius: 999px;
-  background: #8794bb;
-}
-
-.modal::-webkit-scrollbar-thumb:hover {
-  background: #6878aa;
 }
 
 .modal[data-state='closing'] {
@@ -66,15 +46,9 @@
 }
 
 .content {
-  --modal-content-padding: clamp(1rem, 3vw, 2rem);
-
   position: relative;
   min-width: 0;
-  padding: var(--modal-content-padding);
-  padding-bottom: calc(
-    var(--modal-content-padding) + var(--modal-dropdown-space, 0px)
-  );
-  transition: padding-bottom 120ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  padding: clamp(1rem, 3vw, 2rem);
 }
 
 .title {

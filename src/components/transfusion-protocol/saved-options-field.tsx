@@ -21,7 +21,7 @@ export const SavedOptionsField = ({ name, label, category, value, onChange }: Pr
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const { rootRef, dropdownRef, dropdownState } = useOverlayDropdown(open, setOpen);
+  const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
 
   useEffect(() => {
     let active = true;
@@ -94,7 +94,6 @@ export const SavedOptionsField = ({ name, label, category, value, onChange }: Pr
         </button>
       </div>
       <div
-        ref={dropdownRef}
         className={styles.historyDropdown}
         data-state={dropdownState}
         aria-hidden={dropdownState !== 'open'}

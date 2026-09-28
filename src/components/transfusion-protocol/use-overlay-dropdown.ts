@@ -2,19 +2,16 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
   type Dispatch,
   type SetStateAction,
 } from 'react';
 
 const SPACE_VARIABLE = '--modal-dropdown-space';
+const HEIGHT_VARIABLE = '--dropdown-height';
 const DROPDOWN_GAP = 8;
-const OPEN_DELAY_MS = 130;
-const CLOSE_DURATION_MS = 110;
+const MOTION_DURATION_MS = 120;
 const MAX_DROPDOWN_REM = 12;
 const DROPDOWN_CHROME_PX = 10;
-
-type DropdownState = 'closed' | 'preparing' | 'open' | 'closing';
 
 export const useOverlayDropdown = (
   open: boolean,
@@ -23,14 +20,6 @@ export const useOverlayDropdown = (
   const rootRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const spaceRef = useRef(0);
-  const timerRef = useRef<number | null>(null);
-  const stateRef = useRef<DropdownState>('closed');
-  const [dropdownState, setDropdownState] = useState<DropdownState>('closed');
-
-  const changeState = (nextState: DropdownState) => {
-    stateRef.current = nextState;
-    setDropdownState(nextState);
-  };
 
   useEffect(() => {
     const close = (event: PointerEvent) => {
@@ -47,24 +36,40 @@ export const useOverlayDropdown = (
     const dialog = root?.closest('dialog');
     if (!dialog || !dropdown) return;
 
-    const clearTimer = () => {
-      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-      timerRef.current = null;
-    };
-
-    const updateSpace = () => {
+    const getDropdownHeight = () => {
       const rootFontSize = Number.parseFloat(
         getComputedStyle(document.documentElement).fontSize,
       );
       const maxHeight = MAX_DROPDOWN_REM * (rootFontSize || 16);
-      const dropdownHeight = Math.min(
-        dropdown.scrollHeight + DROPDOWN_CHROME_PX,
-        maxHeight,
-      );
+      return Math.min(dropdown.scrollHeight + DROPDOWN_CHROME_PX, maxHeight);
+    };
+
+    const setDropdownHeight = () => {
+      const height = getDropdownHeight();
+      dropdown.style.setProperty(HEIGHT_VARIABLE, `${height}px`);
+      return height;
+    };
+
+    const setInitialSpace = () => {
+      const height = setDropdownHeight();
       const dropdownBottom =
         root.getBoundingClientRect().top +
         dropdown.offsetTop +
-        dropdownHeight +
+        height +
+        DROPDOWN_GAP;
+      const overflow = Math.ceil(dropdownBottom - dialog.getBoundingClientRect().bottom);
+      const nextSpace = Math.max(0, overflow);
+
+      spaceRef.current = nextSpace;
+      dialog.style.setProperty(SPACE_VARIABLE, `${nextSpace}px`);
+    };
+
+    const updateSettledSpace = () => {
+      const height = setDropdownHeight();
+      const dropdownBottom =
+        root.getBoundingClientRect().top +
+        dropdown.offsetTop +
+        height +
         DROPDOWN_GAP;
       const overflow = Math.ceil(dropdownBottom - dialog.getBoundingClientRect().bottom);
       const nextSpace = Math.max(0, spaceRef.current + overflow);
@@ -73,41 +78,31 @@ export const useOverlayDropdown = (
       dialog.style.setProperty(SPACE_VARIABLE, `${nextSpace}px`);
     };
 
-    clearTimer();
-
-    if (open) {
-      changeState('preparing');
-      updateSpace();
-      timerRef.current = window.setTimeout(() => {
-        changeState('open');
-        timerRef.current = null;
-      }, OPEN_DELAY_MS);
-    } else if (stateRef.current !== 'closed') {
-      changeState('closing');
-      timerRef.current = window.setTimeout(() => {
-        changeState('closed');
-        spaceRef.current = 0;
-        dialog.style.setProperty(SPACE_VARIABLE, '0px');
-        timerRef.current = null;
-      }, CLOSE_DURATION_MS);
+    if (!open) {
+      spaceRef.current = 0;
+      dialog.style.setProperty(SPACE_VARIABLE, '0px');
+      return;
     }
 
-    const observer = new ResizeObserver(() => {
-      if (open) updateSpace();
-    });
-    observer.observe(dropdown);
+    setInitialSpace();
 
-    const handleResize = () => {
-      if (open) updateSpace();
-    };
-    window.addEventListener('resize', handleResize);
+    let observer: ResizeObserver | null = null;
+    const timer = window.setTimeout(() => {
+      observer = new ResizeObserver(updateSettledSpace);
+      observer.observe(dropdown);
+      window.addEventListener('resize', updateSettledSpace);
+    }, MOTION_DURATION_MS);
 
     return () => {
-      clearTimer();
-      observer.disconnect();
-      window.removeEventListener('resize', handleResize);
+      window.clearTimeout(timer);
+      observer?.disconnect();
+      window.removeEventListener('resize', updateSettledSpace);
     };
   }, [open]);
 
-  return { rootRef, dropdownRef, dropdownState };
+  return {
+    rootRef,
+    dropdownRef,
+    dropdownState: open ? 'open' : 'closed',
+  } as const;
 };

@@ -22,7 +22,7 @@ export const LabeledCell = ({
     colSpan={colSpan}
     rowSpan={rowSpan}
   >
-    <div className="cell-label">{label}</div>
+    <div className="cell-label">{label.endsWith(':') ? label : `${label}:`}</div>
     {value && <div className="cell-value">{value}</div>}
   </td>
 );

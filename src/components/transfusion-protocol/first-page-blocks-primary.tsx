@@ -33,11 +33,11 @@ export const GeneralBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
       />
       <td colSpan={2}>
         <div className="stacked-field">
-          <div>Время начала трансфузии</div>
+          <div>Время начала трансфузии:</div>
           <div className="blank-line">{values.startTime}</div>
         </div>
         <div className="stacked-field stacked-field--second">
-          <div>Время окончания трансфузии</div>
+          <div>Время окончания трансфузии:</div>
           <div className="blank-line">{values.endTime}</div>
         </div>
       </td>

@@ -61,9 +61,14 @@ export const DepartmentField = ({ value, onChange }: Props) => {
   };
 
   const remove = async (item: DepartmentRecord) => {
+    const previousHistory = history;
+    setHistory((current) => current.filter(({ id }) => id !== item.id));
+    if (value === item.name) onChange('');
+
     try {
       setHistory(await removeDepartment(item.id));
     } catch (error) {
+      setHistory(previousHistory);
       console.error('Не удалось удалить отделение:', error);
     }
   };

@@ -6,6 +6,7 @@ type Props = {
   loaded: boolean;
   values: ProtocolValues;
   recordId: number | null;
+  documentKey: number;
   setRecordId: Dispatch<SetStateAction<number | null>>;
   setStatus: Dispatch<SetStateAction<string>>;
 };
@@ -14,10 +15,12 @@ export const useProtocolAutosave = ({
   loaded,
   values,
   recordId,
+  documentKey,
   setRecordId,
   setStatus,
 }: Props) => {
   const recordIdRef = useRef(recordId);
+  const documentKeyRef = useRef(documentKey);
   const queueRef = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
@@ -25,23 +28,35 @@ export const useProtocolAutosave = ({
   }, [recordId]);
 
   useEffect(() => {
+    documentKeyRef.current = documentKey;
+  }, [documentKey]);
+
+  useEffect(() => {
     if (!loaded || !values.recipientName?.trim() || !values.recipientBirthDate) return;
     const snapshot = { ...values };
+    const scheduledKey = documentKey;
 
     queueRef.current = queueRef.current
       .catch(() => undefined)
       .then(async () => {
+        if (documentKeyRef.current !== scheduledKey) return;
         const currentId = recordIdRef.current;
         const record = await saveProtocolRecord(currentId, snapshot);
 
-        if (currentId === null && recordIdRef.current === null) {
+        if (
+          documentKeyRef.current === scheduledKey &&
+          currentId === null &&
+          recordIdRef.current === null
+        ) {
           recordIdRef.current = record.id;
           setRecordId(record.id);
         }
       })
       .catch((error: unknown) => {
         console.error('Не удалось автоматически сохранить бланк:', error);
-        setStatus('Ошибка автоматического сохранения.');
+        if (documentKeyRef.current === scheduledKey) {
+          setStatus('Ошибка автоматического сохранения.');
+        }
       });
-  }, [loaded, setRecordId, setStatus, values]);
+  }, [documentKey, loaded, setRecordId, setStatus, values]);
 };

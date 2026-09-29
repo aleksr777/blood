@@ -14,12 +14,20 @@ import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 export const useProtocolWorkspace = () => {
   const [values, setValues] = useState<ProtocolValues>({});
   const [recordId, setRecordId] = useState<number | null>(null);
+  const [documentKey, setDocumentKey] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
 
-  useProtocolAutosave({ loaded, values, recordId, setRecordId, setStatus });
+  useProtocolAutosave({
+    loaded,
+    values,
+    recordId,
+    documentKey,
+    setRecordId,
+    setStatus,
+  });
 
   useEffect(() => {
     let active = true;
@@ -47,6 +55,7 @@ export const useProtocolWorkspace = () => {
     setValues((current) => ({ ...current, ...nextValues }));
 
   const clearForm = () => {
+    setDocumentKey((current) => current + 1);
     setActiveBlock(null);
     setRecordId(null);
     setStatus('');
@@ -57,6 +66,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const openRecord = (record: ProtocolRecord) => {
+    setDocumentKey((current) => current + 1);
     setActiveBlock(null);
     setRecordId(record.id);
     setValues(record.values);
@@ -65,6 +75,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const newForRecipient = (recipient: RecipientRecord) => {
+    setDocumentKey((current) => current + 1);
     setActiveBlock(null);
     setRecordId(null);
     setValues({

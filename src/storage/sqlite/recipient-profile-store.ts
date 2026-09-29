@@ -11,35 +11,49 @@ export const upsertRecipient = (
   values: ProtocolValuesRecord,
 ) => {
   const fullName = normalizeName(values.recipientName ?? '');
-  const birthDate = values.recipientBirthDate ?? '';
-  if (!fullName || !birthDate) {
-    throw new Error('Укажите ФИО и дату рождения реципиента.');
-  }
+  if (!fullName) throw new Error('Укажите ФИО реципиента.');
 
   const normalizedName = normalizeKey(fullName);
+  const existing = db.exec({
+    sql: 'SELECT id FROM recipients WHERE normalized_name = $name LIMIT 1',
+    bind: { $name: normalizedName },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ id: number }>;
   const now = Date.now();
+
+  if (existing[0]) {
+    db.exec({
+      sql: `
+        UPDATE recipients
+        SET full_name = $fullName, profile_json = $profile, updated_at = $now
+        WHERE id = $id
+      `,
+      bind: {
+        $fullName: fullName,
+        $profile: JSON.stringify(profileFromValues(values)),
+        $now: now,
+        $id: existing[0].id,
+      },
+    });
+    return Number(existing[0].id);
+  }
+
   db.exec({
     sql: `
       INSERT INTO recipients
         (full_name, normalized_name, birth_date, profile_json, created_at, updated_at)
-      VALUES ($fullName, $normalizedName, $birthDate, $profile, $now, $now)
-      ON CONFLICT(normalized_name, birth_date) DO UPDATE SET
-        full_name = excluded.full_name,
-        profile_json = excluded.profile_json,
-        updated_at = excluded.updated_at
+      VALUES ($fullName, $normalizedName, '', $profile, $now, $now)
     `,
     bind: {
       $fullName: fullName,
       $normalizedName: normalizedName,
-      $birthDate: birthDate,
       $profile: JSON.stringify(profileFromValues(values)),
       $now: now,
     },
   });
-
   const rows = db.exec({
-    sql: 'SELECT id FROM recipients WHERE normalized_name = $name AND birth_date = $birthDate',
-    bind: { $name: normalizedName, $birthDate: birthDate },
+    sql: 'SELECT last_insert_rowid() AS id',
     rowMode: 'object',
     returnValue: 'resultRows',
   }) as Array<{ id: number }>;

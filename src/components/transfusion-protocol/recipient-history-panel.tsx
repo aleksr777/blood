@@ -2,7 +2,6 @@ import type {
   ProtocolRecord,
   RecipientRecord,
 } from '../../storage/repositories/recipients';
-import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
 type Props = {
@@ -36,7 +35,7 @@ export const RecipientHistoryPanel = ({
         <div className={styles.header}>
           <div>
             <h3 className={styles.title}>{recipient.fullName}</h3>
-            <div className={styles.meta}>Дата рождения: {formatDate(recipient.birthDate)}</div>
+            <div className={styles.meta}>Сохранённых бланков: {recipient.protocolCount}</div>
           </div>
           <div className={styles.headerActions}>
             <button type="button" className={styles.secondaryAction} onClick={() => onEdit(recipient)}>

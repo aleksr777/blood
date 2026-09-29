@@ -34,8 +34,8 @@ export const useProtocolWorkspace = () => {
   };
 
   const saveToDatabase = async (afterPrint = false) => {
-    if (!values.recipientName?.trim() || !values.recipientBirthDate) {
-      setStatus('Для сохранения укажите ФИО и дату рождения реципиента.');
+    if (!values.recipientName?.trim()) {
+      setStatus('Для сохранения укажите ФИО реципиента.');
       if (!afterPrint) setActiveBlock('general');
       return false;
     }
@@ -79,7 +79,6 @@ export const useProtocolWorkspace = () => {
     setValues({
       ...recipient.profile,
       recipientName: recipient.fullName,
-      recipientBirthDate: recipient.birthDate,
     });
     setRegistryOpen(false);
     setStatus('Создан новый бланк с данными реципиента.');

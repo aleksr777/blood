@@ -13,7 +13,6 @@ export type SavedOptionRecord = {
 export type RecipientRecord = {
   id: number;
   fullName: string;
-  birthDate: string;
   profile: ProtocolValuesRecord;
   protocolCount: number;
 };

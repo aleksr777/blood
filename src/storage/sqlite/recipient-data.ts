@@ -5,7 +5,6 @@ import type {
 
 const PROFILE_FIELDS = [
   'recipientName',
-  'recipientBirthDate',
   'recipientAbo',
   'recipientRh',
   'recipientAntigens',

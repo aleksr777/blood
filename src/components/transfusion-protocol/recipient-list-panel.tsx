@@ -1,5 +1,4 @@
 import type { RecipientRecord } from '../../storage/repositories/recipients';
-import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
 type Props = {
@@ -21,13 +20,13 @@ export const RecipientListPanel = ({
 }: Props) => (
   <section className={styles.panel}>
     <label className={styles.label} htmlFor="recipient-search">
-      Поиск по ФИО или дате рождения
+      Поиск по ФИО
     </label>
     <input
       id="recipient-search"
       className={styles.search}
       value={query}
-      placeholder="Например: Иванов или 14.03.1980"
+      placeholder="Например: Иванов Иван Иванович"
       onChange={(event) => onQueryChange(event.target.value)}
     />
     <div className={styles.list}>
@@ -44,9 +43,7 @@ export const RecipientListPanel = ({
           onClick={() => onSelect(recipient)}
         >
           <span className={styles.personName}>{recipient.fullName}</span>
-          <span className={styles.meta}>
-            {formatDate(recipient.birthDate)} · бланков: {recipient.protocolCount}
-          </span>
+          <span className={styles.meta}>Сохранённых бланков: {recipient.protocolCount}</span>
         </button>
       ))}
     </div>

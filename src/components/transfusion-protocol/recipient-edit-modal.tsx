@@ -26,7 +26,6 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
   const [values, setValues] = useState<ProtocolValues>(() => ({
     ...recipient.profile,
     recipientName: recipient.fullName,
-    recipientBirthDate: recipient.birthDate,
   }));
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -54,14 +53,6 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
           <input
             value={values.recipientName ?? ''}
             onChange={(event) => change('recipientName', event.target.value)}
-          />
-        </label>
-        <label>
-          <span>Дата рождения</span>
-          <input
-            type="date"
-            value={values.recipientBirthDate ?? ''}
-            onChange={(event) => change('recipientBirthDate', event.target.value)}
           />
         </label>
         <div>

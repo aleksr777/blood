@@ -73,6 +73,7 @@ export const updateRecipient = async (
   }) as Array<{ id: number }>;
   if (duplicates[0]) throw new Error('Реципиент с таким ФИО уже существует.');
 
+  const now = Date.now();
   db.exec({
     sql: `
       UPDATE recipients
@@ -84,10 +85,27 @@ export const updateRecipient = async (
       $fullName: fullName,
       $name: normalizedName,
       $profile: JSON.stringify(profileFromValues(values)),
-      $now: Date.now(),
+      $now: now,
       $id: id,
     },
   });
+
+  const records = db.exec({
+    sql: 'SELECT id, values_json AS valuesJson FROM protocol_records WHERE recipient_id = $id',
+    bind: { $id: id },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ id: number; valuesJson: string }>;
+  for (const record of records) {
+    const recordValues = parseValues(record.valuesJson);
+    recordValues.recipientName = fullName;
+    delete recordValues.recipientBirthDate;
+    db.exec({
+      sql: 'UPDATE protocol_records SET values_json = $values, updated_at = $now WHERE id = $id',
+      bind: { $values: JSON.stringify(recordValues), $now: now, $id: record.id },
+    });
+  }
+
   return getRecipient(db, id);
 };
 

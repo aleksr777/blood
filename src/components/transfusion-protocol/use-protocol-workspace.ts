@@ -9,6 +9,7 @@ import type {
   RecipientRecord,
 } from '../../storage/repositories/recipients';
 import { useProtocolAutosave } from './use-protocol-autosave';
+import { useRecipientMatch } from './use-recipient-match';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
 export const useProtocolWorkspace = () => {
@@ -19,12 +20,14 @@ export const useProtocolWorkspace = () => {
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
+  const recipientMatch = useRecipientMatch(values, recordId);
 
   useProtocolAutosave({
     loaded,
     values,
     recordId,
     documentKey,
+    identityResolved: recipientMatch.resolved && recipientMatch.match === null,
     setRecordId,
     setStatus,
   });
@@ -53,6 +56,25 @@ export const useProtocolWorkspace = () => {
 
   const saveValues = (nextValues: ProtocolValues) =>
     setValues((current) => ({ ...current, ...nextValues }));
+
+  const applyRecipientData = () => {
+    const recipient = recipientMatch.match;
+    if (!recipient) return;
+
+    setValues((current) => ({
+      ...current,
+      ...recipient.profile,
+      recipientName: recipient.fullName,
+      recipientBirthDate: recipient.birthDate,
+    }));
+    recipientMatch.dismiss();
+    setStatus('Данные реципиента подставлены в бланк.');
+  };
+
+  const dismissRecipientMatch = () => {
+    recipientMatch.dismiss();
+    setStatus('Найденный профиль не был подставлен.');
+  };
 
   const clearForm = () => {
     setDocumentKey((current) => current + 1);
@@ -93,9 +115,12 @@ export const useProtocolWorkspace = () => {
     activeBlock,
     registryOpen,
     status,
+    recipientMatch: recipientMatch.match,
     setActiveBlock,
     setRegistryOpen,
     saveValues,
+    applyRecipientData,
+    dismissRecipientMatch,
     clearForm,
     openRecord,
     newForRecipient,

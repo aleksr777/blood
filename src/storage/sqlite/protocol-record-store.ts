@@ -32,6 +32,16 @@ const upsertRecipient = (db: SqliteDatabase, values: ProtocolValuesRecord) => {
   }
 
   const normalizedName = normalizeKey(fullName);
+  const existingRows = db.exec({
+    sql: 'SELECT profile_json AS profileJson FROM recipients WHERE normalized_name = $name AND birth_date = $birthDate',
+    bind: { $name: normalizedName, $birthDate: birthDate },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ profileJson: string }>;
+  const existingProfile = existingRows[0]?.profileJson
+    ? JSON.parse(existingRows[0].profileJson) as ProtocolValuesRecord
+    : {};
+  const profile = { ...existingProfile, ...profileFromValues(values) };
   const now = Date.now();
   db.exec({
     sql: `
@@ -47,7 +57,7 @@ const upsertRecipient = (db: SqliteDatabase, values: ProtocolValuesRecord) => {
       $fullName: fullName,
       $normalizedName: normalizedName,
       $birthDate: birthDate,
-      $profile: JSON.stringify(profileFromValues(values)),
+      $profile: JSON.stringify(profile),
       $now: now,
     },
   });

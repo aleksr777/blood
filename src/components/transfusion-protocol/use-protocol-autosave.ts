@@ -7,6 +7,7 @@ type Props = {
   values: ProtocolValues;
   recordId: number | null;
   documentKey: number;
+  identityResolved: boolean;
   setRecordId: Dispatch<SetStateAction<number | null>>;
   setStatus: Dispatch<SetStateAction<string>>;
 };
@@ -16,6 +17,7 @@ export const useProtocolAutosave = ({
   values,
   recordId,
   documentKey,
+  identityResolved,
   setRecordId,
   setStatus,
 }: Props) => {
@@ -32,7 +34,14 @@ export const useProtocolAutosave = ({
   }, [documentKey]);
 
   useEffect(() => {
-    if (!loaded || !values.recipientName?.trim() || !values.recipientBirthDate) return;
+    if (
+      !loaded ||
+      !identityResolved ||
+      !values.recipientName?.trim() ||
+      !values.recipientBirthDate
+    ) {
+      return;
+    }
     const snapshot = { ...values };
     const scheduledKey = documentKey;
 
@@ -58,5 +67,5 @@ export const useProtocolAutosave = ({
           setStatus('Ошибка автоматического сохранения.');
         }
       });
-  }, [documentKey, loaded, setRecordId, setStatus, values]);
+  }, [documentKey, identityResolved, loaded, setRecordId, setStatus, values]);
 };

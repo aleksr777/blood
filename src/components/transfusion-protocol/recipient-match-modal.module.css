@@ -1,0 +1,51 @@
+.modal {
+  --modal-width: 34rem;
+}
+
+.text {
+  color: #17213f;
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+.meta {
+  margin-top: 0.65rem;
+  color: #64748b;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1.4rem;
+}
+
+.primary,
+.secondary {
+  min-height: 2.5rem;
+  border: 1px solid #1d4ed8;
+  border-radius: 0.5rem;
+  padding: 0 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.secondary {
+  background: #fff;
+  color: #1d4ed8;
+}
+
+.primary:hover {
+  background: #1e40af;
+}
+
+.secondary:hover {
+  background: #eff6ff;
+}

@@ -24,6 +24,7 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
 
   const changeValue = (name: string, value: string) => {
     setDraft((current) => ({ ...current, [name]: value }));
+    onSave({ [name]: value });
   };
 
   const handleClose = () => {

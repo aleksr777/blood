@@ -46,7 +46,8 @@ button {
   gap: 10px;
 }
 
-.print-button {
+.print-button,
+.clear-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -68,8 +69,22 @@ button {
   border-color: #1e40af;
 }
 
-.print-button:focus-visible {
-  outline: 2px solid #2563eb;
+.clear-button {
+  margin-right: auto;
+  border-color: #b91c1c;
+  background: #fff;
+  color: #b91c1c;
+}
+
+.clear-button:hover {
+  border-color: #991b1b;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.print-button:focus-visible,
+.clear-button:focus-visible {
+  outline: 2px solid currentColor;
   outline-offset: 1px;
 }
 

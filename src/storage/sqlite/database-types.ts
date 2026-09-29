@@ -18,7 +18,10 @@ export type DatabaseAction =
   | 'saved-options:list'
   | 'saved-options:remember'
   | 'saved-options:rename'
-  | 'saved-options:remove';
+  | 'saved-options:remove'
+  | 'protocol-draft:load'
+  | 'protocol-draft:save'
+  | 'protocol-draft:clear';
 
 export type DatabaseRequest = {
   id: number;

@@ -30,6 +30,12 @@ const openDatabase = async () => {
       updated_at INTEGER NOT NULL,
       UNIQUE(category, normalized_value)
     );
+
+    CREATE TABLE IF NOT EXISTS protocol_draft (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      values_json TEXT NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
   `);
 
   await migrateLegacyOpfsDepartments(sqlite3, db);

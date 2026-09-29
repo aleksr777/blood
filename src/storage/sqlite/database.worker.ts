@@ -13,6 +13,11 @@ import {
   removeSavedOption,
   renameSavedOption,
 } from './saved-option-store';
+import {
+  clearProtocolDraft,
+  loadProtocolDraft,
+  saveProtocolDraft,
+} from './protocol-draft-store';
 
 const handleRequest = async (request: DatabaseRequest) => {
   switch (request.action) {
@@ -45,6 +50,14 @@ const handleRequest = async (request: DatabaseRequest) => {
       const payload = request.payload as { category: string; id: number };
       return removeSavedOption(payload.category, payload.id);
     }
+    case 'protocol-draft:load':
+      return loadProtocolDraft();
+    case 'protocol-draft:save':
+      return saveProtocolDraft(
+        (request.payload as { values: Record<string, string> }).values,
+      );
+    case 'protocol-draft:clear':
+      return clearProtocolDraft();
   }
 };
 

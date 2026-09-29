@@ -12,6 +12,7 @@ type Props = {
   onCloseEdit: () => void;
   onCloseDelete: () => void;
   onCreate: (fullName: string) => Promise<void>;
+  onExisting: (recipient: RecipientRecord) => void;
   onSave: (recipient: RecipientRecord, values: ProtocolValues) => Promise<void>;
   onDelete: (recipient: RecipientRecord) => Promise<void>;
 };
@@ -24,6 +25,7 @@ export const RecipientDatabaseDialogs = ({
   onCloseEdit,
   onCloseDelete,
   onCreate,
+  onExisting,
   onSave,
   onDelete,
 }: Props) => (
@@ -32,6 +34,8 @@ export const RecipientDatabaseDialogs = ({
       <RecipientNewModal
         onClose={onCloseCreate}
         onCreate={onCreate}
+        onExisting={onExisting}
+        existingActionLabel="Открыть реципиента"
         hint="Реципиент будет сразу добавлен в базу без создания бланка."
       />
     )}

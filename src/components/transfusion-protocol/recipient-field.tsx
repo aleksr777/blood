@@ -42,7 +42,12 @@ export const RecipientField = ({ value, onChange }: Props) => {
         <RecipientSelectModal onClose={() => setMode(null)} onSelect={select} />
       )}
       {mode === 'new' && (
-        <RecipientNewModal onClose={() => setMode(null)} onCreate={create} />
+        <RecipientNewModal
+          onClose={() => setMode(null)}
+          onCreate={create}
+          onExisting={select}
+          existingActionLabel="Использовать реципиента"
+        />
       )}
     </>
   );

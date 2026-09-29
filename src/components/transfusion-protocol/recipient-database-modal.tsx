@@ -71,6 +71,11 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
     setSelected(created);
   };
 
+  const openExistingRecipient = (recipient: RecipientRecord) => {
+    setQuery(recipient.fullName);
+    setSelected(recipient);
+  };
+
   const saveRecipient = async (recipient: RecipientRecord, values: ProtocolValues) => {
     const updated = await updateRecipient(recipient.id, values);
     setRecipients((current) => current.map((item) => (item.id === updated.id ? updated : item)));
@@ -112,6 +117,7 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
         onCloseEdit={() => setEditing(null)}
         onCloseDelete={() => setDeleting(null)}
         onCreate={addRecipient}
+        onExisting={openExistingRecipient}
         onSave={saveRecipient}
         onDelete={deleteRecipient}
       />

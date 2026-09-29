@@ -1,11 +1,17 @@
 import { useState } from 'react';
-import { searchRecipients } from '../../storage/repositories/recipients';
+import {
+  searchRecipients,
+  type RecipientRecord,
+} from '../../storage/repositories/recipients';
 import Modal, { ModalDismissButton } from '../modal/modal';
+import { RecipientExistingCard } from './recipient-existing-card';
 import styles from './recipient-field.module.css';
 
 type Props = {
   onClose: () => void;
   onCreate: (fullName: string) => void | Promise<void>;
+  onExisting: (recipient: RecipientRecord) => void | Promise<void>;
+  existingActionLabel?: string;
   hint?: string;
 };
 
@@ -15,9 +21,13 @@ const normalize = (value: string) =>
 export const RecipientNewModal = ({
   onClose,
   onCreate,
+  onExisting,
+  existingActionLabel = 'Использовать реципиента',
   hint = 'Новый реципиент будет записан в базу при сохранении или печати бланка.',
 }: Props) => {
   const [fullName, setFullName] = useState('');
+  const [existing, setExisting] = useState<RecipientRecord | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
 
@@ -32,8 +42,12 @@ export const RecipientNewModal = ({
     setError('');
     try {
       const matches = await searchRecipients(value);
-      if (matches.some((item) => normalize(item.fullName) === normalize(value))) {
-        setError('Реципиент с таким ФИО уже существует. Используйте поиск.');
+      const duplicate = matches.find(
+        (item) => normalize(item.fullName) === normalize(value),
+      );
+      if (duplicate) {
+        setExisting(duplicate);
+        setExpanded(false);
         return;
       }
       await onCreate(value);
@@ -48,6 +62,17 @@ export const RecipientNewModal = ({
     }
   };
 
+  const useExisting = async () => {
+    if (!existing) return;
+    try {
+      await onExisting(existing);
+      onClose();
+    } catch (useError) {
+      console.error('Не удалось использовать реципиента:', useError);
+      setError('Не удалось использовать найденного реципиента.');
+    }
+  };
+
   return (
     <Modal title="Новый реципиент" onClose={onClose} className={styles.newModal}>
       <label className={styles.newField}>
@@ -55,7 +80,12 @@ export const RecipientNewModal = ({
         <input
           autoFocus
           value={fullName}
-          onChange={(event) => setFullName(event.target.value)}
+          onChange={(event) => {
+            setFullName(event.target.value);
+            setExisting(null);
+            setExpanded(false);
+            setError('');
+          }}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.preventDefault();
@@ -65,12 +95,30 @@ export const RecipientNewModal = ({
         />
       </label>
       <div className={styles.hint}>{hint}</div>
+
+      {existing && (
+        <RecipientExistingCard
+          recipient={existing}
+          expanded={expanded}
+          actionLabel={existingActionLabel}
+          onToggle={() => setExpanded((current) => !current)}
+          onUse={() => void useExisting()}
+        />
+      )}
       {error && <div className={styles.error}>{error}</div>}
+
       <div className={styles.footer}>
         <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>
-        <button type="button" className={styles.primary} disabled={checking} onClick={() => void create()}>
-          {checking ? 'Проверка...' : 'Создать'}
-        </button>
+        {!existing && (
+          <button
+            type="button"
+            className={styles.primary}
+            disabled={checking}
+            onClick={() => void create()}
+          >
+            {checking ? 'Проверка...' : 'Создать'}
+          </button>
+        )}
       </div>
     </Modal>
   );

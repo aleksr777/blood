@@ -146,6 +146,61 @@
   font-size: 0.84rem;
 }
 
+.existingCard {
+  margin-top: 1rem;
+  border: 1px solid #aebfe8;
+  border-radius: 0.6rem;
+  padding: 0.85rem;
+  background: #f4f7ff;
+}
+
+.existingTitle {
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.existingName {
+  margin-top: 0.25rem;
+  color: #17213f;
+  font-weight: 700;
+}
+
+.existingMeta {
+  margin-top: 0.2rem;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.existingDetails {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  border-top: 1px solid #d8e0ec;
+  padding-top: 0.75rem;
+}
+
+.existingDetail {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.7fr) minmax(0, 1.3fr);
+  gap: 0.7rem;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.existingDetail strong {
+  color: #17213f;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.existingActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+}
+
 .footer {
   justify-content: flex-end;
   margin-top: 1rem;

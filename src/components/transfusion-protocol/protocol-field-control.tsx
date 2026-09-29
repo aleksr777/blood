@@ -9,10 +9,9 @@ type Props = {
   field: ProtocolFieldConfig;
   value: string;
   onChange: (name: string, value: string) => void;
-  onBlur?: (name: string) => void;
 };
 
-const BasicControl = ({ field, value, onChange, onBlur }: Props) => {
+const BasicControl = ({ field, value, onChange }: Props) => {
   if (field.type === 'textarea') {
     return (
       <textarea
@@ -20,7 +19,6 @@ const BasicControl = ({ field, value, onChange, onBlur }: Props) => {
         value={value}
         rows={4}
         onChange={(event) => onChange(field.name, event.target.value)}
-        onBlur={() => onBlur?.(field.name)}
       />
     );
   }
@@ -32,12 +30,11 @@ const BasicControl = ({ field, value, onChange, onBlur }: Props) => {
       step={field.step}
       value={value}
       onChange={(event) => onChange(field.name, event.target.value)}
-      onBlur={() => onBlur?.(field.name)}
     />
   );
 };
 
-export const ProtocolFieldControl = ({ field, value, onChange, onBlur }: Props) => {
+export const ProtocolFieldControl = ({ field, value, onChange }: Props) => {
   const className = field.wide ? styles.wide : undefined;
   const change = (nextValue: string) => onChange(field.name, nextValue);
 
@@ -76,7 +73,6 @@ export const ProtocolFieldControl = ({ field, value, onChange, onBlur }: Props) 
           category={category}
           value={value}
           onChange={change}
-          onBlur={() => onBlur?.(field.name)}
         />
       </div>
     );
@@ -85,7 +81,7 @@ export const ProtocolFieldControl = ({ field, value, onChange, onBlur }: Props) 
   return (
     <label className={className}>
       <span>{field.label}</span>
-      <BasicControl field={field} value={value} onChange={onChange} onBlur={onBlur} />
+      <BasicControl field={field} value={value} onChange={onChange} />
     </label>
   );
 };

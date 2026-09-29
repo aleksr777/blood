@@ -2,7 +2,6 @@ import { FirstPage } from './first-page';
 import { ProtocolEditorModal } from './protocol-editor-modal';
 import { ProtocolToolbar } from './protocol-toolbar';
 import { RecipientDatabaseModal } from './recipient-database-modal';
-import { RecipientMatchModal } from './recipient-match-modal';
 import { SecondPage } from './second-page';
 import { useProtocolWorkspace } from './use-protocol-workspace';
 
@@ -44,16 +43,7 @@ export const TransfusionProtocol = () => {
           blockId={workspace.activeBlock}
           values={workspace.values}
           onSave={workspace.saveValues}
-          onFieldBlur={workspace.handleFieldBlur}
           onClose={() => workspace.setActiveBlock(null)}
-        />
-      )}
-
-      {workspace.recipientMatch && (
-        <RecipientMatchModal
-          recipient={workspace.recipientMatch}
-          onApply={workspace.applyRecipientData}
-          onDismiss={workspace.dismissRecipientMatch}
         />
       )}
 

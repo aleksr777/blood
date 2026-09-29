@@ -46,7 +46,6 @@ export type DatabaseAction =
   | 'protocol-draft:save'
   | 'protocol-draft:clear'
   | 'recipients:search'
-  | 'recipients:find-exact'
   | 'protocol-records:list'
   | 'protocol-records:save';
 

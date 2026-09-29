@@ -15,12 +15,9 @@ type Props = {
   category: string;
   value: string;
   onChange: (value: string) => void;
-  onBlur?: () => void;
 };
 
-export const SavedOptionsField = ({
-  name, label, category, value, onChange, onBlur,
-}: Props) => {
+export const SavedOptionsField = ({ name, label, category, value, onChange }: Props) => {
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -29,6 +26,7 @@ export const SavedOptionsField = ({
   useEffect(() => {
     let active = true;
     setStatus('loading');
+
     void loadSavedOptions(category)
       .then((nextItems) => {
         if (!active) return;
@@ -39,6 +37,7 @@ export const SavedOptionsField = ({
         console.error(`Не удалось загрузить список ${category}:`, error);
         if (active) setStatus('error');
       });
+
     return () => {
       active = false;
     };
@@ -57,6 +56,7 @@ export const SavedOptionsField = ({
     const previous = items;
     setItems((current) => current.filter(({ id }) => id !== item.id));
     if (value === item.value) onChange('');
+
     try {
       setItems(await removeSavedOption(category, item.id));
     } catch (error) {
@@ -66,11 +66,12 @@ export const SavedOptionsField = ({
     }
   };
 
-  const emptyText = status === 'loading'
-    ? 'Загрузка...'
-    : status === 'error'
-      ? 'Не удалось загрузить список'
-      : 'Сохранённых вариантов нет';
+  const emptyText =
+    status === 'loading'
+      ? 'Загрузка...'
+      : status === 'error'
+        ? 'Не удалось загрузить список'
+        : 'Сохранённых вариантов нет';
 
   return (
     <div ref={rootRef} className={styles.departmentField}>
@@ -81,7 +82,6 @@ export const SavedOptionsField = ({
           autoComplete="off"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          onBlur={onBlur}
         />
         <button
           type="button"

@@ -12,13 +12,14 @@ export const TransfusionProtocol = () => {
 
   const printPage = (page: PrintPage) => {
     const root = document.documentElement;
-    const cleanup = () => {
+    const afterPrint = () => {
       delete root.dataset.printPage;
-      window.removeEventListener('afterprint', cleanup);
+      window.removeEventListener('afterprint', afterPrint);
+      void workspace.saveToDatabase(true);
     };
 
     root.dataset.printPage = page;
-    window.addEventListener('afterprint', cleanup);
+    window.addEventListener('afterprint', afterPrint);
     window.print();
   };
 
@@ -28,6 +29,7 @@ export const TransfusionProtocol = () => {
         status={workspace.status}
         onClear={workspace.clearForm}
         onOpenRegistry={() => workspace.setRegistryOpen(true)}
+        onSave={() => void workspace.saveToDatabase()}
         onPrintFirst={() => printPage('first')}
         onPrintSecond={() => printPage('second')}
       />

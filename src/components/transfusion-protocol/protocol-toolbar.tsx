@@ -2,6 +2,7 @@ type Props = {
   status: string;
   onClear: () => void;
   onOpenRegistry: () => void;
+  onSave: () => void;
   onPrintFirst: () => void;
   onPrintSecond: () => void;
 };
@@ -10,6 +11,7 @@ export const ProtocolToolbar = ({
   status,
   onClear,
   onOpenRegistry,
+  onSave,
   onPrintFirst,
   onPrintSecond,
 }: Props) => (
@@ -20,6 +22,9 @@ export const ProtocolToolbar = ({
       </button>
       <button type="button" className="secondary-button" onClick={onOpenRegistry}>
         Реципиенты
+      </button>
+      <button type="button" className="save-button" onClick={onSave}>
+        Сохранить
       </button>
       <button type="button" className="print-button" onClick={onPrintFirst}>
         Печать страницы 1

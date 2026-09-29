@@ -27,6 +27,11 @@ export const useRecipientMatch = (
     [values.recipientBirthDate, values.recipientName],
   );
 
+  const identityKeyRef = useRef(identityKey);
+  const recordIdRef = useRef(recordId);
+  identityKeyRef.current = identityKey;
+  recordIdRef.current = recordId;
+
   const check = useCallback(async () => {
     if (
       !identityKey ||
@@ -43,7 +48,13 @@ export const useRecipientMatch = (
         values.recipientName ?? '',
         values.recipientBirthDate ?? '',
       );
-      if (requestRef.current !== requestId) return;
+      if (
+        requestRef.current !== requestId ||
+        identityKeyRef.current !== identityKey ||
+        recordIdRef.current !== null
+      ) {
+        return;
+      }
       setMatch(recipient);
       setResolvedKey(identityKey);
     } catch (error) {

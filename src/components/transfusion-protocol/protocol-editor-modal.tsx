@@ -22,9 +22,13 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
   const config = getProtocolBlockConfig(blockId);
   const [draft, setDraft] = useState<ProtocolValues>(() => getInitialValues(blockId, values));
 
+  const changeValues = (nextValues: ProtocolValues) => {
+    setDraft((current) => ({ ...current, ...nextValues }));
+    onSave(nextValues);
+  };
+
   const changeValue = (name: string, value: string) => {
-    setDraft((current) => ({ ...current, [name]: value }));
-    onSave({ [name]: value });
+    changeValues({ [name]: value });
   };
 
   const handleClose = () => {
@@ -41,6 +45,7 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
             field={field}
             value={draft[field.name] ?? ''}
             onChange={changeValue}
+            onValuesChange={changeValues}
           />
         ))}
       </div>

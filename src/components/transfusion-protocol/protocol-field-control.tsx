@@ -1,17 +1,23 @@
 import { CustomSelectField } from './custom-select-field';
 import { DepartmentField } from './department-field';
 import { getSavedOptionCategory } from './saved-field-config';
+import { RecipientField } from './recipient-field';
 import { SavedOptionsField } from './saved-options-field';
 import styles from './protocol-editor.module.css';
-import type { ProtocolFieldConfig } from './protocol-types';
+import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 
 type Props = {
   field: ProtocolFieldConfig;
   value: string;
   onChange: (name: string, value: string) => void;
+  onValuesChange: (values: ProtocolValues) => void;
 };
 
-const BasicControl = ({ field, value, onChange }: Props) => {
+const BasicControl = ({
+  field,
+  value,
+  onChange,
+}: Omit<Props, 'onValuesChange'>) => {
   if (field.type === 'textarea') {
     return (
       <textarea
@@ -34,9 +40,23 @@ const BasicControl = ({ field, value, onChange }: Props) => {
   );
 };
 
-export const ProtocolFieldControl = ({ field, value, onChange }: Props) => {
+export const ProtocolFieldControl = ({
+  field,
+  value,
+  onChange,
+  onValuesChange,
+}: Props) => {
   const className = field.wide ? styles.wide : undefined;
   const change = (nextValue: string) => onChange(field.name, nextValue);
+
+  if (field.name === 'recipientName') {
+    return (
+      <div className={className}>
+        <div className={styles.fieldLabel}>{field.label}</div>
+        <RecipientField value={value} onChange={onValuesChange} />
+      </div>
+    );
+  }
 
   if (field.name === 'department') {
     return (

@@ -3,7 +3,6 @@ import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import type { ProtocolValues } from './protocol-types';
 
 const SAVED_OPTION_FIELDS = new Set([
-  'recipientName',
   'componentName',
   'collectionOrganization',
   'selectionOrganization',

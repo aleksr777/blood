@@ -1,0 +1,154 @@
+.control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.value,
+.placeholder {
+  min-height: 2.75rem;
+  border: 1px solid #b8c4d6;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  overflow: hidden;
+  background: #fff;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeholder {
+  color: #64748b;
+}
+
+.actions,
+.footer,
+.searchForm {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.primary,
+.secondary {
+  min-height: 2.5rem;
+  border: 1px solid #1d4ed8;
+  border-radius: 0.5rem;
+  padding: 0 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.primary {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.secondary {
+  background: #fff;
+  color: #1d4ed8;
+}
+
+.primary:hover {
+  background: #1e40af;
+}
+
+.secondary:hover {
+  background: #eff6ff;
+}
+
+.primary:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.searchModal {
+  --modal-width: 38rem;
+}
+
+.newModal {
+  --modal-width: 32rem;
+}
+
+.searchForm input,
+.newField input {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid #b8c4d6;
+  border-radius: 0.5rem;
+  padding: 0.55rem 0.7rem;
+  font: inherit;
+}
+
+.searchForm input {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.results {
+  display: grid;
+  gap: 0.4rem;
+  max-height: 18rem;
+  margin-top: 0.8rem;
+  overflow-y: auto;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  width: 100%;
+  border: 1px solid #d8e0ec;
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  background: #fff;
+  color: #17213f;
+  cursor: pointer;
+  text-align: left;
+}
+
+.result:hover {
+  border-color: #8ea6ff;
+  background: #eef4ff;
+}
+
+.result small,
+.hint,
+.empty {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.newField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.hint,
+.error {
+  margin-top: 0.7rem;
+}
+
+.error {
+  color: #b91c1c;
+  font-size: 0.84rem;
+}
+
+.footer {
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .control {
+    grid-template-columns: 1fr;
+  }
+
+  .actions > button {
+    flex: 1 1 0;
+  }
+}

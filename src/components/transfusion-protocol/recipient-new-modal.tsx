@@ -14,7 +14,6 @@ type Props = {
   existingActionLabel?: string;
   hint?: string;
 };
-
 const normalize = (value: string) =>
   value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
@@ -30,7 +29,6 @@ export const RecipientNewModal = ({
   const [expanded, setExpanded] = useState(false);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
-
   const create = async () => {
     const value = fullName.trim().replace(/\s+/g, ' ');
     if (!value) {
@@ -61,7 +59,6 @@ export const RecipientNewModal = ({
       setChecking(false);
     }
   };
-
   const useExisting = async () => {
     if (!existing) return;
     try {
@@ -95,7 +92,6 @@ export const RecipientNewModal = ({
         />
       </label>
       <div className={styles.hint}>{hint}</div>
-
       {existing && (
         <RecipientExistingCard
           recipient={existing}
@@ -106,7 +102,6 @@ export const RecipientNewModal = ({
         />
       )}
       {error && <div className={styles.error}>{error}</div>}
-
       <div className={styles.footer}>
         <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>
         {!existing && (

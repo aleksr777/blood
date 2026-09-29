@@ -29,7 +29,6 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
   const [editing, setEditing] = useState<RecipientRecord | null>(null);
   const [deleting, setDeleting] = useState<RecipientRecord | null>(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     let active = true;
     const timer = window.setTimeout(() => {
@@ -50,7 +49,6 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
       window.clearTimeout(timer);
     };
   }, [query]);
-
   useEffect(() => {
     if (!selected) {
       setRecords([]);
@@ -60,7 +58,6 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
       .then(setRecords)
       .catch((error: unknown) => console.error('Не удалось загрузить бланки:', error));
   }, [selected]);
-
   const addRecipient = async (fullName: string) => {
     const created = await createRecipient(fullName);
     setRecipients((current) =>
@@ -70,12 +67,10 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
     );
     setSelected(created);
   };
-
   const openExistingRecipient = (recipient: RecipientRecord) => {
     setQuery(recipient.fullName);
     setSelected(recipient);
   };
-
   const saveRecipient = async (recipient: RecipientRecord, values: ProtocolValues) => {
     const updated = await updateRecipient(recipient.id, values);
     setRecipients((current) => current.map((item) => (item.id === updated.id ? updated : item)));

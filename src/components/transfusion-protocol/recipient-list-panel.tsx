@@ -8,6 +8,7 @@ type Props = {
   selected: RecipientRecord | null;
   onQueryChange: (value: string) => void;
   onSelect: (recipient: RecipientRecord) => void;
+  onCreate: () => void;
 };
 
 export const RecipientListPanel = ({
@@ -17,11 +18,17 @@ export const RecipientListPanel = ({
   selected,
   onQueryChange,
   onSelect,
+  onCreate,
 }: Props) => (
   <section className={styles.panel}>
-    <label className={styles.label} htmlFor="recipient-search">
-      Поиск по ФИО
-    </label>
+    <div className={styles.listHeader}>
+      <label className={styles.label} htmlFor="recipient-search">
+        Поиск по ФИО
+      </label>
+      <button type="button" className={styles.createRecipient} onClick={onCreate}>
+        Новый реципиент
+      </button>
+    </div>
     <input
       id="recipient-search"
       className={styles.search}

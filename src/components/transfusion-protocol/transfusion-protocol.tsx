@@ -53,7 +53,6 @@ export const TransfusionProtocol = () => {
         <RecipientDatabaseModal
           onClose={() => workspace.setRegistryOpen(false)}
           onOpenRecord={workspace.openRecord}
-          onNewProtocol={workspace.newForRecipient}
         />
       )}
     </main>

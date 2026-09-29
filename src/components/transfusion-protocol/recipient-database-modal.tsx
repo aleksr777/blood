@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  createRecipient,
   listProtocolRecords,
   removeRecipient,
   searchRecipients,
@@ -12,20 +13,21 @@ import { RecipientDeleteModal } from './recipient-delete-modal';
 import { RecipientEditModal } from './recipient-edit-modal';
 import { RecipientHistoryPanel } from './recipient-history-panel';
 import { RecipientListPanel } from './recipient-list-panel';
+import { RecipientNewModal } from './recipient-new-modal';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-database.module.css';
 
 type Props = {
   onClose: () => void;
   onOpenRecord: (record: ProtocolRecord) => void;
-  onNewProtocol: (recipient: RecipientRecord) => void;
 };
 
-export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }: Props) => {
+export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
   const [query, setQuery] = useState('');
   const [recipients, setRecipients] = useState<RecipientRecord[]>([]);
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
+  const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<RecipientRecord | null>(null);
   const [deleting, setDeleting] = useState<RecipientRecord | null>(null);
   const [loading, setLoading] = useState(true);
@@ -61,6 +63,16 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
       .catch((error: unknown) => console.error('Не удалось загрузить бланки:', error));
   }, [selected]);
 
+  const addRecipient = async (fullName: string) => {
+    const created = await createRecipient(fullName);
+    setRecipients((current) =>
+      [...current, created].sort((left, right) =>
+        left.fullName.localeCompare(right.fullName, 'ru'),
+      ),
+    );
+    setSelected(created);
+  };
+
   const saveRecipient = async (recipient: RecipientRecord, values: ProtocolValues) => {
     const updated = await updateRecipient(recipient.id, values);
     setRecipients((current) => current.map((item) => (item.id === updated.id ? updated : item)));
@@ -84,16 +96,23 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
           selected={selected}
           onQueryChange={setQuery}
           onSelect={setSelected}
+          onCreate={() => setCreating(true)}
         />
         <RecipientHistoryPanel
           recipient={selected}
           records={records}
           onOpenRecord={onOpenRecord}
-          onNewProtocol={onNewProtocol}
           onEdit={setEditing}
           onDelete={setDeleting}
         />
       </div>
+      {creating && (
+        <RecipientNewModal
+          onClose={() => setCreating(false)}
+          onCreate={addRecipient}
+          hint="Реципиент будет сразу добавлен в базу без создания бланка."
+        />
+      )}
       {editing && (
         <RecipientEditModal
           recipient={editing}

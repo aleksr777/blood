@@ -3,7 +3,6 @@ import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   saveProtocolRecord,
   type ProtocolRecord,
-  type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
@@ -72,18 +71,6 @@ export const useProtocolWorkspace = () => {
     setStatus('Сохранённый бланк открыт для просмотра и редактирования.');
   };
 
-  const newForRecipient = (recipient: RecipientRecord) => {
-    draft.touch();
-    setActiveBlock(null);
-    setRecordId(null);
-    setValues({
-      ...recipient.profile,
-      recipientName: recipient.fullName,
-    });
-    setRegistryOpen(false);
-    setStatus('Создан новый бланк с данными реципиента.');
-  };
-
   return {
     values,
     recordId,
@@ -96,6 +83,5 @@ export const useProtocolWorkspace = () => {
     saveToDatabase,
     clearForm,
     openRecord,
-    newForRecipient,
   };
 };

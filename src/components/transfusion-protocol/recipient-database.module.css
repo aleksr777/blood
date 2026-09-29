@@ -23,9 +23,17 @@
   background: #fff;
 }
 
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
 .label {
   display: block;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0;
   color: #263552;
   font-size: 0.9rem;
   font-weight: 600;
@@ -103,7 +111,8 @@
 .action,
 .open,
 .secondaryAction,
-.dangerAction {
+.dangerAction,
+.createRecipient {
   border: 1px solid #1d4ed8;
   border-radius: 0.45rem;
   padding: 0.45rem 0.7rem;
@@ -119,6 +128,17 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 0.4rem;
+}
+
+.createRecipient {
+  border-color: #1d4ed8;
+  background: #fff;
+  color: #1d4ed8;
+  white-space: nowrap;
+}
+
+.createRecipient:hover {
+  background: #eff6ff;
 }
 
 .secondaryAction {

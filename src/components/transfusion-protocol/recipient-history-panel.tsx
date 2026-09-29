@@ -9,7 +9,6 @@ type Props = {
   recipient: RecipientRecord | null;
   records: ProtocolRecord[];
   onOpenRecord: (record: ProtocolRecord) => void;
-  onNewProtocol: (recipient: RecipientRecord) => void;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
 };
@@ -24,7 +23,6 @@ export const RecipientHistoryPanel = ({
   recipient,
   records,
   onOpenRecord,
-  onNewProtocol,
   onEdit,
   onDelete,
 }: Props) => (
@@ -44,9 +42,6 @@ export const RecipientHistoryPanel = ({
             </button>
             <button type="button" className={styles.dangerAction} onClick={() => onDelete(recipient)}>
               Удалить
-            </button>
-            <button type="button" className={styles.action} onClick={() => onNewProtocol(recipient)}>
-              Новый бланк
             </button>
           </div>
         </div>

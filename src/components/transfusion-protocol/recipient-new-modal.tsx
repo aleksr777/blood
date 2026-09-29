@@ -5,13 +5,18 @@ import styles from './recipient-field.module.css';
 
 type Props = {
   onClose: () => void;
-  onCreate: (fullName: string) => void;
+  onCreate: (fullName: string) => void | Promise<void>;
+  hint?: string;
 };
 
 const normalize = (value: string) =>
   value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
-export const RecipientNewModal = ({ onClose, onCreate }: Props) => {
+export const RecipientNewModal = ({
+  onClose,
+  onCreate,
+  hint = 'Новый реципиент будет записан в базу при сохранении или печати бланка.',
+}: Props) => {
   const [fullName, setFullName] = useState('');
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
@@ -31,11 +36,13 @@ export const RecipientNewModal = ({ onClose, onCreate }: Props) => {
         setError('Реципиент с таким ФИО уже существует. Используйте поиск.');
         return;
       }
-      onCreate(value);
+      await onCreate(value);
       onClose();
     } catch (checkError) {
-      console.error('Не удалось проверить реципиента:', checkError);
-      setError('Не удалось проверить ФИО в базе.');
+      console.error('Не удалось создать реципиента:', checkError);
+      setError(
+        checkError instanceof Error ? checkError.message : 'Не удалось создать реципиента.',
+      );
     } finally {
       setChecking(false);
     }
@@ -57,9 +64,7 @@ export const RecipientNewModal = ({ onClose, onCreate }: Props) => {
           }}
         />
       </label>
-      <div className={styles.hint}>
-        Новый реципиент будет записан в базу при сохранении или печати бланка.
-      </div>
+      <div className={styles.hint}>{hint}</div>
       {error && <div className={styles.error}>{error}</div>}
       <div className={styles.footer}>
         <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>

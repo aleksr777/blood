@@ -23,6 +23,7 @@ import {
   saveProtocolRecord,
 } from './protocol-record-store';
 import {
+  createRecipient,
   removeRecipient,
   searchRecipients,
   updateRecipient,
@@ -69,6 +70,8 @@ const handleRequest = async (request: DatabaseRequest) => {
       return clearProtocolDraft();
     case 'recipients:search':
       return searchRecipients((request.payload as { query: string }).query);
+    case 'recipients:create':
+      return createRecipient((request.payload as { fullName: string }).fullName);
     case 'recipients:update': {
       const payload = request.payload as {
         id: number;

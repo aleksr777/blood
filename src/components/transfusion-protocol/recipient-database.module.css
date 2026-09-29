@@ -85,9 +85,14 @@
 
 .header {
   display: flex;
+  flex: 0 0 auto;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  border: 1px solid #cbd7f0;
+  border-radius: 0.65rem;
+  padding: 0.8rem;
+  background: #f4f7ff;
 }
 
 .title {
@@ -134,6 +139,10 @@
 
 .dangerAction:hover {
   background: #fef2f2;
+}
+
+.records {
+  margin-top: 1rem;
 }
 
 .record {

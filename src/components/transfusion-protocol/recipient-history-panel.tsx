@@ -2,6 +2,7 @@ import type {
   ProtocolRecord,
   RecipientRecord,
 } from '../../storage/repositories/recipients';
+import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
 type Props = {

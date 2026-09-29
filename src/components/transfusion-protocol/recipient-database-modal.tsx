@@ -11,8 +11,8 @@ import Modal from '../modal/modal';
 import { RecipientDeleteModal } from './recipient-delete-modal';
 import { RecipientEditModal } from './recipient-edit-modal';
 import { RecipientHistoryPanel } from './recipient-history-panel';
+import { RecipientListPanel } from './recipient-list-panel';
 import type { ProtocolValues } from './protocol-types';
-import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
 type Props = {
@@ -45,7 +45,6 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
         .catch((error: unknown) => console.error('Не удалось найти реципиентов:', error))
         .finally(() => active && setLoading(false));
     }, 120);
-
     return () => {
       active = false;
       window.clearTimeout(timer);
@@ -78,39 +77,14 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
   return (
     <Modal title="База реципиентов" onClose={onClose} className={styles.modal}>
       <div className={styles.body}>
-        <section className={styles.panel}>
-          <label className={styles.label} htmlFor="recipient-search">
-            Поиск по ФИО или дате рождения
-          </label>
-          <input
-            id="recipient-search"
-            className={styles.search}
-            value={query}
-            placeholder="Например: Иванов или 14.03.1980"
-            onChange={(event) => setQuery(event.target.value)}
-          />
-          <div className={styles.list}>
-            {loading && <div className={styles.empty}>Поиск...</div>}
-            {!loading && recipients.length === 0 && (
-              <div className={styles.empty}>Реципиенты не найдены</div>
-            )}
-            {recipients.map((recipient) => (
-              <button
-                key={recipient.id}
-                type="button"
-                className={styles.person}
-                data-selected={selected?.id === recipient.id}
-                onClick={() => setSelected(recipient)}
-              >
-                <span className={styles.personName}>{recipient.fullName}</span>
-                <span className={styles.meta}>
-                  {formatDate(recipient.birthDate)} · бланков: {recipient.protocolCount}
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-
+        <RecipientListPanel
+          query={query}
+          loading={loading}
+          recipients={recipients}
+          selected={selected}
+          onQueryChange={setQuery}
+          onSelect={setSelected}
+        />
         <RecipientHistoryPanel
           recipient={selected}
           records={records}
@@ -120,7 +94,6 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
           onDelete={setDeleting}
         />
       </div>
-
       {editing && (
         <RecipientEditModal
           recipient={editing}

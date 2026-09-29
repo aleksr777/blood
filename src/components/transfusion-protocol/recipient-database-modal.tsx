@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react';
 import {
   listProtocolRecords,
+  removeRecipient,
   searchRecipients,
+  updateRecipient,
   type ProtocolRecord,
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
+import { RecipientDeleteModal } from './recipient-delete-modal';
+import { RecipientEditModal } from './recipient-edit-modal';
 import { RecipientHistoryPanel } from './recipient-history-panel';
+import type { ProtocolValues } from './protocol-types';
 import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
@@ -21,6 +26,8 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
   const [recipients, setRecipients] = useState<RecipientRecord[]>([]);
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
+  const [editing, setEditing] = useState<RecipientRecord | null>(null);
+  const [deleting, setDeleting] = useState<RecipientRecord | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,6 +61,19 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
       .then(setRecords)
       .catch((error: unknown) => console.error('Не удалось загрузить бланки:', error));
   }, [selected]);
+
+  const saveRecipient = async (recipient: RecipientRecord, values: ProtocolValues) => {
+    const updated = await updateRecipient(recipient.id, values);
+    setRecipients((current) => current.map((item) => (item.id === updated.id ? updated : item)));
+    setSelected(updated);
+  };
+
+  const deleteRecipient = async (recipient: RecipientRecord) => {
+    await removeRecipient(recipient.id);
+    setRecipients((current) => current.filter(({ id }) => id !== recipient.id));
+    setSelected(null);
+    setRecords([]);
+  };
 
   return (
     <Modal title="База реципиентов" onClose={onClose} className={styles.modal}>
@@ -96,8 +116,25 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
           records={records}
           onOpenRecord={onOpenRecord}
           onNewProtocol={onNewProtocol}
+          onEdit={setEditing}
+          onDelete={setDeleting}
         />
       </div>
+
+      {editing && (
+        <RecipientEditModal
+          recipient={editing}
+          onClose={() => setEditing(null)}
+          onSave={(values) => saveRecipient(editing, values)}
+        />
+      )}
+      {deleting && (
+        <RecipientDeleteModal
+          recipient={deleting}
+          onClose={() => setDeleting(null)}
+          onDelete={() => deleteRecipient(deleting)}
+        />
+      )}
     </Modal>
   );
 };

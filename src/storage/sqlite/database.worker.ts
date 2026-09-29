@@ -22,7 +22,11 @@ import {
   listProtocolRecords,
   saveProtocolRecord,
 } from './protocol-record-store';
-import { searchRecipients } from './recipient-store';
+import {
+  removeRecipient,
+  searchRecipients,
+  updateRecipient,
+} from './recipient-store';
 
 const handleRequest = async (request: DatabaseRequest) => {
   switch (request.action) {
@@ -65,6 +69,15 @@ const handleRequest = async (request: DatabaseRequest) => {
       return clearProtocolDraft();
     case 'recipients:search':
       return searchRecipients((request.payload as { query: string }).query);
+    case 'recipients:update': {
+      const payload = request.payload as {
+        id: number;
+        values: Record<string, string>;
+      };
+      return updateRecipient(payload.id, payload.values);
+    }
+    case 'recipients:remove':
+      return removeRecipient((request.payload as { id: number }).id);
     case 'protocol-records:list':
       return listProtocolRecords((request.payload as { recipientId: number }).recipientId);
     case 'protocol-records:save': {

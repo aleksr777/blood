@@ -1,0 +1,55 @@
+.modal {
+  --modal-width: 34rem;
+}
+
+.text {
+  color: #17213f;
+  line-height: 1.45;
+}
+
+.warning,
+.error {
+  margin-top: 0.7rem;
+  font-size: 0.86rem;
+}
+
+.warning {
+  color: #64748b;
+}
+
+.error {
+  color: #b91c1c;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1.3rem;
+}
+
+.secondary,
+.danger {
+  min-height: 2.5rem;
+  border-radius: 0.5rem;
+  padding: 0 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.secondary {
+  border: 1px solid #64748b;
+  background: #fff;
+  color: #334155;
+}
+
+.danger {
+  border: 1px solid #b91c1c;
+  background: #b91c1c;
+  color: #fff;
+}
+
+.danger:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}

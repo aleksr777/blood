@@ -82,6 +82,16 @@ const insertProtocol = (
   return Number(rows[0].id);
 };
 
+const recordExists = (db: SqliteDatabase, id: number) => {
+  const rows = db.exec({
+    sql: 'SELECT id FROM protocol_records WHERE id = $id LIMIT 1',
+    bind: { $id: id },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ id: number }>;
+  return Boolean(rows[0]);
+};
+
 export const saveProtocolRecord = async (
   recordId: number | null,
   values: ProtocolValuesRecord,
@@ -89,11 +99,10 @@ export const saveProtocolRecord = async (
   const db = await getDatabase();
   const recipientId = upsertRecipient(db, values);
   const now = Date.now();
-  const id =
-    recordId ??
-    insertProtocol(db, recipientId, values, now);
+  const canUpdate = recordId !== null && recordExists(db, recordId);
+  const id = canUpdate ? recordId : insertProtocol(db, recipientId, values, now);
 
-  if (recordId) {
+  if (canUpdate) {
     db.exec({
       sql: `
         UPDATE protocol_records

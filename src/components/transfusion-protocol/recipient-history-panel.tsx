@@ -10,6 +10,8 @@ type Props = {
   records: ProtocolRecord[];
   onOpenRecord: (record: ProtocolRecord) => void;
   onNewProtocol: (recipient: RecipientRecord) => void;
+  onEdit: (recipient: RecipientRecord) => void;
+  onDelete: (recipient: RecipientRecord) => void;
 };
 
 const formatUpdated = (value: number) =>
@@ -23,6 +25,8 @@ export const RecipientHistoryPanel = ({
   records,
   onOpenRecord,
   onNewProtocol,
+  onEdit,
+  onDelete,
 }: Props) => (
   <section className={styles.panel}>
     {!recipient ? (
@@ -34,13 +38,17 @@ export const RecipientHistoryPanel = ({
             <h3 className={styles.title}>{recipient.fullName}</h3>
             <div className={styles.meta}>Дата рождения: {formatDate(recipient.birthDate)}</div>
           </div>
-          <button
-            type="button"
-            className={styles.action}
-            onClick={() => onNewProtocol(recipient)}
-          >
-            Новый бланк
-          </button>
+          <div className={styles.headerActions}>
+            <button type="button" className={styles.secondaryAction} onClick={() => onEdit(recipient)}>
+              Редактировать
+            </button>
+            <button type="button" className={styles.dangerAction} onClick={() => onDelete(recipient)}>
+              Удалить
+            </button>
+            <button type="button" className={styles.action} onClick={() => onNewProtocol(recipient)}>
+              Новый бланк
+            </button>
+          </div>
         </div>
         <div className={styles.records}>
           {records.length === 0 && (
@@ -54,11 +62,7 @@ export const RecipientHistoryPanel = ({
                 </div>
                 <div className={styles.meta}>Изменён: {formatUpdated(record.updatedAt)}</div>
               </div>
-              <button
-                type="button"
-                className={styles.open}
-                onClick={() => onOpenRecord(record)}
-              >
+              <button type="button" className={styles.open} onClick={() => onOpenRecord(record)}>
                 Открыть
               </button>
             </div>

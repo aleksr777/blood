@@ -1,15 +1,9 @@
 import { useState } from 'react';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
-import type {
-  ProtocolRecord,
-  RecipientRecord,
-} from '../../storage/repositories/recipients';
+import type { ProtocolRecord, RecipientRecord } from '../../storage/repositories/recipients';
 import { useProtocolAutosave } from './use-protocol-autosave';
 import { useProtocolDraft } from './use-protocol-draft';
-import {
-  getRecipientIdentityKey,
-  useRecipientMatch,
-} from './use-recipient-match';
+import { getRecipientIdentityKey, useRecipientMatch } from './use-recipient-match';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
 export const useProtocolWorkspace = () => {
@@ -36,6 +30,7 @@ export const useProtocolWorkspace = () => {
   const saveValues = (nextValues: ProtocolValues) => {
     if ('recipientName' in nextValues || 'recipientBirthDate' in nextValues) {
       setIgnoredIdentityKey('');
+      recipientMatch.dismiss();
     }
     setValues((current) => ({ ...current, ...nextValues }));
   };
@@ -49,7 +44,6 @@ export const useProtocolWorkspace = () => {
   const applyRecipientData = () => {
     const recipient = recipientMatch.match;
     if (!recipient) return;
-
     setIgnoredIdentityKey(recipientMatch.identityKey);
     setValues((current) => ({
       ...current,
@@ -90,12 +84,10 @@ export const useProtocolWorkspace = () => {
   };
 
   const newForRecipient = (recipient: RecipientRecord) => {
-    setIgnoredIdentityKey(
-      getRecipientIdentityKey({
-        recipientName: recipient.fullName,
-        recipientBirthDate: recipient.birthDate,
-      }),
-    );
+    setIgnoredIdentityKey(getRecipientIdentityKey({
+      recipientName: recipient.fullName,
+      recipientBirthDate: recipient.birthDate,
+    }));
     setDocumentKey((current) => current + 1);
     setActiveBlock(null);
     setRecordId(null);

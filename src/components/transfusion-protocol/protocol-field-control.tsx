@@ -60,7 +60,6 @@ export const ProtocolFieldControl = ({ field, value, onChange, onBlur }: Props) 
           options={field.options ?? []}
           value={value}
           onChange={change}
-          onBlur={() => onBlur?.(field.name)}
         />
       </div>
     );
@@ -77,6 +76,7 @@ export const ProtocolFieldControl = ({ field, value, onChange, onBlur }: Props) 
           category={category}
           value={value}
           onChange={change}
+          onBlur={() => onBlur?.(field.name)}
         />
       </div>
     );

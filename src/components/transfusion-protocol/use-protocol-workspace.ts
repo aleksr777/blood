@@ -1,49 +1,37 @@
-import { useEffect, useState } from 'react';
-import {
-  clearProtocolDraft,
-  loadProtocolDraft,
-  saveProtocolDraft,
-} from '../../storage/repositories/protocol-draft';
+import { useCallback, useState } from 'react';
+import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   saveProtocolRecord,
   type ProtocolRecord,
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
+import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
 export const useProtocolWorkspace = () => {
   const [values, setValues] = useState<ProtocolValues>({});
   const [recordId, setRecordId] = useState<number | null>(null);
-  const [loaded, setLoaded] = useState(false);
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
 
-  useEffect(() => {
-    let active = true;
-    void loadProtocolDraft()
-      .then((draft) => {
-        if (!active) return;
-        setValues(draft.values);
-        setRecordId(draft.protocolRecordId);
-      })
-      .catch((error: unknown) => console.error('Не удалось загрузить бланк:', error))
-      .finally(() => active && setLoaded(true));
-
-    return () => {
-      active = false;
-    };
+  const handleDraftExpire = useCallback(() => {
+    setActiveBlock(null);
+    setStatus('Бланк автоматически очищен: с последнего изменения прошло 24 часа.');
   }, []);
 
-  useEffect(() => {
-    if (!loaded) return;
-    void saveProtocolDraft({ values, protocolRecordId: recordId }).catch((error: unknown) =>
-      console.error('Не удалось сохранить черновик:', error),
-    );
-  }, [loaded, recordId, values]);
+  const draft = useProtocolDraft({
+    values,
+    recordId,
+    setValues,
+    setRecordId,
+    onExpire: handleDraftExpire,
+  });
 
-  const saveValues = (nextValues: ProtocolValues) =>
+  const saveValues = (nextValues: ProtocolValues) => {
+    draft.touch();
     setValues((current) => ({ ...current, ...nextValues }));
+  };
 
   const saveToDatabase = async (afterPrint = false) => {
     if (!values.recipientName?.trim() || !values.recipientBirthDate) {
@@ -65,6 +53,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const clearForm = () => {
+    draft.reset();
     setActiveBlock(null);
     setRecordId(null);
     setStatus('');
@@ -75,6 +64,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const openRecord = (record: ProtocolRecord) => {
+    draft.touch();
     setActiveBlock(null);
     setRecordId(record.id);
     setValues(record.values);
@@ -83,6 +73,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const newForRecipient = (recipient: RecipientRecord) => {
+    draft.touch();
     setActiveBlock(null);
     setRecordId(null);
     setValues({

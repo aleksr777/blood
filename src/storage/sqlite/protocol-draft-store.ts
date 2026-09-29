@@ -7,30 +7,37 @@ const isValues = (value: unknown): value is ProtocolValuesRecord =>
   !Array.isArray(value) &&
   Object.values(value).every((item) => typeof item === 'string');
 
-const emptyDraft = (): ProtocolDraftState => ({ values: {}, protocolRecordId: null });
+const emptyDraft = (): ProtocolDraftState => ({
+  values: {},
+  protocolRecordId: null,
+  updatedAt: 0,
+});
 
 export const loadProtocolDraft = async (): Promise<ProtocolDraftState> => {
   const db = await getDatabase();
   const rows = db.exec({
-    sql: 'SELECT values_json FROM protocol_draft WHERE id = 1',
+    sql: 'SELECT values_json, updated_at FROM protocol_draft WHERE id = 1',
     rowMode: 'object',
     returnValue: 'resultRows',
-  }) as Array<{ values_json: string }>;
+  }) as Array<{ values_json: string; updated_at: number }>;
 
-  const serialized = rows[0]?.values_json;
-  if (!serialized) return emptyDraft();
+  const row = rows[0];
+  if (!row?.values_json) return emptyDraft();
 
   try {
-    const parsed: unknown = JSON.parse(serialized);
-    if (isValues(parsed)) return { values: parsed, protocolRecordId: null };
+    const parsed: unknown = JSON.parse(row.values_json);
+    if (isValues(parsed)) {
+      return { values: parsed, protocolRecordId: null, updatedAt: Number(row.updated_at) };
+    }
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return emptyDraft();
 
     const state = parsed as Partial<ProtocolDraftState>;
     if (!isValues(state.values)) return emptyDraft();
-    const recordId = state.protocolRecordId;
     return {
       values: state.values,
-      protocolRecordId: typeof recordId === 'number' ? recordId : null,
+      protocolRecordId:
+        typeof state.protocolRecordId === 'number' ? state.protocolRecordId : null,
+      updatedAt: Number(row.updated_at) || 0,
     };
   } catch {
     return emptyDraft();
@@ -42,12 +49,15 @@ export const saveProtocolDraft = async (state: ProtocolDraftState) => {
   db.exec({
     sql: `
       INSERT INTO protocol_draft (id, values_json, updated_at)
-      VALUES (1, $values, $now)
+      VALUES (1, $values, $updatedAt)
       ON CONFLICT(id) DO UPDATE SET
         values_json = excluded.values_json,
         updated_at = excluded.updated_at
     `,
-    bind: { $values: JSON.stringify(state), $now: Date.now() },
+    bind: {
+      $values: JSON.stringify(state),
+      $updatedAt: state.updatedAt,
+    },
   });
 };
 

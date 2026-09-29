@@ -29,6 +29,7 @@ export type ProtocolRecord = {
 export type ProtocolDraftState = {
   values: ProtocolValuesRecord;
   protocolRecordId: number | null;
+  updatedAt: number;
 };
 
 export type DatabaseAction =

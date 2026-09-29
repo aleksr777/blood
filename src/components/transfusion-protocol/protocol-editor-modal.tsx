@@ -29,7 +29,6 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
 
   const handleClose = () => {
     persistProtocolOptions(draft);
-    onSave(draft);
     onClose();
   };
 

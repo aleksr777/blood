@@ -22,7 +22,7 @@ import {
   listProtocolRecords,
   saveProtocolRecord,
 } from './protocol-record-store';
-import { searchRecipients } from './recipient-store';
+import { findRecipient, searchRecipients } from './recipient-store';
 
 const handleRequest = async (request: DatabaseRequest) => {
   switch (request.action) {
@@ -65,6 +65,10 @@ const handleRequest = async (request: DatabaseRequest) => {
       return clearProtocolDraft();
     case 'recipients:search':
       return searchRecipients((request.payload as { query: string }).query);
+    case 'recipients:find-exact': {
+      const payload = request.payload as { fullName: string; birthDate: string };
+      return findRecipient(payload.fullName, payload.birthDate);
+    }
     case 'protocol-records:list':
       return listProtocolRecords((request.payload as { recipientId: number }).recipientId);
     case 'protocol-records:save': {

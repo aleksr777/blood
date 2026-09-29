@@ -92,6 +92,8 @@ export const database = {
   clearProtocolDraft: () => withDatabase<void>('protocol-draft:clear'),
   searchRecipients: (query: string) =>
     withDatabase<RecipientRecord[]>('recipients:search', { query }),
+  findRecipient: (fullName: string, birthDate: string) =>
+    withDatabase<RecipientRecord | null>('recipients:find-exact', { fullName, birthDate }),
   listProtocolRecords: (recipientId: number) =>
     withDatabase<ProtocolRecord[]>('protocol-records:list', { recipientId }),
   saveProtocolRecord: (recordId: number | null, values: ProtocolValuesRecord) =>

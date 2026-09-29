@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  searchRecipients,
+  findRecipient,
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import type { ProtocolValues } from './protocol-types';
@@ -8,21 +8,27 @@ import type { ProtocolValues } from './protocol-types';
 const normalizeName = (value: string) =>
   value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
+export const getRecipientIdentityKey = (values: ProtocolValues) => {
+  const name = normalizeName(values.recipientName ?? '');
+  const birthDate = values.recipientBirthDate ?? '';
+  return name && birthDate ? `${name}|${birthDate}` : '';
+};
+
 export const useRecipientMatch = (
   values: ProtocolValues,
   recordId: number | null,
+  ignoredIdentityKey = '',
 ) => {
   const [match, setMatch] = useState<RecipientRecord | null>(null);
   const [resolvedKey, setResolvedKey] = useState('');
   const requestRef = useRef(0);
-  const identityKey = useMemo(() => {
-    const name = normalizeName(values.recipientName ?? '');
-    const birthDate = values.recipientBirthDate ?? '';
-    return name && birthDate ? `${name}|${birthDate}` : '';
-  }, [values.recipientBirthDate, values.recipientName]);
+  const identityKey = useMemo(
+    () => getRecipientIdentityKey(values),
+    [values.recipientBirthDate, values.recipientName],
+  );
 
   useEffect(() => {
-    if (!identityKey || recordId !== null) {
+    if (!identityKey || recordId !== null || identityKey === ignoredIdentityKey) {
       setMatch(null);
       setResolvedKey(identityKey);
       return;
@@ -31,15 +37,10 @@ export const useRecipientMatch = (
     setResolvedKey('');
     const requestId = ++requestRef.current;
     const timer = window.setTimeout(() => {
-      void searchRecipients(values.recipientName ?? '')
-        .then((items) => {
+      void findRecipient(values.recipientName ?? '', values.recipientBirthDate ?? '')
+        .then((recipient) => {
           if (requestRef.current !== requestId) return;
-          const exact = items.find(
-            (item) =>
-              normalizeName(item.fullName) === normalizeName(values.recipientName ?? '') &&
-              item.birthDate === values.recipientBirthDate,
-          );
-          setMatch(exact ?? null);
+          setMatch(recipient);
           setResolvedKey(identityKey);
         })
         .catch((error: unknown) => {
@@ -49,14 +50,17 @@ export const useRecipientMatch = (
     }, 250);
 
     return () => window.clearTimeout(timer);
-  }, [identityKey, recordId, values.recipientBirthDate, values.recipientName]);
-
-  const dismiss = () => setMatch(null);
+  }, [
+    identityKey,
+    ignoredIdentityKey,
+    recordId,
+    values.recipientBirthDate,
+    values.recipientName,
+  ]);
 
   return {
-    identityKey,
     match,
     resolved: !identityKey || resolvedKey === identityKey,
-    dismiss,
+    dismiss: () => setMatch(null),
   };
 };

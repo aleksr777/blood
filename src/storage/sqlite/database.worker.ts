@@ -18,6 +18,11 @@ import {
   loadProtocolDraft,
   saveProtocolDraft,
 } from './protocol-draft-store';
+import {
+  listProtocolRecords,
+  saveProtocolRecord,
+  searchRecipients,
+} from './recipient-store';
 
 const handleRequest = async (request: DatabaseRequest) => {
   switch (request.action) {
@@ -54,10 +59,21 @@ const handleRequest = async (request: DatabaseRequest) => {
       return loadProtocolDraft();
     case 'protocol-draft:save':
       return saveProtocolDraft(
-        (request.payload as { values: Record<string, string> }).values,
+        (request.payload as { state: Parameters<typeof saveProtocolDraft>[0] }).state,
       );
     case 'protocol-draft:clear':
       return clearProtocolDraft();
+    case 'recipients:search':
+      return searchRecipients((request.payload as { query: string }).query);
+    case 'protocol-records:list':
+      return listProtocolRecords((request.payload as { recipientId: number }).recipientId);
+    case 'protocol-records:save': {
+      const payload = request.payload as {
+        recordId: number | null;
+        values: Record<string, string>;
+      };
+      return saveProtocolRecord(payload.recordId, payload.values);
+    }
   }
 };
 

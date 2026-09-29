@@ -3,6 +3,10 @@ import type {
   DatabaseRequest,
   DatabaseResponse,
   DepartmentRecord,
+  ProtocolDraftState,
+  ProtocolRecord,
+  ProtocolValuesRecord,
+  RecipientRecord,
   SavedOptionRecord,
 } from './database-types';
 
@@ -82,8 +86,14 @@ export const database = {
   removeSavedOption: (category: string, id: number) =>
     withDatabase<SavedOptionRecord[]>('saved-options:remove', { category, id }),
   loadProtocolDraft: () =>
-    withDatabase<Record<string, string>>('protocol-draft:load'),
-  saveProtocolDraft: (values: Record<string, string>) =>
-    withDatabase<void>('protocol-draft:save', { values }),
+    withDatabase<ProtocolDraftState>('protocol-draft:load'),
+  saveProtocolDraft: (state: ProtocolDraftState) =>
+    withDatabase<void>('protocol-draft:save', { state }),
   clearProtocolDraft: () => withDatabase<void>('protocol-draft:clear'),
+  searchRecipients: (query: string) =>
+    withDatabase<RecipientRecord[]>('recipients:search', { query }),
+  listProtocolRecords: (recipientId: number) =>
+    withDatabase<ProtocolRecord[]>('protocol-records:list', { recipientId }),
+  saveProtocolRecord: (recordId: number | null, values: ProtocolValuesRecord) =>
+    withDatabase<ProtocolRecord>('protocol-records:save', { recordId, values }),
 };

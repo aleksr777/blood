@@ -1,46 +1,14 @@
-import { useEffect, useState } from 'react';
-import {
-  clearProtocolDraft,
-  loadProtocolDraft,
-  saveProtocolDraft,
-} from '../../storage/repositories/protocol-draft';
 import { FirstPage } from './first-page';
 import { ProtocolEditorModal } from './protocol-editor-modal';
+import { ProtocolToolbar } from './protocol-toolbar';
+import { RecipientDatabaseModal } from './recipient-database-modal';
 import { SecondPage } from './second-page';
-import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
+import { useProtocolWorkspace } from './use-protocol-workspace';
 
 type PrintPage = 'first' | 'second';
 
 export const TransfusionProtocol = () => {
-  const [values, setValues] = useState<ProtocolValues>({});
-  const [draftLoaded, setDraftLoaded] = useState(false);
-  const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(null);
-
-  useEffect(() => {
-    let active = true;
-
-    void loadProtocolDraft()
-      .then((storedValues) => {
-        if (active) setValues((current) => ({ ...storedValues, ...current }));
-      })
-      .catch((error: unknown) => {
-        console.error('Не удалось загрузить сохранённый бланк:', error);
-      })
-      .finally(() => {
-        if (active) setDraftLoaded(true);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!draftLoaded) return;
-    void saveProtocolDraft(values).catch((error: unknown) => {
-      console.error('Не удалось сохранить бланк:', error);
-    });
-  }, [draftLoaded, values]);
+  const workspace = useProtocolWorkspace();
 
   const printPage = (page: PrintPage) => {
     const root = document.documentElement;
@@ -54,44 +22,38 @@ export const TransfusionProtocol = () => {
     window.print();
   };
 
-  const saveBlock = (nextValues: ProtocolValues) => {
-    setValues((current) => ({ ...current, ...nextValues }));
-  };
-
-  const clearForm = () => {
-    setActiveBlock(null);
-    setValues({});
-    void clearProtocolDraft().catch((error: unknown) => {
-      console.error('Не удалось очистить сохранённый бланк:', error);
-    });
-  };
-
   return (
     <main className="app-shell">
-      <div className="print-actions" aria-label="Панель действий">
-        <button type="button" className="clear-button" onClick={clearForm}>
-          Очистить бланк
-        </button>
-        <button type="button" className="print-button" onClick={() => printPage('first')}>
-          Печать страницы 1
-        </button>
-        <button type="button" className="print-button" onClick={() => printPage('second')}>
-          Печать страницы 2
-        </button>
-      </div>
+      <ProtocolToolbar
+        editingSaved={workspace.recordId !== null}
+        status={workspace.status}
+        onClear={workspace.clearForm}
+        onOpenRegistry={() => workspace.setRegistryOpen(true)}
+        onSaveDatabase={() => void workspace.saveToDatabase()}
+        onPrintFirst={() => printPage('first')}
+        onPrintSecond={() => printPage('second')}
+      />
 
       <div className="sheets">
-        <FirstPage values={values} onOpenBlock={setActiveBlock} />
-        <SecondPage values={values} onOpenBlock={setActiveBlock} />
+        <FirstPage values={workspace.values} onOpenBlock={workspace.setActiveBlock} />
+        <SecondPage values={workspace.values} onOpenBlock={workspace.setActiveBlock} />
       </div>
 
-      {activeBlock && (
+      {workspace.activeBlock && (
         <ProtocolEditorModal
-          key={activeBlock}
-          blockId={activeBlock}
-          values={values}
-          onSave={saveBlock}
-          onClose={() => setActiveBlock(null)}
+          key={workspace.activeBlock}
+          blockId={workspace.activeBlock}
+          values={workspace.values}
+          onSave={workspace.saveValues}
+          onClose={() => workspace.setActiveBlock(null)}
+        />
+      )}
+
+      {workspace.registryOpen && (
+        <RecipientDatabaseModal
+          onClose={() => workspace.setRegistryOpen(false)}
+          onOpenRecord={workspace.openRecord}
+          onNewProtocol={workspace.newForRecipient}
         />
       )}
     </main>

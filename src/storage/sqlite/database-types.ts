@@ -1,3 +1,5 @@
+export type ProtocolValuesRecord = Record<string, string>;
+
 export type DepartmentRecord = {
   id: number;
   name: string;
@@ -6,6 +8,27 @@ export type DepartmentRecord = {
 export type SavedOptionRecord = {
   id: number;
   value: string;
+};
+
+export type RecipientRecord = {
+  id: number;
+  fullName: string;
+  birthDate: string;
+  profile: ProtocolValuesRecord;
+  protocolCount: number;
+};
+
+export type ProtocolRecord = {
+  id: number;
+  recipientId: number;
+  values: ProtocolValuesRecord;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type ProtocolDraftState = {
+  values: ProtocolValuesRecord;
+  protocolRecordId: number | null;
 };
 
 export type DatabaseAction =
@@ -21,7 +44,10 @@ export type DatabaseAction =
   | 'saved-options:remove'
   | 'protocol-draft:load'
   | 'protocol-draft:save'
-  | 'protocol-draft:clear';
+  | 'protocol-draft:clear'
+  | 'recipients:search'
+  | 'protocol-records:list'
+  | 'protocol-records:save';
 
 export type DatabaseRequest = {
   id: number;

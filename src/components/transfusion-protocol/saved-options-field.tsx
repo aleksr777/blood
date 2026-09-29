@@ -15,9 +15,17 @@ type Props = {
   category: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
 };
 
-export const SavedOptionsField = ({ name, label, category, value, onChange }: Props) => {
+export const SavedOptionsField = ({
+  name,
+  label,
+  category,
+  value,
+  onChange,
+  onBlur,
+}: Props) => {
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -82,6 +90,7 @@ export const SavedOptionsField = ({ name, label, category, value, onChange }: Pr
           autoComplete="off"
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlur}
         />
         <button
           type="button"

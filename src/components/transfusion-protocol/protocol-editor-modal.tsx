@@ -10,6 +10,7 @@ type Props = {
   blockId: ProtocolBlockId;
   values: ProtocolValues;
   onSave: (values: ProtocolValues) => void;
+  onFieldBlur: (name: string) => void;
   onClose: () => void;
 };
 
@@ -18,7 +19,13 @@ const getInitialValues = (blockId: ProtocolBlockId, values: ProtocolValues) => {
   return Object.fromEntries(config.fields.map(({ name }) => [name, values[name] ?? '']));
 };
 
-export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props) => {
+export const ProtocolEditorModal = ({
+  blockId,
+  values,
+  onSave,
+  onFieldBlur,
+  onClose,
+}: Props) => {
   const config = getProtocolBlockConfig(blockId);
   const [draft, setDraft] = useState<ProtocolValues>(() => getInitialValues(blockId, values));
 
@@ -42,6 +49,7 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
             field={field}
             value={draft[field.name] ?? ''}
             onChange={changeValue}
+            onBlur={onFieldBlur}
           />
         ))}
       </div>

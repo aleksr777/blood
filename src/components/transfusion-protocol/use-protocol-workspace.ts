@@ -40,10 +40,17 @@ export const useProtocolWorkspace = () => {
     setValues((current) => ({ ...current, ...nextValues }));
   };
 
+  const handleFieldBlur = (fieldName: string) => {
+    if (fieldName === 'recipientName' || fieldName === 'recipientBirthDate') {
+      void recipientMatch.check();
+    }
+  };
+
   const applyRecipientData = () => {
     const recipient = recipientMatch.match;
     if (!recipient) return;
 
+    setIgnoredIdentityKey(recipientMatch.identityKey);
     setValues((current) => ({
       ...current,
       ...recipient.profile,
@@ -55,6 +62,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const dismissRecipientMatch = () => {
+    setIgnoredIdentityKey(recipientMatch.identityKey);
     recipientMatch.dismiss();
     setStatus('Найденный профиль не был подставлен.');
   };
@@ -110,6 +118,7 @@ export const useProtocolWorkspace = () => {
     setActiveBlock,
     setRegistryOpen,
     saveValues,
+    handleFieldBlur,
     applyRecipientData,
     dismissRecipientMatch,
     clearForm,

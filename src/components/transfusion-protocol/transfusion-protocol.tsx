@@ -44,6 +44,7 @@ export const TransfusionProtocol = () => {
           blockId={workspace.activeBlock}
           values={workspace.values}
           onSave={workspace.saveValues}
+          onFieldBlur={workspace.handleFieldBlur}
           onClose={() => workspace.setActiveBlock(null)}
         />
       )}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
   findRecipient,
   type RecipientRecord,
@@ -27,40 +27,49 @@ export const useRecipientMatch = (
     [values.recipientBirthDate, values.recipientName],
   );
 
-  useEffect(() => {
-    if (!identityKey || recordId !== null || identityKey === ignoredIdentityKey) {
-      setMatch(null);
-      setResolvedKey(identityKey);
+  const check = useCallback(async () => {
+    if (
+      !identityKey ||
+      recordId !== null ||
+      identityKey === ignoredIdentityKey ||
+      resolvedKey === identityKey
+    ) {
       return;
     }
 
-    setResolvedKey('');
     const requestId = ++requestRef.current;
-    const timer = window.setTimeout(() => {
-      void findRecipient(values.recipientName ?? '', values.recipientBirthDate ?? '')
-        .then((recipient) => {
-          if (requestRef.current !== requestId) return;
-          setMatch(recipient);
-          setResolvedKey(identityKey);
-        })
-        .catch((error: unknown) => {
-          console.error('Не удалось проверить реципиента:', error);
-          if (requestRef.current === requestId) setResolvedKey(identityKey);
-        });
-    }, 250);
-
-    return () => window.clearTimeout(timer);
+    try {
+      const recipient = await findRecipient(
+        values.recipientName ?? '',
+        values.recipientBirthDate ?? '',
+      );
+      if (requestRef.current !== requestId) return;
+      setMatch(recipient);
+      setResolvedKey(identityKey);
+    } catch (error) {
+      console.error('Не удалось проверить реципиента:', error);
+      if (requestRef.current === requestId) setResolvedKey(identityKey);
+    }
   }, [
     identityKey,
     ignoredIdentityKey,
     recordId,
+    resolvedKey,
     values.recipientBirthDate,
     values.recipientName,
   ]);
 
+  const resolved =
+    !identityKey ||
+    recordId !== null ||
+    identityKey === ignoredIdentityKey ||
+    resolvedKey === identityKey;
+
   return {
+    identityKey,
     match,
-    resolved: !identityKey || resolvedKey === identityKey,
+    resolved,
+    check,
     dismiss: () => setMatch(null),
   };
 };

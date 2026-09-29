@@ -1,14 +1,11 @@
-import { useEffect, useState } from 'react';
-import {
-  clearProtocolDraft,
-  loadProtocolDraft,
-  saveProtocolDraft,
-} from '../../storage/repositories/protocol-draft';
+import { useState } from 'react';
+import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import type {
   ProtocolRecord,
   RecipientRecord,
 } from '../../storage/repositories/recipients';
 import { useProtocolAutosave } from './use-protocol-autosave';
+import { useProtocolDraft } from './use-protocol-draft';
 import {
   getRecipientIdentityKey,
   useRecipientMatch,
@@ -19,11 +16,11 @@ export const useProtocolWorkspace = () => {
   const [values, setValues] = useState<ProtocolValues>({});
   const [recordId, setRecordId] = useState<number | null>(null);
   const [documentKey, setDocumentKey] = useState(0);
-  const [loaded, setLoaded] = useState(false);
   const [ignoredIdentityKey, setIgnoredIdentityKey] = useState('');
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
+  const loaded = useProtocolDraft(values, recordId, setValues, setRecordId);
   const recipientMatch = useRecipientMatch(values, recordId, ignoredIdentityKey);
 
   useProtocolAutosave({
@@ -35,28 +32,6 @@ export const useProtocolWorkspace = () => {
     setRecordId,
     setStatus,
   });
-
-  useEffect(() => {
-    let active = true;
-    void loadProtocolDraft()
-      .then((draft) => {
-        if (!active) return;
-        setValues(draft.values);
-        setRecordId(draft.protocolRecordId);
-      })
-      .catch((error: unknown) => console.error('Не удалось загрузить бланк:', error))
-      .finally(() => active && setLoaded(true));
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    void saveProtocolDraft({ values, protocolRecordId: recordId }).catch((error: unknown) =>
-      console.error('Не удалось сохранить бланк:', error),
-    );
-  }, [loaded, recordId, values]);
 
   const saveValues = (nextValues: ProtocolValues) => {
     if ('recipientName' in nextValues || 'recipientBirthDate' in nextValues) {

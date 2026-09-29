@@ -9,11 +9,9 @@ import {
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
-import { RecipientDeleteModal } from './recipient-delete-modal';
-import { RecipientEditModal } from './recipient-edit-modal';
+import { RecipientDatabaseDialogs } from './recipient-database-dialogs';
 import { RecipientHistoryPanel } from './recipient-history-panel';
 import { RecipientListPanel } from './recipient-list-panel';
-import { RecipientNewModal } from './recipient-new-modal';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-database.module.css';
 
@@ -106,27 +104,17 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
           onDelete={setDeleting}
         />
       </div>
-      {creating && (
-        <RecipientNewModal
-          onClose={() => setCreating(false)}
-          onCreate={addRecipient}
-          hint="Реципиент будет сразу добавлен в базу без создания бланка."
-        />
-      )}
-      {editing && (
-        <RecipientEditModal
-          recipient={editing}
-          onClose={() => setEditing(null)}
-          onSave={(values) => saveRecipient(editing, values)}
-        />
-      )}
-      {deleting && (
-        <RecipientDeleteModal
-          recipient={deleting}
-          onClose={() => setDeleting(null)}
-          onDelete={() => deleteRecipient(deleting)}
-        />
-      )}
+      <RecipientDatabaseDialogs
+        creating={creating}
+        editing={editing}
+        deleting={deleting}
+        onCloseCreate={() => setCreating(false)}
+        onCloseEdit={() => setEditing(null)}
+        onCloseDelete={() => setDeleting(null)}
+        onCreate={addRecipient}
+        onSave={saveRecipient}
+        onDelete={deleteRecipient}
+      />
     </Modal>
   );
 };

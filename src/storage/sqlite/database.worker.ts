@@ -22,8 +22,8 @@ import {
   listProtocolRecords,
   saveProtocolRecord,
 } from './protocol-record-store';
+import { createRecipient } from './recipient-create-store';
 import {
-  createRecipient,
   removeRecipient,
   searchRecipients,
   updateRecipient,

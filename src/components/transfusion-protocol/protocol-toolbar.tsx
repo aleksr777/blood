@@ -1,19 +1,15 @@
 type Props = {
-  editingSaved: boolean;
   status: string;
   onClear: () => void;
   onOpenRegistry: () => void;
-  onSaveDatabase: () => void;
   onPrintFirst: () => void;
   onPrintSecond: () => void;
 };
 
 export const ProtocolToolbar = ({
-  editingSaved,
   status,
   onClear,
   onOpenRegistry,
-  onSaveDatabase,
   onPrintFirst,
   onPrintSecond,
 }: Props) => (
@@ -24,9 +20,6 @@ export const ProtocolToolbar = ({
       </button>
       <button type="button" className="secondary-button" onClick={onOpenRegistry}>
         Реципиенты
-      </button>
-      <button type="button" className="save-button" onClick={onSaveDatabase}>
-        {editingSaved ? 'Сохранить изменения' : 'Сохранить в базу'}
       </button>
       <button type="button" className="print-button" onClick={onPrintFirst}>
         Печать страницы 1

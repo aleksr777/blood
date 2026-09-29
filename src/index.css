@@ -53,8 +53,7 @@ button {
 
 .print-button,
 .clear-button,
-.secondary-button,
-.save-button {
+.secondary-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -99,16 +98,6 @@ button {
   background: #f8fafc;
 }
 
-.save-button {
-  border-color: #15803d;
-  background: #15803d;
-  color: #fff;
-}
-
-.save-button:hover {
-  border-color: #166534;
-  background: #166534;
-}
 
 .toolbar-status {
   margin-top: 0.45rem;
@@ -119,8 +108,7 @@ button {
 
 .print-button:focus-visible,
 .clear-button:focus-visible,
-.secondary-button:focus-visible,
-.save-button:focus-visible {
+.secondary-button:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 1px;
 }

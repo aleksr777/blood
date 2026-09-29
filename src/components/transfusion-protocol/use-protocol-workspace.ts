@@ -4,11 +4,11 @@ import {
   loadProtocolDraft,
   saveProtocolDraft,
 } from '../../storage/repositories/protocol-draft';
-import {
-  saveProtocolRecord,
-  type ProtocolRecord,
-  type RecipientRecord,
+import type {
+  ProtocolRecord,
+  RecipientRecord,
 } from '../../storage/repositories/recipients';
+import { useProtocolAutosave } from './use-protocol-autosave';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
 export const useProtocolWorkspace = () => {
@@ -18,6 +18,8 @@ export const useProtocolWorkspace = () => {
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
+
+  useProtocolAutosave({ loaded, values, recordId, setRecordId, setStatus });
 
   useEffect(() => {
     let active = true;
@@ -54,23 +56,6 @@ export const useProtocolWorkspace = () => {
     );
   };
 
-  const saveToDatabase = async () => {
-    if (!values.recipientName?.trim() || !values.recipientBirthDate) {
-      setStatus('Укажите ФИО и дату рождения реципиента.');
-      setActiveBlock('general');
-      return;
-    }
-
-    try {
-      const record = await saveProtocolRecord(recordId, values);
-      setRecordId(record.id);
-      setStatus(recordId ? 'Изменения сохранены.' : 'Реципиент и бланк сохранены в базе.');
-    } catch (error) {
-      console.error('Не удалось сохранить бланк в базе:', error);
-      setStatus('Не удалось сохранить бланк в базе.');
-    }
-  };
-
   const openRecord = (record: ProtocolRecord) => {
     setActiveBlock(null);
     setRecordId(record.id);
@@ -101,7 +86,6 @@ export const useProtocolWorkspace = () => {
     setRegistryOpen,
     saveValues,
     clearForm,
-    saveToDatabase,
     openRecord,
     newForRecipient,
   };

@@ -25,11 +25,9 @@ export const TransfusionProtocol = () => {
   return (
     <main className="app-shell">
       <ProtocolToolbar
-        editingSaved={workspace.recordId !== null}
         status={workspace.status}
         onClear={workspace.clearForm}
         onOpenRegistry={() => workspace.setRegistryOpen(true)}
-        onSaveDatabase={() => void workspace.saveToDatabase()}
         onPrintFirst={() => printPage('first')}
         onPrintSecond={() => printPage('second')}
       />

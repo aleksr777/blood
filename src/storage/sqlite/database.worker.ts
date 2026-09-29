@@ -21,8 +21,8 @@ import {
 import {
   listProtocolRecords,
   saveProtocolRecord,
-  searchRecipients,
-} from './recipient-store';
+} from './protocol-record-store';
+import { searchRecipients } from './recipient-store';
 
 const handleRequest = async (request: DatabaseRequest) => {
   switch (request.action) {

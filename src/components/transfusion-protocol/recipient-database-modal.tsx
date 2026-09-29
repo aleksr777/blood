@@ -6,6 +6,7 @@ import {
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
+import { RecipientHistoryPanel } from './recipient-history-panel';
 import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
@@ -14,12 +15,6 @@ type Props = {
   onOpenRecord: (record: ProtocolRecord) => void;
   onNewProtocol: (recipient: RecipientRecord) => void;
 };
-
-const formatUpdated = (value: number) =>
-  new Intl.DateTimeFormat('ru-RU', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(new Date(value));
 
 export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }: Props) => {
   const [query, setQuery] = useState('');
@@ -36,7 +31,9 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
         .then((items) => {
           if (!active) return;
           setRecipients(items);
-          if (selected && !items.some(({ id }) => id === selected.id)) setSelected(null);
+          setSelected((current) =>
+            current && !items.some(({ id }) => id === current.id) ? null : current,
+          );
         })
         .catch((error: unknown) => console.error('Не удалось найти реципиентов:', error))
         .finally(() => active && setLoading(false));
@@ -94,49 +91,12 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord, onNewProtocol }:
           </div>
         </section>
 
-        <section className={styles.panel}>
-          {!selected ? (
-            <div className={styles.empty}>Выберите реципиента слева.</div>
-          ) : (
-            <>
-              <div className={styles.header}>
-                <div>
-                  <h3 className={styles.title}>{selected.fullName}</h3>
-                  <div className={styles.meta}>Дата рождения: {formatDate(selected.birthDate)}</div>
-                </div>
-                <button
-                  type="button"
-                  className={styles.action}
-                  onClick={() => onNewProtocol(selected)}
-                >
-                  Новый бланк
-                </button>
-              </div>
-              <div className={styles.records}>
-                {records.length === 0 && (
-                  <div className={styles.empty}>Сохранённых бланков пока нет.</div>
-                )}
-                {records.map((record) => (
-                  <div key={record.id} className={styles.record}>
-                    <div>
-                      <div className={styles.recordTitle}>
-                        Трансфузия: {formatDate(record.values.transfusionDate) || 'дата не указана'}
-                      </div>
-                      <div className={styles.meta}>Изменён: {formatUpdated(record.updatedAt)}</div>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.open}
-                      onClick={() => onOpenRecord(record)}
-                    >
-                      Открыть
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </section>
+        <RecipientHistoryPanel
+          recipient={selected}
+          records={records}
+          onOpenRecord={onOpenRecord}
+          onNewProtocol={onNewProtocol}
+        />
       </div>
     </Modal>
   );

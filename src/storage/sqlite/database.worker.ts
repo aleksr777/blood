@@ -24,6 +24,7 @@ import {
 } from './protocol-record-store';
 import { createRecipient } from './recipient-create-store';
 import {
+  findRecipientsByName,
   removeRecipient,
   searchRecipients,
   updateRecipient,
@@ -70,6 +71,8 @@ const handleRequest = async (request: DatabaseRequest) => {
       return clearProtocolDraft();
     case 'recipients:search':
       return searchRecipients((request.payload as { query: string }).query);
+    case 'recipients:find-name':
+      return findRecipientsByName((request.payload as { fullName: string }).fullName);
     case 'recipients:create':
       return createRecipient((request.payload as { fullName: string }).fullName);
     case 'recipients:update': {

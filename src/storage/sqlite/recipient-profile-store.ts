@@ -1,42 +1,42 @@
 import { getDatabase, type SqliteDatabase } from './database';
 import type { ProtocolValuesRecord } from './database-types';
-import {
-  normalizeKey,
-  normalizeName,
-  profileFromValues,
-} from './recipient-data';
+import { normalizeKey, normalizeName, profileFromValues } from './recipient-data';
 
 export const upsertRecipient = (
   db: SqliteDatabase,
   values: ProtocolValuesRecord,
+  recipientId: number | null,
 ) => {
   const fullName = normalizeName(values.recipientName ?? '');
   if (!fullName) throw new Error('Укажите ФИО реципиента.');
 
-  const normalizedName = normalizeKey(fullName);
-  const existing = db.exec({
-    sql: 'SELECT id FROM recipients WHERE normalized_name = $name LIMIT 1',
-    bind: { $name: normalizedName },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number }>;
   const now = Date.now();
+  const bind = {
+    $fullName: fullName,
+    $normalizedName: normalizeKey(fullName),
+    $profile: JSON.stringify(profileFromValues(values)),
+    $now: now,
+  };
 
-  if (existing[0]) {
+  if (recipientId !== null) {
+    const existing = db.exec({
+      sql: 'SELECT id FROM recipients WHERE id = $id',
+      bind: { $id: recipientId },
+      rowMode: 'object',
+      returnValue: 'resultRows',
+    }) as Array<{ id: number }>;
+    if (!existing[0]) throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
+
     db.exec({
       sql: `
         UPDATE recipients
-        SET full_name = $fullName, profile_json = $profile, updated_at = $now
+        SET full_name = $fullName, normalized_name = $normalizedName,
+          profile_json = $profile, updated_at = $now
         WHERE id = $id
       `,
-      bind: {
-        $fullName: fullName,
-        $profile: JSON.stringify(profileFromValues(values)),
-        $now: now,
-        $id: existing[0].id,
-      },
+      bind: { ...bind, $id: recipientId },
     });
-    return Number(existing[0].id);
+    return recipientId;
   }
 
   db.exec({
@@ -45,12 +45,7 @@ export const upsertRecipient = (
         (full_name, normalized_name, birth_date, profile_json, created_at, updated_at)
       VALUES ($fullName, $normalizedName, '', $profile, $now, $now)
     `,
-    bind: {
-      $fullName: fullName,
-      $normalizedName: normalizedName,
-      $profile: JSON.stringify(profileFromValues(values)),
-      $now: now,
-    },
+    bind,
   });
   const rows = db.exec({
     sql: 'SELECT last_insert_rowid() AS id',

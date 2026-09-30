@@ -56,6 +56,25 @@ export const searchRecipients = async (query: string) => {
   return rows.map(mapRecipient);
 };
 
+export const findRecipientsByName = async (fullName: string) => {
+  const db = await getDatabase();
+  const rows = db.exec({
+    sql: `
+      SELECT r.id, r.full_name AS fullName, r.profile_json AS profileJson,
+        COUNT(p.id) AS protocolCount
+      FROM recipients r
+      LEFT JOIN protocol_records p ON p.recipient_id = r.id
+      WHERE r.normalized_name = $name
+      GROUP BY r.id
+      ORDER BY r.updated_at DESC, r.id DESC
+    `,
+    bind: { $name: normalizeKey(fullName) },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<Record<string, unknown>>;
+  return rows.map(mapRecipient);
+};
+
 export const updateRecipient = async (
   id: number,
   values: ProtocolValuesRecord,
@@ -65,14 +84,6 @@ export const updateRecipient = async (
 
   const db = await getDatabase();
   const normalizedName = normalizeKey(fullName);
-  const duplicates = db.exec({
-    sql: 'SELECT id FROM recipients WHERE normalized_name = $name AND id <> $id LIMIT 1',
-    bind: { $name: normalizedName, $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number }>;
-  if (duplicates[0]) throw new Error('Реципиент с таким ФИО уже существует.');
-
   const now = Date.now();
   db.exec({
     sql: `

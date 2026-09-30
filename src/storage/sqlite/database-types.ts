@@ -46,6 +46,7 @@ export type DatabaseAction =
   | 'protocol-draft:save'
   | 'protocol-draft:clear'
   | 'recipients:search'
+  | 'recipients:find-name'
   | 'recipients:create'
   | 'recipients:update'
   | 'recipients:remove'

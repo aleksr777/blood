@@ -1,5 +1,6 @@
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import { migrateLegacyOpfsDepartments } from './legacy-opfs-migration';
+import { migrateRecipientNameConstraint } from './recipient-name-migration';
 
 const DATABASE_FILE = '/blood.sqlite3';
 
@@ -44,8 +45,7 @@ const openDatabase = async () => {
       birth_date TEXT NOT NULL DEFAULT '',
       profile_json TEXT NOT NULL,
       created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      UNIQUE(normalized_name)
+      updated_at INTEGER NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS protocol_records (
@@ -63,38 +63,7 @@ const openDatabase = async () => {
       ON protocol_records(recipient_id, updated_at DESC);
   `);
 
-  const recipients = db.exec({
-    sql: `
-      SELECT id, normalized_name AS normalizedName
-      FROM recipients
-      ORDER BY normalized_name, updated_at DESC, id DESC
-    `,
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number; normalizedName: string }>;
-  const survivorIds = new Map<string, number>();
-
-  for (const recipient of recipients) {
-    const survivorId = survivorIds.get(recipient.normalizedName);
-    if (!survivorId) {
-      survivorIds.set(recipient.normalizedName, recipient.id);
-      continue;
-    }
-    db.exec({
-      sql: 'UPDATE protocol_records SET recipient_id = $survivorId WHERE recipient_id = $duplicateId',
-      bind: { $survivorId: survivorId, $duplicateId: recipient.id },
-    });
-    db.exec({
-      sql: 'DELETE FROM recipients WHERE id = $id',
-      bind: { $id: recipient.id },
-    });
-  }
-
-  db.exec("UPDATE recipients SET birth_date = ''");
-  db.exec(`
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_recipients_normalized_name_unique
-      ON recipients(normalized_name)
-  `);
+  migrateRecipientNameConstraint(db);
 
   await migrateLegacyOpfsDepartments(sqlite3, db);
   return db;

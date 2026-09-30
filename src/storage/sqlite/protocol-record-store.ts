@@ -41,14 +41,15 @@ const insertProtocol = (
   return Number(rows[0].id);
 };
 
-const recordExists = (db: SqliteDatabase, id: number) => {
+const findRecordRecipient = (db: SqliteDatabase, id: number | null) => {
+  if (id === null) return null;
   const rows = db.exec({
-    sql: 'SELECT id FROM protocol_records WHERE id = $id LIMIT 1',
+    sql: 'SELECT recipient_id AS recipientId FROM protocol_records WHERE id = $id',
     bind: { $id: id },
     rowMode: 'object',
     returnValue: 'resultRows',
-  }) as Array<{ id: number }>;
-  return Boolean(rows[0]);
+  }) as Array<{ recipientId: number }>;
+  return rows[0]?.recipientId ?? null;
 };
 
 export const saveProtocolRecord = async (
@@ -56,9 +57,14 @@ export const saveProtocolRecord = async (
   values: ProtocolValuesRecord,
 ) => {
   const db = await getDatabase();
-  const recipientId = upsertRecipient(db, values);
+  const linkedId = findRecordRecipient(db, recordId);
+  const selectedId = Number(values.recipientId) > 0 ? Number(values.recipientId) : null;
+  if (linkedId !== null && selectedId !== null && selectedId !== linkedId) {
+    throw new Error('Для другого реципиента создайте новый бланк.');
+  }
+  const recipientId = upsertRecipient(db, values, selectedId ?? linkedId);
   const now = Date.now();
-  const canUpdate = recordId !== null && recordExists(db, recordId);
+  const canUpdate = linkedId !== null && recordId !== null;
   const id = canUpdate ? recordId : insertProtocol(db, recipientId, values, now);
 
   if (canUpdate) {

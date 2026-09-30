@@ -8,14 +8,6 @@ export const createRecipient = async (fullNameValue: string): Promise<RecipientR
 
   const db = await getDatabase();
   const normalizedName = normalizeKey(fullName);
-  const duplicates = db.exec({
-    sql: 'SELECT id FROM recipients WHERE normalized_name = $name LIMIT 1',
-    bind: { $name: normalizedName },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number }>;
-  if (duplicates[0]) throw new Error('Реципиент с таким ФИО уже существует.');
-
   const now = Date.now();
   db.exec({
     sql: `

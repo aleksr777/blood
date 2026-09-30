@@ -16,6 +16,7 @@ export const recipientValues = (
   recipient?: RecipientRecord,
 ): ProtocolValues => ({
   recipientName: fullName,
+  recipientId: recipient ? String(recipient.id) : '',
   ...Object.fromEntries(
     PROFILE_FIELDS.map((field) => [field, recipient?.profile[field] ?? '']),
   ),

@@ -72,7 +72,7 @@ export const RecipientSelectModal = ({ onClose, onSelect }: Props) => {
             }}
           >
             <span>{recipient.fullName}</span>
-            <small>Сохранённых бланков: {recipient.protocolCount}</small>
+            <small>Карточка № {recipient.id} · сохранённых бланков: {recipient.protocolCount}</small>
           </button>
         ))}
       </div>

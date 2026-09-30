@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import type { RecipientRecord } from '../../storage/repositories/recipients';
+import {
+  createRecipient,
+  type RecipientRecord,
+} from '../../storage/repositories/recipients';
 import { RecipientNewModal } from './recipient-new-modal';
 import { RecipientSelectModal } from './recipient-select-modal';
 import { recipientValues } from './recipient-profile-values';
@@ -18,8 +21,9 @@ export const RecipientField = ({ value, onChange }: Props) => {
     onChange(recipientValues(recipient.fullName, recipient));
   };
 
-  const create = (fullName: string) => {
-    onChange(recipientValues(fullName));
+  const create = async (fullName: string) => {
+    const created = await createRecipient(fullName);
+    onChange(recipientValues(created.fullName, created));
   };
 
   return (

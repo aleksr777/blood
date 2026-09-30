@@ -15,6 +15,7 @@ type Props = {
   recipient: RecipientRecord;
   expanded: boolean;
   actionLabel: string;
+  disabled?: boolean;
   onToggle: () => void;
   onUse: () => void;
 };
@@ -23,6 +24,7 @@ export const RecipientExistingCard = ({
   recipient,
   expanded,
   actionLabel,
+  disabled = false,
   onToggle,
   onUse,
 }: Props) => {
@@ -33,7 +35,7 @@ export const RecipientExistingCard = ({
 
   return (
     <div className={styles.existingCard}>
-      <div className={styles.existingTitle}>Реципиент с таким ФИО уже существует</div>
+      <div className={styles.existingTitle}>Карточка № {recipient.id}</div>
       <div className={styles.existingName}>{recipient.fullName}</div>
       <div className={styles.existingMeta}>
         Сохранённых бланков: {recipient.protocolCount}
@@ -55,10 +57,10 @@ export const RecipientExistingCard = ({
       )}
 
       <div className={styles.existingActions}>
-        <button type="button" className={styles.secondary} onClick={onToggle}>
+        <button type="button" className={styles.secondary} disabled={disabled} onClick={onToggle}>
           {expanded ? 'Скрыть данные' : 'Посмотреть данные'}
         </button>
-        <button type="button" className={styles.primary} onClick={onUse}>
+        <button type="button" className={styles.primary} disabled={disabled} onClick={onUse}>
           {actionLabel}
         </button>
       </div>

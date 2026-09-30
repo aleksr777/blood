@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
-  searchRecipients,
+  findRecipientsByName,
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
-import Modal, { ModalDismissButton } from '../modal/modal';
-import { RecipientExistingCard } from './recipient-existing-card';
+import Modal from '../modal/modal';
+import { RecipientMatchList } from './recipient-match-list';
+import { RecipientNewForm } from './recipient-new-form';
 import styles from './recipient-field.module.css';
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
   existingActionLabel?: string;
   hint?: string;
 };
+
 const normalize = (value: string) =>
   value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
@@ -22,99 +24,86 @@ export const RecipientNewModal = ({
   onCreate,
   onExisting,
   existingActionLabel = 'Использовать реципиента',
-  hint = 'Новый реципиент будет записан в базу при сохранении или печати бланка.',
+  hint = 'Новый реципиент будет сразу добавлен в базу.',
 }: Props) => {
   const [fullName, setFullName] = useState('');
-  const [existing, setExisting] = useState<RecipientRecord | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const [matches, setMatches] = useState<RecipientRecord[] | null>(null);
+  const [checkedName, setCheckedName] = useState('');
+  const [viewing, setViewing] = useState(false);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState('');
+
+  const changeName = (value: string) => {
+    setFullName(value);
+    setMatches(null);
+    setCheckedName('');
+    setError('');
+  };
+
   const create = async () => {
-    const value = fullName.trim().replace(/\s+/g, ' ');
-    if (!value) {
+    if (checking) return;
+    const name = fullName.trim().replace(/\s+/g, ' ');
+    if (!name) {
       setError('Введите ФИО реципиента.');
       return;
     }
-
     setChecking(true);
     setError('');
     try {
-      const matches = await searchRecipients(value);
-      const duplicate = matches.find(
-        (item) => normalize(item.fullName) === normalize(value),
-      );
-      if (duplicate) {
-        setExisting(duplicate);
-        setExpanded(false);
-        return;
+      if (checkedName !== normalize(name)) {
+        const candidates = await findRecipientsByName(name);
+        setMatches(candidates);
+        setCheckedName(normalize(name));
+        if (candidates.length > 0) return;
       }
-      await onCreate(value);
+      await onCreate(name);
       onClose();
-    } catch (checkError) {
-      console.error('Не удалось создать реципиента:', checkError);
-      setError(
-        checkError instanceof Error ? checkError.message : 'Не удалось создать реципиента.',
-      );
+    } catch (cause) {
+      console.error('Не удалось создать реципиента:', cause);
+      setError(cause instanceof Error ? cause.message : 'Не удалось создать реципиента.');
     } finally {
       setChecking(false);
     }
   };
-  const useExisting = async () => {
-    if (!existing) return;
+
+  const useExisting = async (recipient: RecipientRecord) => {
+    if (checking) return;
+    setChecking(true);
+    setError('');
     try {
-      await onExisting(existing);
+      await onExisting(recipient);
       onClose();
-    } catch (useError) {
-      console.error('Не удалось использовать реципиента:', useError);
-      setError('Не удалось использовать найденного реципиента.');
+    } catch (cause) {
+      console.error('Не удалось использовать реципиента:', cause);
+      setError('Не удалось использовать выбранного реципиента.');
+    } finally {
+      setChecking(false);
     }
   };
 
   return (
     <Modal title="Новый реципиент" onClose={onClose} className={styles.newModal}>
-      <label className={styles.newField}>
-        <span>Фамилия, имя, отчество</span>
-        <input
-          autoFocus
-          value={fullName}
-          onChange={(event) => {
-            setFullName(event.target.value);
-            setExisting(null);
-            setExpanded(false);
-            setError('');
-          }}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              void create();
-            }
-          }}
-        />
-      </label>
-      <div className={styles.hint}>{hint}</div>
-      {existing && (
-        <RecipientExistingCard
-          recipient={existing}
-          expanded={expanded}
+      {viewing && matches?.length ? (
+        <RecipientMatchList
+          matches={matches}
+          busy={checking}
           actionLabel={existingActionLabel}
-          onToggle={() => setExpanded((current) => !current)}
-          onUse={() => void useExisting()}
+          onBack={() => setViewing(false)}
+          onUse={(recipient) => void useExisting(recipient)}
+        />
+      ) : (
+        <RecipientNewForm
+          fullName={fullName}
+          hint={hint}
+          matchesCount={matches?.length ?? 0}
+          checked={checkedName === normalize(fullName)}
+          checking={checking}
+          onNameChange={changeName}
+          onCreate={() => void create()}
+          onView={() => setViewing(true)}
         />
       )}
-      {error && <div className={styles.error}>{error}</div>}
-      <div className={styles.footer}>
-        <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>
-        {!existing && (
-          <button
-            type="button"
-            className={styles.primary}
-            disabled={checking}
-            onClick={() => void create()}
-          >
-            {checking ? 'Проверка...' : 'Создать'}
-          </button>
-        )}
-      </div>
+      {error && <div className={styles.error} role="alert">{error}</div>}
     </Modal>
   );
 };

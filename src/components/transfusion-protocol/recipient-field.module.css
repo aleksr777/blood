@@ -215,3 +215,48 @@
     flex: 1 1 0;
   }
 }
+
+.duplicateNotice {
+  margin-top: 0.85rem;
+  border-left: 3px solid #809bd3;
+  padding: 0.55rem 0.8rem;
+  background: #f6f8fc;
+  color: #334155;
+  font-size: 0.86rem;
+}
+
+.viewMatches {
+  display: inline-block;
+  margin-top: 0.3rem;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #1d4ed8;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.existingIntro {
+  margin: 0;
+  color: #475569;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.matchList {
+  display: grid;
+  gap: 0.65rem;
+  max-height: min(24rem, 55dvh);
+  margin-top: 0.65rem;
+  padding-right: 0.3rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.matchList .existingCard {
+  margin-top: 0;
+}

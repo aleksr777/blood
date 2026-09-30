@@ -29,6 +29,9 @@ export const useProtocolWorkspace = () => {
 
   const saveValues = (nextValues: ProtocolValues) => {
     draft.touch();
+    if ('recipientId' in nextValues && nextValues.recipientId !== values.recipientId) {
+      setRecordId(null);
+    }
     setValues((current) => ({ ...current, ...nextValues }));
   };
 
@@ -42,6 +45,7 @@ export const useProtocolWorkspace = () => {
     try {
       const record = await saveProtocolRecord(recordId, values);
       setRecordId(record.id);
+      setValues((current) => ({ ...current, recipientId: String(record.recipientId) }));
       setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
       return true;
     } catch (error) {
@@ -66,7 +70,7 @@ export const useProtocolWorkspace = () => {
     draft.touch();
     setActiveBlock(null);
     setRecordId(record.id);
-    setValues(record.values);
+    setValues({ ...record.values, recipientId: String(record.recipientId) });
     setRegistryOpen(false);
     setStatus('Сохранённый бланк открыт для просмотра и редактирования.');
   };

@@ -66,6 +66,7 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
       ),
     );
     setSelected(created);
+    setQuery(created.fullName);
   };
   const openExistingRecipient = (recipient: RecipientRecord) => {
     setQuery(recipient.fullName);

@@ -1,4 +1,4 @@
-import { getDatabase, type SqliteDatabase } from './database';
+import type { SqliteDatabase } from './database';
 import type { ProtocolValuesRecord } from './database-types';
 import { normalizeKey, normalizeName, profileFromValues } from './recipient-data';
 

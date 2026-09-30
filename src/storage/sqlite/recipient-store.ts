@@ -16,7 +16,6 @@ const mapRecipient = (row: Record<string, unknown>): RecipientRecord => ({
   profile: profileFromValues(parseValues(String(row.profileJson))),
   protocolCount: Number(row.protocolCount ?? 0),
 });
-
 const getRecipient = (db: SqliteDatabase, id: number) => {
   const rows = db.exec({
     sql: `
@@ -34,7 +33,6 @@ const getRecipient = (db: SqliteDatabase, id: number) => {
   if (!rows[0]) throw new Error('Реципиент не найден.');
   return mapRecipient(rows[0]);
 };
-
 export const searchRecipients = async (query: string) => {
   const db = await getDatabase();
   const value = normalizeKey(query);
@@ -55,7 +53,6 @@ export const searchRecipients = async (query: string) => {
   }) as Array<Record<string, unknown>>;
   return rows.map(mapRecipient);
 };
-
 export const findRecipientsByName = async (fullName: string) => {
   const db = await getDatabase();
   const rows = db.exec({
@@ -74,7 +71,6 @@ export const findRecipientsByName = async (fullName: string) => {
   }) as Array<Record<string, unknown>>;
   return rows.map(mapRecipient);
 };
-
 export const updateRecipient = async (
   id: number,
   values: ProtocolValuesRecord,
@@ -119,7 +115,6 @@ export const updateRecipient = async (
 
   return getRecipient(db, id);
 };
-
 export const removeRecipient = async (id: number) => {
   const db = await getDatabase();
   db.exec({ sql: 'DELETE FROM protocol_records WHERE recipient_id = $id', bind: { $id: id } });

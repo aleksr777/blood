@@ -40,7 +40,14 @@ export const RecipientNewForm = ({
     <div className={styles.hint}>{hint}</div>
     {checked && matchesCount > 0 && (
       <div className={styles.duplicateNotice} role="status">
-        <div>В базе есть {matchesCount} карточек с таким же ФИО.</div>
+        <div>
+          В базе есть {matchesCount} {matchesCount % 10 === 1 && matchesCount % 100 !== 11
+            ? 'карточка'
+            : matchesCount % 10 >= 2 && matchesCount % 10 <= 4
+              && (matchesCount % 100 < 12 || matchesCount % 100 > 14)
+              ? 'карточки'
+              : 'карточек'} с таким же ФИО.
+        </div>
         <button type="button" className={styles.viewMatches} onClick={onView}>
           Посмотреть данные совпадений
         </button>

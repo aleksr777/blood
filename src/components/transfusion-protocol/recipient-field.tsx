@@ -50,7 +50,7 @@ export const RecipientField = ({ value, onChange }: Props) => {
           onClose={() => setMode(null)}
           onCreate={create}
           onExisting={select}
-          existingActionLabel="Использовать реципиента"
+          existingActionLabel="Использовать данные"
         />
       )}
     </>

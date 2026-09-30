@@ -82,7 +82,12 @@ export const RecipientNewModal = ({
   };
 
   return (
-    <Modal title="Новый реципиент" onClose={onClose} className={styles.newModal}>
+    <Modal
+      title="Новый реципиент"
+      onClose={onClose}
+      className={styles.newModal}
+      dismissible={!checking}
+    >
       {viewing && matches?.length ? (
         <RecipientMatchList
           matches={matches}

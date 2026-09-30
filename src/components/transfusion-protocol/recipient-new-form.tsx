@@ -27,6 +27,7 @@ export const RecipientNewForm = ({
       <span>Фамилия, имя, отчество</span>
       <input
         autoFocus
+        disabled={checking}
         value={fullName}
         onChange={(event) => onNameChange(event.target.value)}
         onKeyDown={(event) => {
@@ -55,7 +56,7 @@ export const RecipientNewForm = ({
       </div>
     )}
     <div className={styles.footer}>
-      <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>
+      <ModalDismissButton className={styles.secondary} disabled={checking}>Отмена</ModalDismissButton>
       <button type="button" className={styles.primary} disabled={checking} onClick={onCreate}>
         {checking ? 'Проверка...' : checked && matchesCount ? 'Создать нового' : 'Создать'}
       </button>

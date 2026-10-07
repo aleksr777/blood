@@ -8,6 +8,16 @@ export const INDICATION_COMPONENTS = [
 
 const yes = (value?: string) => value === '1';
 
+const joinIndications = (items: string[]) => {
+  const text = items.reduce((result, item) => {
+    if (!result) return item;
+    return `${result}${/[.!?…]$/.test(result) ? ' ' : '. '}${item}`;
+  }, '');
+
+  if (!text) return '';
+  return /[.!?…]$/.test(text) ? text : `${text}.`;
+};
+
 export const formatIndications = (values: ProtocolValues) => {
   const items: string[] = [];
 
@@ -59,5 +69,5 @@ export const formatIndications = (values: ProtocolValues) => {
     }
   }
 
-  return items.length ? items.join('. ') + '.' : values.indications ?? '';
+  return items.length ? joinIndications(items) : values.indications ?? '';
 };

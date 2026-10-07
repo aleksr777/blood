@@ -1,7 +1,9 @@
 .resizeShell {
   grid-column: 1 / -1;
   min-width: 0;
-  overflow: hidden;
+  max-height: calc(100dvh - 10rem);
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .resizeShell[data-ready='true'] {
@@ -148,7 +150,7 @@
   box-sizing: border-box;
   width: calc(100% - 1.55rem);
   min-height: 3.5rem !important;
-  max-height: min(10rem, 25dvh);
+  max-height: min(8rem, 18dvh);
   margin: 0.4rem 0 0 1.55rem;
   overflow-y: auto;
   resize: vertical;

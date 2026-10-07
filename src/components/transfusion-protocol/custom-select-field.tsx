@@ -9,6 +9,7 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   emptyLabel?: string;
+  compact?: boolean;
 };
 
 export const CustomSelectField = ({
@@ -18,6 +19,7 @@ export const CustomSelectField = ({
   value,
   onChange,
   emptyLabel = 'Не выбрано',
+  compact = false,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
@@ -33,7 +35,10 @@ export const CustomSelectField = ({
       <button
         type="button"
         name={name}
-        className={styles.customSelectControl}
+        className={[
+          styles.customSelectControl,
+          compact ? styles.customSelectControlCompact : '',
+        ].filter(Boolean).join(' ')}
         aria-label={label}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -48,7 +53,10 @@ export const CustomSelectField = ({
       </button>
 
       <div
-        className={styles.historyDropdown}
+        className={[
+          styles.historyDropdown,
+          compact ? styles.historyDropdownCompact : '',
+        ].filter(Boolean).join(' ')}
         data-state={dropdownState}
         role="listbox"
         aria-label={label}

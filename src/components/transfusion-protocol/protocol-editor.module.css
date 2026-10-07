@@ -131,6 +131,16 @@
     visibility 0s linear var(--dropdown-motion-duration);
 }
 
+.historyDropdownCompact {
+  max-height: 9rem;
+  font-size: 0.82rem;
+}
+
+.historyDropdownCompact .customSelectOption {
+  min-height: 1.8rem;
+  padding: 0.2rem 0.4rem;
+}
+
 .historyDropdown[data-state='open'] {
   opacity: 1;
   visibility: visible;
@@ -239,6 +249,22 @@
   font: inherit;
   font-weight: 400;
   text-align: left;
+}
+
+.customSelectControlCompact {
+  grid-template-columns: minmax(0, 1fr) 2rem;
+  min-height: 2.2rem;
+  border-radius: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.customSelectControlCompact .customSelectValue,
+.customSelectControlCompact .customSelectPlaceholder {
+  padding: 0.35rem 0.5rem;
+}
+
+.customSelectControlCompact .customSelectArrow {
+  font-size: 0.78rem;
 }
 
 .customSelectControl:focus-visible {

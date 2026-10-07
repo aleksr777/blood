@@ -18,6 +18,7 @@ const SelectField = ({
   value,
   onChange,
   emptyLabel,
+  compact = false,
 }: {
   name: string;
   label: string;
@@ -25,6 +26,7 @@ const SelectField = ({
   value: string;
   onChange: (value: string) => void;
   emptyLabel?: string;
+  compact?: boolean;
 }) => (
   <div className={styles.selectField}>
     <div className={styles.label}>{label}</div>
@@ -34,6 +36,7 @@ const SelectField = ({
       options={options}
       value={value}
       emptyLabel={emptyLabel}
+      compact={compact}
       onChange={onChange}
     />
   </div>
@@ -77,6 +80,7 @@ export const RecipientExaminationFields = ({ values, onChange }: Props) => {
             options={['+', '-']}
             value={values[name] ?? ''}
             emptyLabel="-- (не указано)"
+            compact
             onChange={(value) => onChange({ [name]: value, recipientAntigens: '' })}
           />
         ))}

@@ -98,8 +98,11 @@
 }
 
 .description textarea {
+  box-sizing: border-box;
   width: 100%;
   min-height: 5rem;
+  max-height: min(12rem, 30dvh);
+  overflow-y: auto;
   resize: vertical;
 }
 

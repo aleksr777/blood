@@ -1,5 +1,19 @@
-.root {
+.resizeShell {
   grid-column: 1 / -1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.resizeShell[data-ready='true'] {
+  transition: height 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.resizeContent {
+  min-width: 0;
+}
+
+.root {
+  display: grid;
   display: grid;
   gap: 0.9rem;
   min-width: 0;

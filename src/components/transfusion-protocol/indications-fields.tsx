@@ -1,6 +1,7 @@
 import type { IndicationProps } from './indication-controls';
 import { CommonIndications } from './indication-common-fields';
 import { ErythrocyteIndications } from './indication-erythrocyte-fields';
+import { IndicationsAutoHeight } from './indications-auto-height';
 import { INDICATION_COMPONENTS } from './indications-model';
 import { PlasmaIndications } from './indication-plasma-fields';
 import { PlateletIndications } from './indication-platelet-fields';
@@ -10,7 +11,8 @@ export const IndicationsFields = ({ values, onChange }: IndicationProps) => {
   const component = values.indicationComponent;
 
   return (
-    <div className={styles.root}>
+    <IndicationsAutoHeight>
+      <div className={styles.root}>
       <fieldset className={styles.componentGroup}>
         <legend>Компонент крови</legend>
         <div className={styles.componentChoices}>
@@ -44,6 +46,7 @@ export const IndicationsFields = ({ values, onChange }: IndicationProps) => {
           )}
         </>
       )}
-    </div>
+      </div>
+    </IndicationsAutoHeight>
   );
 };

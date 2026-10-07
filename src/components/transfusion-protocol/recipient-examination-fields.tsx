@@ -40,15 +40,13 @@ const SelectField = ({
 );
 
 export const RecipientExaminationFields = ({ values, onChange }: Props) => {
-  const setStatus = (status: string) => {
-    onChange({
+  const setStatus = (status: string) => onChange({
       alloimmuneAntibodyStatus: status,
       alloimmuneAntibodies: '',
       ...(status === ANTIBODY_STATUS.notFound
         ? { alloimmuneAntibodyDescription: '' }
         : {}),
     });
-  };
 
   return (
     <div className={styles.root}>

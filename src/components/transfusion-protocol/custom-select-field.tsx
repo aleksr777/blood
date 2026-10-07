@@ -8,9 +8,17 @@ type Props = {
   options: string[];
   value: string;
   onChange: (value: string) => void;
+  emptyLabel?: string;
 };
 
-export const CustomSelectField = ({ name, label, options, value, onChange }: Props) => {
+export const CustomSelectField = ({
+  name,
+  label,
+  options,
+  value,
+  onChange,
+  emptyLabel = 'Не выбрано',
+}: Props) => {
   const [open, setOpen] = useState(false);
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
   const allOptions = ['', ...options];
@@ -32,7 +40,7 @@ export const CustomSelectField = ({ name, label, options, value, onChange }: Pro
         onClick={() => setOpen((current) => !current)}
       >
         <span className={value ? styles.customSelectValue : styles.customSelectPlaceholder}>
-          {value || 'Не выбрано'}
+          {value || emptyLabel}
         </span>
         <span className={styles.customSelectArrow} aria-hidden="true">
           ▾
@@ -55,7 +63,7 @@ export const CustomSelectField = ({ name, label, options, value, onChange }: Pro
             aria-selected={value === option}
             onClick={() => select(option)}
           >
-            <span>{option || 'Не выбрано'}</span>
+            <span>{option || emptyLabel}</span>
             {value === option && <span aria-hidden="true">✓</span>}
           </button>
         ))}

@@ -1,0 +1,93 @@
+.root {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.topGrid,
+.antigenGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.groupTitle {
+  margin-bottom: -0.35rem;
+  color: #263552;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.selectField {
+  min-width: 0;
+}
+
+.label {
+  margin-bottom: 0.4rem;
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.antibodies {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #d8e0ec;
+  border-radius: 0.6rem;
+  padding: 0.8rem;
+}
+
+.antibodies legend {
+  padding: 0 0.35rem;
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.radioGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.radio {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.45rem !important;
+  color: #263552;
+  cursor: pointer;
+  font-weight: 400 !important;
+}
+
+.radio input[type='radio'] {
+  width: 1rem;
+  min-height: 1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: #1d4ed8;
+}
+
+.description {
+  display: flex;
+  margin-top: 0.8rem;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.description textarea {
+  width: 100%;
+  min-height: 5rem;
+  resize: vertical;
+}
+
+@media (max-width: 640px) {
+  .topGrid,
+  .antigenGrid {
+    grid-template-columns: 1fr;
+  }
+}

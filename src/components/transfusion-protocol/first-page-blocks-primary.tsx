@@ -1,4 +1,8 @@
 import { LabeledCell, SectionTitle } from './form-controls';
+import {
+  formatAlloimmuneAntibodies,
+  formatRecipientAntigens,
+} from './recipient-examination-model';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate, formatDateTime } from './protocol-types';
 
@@ -66,14 +70,14 @@ export const ExaminationBlock = ({ values, onOpenBlock }: ProtocolPageProps) => 
       <LabeledCell
         colSpan={4}
         className="span-4"
-        label="Антигены C, c, E, e, K"
-        value={values.recipientAntigens}
+        label="Антигены"
+        value={formatRecipientAntigens(values)}
       />
       <LabeledCell
         colSpan={2}
         className="span-2"
         label="Аллоиммунные антитела"
-        value={values.alloimmuneAntibodies}
+        value={formatAlloimmuneAntibodies(values)}
       />
     </tr>
   </tbody>

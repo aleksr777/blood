@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal, { ModalDismissButton } from '../modal/modal';
-import { CustomSelectField } from './custom-select-field';
+import { RecipientExaminationFields } from './recipient-examination-fields';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-edit-modal.module.css';
 
@@ -10,11 +10,6 @@ type Props = {
   onClose: () => void;
   onSave: (values: ProtocolValues) => Promise<void>;
 };
-
-const textFields = [
-  ['recipientAntigens', 'Антигены C, c, E, e, K'],
-  ['alloimmuneAntibodies', 'Аллоиммунные антитела'],
-] as const;
 
 const textareas = [
   ['previousTransfusions', 'Трансфузии компонентов крови в анамнезе'],
@@ -31,6 +26,8 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
   const [saving, setSaving] = useState(false);
   const change = (name: string, value: string) =>
     setValues((current) => ({ ...current, [name]: value }));
+  const changeValues = (nextValues: ProtocolValues) =>
+    setValues((current) => ({ ...current, ...nextValues }));
 
   const save = async () => {
     setError('');
@@ -55,32 +52,9 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
             onChange={(event) => change('recipientName', event.target.value)}
           />
         </label>
-        <div>
-          <div className={styles.label}>Группа крови AB0</div>
-          <CustomSelectField
-            name="recipientAbo"
-            label="Группа крови AB0"
-            options={['O(I)', 'A(II)', 'B(III)', 'AB(IV)']}
-            value={values.recipientAbo ?? ''}
-            onChange={(value) => change('recipientAbo', value)}
-          />
+        <div className={styles.wide}>
+          <RecipientExaminationFields values={values} onChange={changeValues} />
         </div>
-        <div>
-          <div className={styles.label}>Резус-принадлежность</div>
-          <CustomSelectField
-            name="recipientRh"
-            label="Резус-принадлежность"
-            options={['Rh(D)+', 'Rh(D)-']}
-            value={values.recipientRh ?? ''}
-            onChange={(value) => change('recipientRh', value)}
-          />
-        </div>
-        {textFields.map(([name, label]) => (
-          <label key={name} className={styles.wide}>
-            <span>{label}</span>
-            <input value={values[name] ?? ''} onChange={(event) => change(name, event.target.value)} />
-          </label>
-        ))}
         {textareas.map(([name, label]) => (
           <label key={name} className={styles.wide}>
             <span>{label}</span>

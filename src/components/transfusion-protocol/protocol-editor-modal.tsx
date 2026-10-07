@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Modal from '../modal/modal';
 import { getProtocolBlockConfig } from './editor-config';
 import { ProtocolFieldControl } from './protocol-field-control';
+import { RecipientExaminationFields } from './recipient-examination-fields';
 import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
@@ -39,15 +40,19 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
   return (
     <Modal title={config.title} onClose={handleClose} className={styles[config.size]}>
       <div className={styles.grid}>
-        {config.fields.map((field) => (
-          <ProtocolFieldControl
-            key={field.name}
-            field={field}
-            value={draft[field.name] ?? ''}
-            onChange={changeValue}
-            onValuesChange={changeValues}
-          />
-        ))}
+        {blockId === 'examination' ? (
+          <RecipientExaminationFields values={draft} onChange={changeValues} />
+        ) : (
+          config.fields.map((field) => (
+            <ProtocolFieldControl
+              key={field.name}
+              field={field}
+              value={draft[field.name] ?? ''}
+              onChange={changeValue}
+              onValuesChange={changeValues}
+            />
+          ))
+        )}
       </div>
     </Modal>
   );

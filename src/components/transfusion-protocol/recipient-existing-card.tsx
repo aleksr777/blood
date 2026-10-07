@@ -1,11 +1,13 @@
 import type { RecipientRecord } from '../../storage/repositories/recipients';
+import {
+  formatAlloimmuneAntibodies,
+  formatRecipientAntigens,
+} from './recipient-examination-model';
 import styles from './recipient-field.module.css';
 
-const DETAILS = [
+const TEXT_DETAILS = [
   ['recipientAbo', 'Группа крови AB0'],
   ['recipientRh', 'Резус-принадлежность'],
-  ['recipientAntigens', 'Антигены C, c, E, e, K'],
-  ['alloimmuneAntibodies', 'Аллоиммунные антитела'],
   ['previousTransfusions', 'Трансфузии в анамнезе'],
   ['previousReactions', 'Реакции и осложнения'],
   ['individualSelectionHistory', 'Индивидуальный подбор'],
@@ -28,10 +30,18 @@ export const RecipientExistingCard = ({
   onToggle,
   onUse,
 }: Props) => {
-  const details = DETAILS.flatMap(([name, label]) => {
-    const value = recipient.profile[name];
-    return value ? [{ name, label, value }] : [];
-  });
+  const antigenValue = formatRecipientAntigens(recipient.profile);
+  const antibodyValue = formatAlloimmuneAntibodies(recipient.profile);
+  const details = [
+    ...TEXT_DETAILS.flatMap(([name, label]) => {
+      const value = recipient.profile[name];
+      return value ? [{ name, label, value }] : [];
+    }),
+    ...(antigenValue ? [{ name: 'antigens', label: 'Антигены', value: antigenValue }] : []),
+    ...(antibodyValue
+      ? [{ name: 'antibodies', label: 'Аллоиммунные антитела', value: antibodyValue }]
+      : []),
+  ];
 
   return (
     <div className={styles.existingCard}>

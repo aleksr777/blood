@@ -14,7 +14,6 @@
 
 .root {
   display: grid;
-  display: grid;
   gap: 0.9rem;
   min-width: 0;
 }
@@ -153,6 +152,12 @@
   margin: 0.4rem 0 0 1.55rem;
   overflow-y: auto;
   resize: vertical;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resizeShell[data-ready='true'] {
+    transition: none;
+  }
 }
 
 @media (max-width: 640px) {

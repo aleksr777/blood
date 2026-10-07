@@ -1,0 +1,95 @@
+.root {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+.componentGroup,
+.group {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #d8e0ec;
+  border-radius: 0.65rem;
+  padding: 0.75rem 0.85rem;
+}
+
+.componentGroup legend,
+.group legend {
+  padding: 0 0.35rem;
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.componentChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1.25rem;
+}
+
+.choiceGrid {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.choice {
+  display: flex !important;
+  min-width: 0;
+  flex-direction: row !important;
+  align-items: flex-start;
+  gap: 0.55rem !important;
+  color: #263552;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500 !important;
+  line-height: 1.35;
+}
+
+.choice input[type='radio'],
+.choice input[type='checkbox'] {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  min-height: 1rem;
+  margin: 0.1rem 0 0;
+  padding: 0;
+  accent-color: #1d4ed8;
+}
+
+.inline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.inline input {
+  width: 4.25rem !important;
+  min-height: 1.85rem !important;
+  border-radius: 0.35rem !important;
+  padding: 0.2rem 0.35rem !important;
+  text-align: center;
+}
+
+.inline input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.otherText {
+  box-sizing: border-box;
+  width: calc(100% - 1.55rem);
+  min-height: 3.5rem !important;
+  max-height: min(10rem, 25dvh);
+  margin: 0.4rem 0 0 1.55rem;
+  overflow-y: auto;
+  resize: vertical;
+}
+
+@media (max-width: 640px) {
+  .componentChoices {
+    display: grid;
+    gap: 0.5rem;
+  }
+}

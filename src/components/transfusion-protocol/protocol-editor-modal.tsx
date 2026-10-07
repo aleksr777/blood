@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Modal from '../modal/modal';
 import { getProtocolBlockConfig } from './editor-config';
+import { IndicationsFields } from './indications-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { persistProtocolOptions } from './saved-field-config';
@@ -42,6 +43,8 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
       <div className={styles.grid}>
         {blockId === 'examination' ? (
           <RecipientExaminationFields values={draft} onChange={changeValues} />
+        ) : blockId === 'indications' ? (
+          <IndicationsFields values={draft} onChange={changeValues} />
         ) : (
           config.fields.map((field) => (
             <ProtocolFieldControl

@@ -9,6 +9,7 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   emptyLabel?: string;
+  emptyDisplayLabel?: string;
   compact?: boolean;
 };
 
@@ -19,6 +20,7 @@ export const CustomSelectField = ({
   value,
   onChange,
   emptyLabel = 'Не выбрано',
+  emptyDisplayLabel,
   compact = false,
 }: Props) => {
   const [open, setOpen] = useState(false);
@@ -45,7 +47,7 @@ export const CustomSelectField = ({
         onClick={() => setOpen((current) => !current)}
       >
         <span className={value ? styles.customSelectValue : styles.customSelectPlaceholder}>
-          {value || emptyLabel}
+          {value || emptyDisplayLabel || emptyLabel}
         </span>
         <span className={styles.customSelectArrow} aria-hidden="true">
           ▾

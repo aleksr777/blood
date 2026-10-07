@@ -13,8 +13,8 @@
 
 .antigenGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.6rem 0.7rem;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.45rem;
 }
 
 .groupTitle {
@@ -36,8 +36,10 @@
 }
 
 .antigenGrid .label {
-  margin-bottom: 0.25rem;
-  font-size: 0.82rem;
+  min-height: 1.8rem;
+  margin-bottom: 0.15rem;
+  font-size: 0.74rem;
+  line-height: 1.15;
 }
 
 .antibodies {
@@ -102,13 +104,17 @@
 
 @media (max-width: 720px) {
   .antigenGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
   .topGrid {
     grid-template-columns: 1fr;
+  }
+
+  .antigenGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

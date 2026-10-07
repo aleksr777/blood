@@ -9,15 +9,6 @@ export const CommonIndications = ({ values, onChange }: IndicationProps) => {
     <fieldset className={styles.group}>
       <legend>Общие показания</legend>
       <div className={styles.choiceGrid}>
-        <Choice
-          type="radio"
-          name="indicationBloodLoss"
-          checked={bloodLoss === 'gt25'}
-          onChange={() => onChange({ indicationBloodLoss: 'gt25' })}
-        >
-          Острая кровопотеря более 25% ОЦК
-        </Choice>
-
         <div className={styles.choiceRow}>
           <Choice
             type="radio"

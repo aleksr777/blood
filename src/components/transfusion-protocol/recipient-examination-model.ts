@@ -1,13 +1,13 @@
 import type { ProtocolValues } from './protocol-types';
 
 export const RECIPIENT_ANTIGENS = [
-  { name: 'recipientAntigenC', symbol: 'C', label: 'C (RH2)' },
-  { name: 'recipientAntigenc', symbol: 'c', label: 'c (RH4)' },
-  { name: 'recipientAntigenCw', symbol: 'Cʷ', label: 'Cʷ (RH8)' },
-  { name: 'recipientAntigenE', symbol: 'E', label: 'E (RH3)' },
-  { name: 'recipientAntigene', symbol: 'e', label: 'e (RH5)' },
-  { name: 'recipientAntigenK', symbol: 'K', label: 'K (KEL1; Kell)' },
-  { name: 'recipientAntigenk', symbol: 'k', label: 'k (KEL2; Cellano)' },
+  { name: 'recipientAntigenC', symbol: 'C', label: 'C' },
+  { name: 'recipientAntigenc', symbol: 'c', label: 'c' },
+  { name: 'recipientAntigenCw', symbol: 'Cʷ', label: 'Cʷ' },
+  { name: 'recipientAntigenE', symbol: 'E', label: 'E' },
+  { name: 'recipientAntigene', symbol: 'e', label: 'e' },
+  { name: 'recipientAntigenK', symbol: 'K', label: 'K' },
+  { name: 'recipientAntigenk', symbol: 'k', label: 'k' },
 ] as const;
 
 export const ANTIBODY_STATUS = {

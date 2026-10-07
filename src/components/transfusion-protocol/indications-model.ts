@@ -10,8 +10,6 @@ const yes = (value?: string) => value === '1';
 
 export const formatIndications = (values: ProtocolValues) => {
   const items: string[] = [];
-  const component = INDICATION_COMPONENTS.find(({ value }) => value === values.indicationComponent);
-  if (component) items.push(component.label);
 
   if (values.indicationBloodLoss === 'gt25') items.push('Острая кровопотеря >25% ОЦК');
   if (values.indicationBloodLoss === 'custom' && values.indicationBloodLossPercent) {

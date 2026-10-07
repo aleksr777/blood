@@ -3,6 +3,10 @@
   min-width: 0;
   max-height: calc(100dvh - 10rem);
   overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.resizeShell[data-scrollable='true'] {
   overflow-y: auto;
 }
 

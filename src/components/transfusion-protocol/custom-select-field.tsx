@@ -46,7 +46,13 @@ export const CustomSelectField = ({
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
       >
-        <span className={value ? styles.customSelectValue : styles.customSelectPlaceholder}>
+        <span
+          className={[
+            value ? styles.customSelectValue : styles.customSelectPlaceholder,
+            value === '+' ? styles.customSelectPositive : '',
+            value === '-' ? styles.customSelectNegative : '',
+          ].filter(Boolean).join(' ')}
+        >
           {value || emptyDisplayLabel || emptyLabel}
         </span>
         <span className={styles.customSelectArrow} aria-hidden="true">
@@ -68,7 +74,11 @@ export const CustomSelectField = ({
           <button
             key={option || '__empty'}
             type="button"
-            className={styles.customSelectOption}
+            className={[
+              styles.customSelectOption,
+              option === '+' ? styles.customSelectOptionPositive : '',
+              option === '-' ? styles.customSelectOptionNegative : '',
+            ].filter(Boolean).join(' ')}
             role="option"
             aria-selected={value === option}
             onClick={() => select(option)}

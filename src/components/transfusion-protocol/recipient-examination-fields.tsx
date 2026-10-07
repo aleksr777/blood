@@ -75,8 +75,8 @@ export const RecipientExaminationFields = ({ values, onChange }: Props) => {
             label={label}
             options={['+', '-']}
             value={values[name] ?? ''}
-            emptyLabel="--"
-            emptyDisplayLabel="--"
+            emptyLabel=""
+            emptyDisplayLabel=""
             compact
             onChange={(value) => onChange({ [name]: value, recipientAntigens: '' })}
           />

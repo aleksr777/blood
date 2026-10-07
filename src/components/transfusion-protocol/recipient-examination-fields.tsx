@@ -2,12 +2,10 @@ import { CustomSelectField } from './custom-select-field';
 import { ANTIBODY_STATUS, RECIPIENT_ANTIGENS } from './recipient-examination-model';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-examination-fields.module.css';
-
 type Props = {
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
 };
-
 const SelectField = ({
   name,
   label,
@@ -41,7 +39,6 @@ const SelectField = ({
     />
   </div>
 );
-
 export const RecipientExaminationFields = ({ values, onChange }: Props) => {
   const setStatus = (status: string) => onChange({
     alloimmuneAntibodyStatus: status,
@@ -50,7 +47,6 @@ export const RecipientExaminationFields = ({ values, onChange }: Props) => {
         ? { alloimmuneAntibodyDescription: '' }
         : {}),
     });
-
   return (
     <div className={styles.root}>
       <div className={styles.topGrid}>

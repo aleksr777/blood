@@ -1,8 +1,5 @@
 import { CustomSelectField } from './custom-select-field';
-import {
-  ANTIBODY_STATUS,
-  RECIPIENT_ANTIGENS,
-} from './recipient-examination-model';
+import { ANTIBODY_STATUS, RECIPIENT_ANTIGENS } from './recipient-examination-model';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-examination-fields.module.css';
 
@@ -44,7 +41,7 @@ const SelectField = ({
 
 export const RecipientExaminationFields = ({ values, onChange }: Props) => {
   const setStatus = (status: string) => onChange({
-      alloimmuneAntibodyStatus: status,
+    alloimmuneAntibodyStatus: status,
       alloimmuneAntibodies: '',
       ...(status === ANTIBODY_STATUS.notFound
         ? { alloimmuneAntibodyDescription: '' }

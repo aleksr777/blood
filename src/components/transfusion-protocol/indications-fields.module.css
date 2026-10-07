@@ -23,9 +23,56 @@
 }
 
 .componentChoices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.componentButton {
+  min-width: 0;
+  min-height: 3rem;
+  border: 2px solid transparent;
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+  transition:
+    filter 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.componentButton[data-component='erythrocytes'] {
+  background: #c62828;
+  color: #fff;
+}
+
+.componentButton[data-component='plasma-cryo'] {
+  background: #f6c945;
+  color: #2f2a16;
+}
+
+.componentButton[data-component='platelets'] {
+  background: #1565c0;
+  color: #fff;
+}
+
+.componentButton:hover {
+  filter: brightness(0.96);
+}
+
+.componentButton:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 28%);
+  outline-offset: 2px;
+}
+
+.componentButton[data-selected='true'] {
+  border-color: #17213f;
+  box-shadow: 0 0 0 2px #fff inset;
+  transform: translateY(-1px);
 }
 
 .choiceGrid {
@@ -92,7 +139,7 @@
 
 @media (max-width: 640px) {
   .componentChoices {
-    display: grid;
+    grid-template-columns: 1fr;
     gap: 0.5rem;
   }
 }

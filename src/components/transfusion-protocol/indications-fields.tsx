@@ -1,4 +1,4 @@
-import { Choice, type IndicationProps } from './indication-controls';
+import type { IndicationProps } from './indication-controls';
 import { CommonIndications } from './indication-common-fields';
 import { ErythrocyteIndications } from './indication-erythrocyte-fields';
 import { INDICATION_COMPONENTS } from './indications-model';
@@ -15,15 +15,17 @@ export const IndicationsFields = ({ values, onChange }: IndicationProps) => {
         <legend>Компонент крови</legend>
         <div className={styles.componentChoices}>
           {INDICATION_COMPONENTS.map(({ value, label }) => (
-            <Choice
+            <button
               key={value}
-              type="radio"
-              name="indicationComponent"
-              checked={component === value}
-              onChange={() => onChange({ indicationComponent: value })}
+              type="button"
+              className={styles.componentButton}
+              data-component={value}
+              data-selected={component === value}
+              aria-pressed={component === value}
+              onClick={() => onChange({ indicationComponent: value })}
             >
               {label}
-            </Choice>
+            </button>
           ))}
         </div>
       </fieldset>

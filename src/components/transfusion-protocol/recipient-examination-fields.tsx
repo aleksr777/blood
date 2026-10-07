@@ -17,12 +17,14 @@ const SelectField = ({
   options,
   value,
   onChange,
+  emptyLabel,
 }: {
   name: string;
   label: string;
   options: string[];
   value: string;
   onChange: (value: string) => void;
+  emptyLabel?: string;
 }) => (
   <div className={styles.selectField}>
     <div className={styles.label}>{label}</div>
@@ -31,7 +33,7 @@ const SelectField = ({
       label={label}
       options={options}
       value={value}
-      emptyLabel="-- (не указано)"
+      emptyLabel={emptyLabel}
       onChange={onChange}
     />
   </div>
@@ -41,6 +43,7 @@ export const RecipientExaminationFields = ({ values, onChange }: Props) => {
   const setStatus = (status: string) => {
     onChange({
       alloimmuneAntibodyStatus: status,
+      alloimmuneAntibodies: '',
       ...(status === ANTIBODY_STATUS.notFound
         ? { alloimmuneAntibodyDescription: '' }
         : {}),
@@ -75,7 +78,8 @@ export const RecipientExaminationFields = ({ values, onChange }: Props) => {
             label={label}
             options={['+', '-']}
             value={values[name] ?? ''}
-            onChange={(value) => onChange({ [name]: value })}
+            emptyLabel="-- (не указано)"
+            onChange={(value) => onChange({ [name]: value, recipientAntigens: '' })}
           />
         ))}
       </div>

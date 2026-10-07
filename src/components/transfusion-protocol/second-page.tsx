@@ -1,3 +1,4 @@
+import { SelectionBlock } from './first-page-blocks-secondary';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { MonitorTable } from './monitor-table';
 import type { ProtocolPageProps } from './protocol-types';
@@ -6,26 +7,7 @@ import { formatDate } from './protocol-types';
 export const SecondPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
   <section className="sheet sheet--second" aria-label="Вторая страница протокола трансфузии">
     <table className="protocol-table">
-      <tbody
-        className="fill-block"
-        data-logical-block="selection"
-        onClick={() => onOpenBlock('selection')}
-      >
-        <tr className="row-responsible">
-          <LabeledCell
-            colSpan={3}
-            className="span-3"
-            label="Фамилия, имя, отчество (при наличии) ответственного лица"
-            value={values.responsiblePerson}
-          />
-          <LabeledCell
-            colSpan={3}
-            className="span-3"
-            label="Заключение (совместимо/несовместимо)"
-            value={values.compatibilityConclusion}
-          />
-        </tr>
-      </tbody>
+      <SelectionBlock values={values} onOpenBlock={onOpenBlock} />
 
       <tbody className="fill-block" onClick={() => onOpenBlock('compatibilityTests')}>
         <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>

@@ -1,5 +1,5 @@
 import { GeneralBlock, ExaminationBlock, IndicationsBlock } from './first-page-blocks-primary';
-import { DonorBlock, HistoryBlock, SelectionBlock } from './first-page-blocks-secondary';
+import { DonorBlock, HistoryBlock } from './first-page-blocks-secondary';
 import type { ProtocolPageProps } from './protocol-types';
 
 export const FirstPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
@@ -29,7 +29,6 @@ export const FirstPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
       <IndicationsBlock values={values} onOpenBlock={onOpenBlock} />
       <HistoryBlock values={values} onOpenBlock={onOpenBlock} />
       <DonorBlock values={values} onOpenBlock={onOpenBlock} />
-      <SelectionBlock values={values} onOpenBlock={onOpenBlock} />
     </table>
   </section>
 );

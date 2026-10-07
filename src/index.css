@@ -325,7 +325,8 @@ button {
   height: 15mm;
 }
 
-.row-final-page1 td {
+.row-final-page1 td,
+.row-selection-date td {
   height: 13mm;
 }
 

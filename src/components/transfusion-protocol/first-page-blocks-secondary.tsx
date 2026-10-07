@@ -100,12 +100,26 @@ export const SelectionBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
         value={values.selectionOrganization}
       />
     </tr>
-    <tr className="row-final-page1">
+    <tr className="row-selection-date">
       <LabeledCell
         colSpan={6}
         className="span-6"
         label="Дата исследования"
         value={formatDate(values.selectionDate)}
+      />
+    </tr>
+    <tr className="row-responsible">
+      <LabeledCell
+        colSpan={3}
+        className="span-3"
+        label="Фамилия, имя, отчество (при наличии) ответственного лица"
+        value={values.responsiblePerson}
+      />
+      <LabeledCell
+        colSpan={3}
+        className="span-3"
+        label="Заключение (совместимо/несовместимо)"
+        value={values.compatibilityConclusion}
       />
     </tr>
   </tbody>

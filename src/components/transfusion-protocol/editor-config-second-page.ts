@@ -18,6 +18,30 @@ const monitoringFields = [
 
 export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
   {
+    id: 'selection',
+    title: 'Результаты индивидуального подбора',
+    size: 'large',
+    fields: [
+      {
+        name: 'selectionOrganization',
+        label: 'Медицинская организация, осуществившая индивидуальный подбор',
+        wide: true,
+      },
+      { name: 'selectionDate', label: 'Дата исследования', type: 'date' },
+      {
+        name: 'responsiblePerson',
+        label: 'Фамилия, имя, отчество ответственного лица',
+        wide: true,
+      },
+      {
+        name: 'compatibilityConclusion',
+        label: 'Заключение',
+        type: 'select',
+        options: ['Совместимо', 'Несовместимо'],
+      },
+    ],
+  },
+  {
     id: 'compatibilityTests',
     title: 'Пробы на индивидуальную совместимость',
     size: 'large',

@@ -96,28 +96,4 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'expirationDate', label: 'Срок годности', type: 'date' },
     ],
   },
-  {
-    id: 'selection',
-    title: 'Результаты индивидуального подбора',
-    size: 'large',
-    fields: [
-      {
-        name: 'selectionOrganization',
-        label: 'Медицинская организация, осуществившая индивидуальный подбор',
-        wide: true,
-      },
-      { name: 'selectionDate', label: 'Дата исследования', type: 'date' },
-      {
-        name: 'responsiblePerson',
-        label: 'Фамилия, имя, отчество ответственного лица',
-        wide: true,
-      },
-      {
-        name: 'compatibilityConclusion',
-        label: 'Заключение',
-        type: 'select',
-        options: ['Совместимо', 'Несовместимо'],
-      },
-    ],
-  },
 ];

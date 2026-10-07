@@ -2,7 +2,8 @@ import { Choice, type IndicationProps } from './indication-controls';
 import styles from './indications-fields.module.css';
 
 export const CommonIndications = ({ values, onChange }: IndicationProps) => {
-  const bloodLoss = values.indicationBloodLoss;
+  const bloodLossChecked = values.indicationBloodLoss === 'custom';
+  const bloodLossPercent = values.indicationBloodLossPercent || '25';
   const ongoing = values.indicationOngoingBleeding === '1';
 
   return (
@@ -11,10 +12,19 @@ export const CommonIndications = ({ values, onChange }: IndicationProps) => {
       <div className={styles.choiceGrid}>
         <div className={styles.choiceRow}>
           <Choice
-            type="radio"
+            type="checkbox"
             name="indicationBloodLoss"
-            checked={bloodLoss === 'custom'}
-            onChange={() => onChange({ indicationBloodLoss: 'custom' })}
+            checked={bloodLossChecked}
+            onChange={() =>
+              onChange(
+                bloodLossChecked
+                  ? { indicationBloodLoss: '' }
+                  : {
+                      indicationBloodLoss: 'custom',
+                      indicationBloodLossPercent: bloodLossPercent,
+                    },
+              )
+            }
           >
             Острая кровопотеря более
           </Choice>
@@ -23,8 +33,8 @@ export const CommonIndications = ({ values, onChange }: IndicationProps) => {
             type="number"
             min="0"
             max="100"
-            disabled={bloodLoss !== 'custom'}
-            value={values.indicationBloodLossPercent ?? ''}
+            disabled={!bloodLossChecked}
+            value={bloodLossPercent}
             onChange={(event) => onChange({ indicationBloodLossPercent: event.target.value })}
           />
           <span>% ОЦК</span>

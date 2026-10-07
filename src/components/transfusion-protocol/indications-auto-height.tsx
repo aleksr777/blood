@@ -3,6 +3,8 @@ import styles from './indications-fields.module.css';
 
 export const IndicationsAutoHeight = ({ children }: PropsWithChildren) => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const readyFrameRef = useRef<number | null>(null);
+  const initializedRef = useRef(false);
   const [height, setHeight] = useState<number>();
   const [ready, setReady] = useState(false);
 
@@ -10,15 +12,33 @@ export const IndicationsAutoHeight = ({ children }: PropsWithChildren) => {
     const content = contentRef.current;
     if (!content) return undefined;
 
-    const updateHeight = () => setHeight(content.getBoundingClientRect().height);
+    const updateHeight = () => {
+      const nextHeight = content.getBoundingClientRect().height;
+
+      // A closed <dialog> has no layout box. Ignore that zero-height
+      // measurement and initialize only after the modal becomes visible.
+      if (nextHeight <= 0) return;
+
+      setHeight(nextHeight);
+
+      if (!initializedRef.current) {
+        initializedRef.current = true;
+        readyFrameRef.current = window.requestAnimationFrame(() => {
+          readyFrameRef.current = null;
+          setReady(true);
+        });
+      }
+    };
+
     updateHeight();
 
     const observer = new ResizeObserver(updateHeight);
     observer.observe(content);
-    const frame = window.requestAnimationFrame(() => setReady(true));
 
     return () => {
-      window.cancelAnimationFrame(frame);
+      if (readyFrameRef.current !== null) {
+        window.cancelAnimationFrame(readyFrameRef.current);
+      }
       observer.disconnect();
     };
   }, []);

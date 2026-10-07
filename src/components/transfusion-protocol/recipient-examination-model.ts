@@ -27,8 +27,7 @@ export const formatRecipientAntigens = (values: ProtocolValues) => {
 export const formatAlloimmuneAntibodies = (values: ProtocolValues) => {
   if (values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.notFound) return 'не найдены';
   if (values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found) {
-    const description = values.alloimmuneAntibodyDescription?.trim();
-    return description ? `найдены: ${description}` : 'найдены';
+    return values.alloimmuneAntibodyDescription?.trim() ?? '';
   }
   return values.alloimmuneAntibodies ?? '';
 };

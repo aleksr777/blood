@@ -1,11 +1,13 @@
 import {
   createContext,
   useContext,
+  useRef,
   type ComponentPropsWithoutRef,
   type PropsWithChildren,
 } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './modal.module.css';
+import { useModalAutoHeight } from './use-modal-auto-height';
 import { useModalBehavior } from './use-modal-behavior';
 
 const ModalCloseContext = createContext<(() => void) | null>(null);
@@ -40,6 +42,8 @@ const Modal = ({
     onClose,
     dismissible,
   );
+  const contentRef = useRef<HTMLDivElement>(null);
+  useModalAutoHeight(ref, contentRef);
 
   return createPortal(
     <dialog
@@ -57,7 +61,7 @@ const Modal = ({
       }}
     >
       <ModalCloseContext.Provider value={requestClose}>
-        <div className={styles.content}>
+        <div ref={contentRef} className={styles.content}>
           <button
             type="button"
             className={styles.close}

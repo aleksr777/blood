@@ -64,8 +64,11 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationRbcOther', label: 'indicationRbcOther' },
       { name: 'indicationRbcOtherText', label: 'indicationRbcOtherText' },
       { name: 'indicationPlasmaFactorDeficiency', label: 'indicationPlasmaFactorDeficiency' },
-      { name: 'indicationPlasmaAnticoagulantOverdose', label: 'indicationPlasmaAnticoagulantOverdose' },
-      { name: 'indicationPlasmaPlasmapheresis', label: 'indicationPlasmaPlasmapheresis' },
+      {
+        name: 'indicationPlasmaFibrinogenBleeding',
+        label: 'indicationPlasmaFibrinogenBleeding',
+      },
+      { name: 'indicationPlasmaFibrinogenLow', label: 'indicationPlasmaFibrinogenLow' },
       { name: 'indicationPlasmaOther', label: 'indicationPlasmaOther' },
       { name: 'indicationPlasmaOtherText', label: 'indicationPlasmaOtherText' },
       { name: 'indicationPlateletReason', label: 'indicationPlateletReason' },

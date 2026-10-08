@@ -3,8 +3,11 @@ import styles from './indications-fields.module.css';
 
 export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) => {
   const threshold = values.indicationRbcThreshold;
+  const thresholdSelected = threshold === 'custom' || threshold === '70-25';
   const severe = values.indicationRbcSevereAnemia === '1';
   const replacement = values.indicationRbcReplacement === '1';
+  const hgb = values.indicationRbcHgb || '70';
+  const hct = values.indicationRbcHct || '25';
 
   return (
     <fieldset className={styles.group}>
@@ -26,38 +29,48 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
         >
           Восполнение количества циркулирующих эритроцитов
         </Choice>
-        <Choice
-          type="radio"
-          name="indicationRbcThreshold"
-          checked={threshold === '70-25'}
-          onChange={() => onChange({ indicationRbcThreshold: '70-25' })}
-        >
-          Снижение Hb менее 70 г/л и Hct менее 25%
-        </Choice>
 
         <div className={styles.choiceRow}>
           <Choice
             type="radio"
             name="indicationRbcThreshold"
-            checked={threshold === 'custom'}
-            onChange={() => onChange({ indicationRbcThreshold: 'custom' })}
+            checked={thresholdSelected}
+            onChange={() =>
+              onChange({
+                indicationRbcThreshold: 'custom',
+                indicationRbcHgb: hgb,
+                indicationRbcHct: hct,
+              })
+            }
           >
             Снижение Hb менее
           </Choice>
           <input
             className={styles.shortNumber}
             type="number"
-            disabled={threshold !== 'custom'}
-            value={values.indicationRbcHgb ?? ''}
-            onChange={(event) => onChange({ indicationRbcHgb: event.target.value })}
+            disabled={!thresholdSelected}
+            value={hgb}
+            onChange={(event) =>
+              onChange({
+                indicationRbcThreshold: 'custom',
+                indicationRbcHgb: event.target.value,
+                indicationRbcHct: hct,
+              })
+            }
           />
           <span>г/л и Hct менее</span>
           <input
             className={styles.shortNumber}
             type="number"
-            disabled={threshold !== 'custom'}
-            value={values.indicationRbcHct ?? ''}
-            onChange={(event) => onChange({ indicationRbcHct: event.target.value })}
+            disabled={!thresholdSelected}
+            value={hct}
+            onChange={(event) =>
+              onChange({
+                indicationRbcThreshold: 'custom',
+                indicationRbcHgb: hgb,
+                indicationRbcHct: event.target.value,
+              })
+            }
           />
           <span>%</span>
         </div>

@@ -35,6 +35,21 @@
   overscroll-behavior: contain;
 }
 
+
+.modal textarea {
+  animation: modal-textarea-appear 100ms ease 180ms both;
+}
+
+@keyframes modal-textarea-appear {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .modal:focus {
   outline: none;
 }

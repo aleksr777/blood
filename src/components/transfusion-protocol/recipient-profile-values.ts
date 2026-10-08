@@ -15,8 +15,11 @@ const PROFILE_FIELDS = [
   'alloimmuneAntibodies',
   'alloimmuneAntibodyStatus',
   'alloimmuneAntibodyDescription',
+  'previousTransfusionsStatus',
   'previousTransfusions',
+  'previousReactionsStatus',
   'previousReactions',
+  'individualSelectionHistoryStatus',
   'individualSelectionHistory',
 ] as const;
 

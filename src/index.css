@@ -339,6 +339,10 @@ textarea {
   height: 13mm;
 }
 
+.row-selection-summary td {
+  height: 10mm;
+}
+
 .stacked-field {
   min-height: 10mm;
 }

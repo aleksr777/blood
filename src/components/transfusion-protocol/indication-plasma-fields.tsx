@@ -1,3 +1,4 @@
+import { ComponentCommonIndications } from './indication-common-fields';
 import { Choice, OtherChoice, type IndicationProps } from './indication-controls';
 
 const PLASMA_OPTIONS = [
@@ -8,6 +9,13 @@ const PLASMA_OPTIONS = [
 
 export const PlasmaIndications = ({ values, onChange }: IndicationProps) => (
   <>
+    <ComponentCommonIndications
+      values={values}
+      onChange={onChange}
+      bloodLossName="indicationPlasmaBloodLoss"
+      bloodLossPercentName="indicationPlasmaBloodLossPercent"
+      ongoingBleedingName="indicationPlasmaOngoingBleeding"
+    />
     {PLASMA_OPTIONS.map(([name, label]) => (
       <Choice
         key={name}

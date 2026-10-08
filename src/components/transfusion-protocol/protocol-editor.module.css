@@ -56,11 +56,9 @@
 }
 
 .grid textarea {
+  height: 6.5rem;
   min-height: 6.5rem;
-  resize: vertical;
-}
-
-.historyGrid textarea {
+  max-height: 6.5rem;
   resize: none;
 }
 

@@ -1,5 +1,6 @@
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatHistoryValue } from './recipient-history-model';
+import { getSelectionStatus, SELECTION_STATUS } from './selection-model';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate } from './protocol-types';
 export const HistoryBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
@@ -84,43 +85,63 @@ export const DonorBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
     </tr>
   </tbody>
 );
-export const SelectionBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody
-    className="fill-block"
-    data-logical-block="selection"
-    data-protocol-block="selection"
-    onClick={() => onOpenBlock('selection')}
-  >
-    <SectionTitle>Результаты индивидуального подбора</SectionTitle>
-    <tr>
-      <LabeledCell
-        colSpan={6}
-        className="span-6"
-        label="Наименование медицинской организации, осуществившей индивидуальный подбор"
-        value={values.selectionOrganization}
-      />
-    </tr>
-    <tr className="row-selection-date">
-      <LabeledCell
-        colSpan={6}
-        className="span-6"
-        label="Дата исследования"
-        value={formatDate(values.selectionDate)}
-      />
-    </tr>
-    <tr className="row-responsible">
-      <LabeledCell
-        colSpan={3}
-        className="span-3"
-        label="Фамилия, имя, отчество (при наличии) ответственного лица"
-        value={values.responsiblePerson}
-      />
-      <LabeledCell
-        colSpan={3}
-        className="span-3"
-        label="Заключение (совместимо/несовместимо)"
-        value={values.compatibilityConclusion}
-      />
-    </tr>
-  </tbody>
-);
+export const SelectionBlock = ({ values, onOpenBlock }: ProtocolPageProps) => {
+  const status = getSelectionStatus(values);
+  const performed = status === SELECTION_STATUS.performed;
+
+  return (
+    <tbody
+      className="fill-block"
+      data-logical-block="selection"
+      data-protocol-block="selection"
+      onClick={() => onOpenBlock('selection')}
+    >
+      <SectionTitle>
+        {performed ? 'Результаты индивидуального подбора' : 'Индивидуальный подбор'}
+      </SectionTitle>
+
+      {!performed ? (
+        <tr className="row-selection-summary">
+          <td colSpan={6}>
+            {status === SELECTION_STATUS.notPerformed && (
+              <div className="cell-value">Не проводился</div>
+            )}
+          </td>
+        </tr>
+      ) : (
+        <>
+          <tr>
+            <LabeledCell
+              colSpan={6}
+              className="span-6"
+              label="Наименование медицинской организации, осуществившей индивидуальный подбор"
+              value={values.selectionOrganization}
+            />
+          </tr>
+          <tr className="row-selection-date">
+            <LabeledCell
+              colSpan={6}
+              className="span-6"
+              label="Дата исследования"
+              value={formatDate(values.selectionDate)}
+            />
+          </tr>
+          <tr className="row-responsible">
+            <LabeledCell
+              colSpan={3}
+              className="span-3"
+              label="Фамилия, имя, отчество (при наличии) ответственного лица"
+              value={values.responsiblePerson}
+            />
+            <LabeledCell
+              colSpan={3}
+              className="span-3"
+              label="Заключение (совместимо/несовместимо)"
+              value={values.compatibilityConclusion}
+            />
+          </tr>
+        </>
+      )}
+    </tbody>
+  );
+};

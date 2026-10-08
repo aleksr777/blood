@@ -8,7 +8,7 @@ import type { ProtocolPageProps } from './protocol-types';
 import { formatDate, formatDateTime } from './protocol-types';
 
 export const GeneralBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody className="fill-block" onClick={() => onOpenBlock('general')}>
+  <tbody className="fill-block" data-protocol-block="general" onClick={() => onOpenBlock('general')}>
     <tr className="row-top-data">
       <LabeledCell
         colSpan={2}
@@ -51,7 +51,7 @@ export const GeneralBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
 );
 
 export const ExaminationBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody className="fill-block" onClick={() => onOpenBlock('examination')}>
+  <tbody className="fill-block" data-protocol-block="examination" onClick={() => onOpenBlock('examination')}>
     <SectionTitle>Данные медицинского обследования реципиента</SectionTitle>
     <tr>
       <LabeledCell
@@ -85,7 +85,7 @@ export const ExaminationBlock = ({ values, onOpenBlock }: ProtocolPageProps) => 
 );
 
 export const IndicationsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody className="fill-block" onClick={() => onOpenBlock('indications')}>
+  <tbody className="fill-block" data-protocol-block="indications" onClick={() => onOpenBlock('indications')}>
     <SectionTitle>Показания к трансфузии</SectionTitle>
     <tr className="row-large-blank">
       <td colSpan={6}>

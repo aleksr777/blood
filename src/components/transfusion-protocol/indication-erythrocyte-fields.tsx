@@ -44,7 +44,7 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
               )
             }
           >
-            Снижение Hb менее
+            Снижение гемоглобина менее
           </Choice>
           <input
             className={styles.shortNumber}
@@ -59,7 +59,7 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
               })
             }
           />
-          <span>г/л и Hct менее</span>
+          <span>г/л и гематокрита менее</span>
           <input
             className={styles.shortNumber}
             type="number"

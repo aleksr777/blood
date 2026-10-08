@@ -1,0 +1,55 @@
+.root {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.statusGroup {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #d8e0ec;
+  border-radius: 0.65rem;
+  padding: 0.8rem 0.9rem;
+}
+
+.statusGroup legend {
+  padding: 0 0.35rem;
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem 1.5rem;
+}
+
+.option {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 0.45rem !important;
+  color: #263552;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500 !important;
+}
+
+.option input[type='radio'] {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  min-height: 1rem;
+  margin: 0;
+  padding: 0;
+  accent-color: #1d4ed8;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  min-width: 0;
+}

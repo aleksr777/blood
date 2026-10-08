@@ -1,5 +1,4 @@
 import type { IndicationProps } from './indication-controls';
-import { CommonIndications } from './indication-common-fields';
 import { ErythrocyteIndications } from './indication-erythrocyte-fields';
 import { IndicationsAutoHeight } from './indications-auto-height';
 import { INDICATION_COMPONENTS } from './indications-model';
@@ -35,7 +34,6 @@ export const IndicationsFields = ({ values, onChange }: IndicationProps) => {
         {component && (
           <fieldset className={styles.group}>
             <div className={styles.choiceGrid}>
-              <CommonIndications values={values} onChange={onChange} />
               {component === 'erythrocytes' && (
                 <ErythrocyteIndications values={values} onChange={onChange} />
               )}

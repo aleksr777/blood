@@ -157,8 +157,8 @@
   box-sizing: border-box;
   width: calc(100% - 1.55rem);
   max-width: calc(100% - 1.55rem);
-  min-height: 3.5rem !important;
-  max-height: min(6.5rem, 16dvh) !important;
+  min-height: 6.5rem !important;
+  max-height: min(16rem, 40dvh) !important;
   margin: 0.4rem 0 0 1.55rem;
   overflow: auto;
   resize: vertical;

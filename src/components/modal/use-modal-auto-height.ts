@@ -1,7 +1,6 @@
 import { useEffect, type RefObject } from 'react';
 
 const SIZE_TOLERANCE_PX = 0.5;
-const SIZE_TRANSITION_MS = 220;
 
 const parsePixels = (value: string) => {
   const parsed = Number.parseFloat(value);
@@ -19,9 +18,7 @@ export const useModalAutoHeight = (
 
     let measureFrame: number | null = null;
     let readyFrame: number | null = null;
-    let settleTimer: number | null = null;
     let initialized = false;
-    let previousTargetHeight: number | null = null;
 
     const updateHeight = () => {
       if (measureFrame !== null) {
@@ -46,26 +43,7 @@ export const useModalAutoHeight = (
         dialog.dataset.sizeScrollable = String(
           naturalHeight > maximumHeight + SIZE_TOLERANCE_PX,
         );
-
-        if (
-          initialized &&
-          previousTargetHeight !== null &&
-          Math.abs(targetHeight - previousTargetHeight) > SIZE_TOLERANCE_PX
-        ) {
-          dialog.dataset.sizeAnimating = 'true';
-
-          if (settleTimer !== null) {
-            window.clearTimeout(settleTimer);
-          }
-
-          settleTimer = window.setTimeout(() => {
-            settleTimer = null;
-            delete dialog.dataset.sizeAnimating;
-          }, SIZE_TRANSITION_MS);
-        }
-
         dialog.style.height = `${targetHeight}px`;
-        previousTargetHeight = targetHeight;
 
         if (!initialized) {
           initialized = true;
@@ -90,14 +68,10 @@ export const useModalAutoHeight = (
       if (readyFrame !== null) {
         window.cancelAnimationFrame(readyFrame);
       }
-      if (settleTimer !== null) {
-        window.clearTimeout(settleTimer);
-      }
       observer.disconnect();
       window.removeEventListener('resize', updateHeight);
       delete dialog.dataset.sizeReady;
       delete dialog.dataset.sizeScrollable;
-      delete dialog.dataset.sizeAnimating;
       dialog.style.removeProperty('height');
     };
   }, [dialogRef, contentRef]);

@@ -1,4 +1,5 @@
 import { LabeledCell, SectionTitle } from './form-controls';
+import { formatHistoryValue } from './recipient-history-model';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate } from './protocol-types';
 export const HistoryBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
@@ -9,19 +10,23 @@ export const HistoryBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
         colSpan={2}
         centered
         label="Трансфузии компонентов крови в анамнезе"
-        value={values.previousTransfusions}
+        value={formatHistoryValue(values, 'previousTransfusionsStatus', 'previousTransfusions')}
       />
       <LabeledCell
         colSpan={2}
         centered
         label="Реакции и осложнения на трансфузии в анамнезе"
-        value={values.previousReactions}
+        value={formatHistoryValue(values, 'previousReactionsStatus', 'previousReactions')}
       />
       <LabeledCell
         colSpan={2}
         centered
         label="Трансфузии по индивидуальному подбору"
-        value={values.individualSelectionHistory}
+        value={formatHistoryValue(
+          values,
+          'individualSelectionHistoryStatus',
+          'individualSelectionHistory',
+        )}
       />
     </tr>
   </tbody>

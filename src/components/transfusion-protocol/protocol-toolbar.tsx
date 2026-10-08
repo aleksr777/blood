@@ -3,8 +3,8 @@ type Props = {
   onClear: () => void;
   onOpenRegistry: () => void;
   onSave: () => void;
-  onPrintFirst: () => void;
-  onPrintSecond: () => void;
+  pageCount: number;
+  onPrintPage: (pageIndex: number) => void;
 };
 
 export const ProtocolToolbar = ({
@@ -12,8 +12,8 @@ export const ProtocolToolbar = ({
   onClear,
   onOpenRegistry,
   onSave,
-  onPrintFirst,
-  onPrintSecond,
+  pageCount,
+  onPrintPage,
 }: Props) => (
   <div className="toolbar-wrap">
     <div className="print-actions" aria-label="Панель действий">
@@ -26,12 +26,16 @@ export const ProtocolToolbar = ({
       <button type="button" className="save-button" onClick={onSave}>
         Сохранить
       </button>
-      <button type="button" className="print-button" onClick={onPrintFirst}>
-        Печать страницы 1
-      </button>
-      <button type="button" className="print-button" onClick={onPrintSecond}>
-        Печать страницы 2
-      </button>
+      {Array.from({ length: pageCount }, (_, pageIndex) => (
+        <button
+          key={pageIndex}
+          type="button"
+          className="print-button"
+          onClick={() => onPrintPage(pageIndex)}
+        >
+          Печать страницы {pageIndex + 1}
+        </button>
+      ))}
     </div>
     {status && (
       <div className="toolbar-status" role="status">

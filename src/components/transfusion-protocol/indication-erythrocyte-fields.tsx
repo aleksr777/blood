@@ -4,8 +4,8 @@ import styles from './indications-fields.module.css';
 export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) => {
   const threshold = values.indicationRbcThreshold;
   const thresholdSelected = threshold === 'custom' || threshold === '70-25';
-  const severe = values.indicationRbcSevereAnemia === '1';
-  const replacement = values.indicationRbcReplacement === '1';
+  const severeAnemicSyndrome =
+    values.indicationRbcSevereAnemia === '1' || values.indicationRbcReplacement === '1';
   const hgb = values.indicationRbcHgb || '70';
   const hct = values.indicationRbcHct || '25';
 
@@ -16,18 +16,15 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
         <Choice
           type="checkbox"
           name="indicationRbcSevereAnemia"
-          checked={severe}
-          onChange={() => onChange({ indicationRbcSevereAnemia: severe ? '' : '1' })}
+          checked={severeAnemicSyndrome}
+          onChange={() =>
+            onChange({
+              indicationRbcSevereAnemia: severeAnemicSyndrome ? '' : '1',
+              indicationRbcReplacement: '',
+            })
+          }
         >
-          Тяжёлая декомпенсированная анемия
-        </Choice>
-        <Choice
-          type="checkbox"
-          name="indicationRbcReplacement"
-          checked={replacement}
-          onChange={() => onChange({ indicationRbcReplacement: replacement ? '' : '1' })}
-        >
-          Восполнение количества циркулирующих эритроцитов
+          Тяжёлый анемический синдром
         </Choice>
 
         <div className={styles.choiceRow}>

@@ -50,9 +50,9 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     fields: [
       { name: 'indications', label: 'indications' },
       { name: 'indicationComponent', label: 'indicationComponent' },
-      { name: 'indicationBloodLoss', label: 'indicationBloodLoss' },
-      { name: 'indicationBloodLossPercent', label: 'indicationBloodLossPercent' },
-      { name: 'indicationOngoingBleeding', label: 'indicationOngoingBleeding' },
+      { name: 'indicationRbcBloodLoss', label: 'indicationRbcBloodLoss' },
+      { name: 'indicationRbcBloodLossPercent', label: 'indicationRbcBloodLossPercent' },
+      { name: 'indicationRbcOngoingBleeding', label: 'indicationRbcOngoingBleeding' },
       {
         name: 'indicationRbcCirculatoryDisturbances',
         label: 'indicationRbcCirculatoryDisturbances',
@@ -63,6 +63,12 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationRbcHct', label: 'indicationRbcHct' },
       { name: 'indicationRbcOther', label: 'indicationRbcOther' },
       { name: 'indicationRbcOtherText', label: 'indicationRbcOtherText' },
+      { name: 'indicationPlasmaBloodLoss', label: 'indicationPlasmaBloodLoss' },
+      {
+        name: 'indicationPlasmaBloodLossPercent',
+        label: 'indicationPlasmaBloodLossPercent',
+      },
+      { name: 'indicationPlasmaOngoingBleeding', label: 'indicationPlasmaOngoingBleeding' },
       { name: 'indicationPlasmaFactorDeficiency', label: 'indicationPlasmaFactorDeficiency' },
       {
         name: 'indicationPlasmaFibrinogenBleeding',
@@ -71,6 +77,15 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationPlasmaFibrinogenLow', label: 'indicationPlasmaFibrinogenLow' },
       { name: 'indicationPlasmaOther', label: 'indicationPlasmaOther' },
       { name: 'indicationPlasmaOtherText', label: 'indicationPlasmaOtherText' },
+      { name: 'indicationPlateletBloodLoss', label: 'indicationPlateletBloodLoss' },
+      {
+        name: 'indicationPlateletBloodLossPercent',
+        label: 'indicationPlateletBloodLossPercent',
+      },
+      {
+        name: 'indicationPlateletOngoingBleeding',
+        label: 'indicationPlateletOngoingBleeding',
+      },
       {
         name: 'indicationPlateletHemorrhagicSyndrome',
         label: 'indicationPlateletHemorrhagicSyndrome',

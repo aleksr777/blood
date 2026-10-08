@@ -19,9 +19,10 @@ const monitoringFields = [
 export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
   {
     id: 'selection',
-    title: 'Результаты индивидуального подбора',
+    title: 'Индивидуальный подбор',
     size: 'large',
     fields: [
+      { name: 'selectionStatus', label: 'selectionStatus' },
       {
         name: 'selectionOrganization',
         label: 'Медицинская организация, осуществившая индивидуальный подбор',

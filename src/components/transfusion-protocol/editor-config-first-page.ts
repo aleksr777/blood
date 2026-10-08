@@ -53,8 +53,6 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationBloodLoss', label: 'indicationBloodLoss' },
       { name: 'indicationBloodLossPercent', label: 'indicationBloodLossPercent' },
       { name: 'indicationOngoingBleeding', label: 'indicationOngoingBleeding' },
-      { name: 'indicationRbcSevereAnemia', label: 'indicationRbcSevereAnemia' },
-      { name: 'indicationRbcReplacement', label: 'indicationRbcReplacement' },
       {
         name: 'indicationRbcCirculatoryDisturbances',
         label: 'indicationRbcCirculatoryDisturbances',

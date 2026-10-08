@@ -30,6 +30,12 @@ export const formatIndications = (values: ProtocolValues) => {
     if (yes(values.indicationRbcSevereAnemia) || yes(values.indicationRbcReplacement)) {
       items.push('Тяжёлый анемический синдром');
     }
+    if (yes(values.indicationRbcCirculatoryDisturbances)) {
+      items.push('Циркуляторные нарушения');
+    }
+    if (yes(values.indicationRbcHemicHypoxia)) {
+      items.push('Признаки гемической гипоксии');
+    }
     if (values.indicationRbcThreshold === '70-25') items.push('Снижение гемоглобина менее 70 г/л и гематокрита менее 25%');
     if (values.indicationRbcThreshold === 'custom') {
       const hgb = values.indicationRbcHgb?.trim();

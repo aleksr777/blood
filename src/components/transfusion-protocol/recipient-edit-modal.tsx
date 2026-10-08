@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal, { ModalDismissButton } from '../modal/modal';
 import { RecipientExaminationFields } from './recipient-examination-fields';
+import { RecipientHistoryFields } from './recipient-history-fields';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-edit-modal.module.css';
 
@@ -10,12 +11,6 @@ type Props = {
   onClose: () => void;
   onSave: (values: ProtocolValues) => Promise<void>;
 };
-
-const textareas = [
-  ['previousTransfusions', 'Трансфузии компонентов крови в анамнезе'],
-  ['previousReactions', 'Реакции и осложнения на трансфузии в анамнезе'],
-  ['individualSelectionHistory', 'Трансфузии по индивидуальному подбору'],
-] as const;
 
 export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
   const [values, setValues] = useState<ProtocolValues>(() => ({
@@ -55,16 +50,9 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
         <div className={styles.wide}>
           <RecipientExaminationFields values={values} onChange={changeValues} />
         </div>
-        {textareas.map(([name, label]) => (
-          <label key={name} className={styles.wide}>
-            <span>{label}</span>
-            <textarea
-              rows={3}
-              value={values[name] ?? ''}
-              onChange={(event) => change(name, event.target.value)}
-            />
-          </label>
-        ))}
+        <div className={styles.wide}>
+          <RecipientHistoryFields values={values} onChange={changeValues} />
+        </div>
       </div>
       {error && <div className={styles.error}>{error}</div>}
       <div className={styles.actions}>

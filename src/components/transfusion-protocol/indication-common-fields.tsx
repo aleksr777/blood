@@ -1,25 +1,37 @@
 import { Choice, type IndicationProps } from './indication-controls';
 import styles from './indications-fields.module.css';
 
-export const CommonIndications = ({ values, onChange }: IndicationProps) => {
-  const bloodLossChecked = values.indicationBloodLoss === 'custom';
-  const bloodLossPercent = values.indicationBloodLossPercent || '25';
-  const ongoing = values.indicationOngoingBleeding === '1';
+type ComponentCommonIndicationsProps = IndicationProps & {
+  bloodLossName: string;
+  bloodLossPercentName: string;
+  ongoingBleedingName: string;
+};
+
+export const ComponentCommonIndications = ({
+  values,
+  onChange,
+  bloodLossName,
+  bloodLossPercentName,
+  ongoingBleedingName,
+}: ComponentCommonIndicationsProps) => {
+  const bloodLossChecked = values[bloodLossName] === 'custom';
+  const bloodLossPercent = values[bloodLossPercentName] || '25';
+  const ongoing = values[ongoingBleedingName] === '1';
 
   return (
     <>
       <div className={styles.choiceRow}>
         <Choice
           type="checkbox"
-          name="indicationBloodLoss"
+          name={bloodLossName}
           checked={bloodLossChecked}
           onChange={() =>
             onChange(
               bloodLossChecked
-                ? { indicationBloodLoss: '' }
+                ? { [bloodLossName]: '' }
                 : {
-                    indicationBloodLoss: 'custom',
-                    indicationBloodLossPercent: bloodLossPercent,
+                    [bloodLossName]: 'custom',
+                    [bloodLossPercentName]: bloodLossPercent,
                   },
             )
           }
@@ -33,16 +45,16 @@ export const CommonIndications = ({ values, onChange }: IndicationProps) => {
           max="100"
           disabled={!bloodLossChecked}
           value={bloodLossPercent}
-          onChange={(event) => onChange({ indicationBloodLossPercent: event.target.value })}
+          onChange={(event) => onChange({ [bloodLossPercentName]: event.target.value })}
         />
         <span>% ОЦК</span>
       </div>
 
       <Choice
         type="checkbox"
-        name="indicationOngoingBleeding"
+        name={ongoingBleedingName}
         checked={ongoing}
-        onChange={() => onChange({ indicationOngoingBleeding: ongoing ? '' : '1' })}
+        onChange={() => onChange({ [ongoingBleedingName]: ongoing ? '' : '1' })}
       >
         Продолжающееся кровотечение
       </Choice>

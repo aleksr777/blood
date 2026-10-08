@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 
 const STORAGE_PREFIX = 'blood:textarea-height:';
 const MODAL_RESIZE_SAFETY_PX = 8;
+const MODAL_SIZE_TRANSITION_MS = 220;
+const TEXTAREA_REVEAL_DELAY_MS = MODAL_SIZE_TRANSITION_MS + 15;
 
 const normalizeKeyPart = (value: string) =>
   value.trim().replace(/\s+/g, ' ').slice(0, 160);
@@ -102,8 +104,30 @@ const forEachTextarea = (node: ParentNode, callback: (textarea: HTMLTextAreaElem
 
 export const usePersistedTextareaSizes = () => {
   useEffect(() => {
-    const restoreInNode = (node: ParentNode) => {
-      forEachTextarea(node, restoreHeight);
+    const revealTimers = new Set<number>();
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const stageTextareaAfterModal = (textarea: HTMLTextAreaElement) => {
+      if (reducedMotion) return;
+
+      const dialog = textarea.closest<HTMLDialogElement>('dialog');
+      if (!dialog || dialog.dataset.sizeReady !== 'true') return;
+
+      textarea.dataset.modalResizeStage = 'true';
+
+      const timer = window.setTimeout(() => {
+        revealTimers.delete(timer);
+        delete textarea.dataset.modalResizeStage;
+      }, TEXTAREA_REVEAL_DELAY_MS);
+
+      revealTimers.add(timer);
+    };
+
+    const restoreInNode = (node: ParentNode, stageAfterModal = false) => {
+      forEachTextarea(node, (textarea) => {
+        restoreHeight(textarea);
+        if (stageAfterModal) stageTextareaAfterModal(textarea);
+      });
     };
 
     restoreInNode(document);
@@ -118,7 +142,7 @@ export const usePersistedTextareaSizes = () => {
 
         mutation.addedNodes.forEach((node) => {
           if (node instanceof HTMLElement) {
-            restoreInNode(node);
+            restoreInNode(node, true);
           }
         });
       });
@@ -154,6 +178,8 @@ export const usePersistedTextareaSizes = () => {
 
     return () => {
       saveVisibleTextareaHeights();
+      revealTimers.forEach((timer) => window.clearTimeout(timer));
+      revealTimers.clear();
       mutationObserver.disconnect();
       document.removeEventListener('pointerdown', handlePointerDown, true);
       document.removeEventListener('pointerup', handlePointerUp, true);

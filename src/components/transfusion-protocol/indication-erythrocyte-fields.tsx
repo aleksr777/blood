@@ -6,6 +6,8 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
   const thresholdSelected = threshold === 'custom' || threshold === '70-25';
   const severeAnemicSyndrome =
     values.indicationRbcSevereAnemia === '1' || values.indicationRbcReplacement === '1';
+  const circulatoryDisturbances = values.indicationRbcCirculatoryDisturbances === '1';
+  const hemicHypoxia = values.indicationRbcHemicHypoxia === '1';
   const hgb = values.indicationRbcHgb || '70';
   const hct = values.indicationRbcHct || '25';
 
@@ -25,6 +27,30 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
           }
         >
           Тяжёлый анемический синдром
+        </Choice>
+        <Choice
+          type="checkbox"
+          name="indicationRbcCirculatoryDisturbances"
+          checked={circulatoryDisturbances}
+          onChange={() =>
+            onChange({
+              indicationRbcCirculatoryDisturbances: circulatoryDisturbances ? '' : '1',
+            })
+          }
+        >
+          Циркуляторные нарушения
+        </Choice>
+        <Choice
+          type="checkbox"
+          name="indicationRbcHemicHypoxia"
+          checked={hemicHypoxia}
+          onChange={() =>
+            onChange({
+              indicationRbcHemicHypoxia: hemicHypoxia ? '' : '1',
+            })
+          }
+        >
+          Признаки гемической гипоксии
         </Choice>
 
         <div className={styles.choiceRow}>

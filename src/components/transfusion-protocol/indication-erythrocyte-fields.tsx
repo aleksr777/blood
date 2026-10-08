@@ -1,3 +1,4 @@
+import { ComponentCommonIndications } from './indication-common-fields';
 import { Choice, OtherChoice, type IndicationProps } from './indication-controls';
 import styles from './indications-fields.module.css';
 
@@ -11,6 +12,13 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
 
   return (
     <>
+      <ComponentCommonIndications
+        values={values}
+        onChange={onChange}
+        bloodLossName="indicationRbcBloodLoss"
+        bloodLossPercentName="indicationRbcBloodLossPercent"
+        ongoingBleedingName="indicationRbcOngoingBleeding"
+      />
       <Choice
         type="checkbox"
         name="indicationRbcCirculatoryDisturbances"

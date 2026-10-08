@@ -1,0 +1,108 @@
+import { LabeledCell, SectionTitle } from './form-controls';
+import { MonitorTable } from './monitor-table';
+import type { ProtocolPageProps } from './protocol-types';
+import { formatDate } from './protocol-types';
+
+export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
+  <tbody
+    className="fill-block"
+    data-protocol-block="compatibilityTests"
+    onClick={() => onOpenBlock('compatibilityTests')}
+  >
+    <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
+    <tr>
+      <LabeledCell
+        colSpan={6}
+        className="span-6"
+        label="Наименования реагентов"
+        value={values.reagentNames}
+      />
+    </tr>
+    <tr>
+      <LabeledCell
+        colSpan={4}
+        className="span-4"
+        label="N серии реагента"
+        value={values.reagentSeries}
+      />
+      <LabeledCell
+        colSpan={2}
+        className="span-2"
+        label="Срок годности"
+        value={formatDate(values.reagentExpiration)}
+      />
+    </tr>
+    <tr className="row-tests">
+      <LabeledCell
+        colSpan={3}
+        className="span-3"
+        centered
+        label="На плоскости"
+        value={values.planeTestResult}
+      />
+      <LabeledCell
+        colSpan={3}
+        className="span-3"
+        centered
+        label="Биологическая проба"
+        value={values.biologicalTestResult}
+      />
+    </tr>
+  </tbody>
+);
+
+export const ComplicationsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
+  <tbody
+    className="fill-block"
+    data-protocol-block="complications"
+    onClick={() => onOpenBlock('complications')}
+  >
+    <SectionTitle>Реакции и осложнения</SectionTitle>
+    <tr className="row-complications">
+      <LabeledCell
+        colSpan={3}
+        className="span-3"
+        label="Основные симптомы"
+        value={values.symptoms}
+      />
+      <LabeledCell
+        colSpan={3}
+        className="span-3"
+        label="Степень тяжести"
+        value={values.severity}
+      />
+    </tr>
+  </tbody>
+);
+
+export const MonitoringBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
+  <tbody
+    className="fill-block"
+    data-protocol-block="monitoring"
+    onClick={() => onOpenBlock('monitoring')}
+  >
+    <SectionTitle>Наблюдение за состоянием реципиента</SectionTitle>
+    <tr>
+      <td colSpan={6} className="monitor-wrapper">
+        <MonitorTable values={values} />
+      </td>
+    </tr>
+  </tbody>
+);
+
+export const DoctorBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
+  <tbody
+    className="fill-block"
+    data-protocol-block="doctor"
+    onClick={() => onOpenBlock('doctor')}
+  >
+    <tr className="doctor-row">
+      <td colSpan={6} className="span-6">
+        <div className="doctor-inline">
+          <span>Врач, осуществивший трансфузию:</span>
+          {values.doctorName && <span className="doctor-value">{values.doctorName}</span>}
+        </div>
+      </td>
+    </tr>
+  </tbody>
+);

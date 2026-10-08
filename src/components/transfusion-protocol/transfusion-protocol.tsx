@@ -3,11 +3,9 @@ import { FirstPage } from './first-page';
 import { ProtocolEditorModal } from './protocol-editor-modal';
 import { ProtocolToolbar } from './protocol-toolbar';
 import { RecipientDatabaseModal } from './recipient-database-modal';
-import { SecondPage } from './second-page';
+import { ContinuationPage } from './second-page';
 import type { ProtocolBlockId } from './protocol-types';
 import { useProtocolWorkspace } from './use-protocol-workspace';
-
-type PrintPage = 'first' | 'second';
 
 const PROTOCOL_BLOCK_ORDER: ProtocolBlockId[] = [
   'general',
@@ -22,15 +20,25 @@ const PROTOCOL_BLOCK_ORDER: ProtocolBlockId[] = [
   'doctor',
 ];
 
-const INITIAL_FIRST_PAGE_BLOCK_COUNT = 5;
+const INITIAL_PAGES: ProtocolBlockId[][] = [
+  PROTOCOL_BLOCK_ORDER.slice(0, 5),
+  PROTOCOL_BLOCK_ORDER.slice(5),
+];
+
 const PAGE_FIT_TOLERANCE_PX = 2;
+
+const samePages = (left: ProtocolBlockId[][], right: ProtocolBlockId[][]) =>
+  left.length === right.length &&
+  left.every(
+    (page, pageIndex) =>
+      page.length === right[pageIndex]?.length &&
+      page.every((blockId, blockIndex) => blockId === right[pageIndex][blockIndex]),
+  );
 
 export const TransfusionProtocol = () => {
   const workspace = useProtocolWorkspace();
   const sheetsRef = useRef<HTMLDivElement>(null);
-  const [firstPageBlockCount, setFirstPageBlockCount] = useState(
-    INITIAL_FIRST_PAGE_BLOCK_COUNT,
-  );
+  const [pages, setPages] = useState<ProtocolBlockId[][]>(INITIAL_PAGES);
 
   useLayoutEffect(() => {
     const sheets = sheetsRef.current;
@@ -38,7 +46,8 @@ export const TransfusionProtocol = () => {
 
     const updatePagination = () => {
       const firstSheet = sheets.querySelector<HTMLElement>('.sheet--first');
-      if (!firstSheet) return;
+      const continuationSheet = sheets.querySelector<HTMLElement>('.sheet--continuation');
+      if (!firstSheet || !continuationSheet) return;
 
       const blocks = new Map<ProtocolBlockId, HTMLElement>();
       sheets.querySelectorAll<HTMLElement>('[data-protocol-block]').forEach((element) => {
@@ -47,42 +56,67 @@ export const TransfusionProtocol = () => {
       });
 
       const firstBlock = blocks.get(PROTOCOL_BLOCK_ORDER[0]);
-      if (!firstBlock) return;
+      if (!firstBlock || blocks.size !== PROTOCOL_BLOCK_ORDER.length) return;
 
-      const sheetStyle = window.getComputedStyle(firstSheet);
-      const zoom = Number.parseFloat(sheetStyle.zoom) || 1;
-      const paddingBottom = Number.parseFloat(sheetStyle.paddingBottom) * zoom;
-      const sheetBottom = firstSheet.getBoundingClientRect().bottom - paddingBottom;
-      const blocksTop = firstBlock.getBoundingClientRect().top;
-      const availableHeight = sheetBottom - blocksTop;
+      const firstStyle = window.getComputedStyle(firstSheet);
+      const continuationStyle = window.getComputedStyle(continuationSheet);
+      const firstZoom = Number.parseFloat(firstStyle.zoom) || 1;
+      const continuationZoom = Number.parseFloat(continuationStyle.zoom) || 1;
 
-      let usedHeight = 0;
-      let nextCount = 0;
+      const firstPaddingBottom = Number.parseFloat(firstStyle.paddingBottom) * firstZoom;
+      const firstCapacity =
+        firstSheet.getBoundingClientRect().bottom -
+        firstPaddingBottom -
+        firstBlock.getBoundingClientRect().top;
 
-      for (const blockId of PROTOCOL_BLOCK_ORDER) {
+      const continuationCapacity =
+        (continuationSheet.clientHeight -
+          Number.parseFloat(continuationStyle.paddingTop) -
+          Number.parseFloat(continuationStyle.paddingBottom)) *
+        continuationZoom;
+
+      if (firstCapacity <= 0 || continuationCapacity <= 0) return;
+
+      const nextPages: ProtocolBlockId[][] = [];
+      let currentPage: ProtocolBlockId[] = [];
+      let currentHeight = 0;
+      let currentCapacity = firstCapacity;
+
+      PROTOCOL_BLOCK_ORDER.forEach((blockId) => {
         const block = blocks.get(blockId);
-        if (!block) continue;
+        if (!block) return;
 
         const blockHeight = block.getBoundingClientRect().height;
-        const fits =
-          nextCount === 0 ||
-          usedHeight + blockHeight <= availableHeight + PAGE_FIT_TOLERANCE_PX;
+        const fitsCurrentPage =
+          currentPage.length === 0 ||
+          currentHeight + blockHeight <= currentCapacity + PAGE_FIT_TOLERANCE_PX;
 
-        if (!fits) break;
-        usedHeight += blockHeight;
-        nextCount += 1;
-      }
+        if (!fitsCurrentPage) {
+          nextPages.push(currentPage);
+          currentPage = [];
+          currentHeight = 0;
+          currentCapacity = continuationCapacity;
+        }
 
-      nextCount = Math.max(1, nextCount);
-      setFirstPageBlockCount((current) => (current === nextCount ? current : nextCount));
+        currentPage.push(blockId);
+        currentHeight += blockHeight;
+      });
+
+      if (currentPage.length) nextPages.push(currentPage);
+
+      // Keep a continuation sheet available for measurement and for the
+      // protocol's normal two-page layout even if all blocks happen to fit.
+      if (nextPages.length === 1) nextPages.push([]);
+
+      setPages((current) => (samePages(current, nextPages) ? current : nextPages));
     };
 
     updatePagination();
 
     const observer = new ResizeObserver(updatePagination);
-    sheets.querySelectorAll<HTMLElement>('.sheet, [data-protocol-block]').forEach((element) => {
-      observer.observe(element);
-    });
+    sheets
+      .querySelectorAll<HTMLElement>('.sheet, [data-protocol-block]')
+      .forEach((element) => observer.observe(element));
 
     window.addEventListener('resize', updatePagination);
 
@@ -90,20 +124,26 @@ export const TransfusionProtocol = () => {
       observer.disconnect();
       window.removeEventListener('resize', updatePagination);
     };
-  }, [workspace.values, firstPageBlockCount]);
+  }, [pages]);
 
-  const firstPageBlocks = PROTOCOL_BLOCK_ORDER.slice(0, firstPageBlockCount);
-  const secondPageBlocks = PROTOCOL_BLOCK_ORDER.slice(firstPageBlockCount);
-
-  const printPage = (page: PrintPage) => {
+  const printPage = (pageIndex: number) => {
     const root = document.documentElement;
+    const sheetElements = Array.from(
+      document.querySelectorAll<HTMLElement>('.sheets .sheet'),
+    );
+
+    sheetElements.forEach((sheet, index) => {
+      if (index !== pageIndex) sheet.dataset.printHidden = 'true';
+    });
+
     const afterPrint = () => {
       delete root.dataset.printPage;
+      sheetElements.forEach((sheet) => delete sheet.dataset.printHidden);
       window.removeEventListener('afterprint', afterPrint);
       void workspace.saveToDatabase(true);
     };
 
-    root.dataset.printPage = page;
+    root.dataset.printPage = String(pageIndex + 1);
     window.addEventListener('afterprint', afterPrint);
     window.print();
   };
@@ -115,21 +155,25 @@ export const TransfusionProtocol = () => {
         onClear={workspace.clearForm}
         onOpenRegistry={() => workspace.setRegistryOpen(true)}
         onSave={() => void workspace.saveToDatabase()}
-        onPrintFirst={() => printPage('first')}
-        onPrintSecond={() => printPage('second')}
+        pageCount={pages.length}
+        onPrintPage={printPage}
       />
 
       <div ref={sheetsRef} className="sheets">
         <FirstPage
           values={workspace.values}
           onOpenBlock={workspace.setActiveBlock}
-          blockIds={firstPageBlocks}
+          blockIds={pages[0] ?? []}
         />
-        <SecondPage
-          values={workspace.values}
-          onOpenBlock={workspace.setActiveBlock}
-          blockIds={secondPageBlocks}
-        />
+        {pages.slice(1).map((blockIds, index) => (
+          <ContinuationPage
+            key={index + 2}
+            pageNumber={index + 2}
+            values={workspace.values}
+            onOpenBlock={workspace.setActiveBlock}
+            blockIds={blockIds}
+          />
+        ))}
       </div>
 
       {workspace.activeBlock && (

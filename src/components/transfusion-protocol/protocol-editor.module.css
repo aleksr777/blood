@@ -60,6 +60,10 @@
   resize: vertical;
 }
 
+.historyGrid textarea {
+  resize: none;
+}
+
 .grid input:focus,
 .grid textarea:focus {
   border-color: #2563eb;

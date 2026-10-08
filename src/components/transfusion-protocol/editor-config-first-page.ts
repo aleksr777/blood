@@ -71,7 +71,19 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationPlasmaFibrinogenLow', label: 'indicationPlasmaFibrinogenLow' },
       { name: 'indicationPlasmaOther', label: 'indicationPlasmaOther' },
       { name: 'indicationPlasmaOtherText', label: 'indicationPlasmaOtherText' },
-      { name: 'indicationPlateletReason', label: 'indicationPlateletReason' },
+      {
+        name: 'indicationPlateletHemorrhagicSyndrome',
+        label: 'indicationPlateletHemorrhagicSyndrome',
+      },
+      {
+        name: 'indicationPlateletHighBleedingRisk',
+        label: 'indicationPlateletHighBleedingRisk',
+      },
+      {
+        name: 'indicationPlateletThrombocytopenia',
+        label: 'indicationPlateletThrombocytopenia',
+      },
+      { name: 'indicationPlateletCount', label: 'indicationPlateletCount' },
       { name: 'indicationPlateletOther', label: 'indicationPlateletOther' },
       { name: 'indicationPlateletOtherText', label: 'indicationPlateletOtherText' },
     ],

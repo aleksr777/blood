@@ -34,8 +34,13 @@ button {
   font: inherit;
 }
 
-dialog textarea {
+textarea {
+  width: 100%;
+  height: 6.5rem !important;
+  min-height: 6.5rem !important;
+  max-height: 6.5rem !important;
   max-width: 100%;
+  resize: none !important;
 }
 
 .app-shell {

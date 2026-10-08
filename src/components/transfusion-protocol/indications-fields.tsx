@@ -13,39 +13,41 @@ export const IndicationsFields = ({ values, onChange }: IndicationProps) => {
   return (
     <IndicationsAutoHeight>
       <div className={styles.root}>
-      <fieldset className={styles.componentGroup}>
-        <legend>Компонент крови</legend>
-        <div className={styles.componentChoices}>
-          {INDICATION_COMPONENTS.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              className={styles.componentButton}
-              data-component={value}
-              data-selected={component === value}
-              aria-pressed={component === value}
-              onClick={() => onChange({ indicationComponent: value })}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </fieldset>
+        <fieldset className={styles.componentGroup}>
+          <legend>Компонент крови</legend>
+          <div className={styles.componentChoices}>
+            {INDICATION_COMPONENTS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                className={styles.componentButton}
+                data-component={value}
+                data-selected={component === value}
+                aria-pressed={component === value}
+                onClick={() => onChange({ indicationComponent: value })}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
 
-      {component && (
-        <>
-          <CommonIndications values={values} onChange={onChange} />
-          {component === 'erythrocytes' && (
-            <ErythrocyteIndications values={values} onChange={onChange} />
-          )}
-          {component === 'plasma-cryo' && (
-            <PlasmaIndications values={values} onChange={onChange} />
-          )}
-          {component === 'platelets' && (
-            <PlateletIndications values={values} onChange={onChange} />
-          )}
-        </>
-      )}
+        {component && (
+          <fieldset className={styles.group}>
+            <div className={styles.choiceGrid}>
+              <CommonIndications values={values} onChange={onChange} />
+              {component === 'erythrocytes' && (
+                <ErythrocyteIndications values={values} onChange={onChange} />
+              )}
+              {component === 'plasma-cryo' && (
+                <PlasmaIndications values={values} onChange={onChange} />
+              )}
+              {component === 'platelets' && (
+                <PlateletIndications values={values} onChange={onChange} />
+              )}
+            </div>
+          </fieldset>
+        )}
       </div>
     </IndicationsAutoHeight>
   );

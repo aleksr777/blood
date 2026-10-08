@@ -27,9 +27,6 @@ export const formatIndications = (values: ProtocolValues) => {
   if (yes(values.indicationOngoingBleeding)) items.push('Продолжающееся кровотечение');
 
   if (values.indicationComponent === 'erythrocytes') {
-    if (yes(values.indicationRbcSevereAnemia) || yes(values.indicationRbcReplacement)) {
-      items.push('Тяжёлый анемический синдром');
-    }
     if (yes(values.indicationRbcCirculatoryDisturbances)) {
       items.push('Циркуляторные нарушения');
     }

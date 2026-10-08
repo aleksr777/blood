@@ -47,7 +47,8 @@ export const OtherChoice = ({
     {checked && (
       <textarea
         className={styles.otherText}
-        rows={2}
+        name={`${name}Text`}
+        rows={4}
         value={text}
         onChange={(event) => onChange({ [`${name}Text`]: event.target.value })}
       />

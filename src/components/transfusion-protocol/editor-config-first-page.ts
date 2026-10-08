@@ -99,17 +99,23 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     title: 'Анамнез реципиента',
     size: 'large',
     fields: [
+      { name: 'previousTransfusionsStatus', label: 'previousTransfusionsStatus' },
       {
         name: 'previousTransfusions',
         label: 'Трансфузии компонентов крови в анамнезе',
         type: 'textarea',
         wide: true,
       },
+      { name: 'previousReactionsStatus', label: 'previousReactionsStatus' },
       {
         name: 'previousReactions',
         label: 'Реакции и осложнения на трансфузии в анамнезе',
         type: 'textarea',
         wide: true,
+      },
+      {
+        name: 'individualSelectionHistoryStatus',
+        label: 'individualSelectionHistoryStatus',
       },
       {
         name: 'individualSelectionHistory',

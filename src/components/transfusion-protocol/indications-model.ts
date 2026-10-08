@@ -27,9 +27,8 @@ export const formatIndications = (values: ProtocolValues) => {
   if (yes(values.indicationOngoingBleeding)) items.push('Продолжающееся кровотечение');
 
   if (values.indicationComponent === 'erythrocytes') {
-    if (yes(values.indicationRbcSevereAnemia)) items.push('Тяжёлая декомпенсированная анемия');
-    if (yes(values.indicationRbcReplacement)) {
-      items.push('Восполнение количества циркулирующих эритроцитов');
+    if (yes(values.indicationRbcSevereAnemia) || yes(values.indicationRbcReplacement)) {
+      items.push('Тяжёлый анемический синдром');
     }
     if (values.indicationRbcThreshold === '70-25') items.push('Hb <70 г/л и Hct <25%');
     if (values.indicationRbcThreshold === 'custom') {

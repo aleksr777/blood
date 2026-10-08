@@ -327,7 +327,7 @@ textarea {
 }
 
 .row-history td {
-  height: 22mm;
+  height: auto;
 }
 
 .row-donor-main td {

@@ -40,7 +40,7 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
 
   return (
     <Modal title={config.title} onClose={handleClose} className={styles[config.size]}>
-      <div className={styles.grid}>
+      <div className={[styles.grid, blockId === 'history' ? styles.historyGrid : ''].filter(Boolean).join(' ')}>
         {blockId === 'examination' ? (
           <RecipientExaminationFields values={draft} onChange={changeValues} />
         ) : blockId === 'indications' ? (

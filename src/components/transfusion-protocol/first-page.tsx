@@ -1,8 +1,11 @@
-import { GeneralBlock, ExaminationBlock, IndicationsBlock } from './first-page-blocks-primary';
-import { DonorBlock, HistoryBlock } from './first-page-blocks-secondary';
-import type { ProtocolPageProps } from './protocol-types';
+import { ProtocolBlocks } from './protocol-blocks';
+import type { ProtocolBlockId, ProtocolPageProps } from './protocol-types';
 
-export const FirstPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
+type Props = ProtocolPageProps & {
+  blockIds: ProtocolBlockId[];
+};
+
+export const FirstPage = ({ values, onOpenBlock, blockIds }: Props) => (
   <section className="sheet sheet--first" aria-label="Первая страница протокола трансфузии">
     <div className="legal-note">
       <div>
@@ -24,11 +27,7 @@ export const FirstPage = ({ values, onOpenBlock }: ProtocolPageProps) => (
         </tr>
       </tbody>
 
-      <GeneralBlock values={values} onOpenBlock={onOpenBlock} />
-      <ExaminationBlock values={values} onOpenBlock={onOpenBlock} />
-      <IndicationsBlock values={values} onOpenBlock={onOpenBlock} />
-      <HistoryBlock values={values} onOpenBlock={onOpenBlock} />
-      <DonorBlock values={values} onOpenBlock={onOpenBlock} />
+      <ProtocolBlocks blockIds={blockIds} values={values} onOpenBlock={onOpenBlock} />
     </table>
   </section>
 );

@@ -21,12 +21,11 @@ const joinIndications = (items: string[]) => {
 export const formatIndications = (values: ProtocolValues) => {
   const items: string[] = [];
 
-  if (values.indicationBloodLoss === 'custom' && values.indicationBloodLossPercent) {
-    items.push(`Острая кровопотеря более ${values.indicationBloodLossPercent}% ОЦК`);
-  }
-  if (yes(values.indicationOngoingBleeding)) items.push('Продолжающееся кровотечение');
-
   if (values.indicationComponent === 'erythrocytes') {
+    if (values.indicationRbcBloodLoss === 'custom' && values.indicationRbcBloodLossPercent) {
+      items.push(`Острая кровопотеря более ${values.indicationRbcBloodLossPercent}% ОЦК`);
+    }
+    if (yes(values.indicationRbcOngoingBleeding)) items.push('Продолжающееся кровотечение');
     if (yes(values.indicationRbcCirculatoryDisturbances)) {
       items.push('Циркуляторные нарушения');
     }
@@ -45,6 +44,13 @@ export const formatIndications = (values: ProtocolValues) => {
   }
 
   if (values.indicationComponent === 'plasma-cryo') {
+    if (
+      values.indicationPlasmaBloodLoss === 'custom' &&
+      values.indicationPlasmaBloodLossPercent
+    ) {
+      items.push(`Острая кровопотеря более ${values.indicationPlasmaBloodLossPercent}% ОЦК`);
+    }
+    if (yes(values.indicationPlasmaOngoingBleeding)) items.push('Продолжающееся кровотечение');
     if (yes(values.indicationPlasmaFactorDeficiency)) {
       items.push('Дефицит плазменных факторов свёртывания крови');
     }
@@ -60,6 +66,15 @@ export const formatIndications = (values: ProtocolValues) => {
   }
 
   if (values.indicationComponent === 'platelets') {
+    if (
+      values.indicationPlateletBloodLoss === 'custom' &&
+      values.indicationPlateletBloodLossPercent
+    ) {
+      items.push(`Острая кровопотеря более ${values.indicationPlateletBloodLossPercent}% ОЦК`);
+    }
+    if (yes(values.indicationPlateletOngoingBleeding)) {
+      items.push('Продолжающееся кровотечение');
+    }
     if (yes(values.indicationPlateletHemorrhagicSyndrome)) {
       items.push('Геморрагический синдром');
     }

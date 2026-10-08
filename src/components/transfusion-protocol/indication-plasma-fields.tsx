@@ -2,8 +2,8 @@ import { Choice, OtherChoice, type IndicationProps } from './indication-controls
 
 const PLASMA_OPTIONS = [
   ['indicationPlasmaFactorDeficiency', 'Дефицит плазменных факторов свёртывания крови'],
-  ['indicationPlasmaAnticoagulantOverdose', 'Передозировка антикоагулянтов непрямого действия'],
-  ['indicationPlasmaPlasmapheresis', 'Выполнение терапевтического плазмафереза'],
+  ['indicationPlasmaFibrinogenBleeding', 'Фибриноген менее 1,5 г/л при кровотечении'],
+  ['indicationPlasmaFibrinogenLow', 'Фибриноген менее 1 г/л'],
 ] as const;
 
 export const PlasmaIndications = ({ values, onChange }: IndicationProps) => (

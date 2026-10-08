@@ -140,9 +140,11 @@
 
 .shortNumber {
   width: 4.25rem !important;
-  min-height: 1.85rem !important;
+  height: 1.45rem !important;
+  min-height: 1.45rem !important;
   border-radius: 0.35rem !important;
-  padding: 0.2rem 0.35rem !important;
+  padding: 0.05rem 0.35rem !important;
+  line-height: 1.2;
   text-align: center;
 }
 

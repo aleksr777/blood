@@ -157,11 +157,12 @@
   box-sizing: border-box;
   width: calc(100% - 1.55rem);
   max-width: calc(100% - 1.55rem);
+  height: 6.5rem !important;
   min-height: 6.5rem !important;
-  max-height: min(16rem, 40dvh) !important;
+  max-height: 6.5rem !important;
   margin: 0.4rem 0 0 1.55rem;
   overflow: auto;
-  resize: vertical;
+  resize: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

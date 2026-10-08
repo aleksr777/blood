@@ -22,7 +22,7 @@ export const formatIndications = (values: ProtocolValues) => {
   const items: string[] = [];
 
   if (values.indicationBloodLoss === 'custom' && values.indicationBloodLossPercent) {
-    items.push(`Острая кровопотеря >${values.indicationBloodLossPercent}% ОЦК`);
+    items.push(`Острая кровопотеря более ${values.indicationBloodLossPercent}% ОЦК`);
   }
   if (yes(values.indicationOngoingBleeding)) items.push('Продолжающееся кровотечение');
 

@@ -48,11 +48,11 @@ export const formatIndications = (values: ProtocolValues) => {
     if (yes(values.indicationPlasmaFactorDeficiency)) {
       items.push('Дефицит плазменных факторов свёртывания крови');
     }
-    if (yes(values.indicationPlasmaAnticoagulantOverdose)) {
-      items.push('Передозировка антикоагулянтов непрямого действия');
+    if (yes(values.indicationPlasmaFibrinogenBleeding)) {
+      items.push('Фибриноген менее 1,5 г/л при кровотечении');
     }
-    if (yes(values.indicationPlasmaPlasmapheresis)) {
-      items.push('Выполнение терапевтического плазмафереза');
+    if (yes(values.indicationPlasmaFibrinogenLow)) {
+      items.push('Фибриноген менее 1 г/л');
     }
     if (yes(values.indicationPlasmaOther) && values.indicationPlasmaOtherText?.trim()) {
       items.push(values.indicationPlasmaOtherText.trim());

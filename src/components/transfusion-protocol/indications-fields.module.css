@@ -43,19 +43,20 @@
 
 .componentChoices {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(3, minmax(0, 10.5rem));
+  justify-content: start;
+  gap: 0.55rem;
 }
 
 .componentButton {
   min-width: 0;
-  min-height: 2.55rem;
+  min-height: 2.15rem;
   border: 2px solid transparent;
-  border-radius: 0.55rem;
-  padding: 0.42rem 0.65rem;
+  border-radius: 0.5rem;
+  padding: 0.3rem 0.55rem;
   cursor: pointer;
   font: inherit;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.2;
   transition:

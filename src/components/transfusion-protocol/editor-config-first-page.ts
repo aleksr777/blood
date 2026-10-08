@@ -55,6 +55,11 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationOngoingBleeding', label: 'indicationOngoingBleeding' },
       { name: 'indicationRbcSevereAnemia', label: 'indicationRbcSevereAnemia' },
       { name: 'indicationRbcReplacement', label: 'indicationRbcReplacement' },
+      {
+        name: 'indicationRbcCirculatoryDisturbances',
+        label: 'indicationRbcCirculatoryDisturbances',
+      },
+      { name: 'indicationRbcHemicHypoxia', label: 'indicationRbcHemicHypoxia' },
       { name: 'indicationRbcThreshold', label: 'indicationRbcThreshold' },
       { name: 'indicationRbcHgb', label: 'indicationRbcHgb' },
       { name: 'indicationRbcHct', label: 'indicationRbcHct' },

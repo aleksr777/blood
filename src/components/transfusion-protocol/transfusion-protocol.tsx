@@ -60,8 +60,9 @@ export const TransfusionProtocol = () => {
 
       const firstStyle = window.getComputedStyle(firstSheet);
       const continuationStyle = window.getComputedStyle(continuationSheet);
-      const firstZoom = Number.parseFloat(firstStyle.zoom) || 1;
-      const continuationZoom = Number.parseFloat(continuationStyle.zoom) || 1;
+      const firstZoom = Number.parseFloat(firstStyle.getPropertyValue('zoom')) || 1;
+      const continuationZoom =
+        Number.parseFloat(continuationStyle.getPropertyValue('zoom')) || 1;
 
       const firstPaddingBottom = Number.parseFloat(firstStyle.paddingBottom) * firstZoom;
       const firstCapacity =

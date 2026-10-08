@@ -32,15 +32,19 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
 
         <div className={styles.choiceRow}>
           <Choice
-            type="radio"
+            type="checkbox"
             name="indicationRbcThreshold"
             checked={thresholdSelected}
             onChange={() =>
-              onChange({
-                indicationRbcThreshold: 'custom',
-                indicationRbcHgb: hgb,
-                indicationRbcHct: hct,
-              })
+              onChange(
+                thresholdSelected
+                  ? { indicationRbcThreshold: '' }
+                  : {
+                      indicationRbcThreshold: 'custom',
+                      indicationRbcHgb: hgb,
+                      indicationRbcHct: hct,
+                    },
+              )
             }
           >
             Снижение Hb менее

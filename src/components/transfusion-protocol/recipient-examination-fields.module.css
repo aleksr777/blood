@@ -100,10 +100,11 @@
 .description textarea {
   box-sizing: border-box;
   width: 100%;
-  min-height: 5rem;
-  max-height: min(12rem, 30dvh);
+  height: 6.5rem;
+  min-height: 6.5rem;
+  max-height: 6.5rem;
   overflow-y: auto;
-  resize: vertical;
+  resize: none;
 }
 
 @media (max-width: 720px) {

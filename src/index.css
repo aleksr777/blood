@@ -151,7 +151,7 @@ button {
   padding-top: 14mm;
 }
 
-.sheet--second {
+.sheet--continuation {
   padding-top: 18mm;
 }
 
@@ -481,8 +481,7 @@ button {
     page-break-after: auto;
   }
 
-  html[data-print-page="first"] .sheet--second,
-  html[data-print-page="second"] .sheet--first {
+  .sheet[data-print-hidden='true'] {
     display: none !important;
   }
 

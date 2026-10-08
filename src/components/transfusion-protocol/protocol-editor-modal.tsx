@@ -4,6 +4,7 @@ import { getProtocolBlockConfig } from './editor-config';
 import { IndicationsFields } from './indications-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { RecipientExaminationFields } from './recipient-examination-fields';
+import { RecipientHistoryFields } from './recipient-history-fields';
 import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
@@ -45,6 +46,8 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
           <RecipientExaminationFields values={draft} onChange={changeValues} />
         ) : blockId === 'indications' ? (
           <IndicationsFields values={draft} onChange={changeValues} />
+        ) : blockId === 'history' ? (
+          <RecipientHistoryFields values={draft} onChange={changeValues} />
         ) : (
           config.fields.map((field) => (
             <ProtocolFieldControl

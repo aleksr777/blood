@@ -8,19 +8,16 @@ export const HistoryBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
     <tr className="row-history">
       <LabeledCell
         colSpan={2}
-        centered
         label="Трансфузии компонентов крови в анамнезе"
         value={formatHistoryValue(values, 'previousTransfusionsStatus', 'previousTransfusions')}
       />
       <LabeledCell
         colSpan={2}
-        centered
         label="Реакции и осложнения на трансфузии в анамнезе"
         value={formatHistoryValue(values, 'previousReactionsStatus', 'previousReactions')}
       />
       <LabeledCell
         colSpan={2}
-        centered
         label="Трансфузии по индивидуальному подбору"
         value={formatHistoryValue(
           values,

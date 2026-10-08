@@ -2,7 +2,7 @@ import { LabeledCell, SectionTitle } from './form-controls';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate } from './protocol-types';
 export const HistoryBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody className="fill-block" onClick={() => onOpenBlock('history')}>
+  <tbody className="fill-block" data-protocol-block="history" onClick={() => onOpenBlock('history')}>
     <SectionTitle>Анамнез реципиента</SectionTitle>
     <tr className="row-history">
       <LabeledCell
@@ -27,7 +27,7 @@ export const HistoryBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
   </tbody>
 );
 export const DonorBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody className="fill-block" onClick={() => onOpenBlock('donor')}>
+  <tbody className="fill-block" data-protocol-block="donor" onClick={() => onOpenBlock('donor')}>
     <SectionTitle>Данные о донорской крови или ее компоненте</SectionTitle>
     <tr className="row-donor-main">
       <LabeledCell
@@ -86,6 +86,7 @@ export const SelectionBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
   <tbody
     className="fill-block"
     data-logical-block="selection"
+    data-protocol-block="selection"
     onClick={() => onOpenBlock('selection')}
   >
     <SectionTitle>Результаты индивидуального подбора</SectionTitle>

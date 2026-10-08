@@ -4,8 +4,6 @@ import styles from './indications-fields.module.css';
 export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) => {
   const threshold = values.indicationRbcThreshold;
   const thresholdSelected = threshold === 'custom' || threshold === '70-25';
-  const severeAnemicSyndrome =
-    values.indicationRbcSevereAnemia === '1' || values.indicationRbcReplacement === '1';
   const circulatoryDisturbances = values.indicationRbcCirculatoryDisturbances === '1';
   const hemicHypoxia = values.indicationRbcHemicHypoxia === '1';
   const hgb = values.indicationRbcHgb || '70';
@@ -15,19 +13,6 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
     <fieldset className={styles.group}>
       <legend>Для эритроцитсодержащих компонентов</legend>
       <div className={styles.choiceGrid}>
-        <Choice
-          type="checkbox"
-          name="indicationRbcSevereAnemia"
-          checked={severeAnemicSyndrome}
-          onChange={() =>
-            onChange({
-              indicationRbcSevereAnemia: severeAnemicSyndrome ? '' : '1',
-              indicationRbcReplacement: '',
-            })
-          }
-        >
-          Тяжёлый анемический синдром
-        </Choice>
         <Choice
           type="checkbox"
           name="indicationRbcCirculatoryDisturbances"

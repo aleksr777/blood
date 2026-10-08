@@ -66,15 +66,6 @@ export const formatIndications = (values: ProtocolValues) => {
   }
 
   if (values.indicationComponent === 'platelets') {
-    if (
-      values.indicationPlateletBloodLoss === 'custom' &&
-      values.indicationPlateletBloodLossPercent
-    ) {
-      items.push(`Острая кровопотеря более ${values.indicationPlateletBloodLossPercent}% ОЦК`);
-    }
-    if (yes(values.indicationPlateletOngoingBleeding)) {
-      items.push('Продолжающееся кровотечение');
-    }
     if (yes(values.indicationPlateletHemorrhagicSyndrome)) {
       items.push('Геморрагический синдром');
     }

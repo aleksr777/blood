@@ -1,8 +1,8 @@
 import type { ProtocolValues } from './protocol-types';
 
 export const INDICATION_COMPONENTS = [
-  { value: 'erythrocytes', label: 'Эритроцитсодержащие компоненты' },
-  { value: 'plasma-cryo', label: 'Плазма / криопреципитат' },
+  { value: 'erythrocytes', label: 'Эритроциты' },
+  { value: 'plasma-cryo', label: 'Плазма' },
   { value: 'platelets', label: 'Тромбоциты' },
 ] as const;
 

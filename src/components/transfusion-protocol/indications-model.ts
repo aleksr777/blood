@@ -60,11 +60,17 @@ export const formatIndications = (values: ProtocolValues) => {
   }
 
   if (values.indicationComponent === 'platelets') {
-    if (values.indicationPlateletReason === 'hemorrhagic') {
-      items.push('Тромбоцитопения, геморрагический синдром');
+    if (yes(values.indicationPlateletHemorrhagicSyndrome)) {
+      items.push('Геморрагический синдром');
     }
-    if (values.indicationPlateletReason === 'high-risk') {
-      items.push('Тромбоцитопения, высокий риск кровотечения');
+    if (yes(values.indicationPlateletHighBleedingRisk)) {
+      items.push('Высокий риск кровотечения');
+    }
+    if (yes(values.indicationPlateletThrombocytopenia)) {
+      const plateletCount = values.indicationPlateletCount?.trim();
+      if (plateletCount) {
+        items.push(`Тромбоцитопения менее ${plateletCount} ×10⁹/л`);
+      }
     }
     if (yes(values.indicationPlateletOther) && values.indicationPlateletOtherText?.trim()) {
       items.push(values.indicationPlateletOtherText.trim());

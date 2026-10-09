@@ -5,10 +5,6 @@
   min-width: 0;
 }
 
-.openedDate {
-  max-width: 20rem;
-}
-
 .reagentList {
   display: grid;
   gap: 0.8rem;
@@ -49,7 +45,4 @@
     grid-template-columns: 1fr;
   }
 
-  .openedDate {
-    max-width: none;
-  }
 }

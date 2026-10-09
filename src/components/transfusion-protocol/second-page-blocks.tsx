@@ -75,30 +75,22 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
     >
       <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
 
-      {!detailedReagents &&
-      (values.reagentNames || values.reagentSeries || values.reagentExpiration) ? (
-        <tr className="row-reagents">
-          <td colSpan={6} className="span-6 reagent-summary">
+      <tr className="row-reagents">
+        <td colSpan={6} className="span-6 reagent-summary">
+          {!detailedReagents &&
+          (values.reagentNames || values.reagentSeries || values.reagentExpiration) ? (
             <LegacyReagentDetails values={values} />
-          </td>
-        </tr>
-      ) : (
-        <>
-          <tr className="row-reagent-opened">
-            <td colSpan={6} className="span-6">
+          ) : (
+            <>
               <div className="reagent-opened-date">
                 <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
                 {values.reagentVialsOpenedDate && (
                   <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
                 )}
               </div>
-            </td>
-          </tr>
 
-          {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
-            <tr className="row-reagent-item" key={title}>
-              <td colSpan={6} className="span-6">
-                <div className="reagent-item">
+              {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
+                <div className="reagent-item" key={title}>
                   <div className="reagent-name">{title}</div>
                   <div className="reagent-inline-fields">
                     <span className="reagent-label">серия:</span>
@@ -109,11 +101,11 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
                     <span className="reagent-value">{values[manufacturer] ?? ''}</span>
                   </div>
                 </div>
-              </td>
-            </tr>
-          ))}
-        </>
-      )}
+              ))}
+            </>
+          )}
+        </td>
+      </tr>
 
       <tr className="row-tests">
         <LabeledCell

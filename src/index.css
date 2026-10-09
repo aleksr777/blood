@@ -424,7 +424,12 @@ input[type='radio']:checked:disabled {
 }
 
 .reagent-summary {
+  width: 100%;
+}
+
+.reagent-summary-content {
   display: grid;
+  width: 100%;
   gap: 1.3mm;
 }
 

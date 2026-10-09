@@ -40,14 +40,18 @@
   overflow: hidden;
 }
 
-.modal textarea {
-  opacity: 1;
-  transition: opacity 120ms ease;
-}
-
-.modal textarea[data-modal-textarea-entering='true'] {
+.modal [data-modal-content-entering] {
   visibility: hidden;
   opacity: 0;
+}
+
+.modal [data-modal-content-entering],
+.modal [data-modal-content-entering] * {
+  pointer-events: none;
+}
+
+.modal [data-modal-content-entering] {
+  transition: opacity 140ms ease;
 }
 
 
@@ -122,12 +126,9 @@
       transform 0.2s ease;
   }
 
-  .modal textarea {
-    transition: none;
-  }
-
-  .modal textarea[data-modal-textarea-entering='true'] {
+  .modal [data-modal-content-entering] {
     visibility: visible;
     opacity: 1;
+    transition: none;
   }
 }

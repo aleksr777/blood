@@ -83,12 +83,7 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
               <LegacyReagentDetails values={values} />
             ) : (
               <>
-                <div className="reagent-opened-date">
-                  <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
-                  {values.reagentVialsOpenedDate && (
-                    <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
-                  )}
-                </div>
+                <div className="reagent-name">Наименования реагентов</div>
 
                 {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
                   <div className="reagent-item" key={title}>
@@ -103,6 +98,13 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
                     </div>
                   </div>
                 ))}
+
+                <div className="reagent-opened-date">
+                  <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
+                  {values.reagentVialsOpenedDate && (
+                    <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
+                  )}
+                </div>
               </>
             )}
           </div>

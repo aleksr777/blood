@@ -37,12 +37,9 @@ const REAGENT_ROWS = [
 ] as const;
 
 const hasDetailedReagents = (values: ProtocolValues) =>
-  Boolean(
-    values.reagentVialsOpenedDate ||
-      REAGENT_ROWS.some(
-        ({ series, expiration, manufacturer }) =>
-          values[series] || values[expiration] || values[manufacturer],
-      ),
+  REAGENT_ROWS.some(
+    ({ series, expiration, manufacturer }) =>
+      values[series] || values[expiration] || values[manufacturer],
   );
 
 const LegacyReagentDetails = ({ values }: { values: ProtocolValues }) => (
@@ -99,12 +96,6 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
                   </div>
                 ))}
 
-                <div className="reagent-opened-date">
-                  <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
-                  {values.reagentVialsOpenedDate && (
-                    <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
-                  )}
-                </div>
               </>
             )}
           </div>

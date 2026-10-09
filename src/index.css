@@ -469,6 +469,10 @@ input[type='radio']:checked:disabled {
   white-space: pre-wrap;
 }
 
+.row-confirmed-blood-groups td {
+  height: auto;
+}
+
 .row-tests td {
   height: 22mm;
 }

@@ -1,17 +1,54 @@
 import { LabeledCell, SectionTitle } from './form-controls';
 import { MonitorTable } from './monitor-table';
-import type { ProtocolPageProps } from './protocol-types';
+import type { ProtocolPageProps, ProtocolValues } from './protocol-types';
 import { formatDate } from './protocol-types';
 
-export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody
-    className="fill-block"
-    data-protocol-block="compatibilityTests"
-    onClick={() => onOpenBlock('compatibilityTests')}
-  >
-    <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
-    <tr className="row-reagents">
-      <td colSpan={6} className="span-6 reagent-summary">
+const REAGENT_ROWS = [
+  {
+    title: 'Цоликлон "анти-A"',
+    series: 'reagentAntiASeries',
+    expiration: 'reagentAntiAExpiration',
+    manufacturer: 'reagentAntiAManufacturer',
+  },
+  {
+    title: 'Цоликлон "анти-B"',
+    series: 'reagentAntiBSeries',
+    expiration: 'reagentAntiBExpiration',
+    manufacturer: 'reagentAntiBManufacturer',
+  },
+  {
+    title: 'Цоликлон "анти-AB"',
+    series: 'reagentAntiABSeries',
+    expiration: 'reagentAntiABExpiration',
+    manufacturer: 'reagentAntiABManufacturer',
+  },
+  {
+    title: 'Цоликлон "анти-D"',
+    series: 'reagentAntiDSeries',
+    expiration: 'reagentAntiDExpiration',
+    manufacturer: 'reagentAntiDManufacturer',
+  },
+  {
+    title: 'Полиглюкин 33%',
+    series: 'polyglukinSeries',
+    expiration: 'polyglukinExpiration',
+    manufacturer: 'polyglukinManufacturer',
+  },
+] as const;
+
+const hasDetailedReagents = (values: ProtocolValues) =>
+  Boolean(
+    values.reagentVialsOpenedDate ||
+      REAGENT_ROWS.some(
+        ({ series, expiration, manufacturer }) =>
+          values[series] || values[expiration] || values[manufacturer],
+      ),
+  );
+
+const ReagentDetails = ({ values }: { values: ProtocolValues }) => {
+  if (!hasDetailedReagents(values) && (values.reagentNames || values.reagentSeries || values.reagentExpiration)) {
+    return (
+      <>
         <div className="reagent-line">
           <span className="reagent-label">Наименования реагентов:</span>
           {values.reagentNames && <span className="reagent-value">{values.reagentNames}</span>}
@@ -26,6 +63,46 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
             <span className="reagent-value">{formatDate(values.reagentExpiration)}</span>
           )}
         </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="reagent-opened-date">
+        <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
+        {values.reagentVialsOpenedDate && (
+          <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
+        )}
+      </div>
+
+      {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
+        <div className="reagent-item" key={title}>
+          <div className="reagent-name">{title}</div>
+          <div className="reagent-inline-fields">
+            <span className="reagent-label">серия:</span>
+            <span className="reagent-value">{values[series] ?? ''}</span>
+            <span className="reagent-label">годен до:</span>
+            <span className="reagent-value">{formatDate(values[expiration])}</span>
+            <span className="reagent-label">производитель:</span>
+            <span className="reagent-value">{values[manufacturer] ?? ''}</span>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+};
+
+export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
+  <tbody
+    className="fill-block"
+    data-protocol-block="compatibilityTests"
+    onClick={() => onOpenBlock('compatibilityTests')}
+  >
+    <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
+    <tr className="row-reagents">
+      <td colSpan={6} className="span-6 reagent-summary">
+        <ReagentDetails values={values} />
       </td>
     </tr>
     <tr className="row-tests">

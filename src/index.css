@@ -419,7 +419,9 @@ input[type='radio']:checked:disabled {
 
 
 
-.row-reagents td {
+.row-reagents td,
+.row-reagent-opened td,
+.row-reagent-item td {
   height: auto;
 }
 
@@ -437,13 +439,12 @@ input[type='radio']:checked:disabled {
 }
 
 .reagent-opened-date {
-  margin-bottom: 0.6mm;
+  min-height: 4.5mm;
 }
 
 .reagent-item {
   display: grid;
-  gap: 0.5mm;
-  padding-top: 0.3mm;
+  gap: 0.7mm;
 }
 
 .reagent-name {

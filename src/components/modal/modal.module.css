@@ -51,7 +51,8 @@
 }
 
 .modal [data-modal-content-entering] {
-  transition: opacity 140ms ease;
+  will-change: opacity;
+  transition: opacity 160ms ease;
 }
 
 

@@ -89,6 +89,7 @@ export const useModalAutoHeight = (
         const hasEnteringContent = Boolean(
           content.querySelector('[data-modal-content-entering]'),
         );
+        const sizeAnimating = dialog.dataset.sizeAnimating === 'true';
 
         dialog.dataset.sizeScrollable = String(
           naturalHeight > maximumHeight + SIZE_TOLERANCE_PX,
@@ -108,7 +109,16 @@ export const useModalAutoHeight = (
             readyFrame = null;
             dialog.dataset.sizeReady = 'true';
           });
-        } else if (hasEnteringContent && (!heightChanged || reducedMotion)) {
+        } else if (
+          hasEnteringContent &&
+          reducedMotion
+        ) {
+          revealEnteringContent();
+        } else if (
+          hasEnteringContent &&
+          !heightChanged &&
+          !sizeAnimating
+        ) {
           revealEnteringContent();
         }
       });

@@ -8,12 +8,12 @@ const parsePixels = (value: string) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const getAddedTextareas = (node: Node) => {
-  if (node instanceof HTMLTextAreaElement) return [node];
-  if (node instanceof HTMLElement) {
-    return Array.from(node.querySelectorAll<HTMLTextAreaElement>('textarea'));
-  }
-  return [];
+const getAddedElements = (node: Node) => {
+  if (!(node instanceof HTMLElement)) return [];
+
+  // Fade the highest newly-added node only. Its descendants remain hidden with it
+  // and participate in layout, so the modal can measure the final height first.
+  return [node];
 };
 
 export const useModalAutoHeight = (
@@ -25,19 +25,28 @@ export const useModalAutoHeight = (
     const content = contentRef.current;
     if (!dialog || !content) return undefined;
 
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let measureFrame: number | null = null;
     let readyFrame: number | null = null;
     let settleTimer: number | null = null;
+    let revealFrame: number | null = null;
     let initialized = false;
     let previousHeight: number | null = null;
 
-    const revealEnteringTextareas = () => {
-      content
-        .querySelectorAll<HTMLTextAreaElement>('textarea[data-modal-textarea-entering]')
-        .forEach((textarea) => {
-          delete textarea.dataset.modalTextareaEntering;
-        });
-      delete dialog.dataset.sizeAnimating;
+    const revealEnteringContent = () => {
+      if (revealFrame !== null) {
+        window.cancelAnimationFrame(revealFrame);
+      }
+
+      revealFrame = window.requestAnimationFrame(() => {
+        revealFrame = null;
+        content
+          .querySelectorAll<HTMLElement>('[data-modal-content-entering]')
+          .forEach((element) => {
+            delete element.dataset.modalContentEntering;
+          });
+        delete dialog.dataset.sizeAnimating;
+      });
 
       if (settleTimer !== null) {
         window.clearTimeout(settleTimer);
@@ -50,7 +59,7 @@ export const useModalAutoHeight = (
         window.clearTimeout(settleTimer);
       }
       settleTimer = window.setTimeout(
-        revealEnteringTextareas,
+        revealEnteringContent,
         SIZE_TRANSITION_FALLBACK_MS,
       );
     };
@@ -77,15 +86,15 @@ export const useModalAutoHeight = (
         const heightChanged =
           previousHeight !== null &&
           Math.abs(targetHeight - previousHeight) > SIZE_TOLERANCE_PX;
-        const hasEnteringTextarea = Boolean(
-          content.querySelector('textarea[data-modal-textarea-entering]'),
+        const hasEnteringContent = Boolean(
+          content.querySelector('[data-modal-content-entering]'),
         );
 
         dialog.dataset.sizeScrollable = String(
           naturalHeight > maximumHeight + SIZE_TOLERANCE_PX,
         );
 
-        if (initialized && heightChanged && hasEnteringTextarea) {
+        if (initialized && heightChanged && hasEnteringContent && !reducedMotion) {
           dialog.dataset.sizeAnimating = 'true';
           armRevealFallback();
         }
@@ -99,8 +108,8 @@ export const useModalAutoHeight = (
             readyFrame = null;
             dialog.dataset.sizeReady = 'true';
           });
-        } else if (hasEnteringTextarea && !heightChanged) {
-          revealEnteringTextareas();
+        } else if (hasEnteringContent && (!heightChanged || reducedMotion)) {
+          revealEnteringContent();
         }
       });
     };
@@ -108,18 +117,25 @@ export const useModalAutoHeight = (
     const contentMutationObserver = new MutationObserver((mutations) => {
       if (!initialized) return;
 
+      let hasNewContent = false;
+
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          getAddedTextareas(node).forEach((textarea) => {
-            textarea.dataset.modalTextareaEntering = 'true';
+          getAddedElements(node).forEach((element) => {
+            // Ignore nodes already covered by a newly-added hidden ancestor.
+            if (element.parentElement?.closest('[data-modal-content-entering]')) return;
+            element.dataset.modalContentEntering = 'true';
+            hasNewContent = true;
           });
         });
       });
+
+      if (hasNewContent) updateHeight();
     });
 
     const handleTransitionEnd = (event: TransitionEvent) => {
       if (event.target !== dialog || event.propertyName !== 'height') return;
-      revealEnteringTextareas();
+      revealEnteringContent();
     };
 
     updateHeight();
@@ -136,6 +152,9 @@ export const useModalAutoHeight = (
       }
       if (readyFrame !== null) {
         window.cancelAnimationFrame(readyFrame);
+      }
+      if (revealFrame !== null) {
+        window.cancelAnimationFrame(revealFrame);
       }
       if (settleTimer !== null) {
         window.clearTimeout(settleTimer);

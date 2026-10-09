@@ -10,27 +10,23 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
     onClick={() => onOpenBlock('compatibilityTests')}
   >
     <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
-    <tr>
-      <LabeledCell
-        colSpan={6}
-        className="span-6"
-        label="Наименования реагентов"
-        value={values.reagentNames}
-      />
-    </tr>
-    <tr>
-      <LabeledCell
-        colSpan={4}
-        className="span-4"
-        label="N серии реагента"
-        value={values.reagentSeries}
-      />
-      <LabeledCell
-        colSpan={2}
-        className="span-2"
-        label="Срок годности"
-        value={formatDate(values.reagentExpiration)}
-      />
+    <tr className="row-reagents">
+      <td colSpan={6} className="span-6 reagent-summary">
+        <div className="reagent-line">
+          <span className="reagent-label">Наименования реагентов:</span>
+          {values.reagentNames && <span className="reagent-value">{values.reagentNames}</span>}
+        </div>
+        <div className="reagent-line">
+          <span className="reagent-label">N серии реагента:</span>
+          {values.reagentSeries && <span className="reagent-value">{values.reagentSeries}</span>}
+        </div>
+        <div className="reagent-line">
+          <span className="reagent-label">Срок годности:</span>
+          {values.reagentExpiration && (
+            <span className="reagent-value">{formatDate(values.reagentExpiration)}</span>
+          )}
+        </div>
+      </td>
     </tr>
     <tr className="row-tests">
       <LabeledCell

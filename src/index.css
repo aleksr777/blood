@@ -419,9 +419,7 @@ input[type='radio']:checked:disabled {
 
 
 
-.row-reagents td,
-.row-reagent-opened td,
-.row-reagent-item td {
+.row-reagents td {
   height: auto;
 }
 

@@ -45,84 +45,95 @@ const hasDetailedReagents = (values: ProtocolValues) =>
       ),
   );
 
-const ReagentDetails = ({ values }: { values: ProtocolValues }) => {
-  if (!hasDetailedReagents(values) && (values.reagentNames || values.reagentSeries || values.reagentExpiration)) {
-    return (
-      <>
-        <div className="reagent-line">
-          <span className="reagent-label">Наименования реагентов:</span>
-          {values.reagentNames && <span className="reagent-value">{values.reagentNames}</span>}
-        </div>
-        <div className="reagent-line">
-          <span className="reagent-label">N серии реагента:</span>
-          {values.reagentSeries && <span className="reagent-value">{values.reagentSeries}</span>}
-        </div>
-        <div className="reagent-line">
-          <span className="reagent-label">Срок годности:</span>
-          {values.reagentExpiration && (
-            <span className="reagent-value">{formatDate(values.reagentExpiration)}</span>
-          )}
-        </div>
-      </>
-    );
-  }
+const LegacyReagentDetails = ({ values }: { values: ProtocolValues }) => (
+  <>
+    <div className="reagent-line">
+      <span className="reagent-label">Наименования реагентов:</span>
+      {values.reagentNames && <span className="reagent-value">{values.reagentNames}</span>}
+    </div>
+    <div className="reagent-line">
+      <span className="reagent-label">N серии реагента:</span>
+      {values.reagentSeries && <span className="reagent-value">{values.reagentSeries}</span>}
+    </div>
+    <div className="reagent-line">
+      <span className="reagent-label">Срок годности:</span>
+      {values.reagentExpiration && (
+        <span className="reagent-value">{formatDate(values.reagentExpiration)}</span>
+      )}
+    </div>
+  </>
+);
+
+export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => {
+  const detailedReagents = hasDetailedReagents(values);
 
   return (
-    <>
-      <div className="reagent-opened-date">
-        <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
-        {values.reagentVialsOpenedDate && (
-          <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
-        )}
-      </div>
+    <tbody
+      className="fill-block"
+      data-protocol-block="compatibilityTests"
+      onClick={() => onOpenBlock('compatibilityTests')}
+    >
+      <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
 
-      {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
-        <div className="reagent-item" key={title}>
-          <div className="reagent-name">{title}</div>
-          <div className="reagent-inline-fields">
-            <span className="reagent-label">серия:</span>
-            <span className="reagent-value">{values[series] ?? ''}</span>
-            <span className="reagent-label">годен до:</span>
-            <span className="reagent-value">{formatDate(values[expiration])}</span>
-            <span className="reagent-label">производитель:</span>
-            <span className="reagent-value">{values[manufacturer] ?? ''}</span>
-          </div>
-        </div>
-      ))}
-    </>
+      {!detailedReagents &&
+      (values.reagentNames || values.reagentSeries || values.reagentExpiration) ? (
+        <tr className="row-reagents">
+          <td colSpan={6} className="span-6 reagent-summary">
+            <LegacyReagentDetails values={values} />
+          </td>
+        </tr>
+      ) : (
+        <>
+          <tr className="row-reagent-opened">
+            <td colSpan={6} className="span-6">
+              <div className="reagent-opened-date">
+                <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
+                {values.reagentVialsOpenedDate && (
+                  <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
+                )}
+              </div>
+            </td>
+          </tr>
+
+          {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
+            <tr className="row-reagent-item" key={title}>
+              <td colSpan={6} className="span-6">
+                <div className="reagent-item">
+                  <div className="reagent-name">{title}</div>
+                  <div className="reagent-inline-fields">
+                    <span className="reagent-label">серия:</span>
+                    <span className="reagent-value">{values[series] ?? ''}</span>
+                    <span className="reagent-label">годен до:</span>
+                    <span className="reagent-value">{formatDate(values[expiration])}</span>
+                    <span className="reagent-label">производитель:</span>
+                    <span className="reagent-value">{values[manufacturer] ?? ''}</span>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </>
+      )}
+
+      <tr className="row-tests">
+        <LabeledCell
+          colSpan={3}
+          className="span-3"
+          centered
+          label="На плоскости"
+          value={values.planeTestResult}
+        />
+        <LabeledCell
+          colSpan={3}
+          className="span-3"
+          centered
+          label="Биологическая проба"
+          value={values.biologicalTestResult}
+        />
+      </tr>
+    </tbody>
   );
 };
-
-export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody
-    className="fill-block"
-    data-protocol-block="compatibilityTests"
-    onClick={() => onOpenBlock('compatibilityTests')}
-  >
-    <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
-    <tr className="row-reagents">
-      <td colSpan={6} className="span-6 reagent-summary">
-        <ReagentDetails values={values} />
-      </td>
-    </tr>
-    <tr className="row-tests">
-      <LabeledCell
-        colSpan={3}
-        className="span-3"
-        centered
-        label="На плоскости"
-        value={values.planeTestResult}
-      />
-      <LabeledCell
-        colSpan={3}
-        className="span-3"
-        centered
-        label="Биологическая проба"
-        value={values.biologicalTestResult}
-      />
-    </tr>
-  </tbody>
-);
 
 export const ComplicationsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
   <tbody

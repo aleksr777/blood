@@ -77,33 +77,35 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
 
       <tr className="row-reagents">
         <td colSpan={6} className="span-6 reagent-summary">
-          {!detailedReagents &&
-          (values.reagentNames || values.reagentSeries || values.reagentExpiration) ? (
-            <LegacyReagentDetails values={values} />
-          ) : (
-            <>
-              <div className="reagent-opened-date">
-                <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
-                {values.reagentVialsOpenedDate && (
-                  <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
-                )}
-              </div>
-
-              {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
-                <div className="reagent-item" key={title}>
-                  <div className="reagent-name">{title}</div>
-                  <div className="reagent-inline-fields">
-                    <span className="reagent-label">серия:</span>
-                    <span className="reagent-value">{values[series] ?? ''}</span>
-                    <span className="reagent-label">годен до:</span>
-                    <span className="reagent-value">{formatDate(values[expiration])}</span>
-                    <span className="reagent-label">производитель:</span>
-                    <span className="reagent-value">{values[manufacturer] ?? ''}</span>
-                  </div>
+          <div className="reagent-summary-content">
+            {!detailedReagents &&
+            (values.reagentNames || values.reagentSeries || values.reagentExpiration) ? (
+              <LegacyReagentDetails values={values} />
+            ) : (
+              <>
+                <div className="reagent-opened-date">
+                  <span className="reagent-label">Дата вскрытия флаконов с цоликлонами:</span>
+                  {values.reagentVialsOpenedDate && (
+                    <span className="reagent-value">{formatDate(values.reagentVialsOpenedDate)}</span>
+                  )}
                 </div>
-              ))}
-            </>
-          )}
+
+                {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
+                  <div className="reagent-item" key={title}>
+                    <div className="reagent-name">{title}</div>
+                    <div className="reagent-inline-fields">
+                      <span className="reagent-label">серия:</span>
+                      <span className="reagent-value">{values[series] ?? ''}</span>
+                      <span className="reagent-label">годен до:</span>
+                      <span className="reagent-value">{formatDate(values[expiration])}</span>
+                      <span className="reagent-label">производитель:</span>
+                      <span className="reagent-value">{values[manufacturer] ?? ''}</span>
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
+          </div>
         </td>
       </tr>
 

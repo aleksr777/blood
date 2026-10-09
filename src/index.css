@@ -425,14 +425,37 @@ input[type='radio']:checked:disabled {
 
 .reagent-summary {
   display: grid;
-  gap: 1.2mm;
+  gap: 1.3mm;
 }
 
+.reagent-opened-date,
 .reagent-line {
   display: flex;
   align-items: baseline;
   gap: 1.5mm;
   min-height: 4.5mm;
+}
+
+.reagent-opened-date {
+  margin-bottom: 0.6mm;
+}
+
+.reagent-item {
+  display: grid;
+  gap: 0.5mm;
+  padding-top: 0.3mm;
+}
+
+.reagent-name {
+  font-weight: 700;
+}
+
+.reagent-inline-fields {
+  display: grid;
+  grid-template-columns: auto minmax(12mm, 0.7fr) auto minmax(22mm, 0.9fr) auto minmax(28mm, 1.8fr);
+  align-items: baseline;
+  gap: 0.6mm 1.4mm;
+  min-width: 0;
 }
 
 .reagent-label {

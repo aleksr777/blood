@@ -433,15 +433,10 @@ input[type='radio']:checked:disabled {
   gap: 1.3mm;
 }
 
-.reagent-opened-date,
 .reagent-line {
   display: flex;
   align-items: baseline;
   gap: 1.5mm;
-  min-height: 4.5mm;
-}
-
-.reagent-opened-date {
   min-height: 4.5mm;
 }
 

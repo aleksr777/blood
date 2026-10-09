@@ -65,16 +65,6 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
 
   return (
     <div className={styles.root}>
-      <label className={styles.openedDate}>
-        <span>Дата вскрытия флаконов с цоликлонами</span>
-        <input
-          type="date"
-          name="reagentVialsOpenedDate"
-          value={values.reagentVialsOpenedDate ?? ''}
-          onChange={(event) => change('reagentVialsOpenedDate', event.target.value)}
-        />
-      </label>
-
       <div className={styles.reagentList}>
         {REAGENTS.map((reagent) => (
           <fieldset key={reagent.key} className={styles.reagentGroup}>

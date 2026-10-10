@@ -57,6 +57,10 @@ const LegacyReagentDetails = ({ values }: { values: ProtocolValues }) => (
 
 export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => {
   const detailedReagents = hasDetailedReagents(values);
+  const recipientAboConfirmed = values.confirmedRecipientAboResult !== 'Не подтверждено';
+  const donorAboConfirmed = values.confirmedDonorAboResult !== 'Не подтверждено';
+  const planeTestResult = values.planeTestResult || 'Совместимо';
+  const biologicalTestResult = values.biologicalTestResult || 'Совместимо';
 
   return (
     <tbody
@@ -102,7 +106,11 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
             <LabeledCell
               colSpan={values.donorAbo ? 3 : 6}
               className={values.donorAbo ? 'span-3' : 'span-6'}
-              label="Подтверждена группа крови реципиента"
+              label={
+                recipientAboConfirmed
+                  ? 'Подтверждена группа крови реципиента'
+                  : 'Группа крови реципиента не подтверждена'
+              }
               value={values.recipientAbo}
             />
           )}
@@ -110,7 +118,11 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
             <LabeledCell
               colSpan={values.recipientAbo ? 3 : 6}
               className={values.recipientAbo ? 'span-3' : 'span-6'}
-              label="Подтверждена группа крови донора"
+              label={
+                donorAboConfirmed
+                  ? 'Подтверждена группа крови донора'
+                  : 'Группа крови донора не подтверждена'
+              }
               value={values.donorAbo}
             />
           )}
@@ -123,14 +135,14 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
           className="span-3"
           centered
           label="На плоскости"
-          value={values.planeTestResult}
+          value={planeTestResult}
         />
         <LabeledCell
           colSpan={3}
           className="span-3"
           centered
           label="Биологическая проба"
-          value={values.biologicalTestResult}
+          value={biologicalTestResult}
         />
       </tr>
     </tbody>

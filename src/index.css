@@ -1,6 +1,10 @@
 :root {
   --page-title-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
-  --control-height: 2.75rem;
+  --control-height: 2.4rem;
+  --control-radius: 0.45rem;
+  --control-padding-y: 0.4rem;
+  --control-padding-x: 0.65rem;
+  --control-border: #b8c4d6;
   --scrollbar-width: 12px;
 
   font-family: Arial, Helvetica, sans-serif;

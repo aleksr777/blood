@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Modal from '../modal/modal';
 import { getProtocolBlockConfig } from './editor-config';
 import { CompatibilityTestsFields } from './compatibility-tests-fields';
+import { ComplicationsFields } from './complications-fields';
 import { IndicationsFields } from './indications-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { RecipientExaminationFields } from './recipient-examination-fields';
@@ -54,6 +55,8 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
           <SelectionFields values={draft} onChange={changeValues} />
         ) : blockId === 'compatibilityTests' ? (
           <CompatibilityTestsFields values={draft} onChange={changeValues} />
+        ) : blockId === 'complications' ? (
+          <ComplicationsFields values={draft} onChange={changeValues} />
         ) : (
           config.fields.map((field) => (
             <ProtocolFieldControl

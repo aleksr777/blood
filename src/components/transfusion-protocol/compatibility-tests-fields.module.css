@@ -34,10 +34,6 @@
   min-width: 0;
 }
 
-.reagentGrid input:not([type='date']) {
-  min-height: 2.4rem;
-  padding: 0.4rem 0.6rem;
-}
 
 .results {
   display: grid;

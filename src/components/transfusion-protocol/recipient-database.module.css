@@ -41,10 +41,12 @@
 
 .search {
   width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid #b8c4d6;
-  border-radius: 0.5rem;
-  padding: 0.55rem 0.7rem;
+  min-height: var(--control-height);
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  padding: var(--control-padding-y) var(--control-padding-x);
+  background: #fff;
+  color: #111827;
   font: inherit;
 }
 

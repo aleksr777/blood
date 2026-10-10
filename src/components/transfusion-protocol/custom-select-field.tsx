@@ -11,6 +11,7 @@ type Props = {
   emptyLabel?: string;
   emptyDisplayLabel?: string;
   compact?: boolean;
+  allowEmpty?: boolean;
 };
 
 export const CustomSelectField = ({
@@ -22,10 +23,11 @@ export const CustomSelectField = ({
   emptyLabel = 'Не выбрано',
   emptyDisplayLabel,
   compact = false,
+  allowEmpty = true,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
-  const allOptions = ['', ...options];
+  const allOptions = allowEmpty ? ['', ...options] : options;
 
   const select = (nextValue: string) => {
     onChange(nextValue);

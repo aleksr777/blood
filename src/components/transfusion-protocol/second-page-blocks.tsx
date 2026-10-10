@@ -58,9 +58,9 @@ const LegacyReagentDetails = ({ values }: { values: ProtocolValues }) => (
 export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => {
   const detailedReagents = hasDetailedReagents(values);
   const recipientAboConfirmed =
-    values.confirmedRecipientAboResult === 'Подтверждено' && Boolean(values.recipientAbo);
+    (values.confirmedRecipientAboResult || 'Подтверждено') === 'Подтверждено';
   const donorAboConfirmed =
-    values.confirmedDonorAboResult === 'Подтверждено' && Boolean(values.donorAbo);
+    (values.confirmedDonorAboResult || 'Подтверждено') === 'Подтверждено';
   const planeTestResult = values.planeTestResult || 'Совместимо';
   const biologicalTestResult = values.biologicalTestResult || 'Совместимо';
 

@@ -510,6 +510,7 @@ input[type='radio']:checked:disabled {
 
 .monitor-header th:nth-child(1) {
   width: 38%;
+  text-align: left;
 }
 
 .monitor-header th:nth-child(2) {
@@ -537,6 +538,7 @@ input[type='radio']:checked:disabled {
 .monitor-row th {
   padding: 2mm;
   line-height: 1.08;
+  text-align: left;
 }
 
 .monitor-row td {

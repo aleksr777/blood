@@ -14,7 +14,11 @@ export const MonitorTable = ({ values }: Props) => (
       <tr className="monitor-header">
         <th>Трансфузии компонентов крови:</th>
         <th>АД (мм рт.ст.):</th>
-        <th>Частота пульса (уд/мин):</th>
+        <th>
+          Частота пульса
+          <br />
+          (уд/мин):
+        </th>
         <th>Температура (°C):</th>
         <th>Диурез, цвет мочи:</th>
       </tr>

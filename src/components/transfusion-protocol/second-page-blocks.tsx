@@ -28,12 +28,6 @@ const REAGENT_ROWS = [
     expiration: 'reagentAntiDExpiration',
     manufacturer: 'reagentAntiDManufacturer',
   },
-  {
-    title: 'Полиглюкин 33%',
-    series: 'polyglukinSeries',
-    expiration: 'polyglukinExpiration',
-    manufacturer: 'polyglukinManufacturer',
-  },
 ] as const;
 
 const hasDetailedReagents = (values: ProtocolValues) =>
@@ -102,22 +96,22 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
         </td>
       </tr>
 
-      {(values.confirmedRecipientAbo || values.confirmedDonorAbo) && (
+      {(values.recipientAbo || values.donorAbo) && (
         <tr className="row-confirmed-blood-groups">
-          {values.confirmedRecipientAbo && (
+          {values.recipientAbo && (
             <LabeledCell
-              colSpan={values.confirmedDonorAbo ? 3 : 6}
-              className={values.confirmedDonorAbo ? 'span-3' : 'span-6'}
+              colSpan={values.donorAbo ? 3 : 6}
+              className={values.donorAbo ? 'span-3' : 'span-6'}
               label="Подтверждена группа крови реципиента"
-              value={values.confirmedRecipientAbo}
+              value={values.recipientAbo}
             />
           )}
-          {values.confirmedDonorAbo && (
+          {values.donorAbo && (
             <LabeledCell
-              colSpan={values.confirmedRecipientAbo ? 3 : 6}
-              className={values.confirmedRecipientAbo ? 'span-3' : 'span-6'}
+              colSpan={values.recipientAbo ? 3 : 6}
+              className={values.recipientAbo ? 'span-3' : 'span-6'}
               label="Подтверждена группа крови донора"
-              value={values.confirmedDonorAbo}
+              value={values.donorAbo}
             />
           )}
         </tr>

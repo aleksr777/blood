@@ -77,6 +77,7 @@ export const ProtocolFieldControl = ({
           options={field.options ?? []}
           value={value}
           onChange={change}
+          allowEmpty={!field.required}
         />
       </div>
     );

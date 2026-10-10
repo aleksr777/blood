@@ -18,27 +18,31 @@
   font-weight: 600;
 }
 
-.grid input,
+.grid input:not([type='radio']):not([type='checkbox']),
 .grid textarea {
   width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid #b8c4d6;
-  border-radius: 0.5rem;
-  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
   background: #fff;
   color: #111827;
   font: inherit;
   font-weight: 400;
 }
 
+.grid input:not([type='radio']):not([type='checkbox']) {
+  min-height: var(--control-height);
+  padding: var(--control-padding-y) var(--control-padding-x);
+}
+
 .grid textarea {
   height: 6.5rem;
   min-height: 6.5rem;
   max-height: 6.5rem;
+  padding: 0.55rem var(--control-padding-x);
   resize: none;
 }
 
-.grid input:focus,
+.grid input:not([type='radio']):not([type='checkbox']):focus,
 .grid textarea:focus {
   border-color: #2563eb;
   outline: 2px solid rgb(37 99 235 / 16%);

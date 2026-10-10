@@ -66,6 +66,18 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'reagentSeries', label: '№ серии реагента' },
       { name: 'reagentExpiration', label: 'Срок годности реагента', type: 'date' },
       {
+        name: 'confirmedRecipientAbo',
+        label: 'Подтверждена группа крови реципиента',
+        type: 'select',
+        options: ['O(I)', 'A(II)', 'B(III)', 'AB(IV)'],
+      },
+      {
+        name: 'confirmedDonorAbo',
+        label: 'Подтверждена группа крови донора',
+        type: 'select',
+        options: ['O(I)', 'A(II)', 'B(III)', 'AB(IV)'],
+      },
+      {
         name: 'planeTestResult',
         label: 'Проба на плоскости',
         type: 'select',

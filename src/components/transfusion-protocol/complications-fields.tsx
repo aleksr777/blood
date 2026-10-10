@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { COMPLICATIONS_STATUS, getComplicationsStatus } from './complications-model';
 import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
@@ -7,6 +8,8 @@ type Props = {
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
 };
+
+const DEFAULT_SEVERITY = 'Средней степени тяжести';
 
 const DETAIL_FIELDS: ProtocolFieldConfig[] = [
   {
@@ -19,14 +22,21 @@ const DETAIL_FIELDS: ProtocolFieldConfig[] = [
     name: 'severity',
     label: 'Степень тяжести',
     type: 'select',
-    options: ['Средней степени тяжести', 'Тяжёлое', 'Крайне тяжёлое'],
+    options: [DEFAULT_SEVERITY, 'Тяжёлое', 'Крайне тяжёлое'],
     wide: true,
+    required: true,
   },
 ];
 
 export const ComplicationsFields = ({ values, onChange }: Props) => {
   const status = getComplicationsStatus(values);
   const changeValue = (name: string, value: string) => onChange({ [name]: value });
+
+  useEffect(() => {
+    if (status === COMPLICATIONS_STATUS.had && !values.severity) {
+      onChange({ severity: DEFAULT_SEVERITY });
+    }
+  }, [onChange, status, values.severity]);
 
   return (
     <div className={styles.root}>
@@ -48,7 +58,12 @@ export const ComplicationsFields = ({ values, onChange }: Props) => {
               type="radio"
               name="complicationsStatus"
               checked={status === COMPLICATIONS_STATUS.had}
-              onChange={() => onChange({ complicationsStatus: COMPLICATIONS_STATUS.had })}
+              onChange={() =>
+                onChange({
+                  complicationsStatus: COMPLICATIONS_STATUS.had,
+                  severity: values.severity || DEFAULT_SEVERITY,
+                })
+              }
             />
             <span>Были</span>
           </label>

@@ -1,3 +1,4 @@
+import { COMPLICATIONS_STATUS, getComplicationsStatus } from './complications-model';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { MonitorTable } from './monitor-table';
 import type { ProtocolPageProps, ProtocolValues } from './protocol-types';
@@ -151,29 +152,42 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
   );
 };
 
-export const ComplicationsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
-  <tbody
-    className="fill-block"
-    data-protocol-block="complications"
-    onClick={() => onOpenBlock('complications')}
-  >
-    <SectionTitle>Реакции и осложнения</SectionTitle>
-    <tr className="row-complications">
-      <LabeledCell
-        colSpan={3}
-        className="span-3"
-        label="Основные симптомы"
-        value={values.symptoms}
-      />
-      <LabeledCell
-        colSpan={3}
-        className="span-3"
-        label="Степень тяжести"
-        value={values.severity}
-      />
-    </tr>
-  </tbody>
-);
+export const ComplicationsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => {
+  const status = getComplicationsStatus(values);
+
+  return (
+    <tbody
+      className="fill-block"
+      data-protocol-block="complications"
+      onClick={() => onOpenBlock('complications')}
+    >
+      <SectionTitle>Реакции и осложнения</SectionTitle>
+
+      {status === COMPLICATIONS_STATUS.none ? (
+        <tr className="row-complications">
+          <td colSpan={6} className="span-6">
+            <div className="cell-value">Не было</div>
+          </td>
+        </tr>
+      ) : (
+        <tr className="row-complications">
+          <LabeledCell
+            colSpan={3}
+            className="span-3"
+            label="Основные симптомы"
+            value={values.symptoms}
+          />
+          <LabeledCell
+            colSpan={3}
+            className="span-3"
+            label="Степень тяжести"
+            value={values.severity}
+          />
+        </tr>
+      )}
+    </tbody>
+  );
+};
 
 export const MonitoringBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
   <tbody

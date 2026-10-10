@@ -102,20 +102,26 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
         </td>
       </tr>
 
-      <tr className="row-confirmed-blood-groups">
-        <LabeledCell
-          colSpan={3}
-          className="span-3"
-          label="Подтверждена группа крови реципиента"
-          value={values.recipientAbo}
-        />
-        <LabeledCell
-          colSpan={3}
-          className="span-3"
-          label="Подтверждена группа крови донора"
-          value={values.donorAbo}
-        />
-      </tr>
+      {(values.confirmedRecipientAbo || values.confirmedDonorAbo) && (
+        <tr className="row-confirmed-blood-groups">
+          {values.confirmedRecipientAbo && (
+            <LabeledCell
+              colSpan={values.confirmedDonorAbo ? 3 : 6}
+              className={values.confirmedDonorAbo ? 'span-3' : 'span-6'}
+              label="Подтверждена группа крови реципиента"
+              value={values.confirmedRecipientAbo}
+            />
+          )}
+          {values.confirmedDonorAbo && (
+            <LabeledCell
+              colSpan={values.confirmedRecipientAbo ? 3 : 6}
+              className={values.confirmedRecipientAbo ? 'span-3' : 'span-6'}
+              label="Подтверждена группа крови донора"
+              value={values.confirmedDonorAbo}
+            />
+          )}
+        </tr>
+      )}
 
       <tr className="row-tests">
         <LabeledCell

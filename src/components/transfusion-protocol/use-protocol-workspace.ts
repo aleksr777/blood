@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   saveProtocolRecord,
@@ -7,12 +7,80 @@ import {
 import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
+const OPEN_WINDOW_STORAGE_KEY = 'blood:protocol-open-window';
+
+const PROTOCOL_BLOCK_IDS: ProtocolBlockId[] = [
+  'general',
+  'examination',
+  'indications',
+  'history',
+  'donor',
+  'selection',
+  'compatibilityTests',
+  'complications',
+  'monitoring',
+  'doctor',
+];
+
+type StoredOpenWindow =
+  | { type: 'block'; blockId: ProtocolBlockId }
+  | { type: 'registry' };
+
+const readStoredOpenWindow = (): StoredOpenWindow | null => {
+  try {
+    const raw = window.sessionStorage.getItem(OPEN_WINDOW_STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw) as Partial<StoredOpenWindow>;
+    if (
+      parsed.type === 'block' &&
+      typeof parsed.blockId === 'string' &&
+      PROTOCOL_BLOCK_IDS.includes(parsed.blockId as ProtocolBlockId)
+    ) {
+      return { type: 'block', blockId: parsed.blockId as ProtocolBlockId };
+    }
+
+    if (parsed.type === 'registry') return { type: 'registry' };
+  } catch (error) {
+    console.error('Не удалось восстановить открытое окно:', error);
+  }
+
+  return null;
+};
+
+const getInitialActiveBlock = () => {
+  const stored = readStoredOpenWindow();
+  return stored?.type === 'block' ? stored.blockId : null;
+};
+
+const getInitialRegistryOpen = () => readStoredOpenWindow()?.type === 'registry';
+
 export const useProtocolWorkspace = () => {
   const [values, setValues] = useState<ProtocolValues>({});
   const [recordId, setRecordId] = useState<number | null>(null);
-  const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(null);
-  const [registryOpen, setRegistryOpen] = useState(false);
+  const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(getInitialActiveBlock);
+  const [registryOpen, setRegistryOpen] = useState(getInitialRegistryOpen);
   const [status, setStatus] = useState('');
+
+  useEffect(() => {
+    try {
+      if (activeBlock) {
+        window.sessionStorage.setItem(
+          OPEN_WINDOW_STORAGE_KEY,
+          JSON.stringify({ type: 'block', blockId: activeBlock }),
+        );
+      } else if (registryOpen) {
+        window.sessionStorage.setItem(
+          OPEN_WINDOW_STORAGE_KEY,
+          JSON.stringify({ type: 'registry' }),
+        );
+      } else {
+        window.sessionStorage.removeItem(OPEN_WINDOW_STORAGE_KEY);
+      }
+    } catch (error) {
+      console.error('Не удалось сохранить состояние открытого окна:', error);
+    }
+  }, [activeBlock, registryOpen]);
 
   const handleDraftExpire = useCallback(() => {
     setActiveBlock(null);

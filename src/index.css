@@ -473,12 +473,28 @@ input[type='radio']:checked:disabled {
   white-space: pre-wrap;
 }
 
-.row-confirmed-blood-groups td {
+.row-confirmed-blood-groups td,
+.row-tests td {
   height: auto;
 }
 
-.row-tests td {
-  height: 22mm;
+.compatibility-inline {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5mm;
+  line-height: 1.08;
+}
+
+.compatibility-inline-label {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.compatibility-inline-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 400;
+  white-space: pre-wrap;
 }
 
 .row-complications td {

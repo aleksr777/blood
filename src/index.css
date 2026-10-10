@@ -498,11 +498,11 @@ input[type='radio']:checked:disabled {
 }
 
 .row-complications td {
-  height: 12mm;
+  height: auto;
 }
 
 .monitor-header th {
-  height: 22mm;
+  height: auto;
   padding: 2mm 1mm;
   vertical-align: top;
   line-height: 1.08;
@@ -530,7 +530,7 @@ input[type='radio']:checked:disabled {
 
 .monitor-row th,
 .monitor-row td {
-  height: 18mm;
+  height: auto;
   vertical-align: middle;
 }
 

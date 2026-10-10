@@ -93,6 +93,7 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
         type: 'select',
         options: ['Средней степени тяжести', 'Тяжёлое', 'Крайне тяжёлое'],
         wide: true,
+        required: true,
       },
     ],
   },

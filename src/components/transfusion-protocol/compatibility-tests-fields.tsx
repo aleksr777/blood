@@ -1,5 +1,5 @@
-import { ProtocolFieldControl } from './protocol-field-control';
-import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
+import { useEffect } from 'react';
+import type { ProtocolValues } from './protocol-types';
 import styles from './compatibility-tests-fields.module.css';
 
 type Props = {
@@ -38,23 +38,48 @@ const REAGENTS = [
   },
 ] as const;
 
-const RESULT_FIELDS: ProtocolFieldConfig[] = [
+const DEFAULT_RESULTS = {
+  confirmedRecipientAboResult: 'Подтверждено',
+  confirmedDonorAboResult: 'Подтверждено',
+  planeTestResult: 'Совместимо',
+  biologicalTestResult: 'Совместимо',
+} as const;
+
+const RADIO_GROUPS = [
+  {
+    name: 'confirmedRecipientAboResult',
+    label: 'Подтверждена группа крови реципиента',
+    options: ['Подтверждено', 'Не подтверждено'],
+  },
+  {
+    name: 'confirmedDonorAboResult',
+    label: 'Подтверждена группа крови донора',
+    options: ['Подтверждено', 'Не подтверждено'],
+  },
   {
     name: 'planeTestResult',
     label: 'Проба на плоскости',
-    type: 'select',
     options: ['Совместимо', 'Несовместимо'],
   },
   {
     name: 'biologicalTestResult',
     label: 'Биологическая проба',
-    type: 'select',
     options: ['Совместимо', 'Несовместимо'],
   },
-];
+] as const;
 
 export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
   const change = (name: string, value: string) => onChange({ [name]: value });
+
+  useEffect(() => {
+    const missingDefaults = Object.fromEntries(
+      Object.entries(DEFAULT_RESULTS).filter(([name]) => !values[name]),
+    );
+
+    if (Object.keys(missingDefaults).length > 0) {
+      onChange(missingDefaults);
+    }
+  }, [onChange, values]);
 
   return (
     <div className={styles.root}>
@@ -94,15 +119,29 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
       </div>
 
       <div className={styles.results}>
-        {RESULT_FIELDS.map((field) => (
-          <ProtocolFieldControl
-            key={field.name}
-            field={field}
-            value={values[field.name] ?? ''}
-            onChange={change}
-            onValuesChange={onChange}
-          />
-        ))}
+        {RADIO_GROUPS.map((group) => {
+          const selected =
+            values[group.name] || DEFAULT_RESULTS[group.name as keyof typeof DEFAULT_RESULTS];
+
+          return (
+            <fieldset key={group.name} className={styles.resultGroup}>
+              <legend>{group.label}</legend>
+              <div className={styles.options}>
+                {group.options.map((option) => (
+                  <label key={option} className={styles.option}>
+                    <input
+                      type="radio"
+                      name={group.name}
+                      checked={selected === option}
+                      onChange={() => change(group.name, option)}
+                    />
+                    <span>{option}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          );
+        })}
       </div>
     </div>
   );

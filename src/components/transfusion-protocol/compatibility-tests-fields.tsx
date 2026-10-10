@@ -45,6 +45,21 @@ const REAGENTS = [
   },
 ] as const;
 
+const CONFIRMED_GROUP_FIELDS: ProtocolFieldConfig[] = [
+  {
+    name: 'confirmedRecipientAbo',
+    label: 'Подтверждена группа крови реципиента',
+    type: 'select',
+    options: ['O(I)', 'A(II)', 'B(III)', 'AB(IV)'],
+  },
+  {
+    name: 'confirmedDonorAbo',
+    label: 'Подтверждена группа крови донора',
+    type: 'select',
+    options: ['O(I)', 'A(II)', 'B(III)', 'AB(IV)'],
+  },
+];
+
 const RESULT_FIELDS: ProtocolFieldConfig[] = [
   {
     name: 'planeTestResult',
@@ -97,6 +112,18 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
               </label>
             </div>
           </fieldset>
+        ))}
+      </div>
+
+      <div className={styles.confirmedGroups}>
+        {CONFIRMED_GROUP_FIELDS.map((field) => (
+          <ProtocolFieldControl
+            key={field.name}
+            field={field}
+            value={values[field.name] ?? ''}
+            onChange={change}
+            onValuesChange={onChange}
+          />
         ))}
       </div>
 

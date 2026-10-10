@@ -57,8 +57,10 @@ const LegacyReagentDetails = ({ values }: { values: ProtocolValues }) => (
 
 export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => {
   const detailedReagents = hasDetailedReagents(values);
-  const recipientAboConfirmed = values.confirmedRecipientAboResult !== 'Не подтверждено';
-  const donorAboConfirmed = values.confirmedDonorAboResult !== 'Не подтверждено';
+  const recipientAboConfirmed =
+    values.confirmedRecipientAboResult === 'Подтверждено' && Boolean(values.recipientAbo);
+  const donorAboConfirmed =
+    values.confirmedDonorAboResult === 'Подтверждено' && Boolean(values.donorAbo);
   const planeTestResult = values.planeTestResult || 'Совместимо';
   const biologicalTestResult = values.biologicalTestResult || 'Совместимо';
 
@@ -100,50 +102,50 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
         </td>
       </tr>
 
-      {(values.recipientAbo || values.donorAbo) && (
+      {(recipientAboConfirmed || donorAboConfirmed) && (
         <tr className="row-confirmed-blood-groups">
-          {values.recipientAbo && (
-            <LabeledCell
-              colSpan={values.donorAbo ? 3 : 6}
-              className={values.donorAbo ? 'span-3' : 'span-6'}
-              label={
-                recipientAboConfirmed
-                  ? 'Подтверждена группа крови реципиента'
-                  : 'Группа крови реципиента не подтверждена'
-              }
-              value={values.recipientAbo}
-            />
+          {recipientAboConfirmed && (
+            <td
+              colSpan={donorAboConfirmed ? 3 : 6}
+              className={donorAboConfirmed ? 'span-3' : 'span-6'}
+            >
+              <div className="compatibility-inline">
+                <span className="compatibility-inline-label">
+                  Подтверждена группа крови реципиента:
+                </span>
+                <span className="compatibility-inline-value">{values.recipientAbo}</span>
+              </div>
+            </td>
           )}
-          {values.donorAbo && (
-            <LabeledCell
-              colSpan={values.recipientAbo ? 3 : 6}
-              className={values.recipientAbo ? 'span-3' : 'span-6'}
-              label={
-                donorAboConfirmed
-                  ? 'Подтверждена группа крови донора'
-                  : 'Группа крови донора не подтверждена'
-              }
-              value={values.donorAbo}
-            />
+          {donorAboConfirmed && (
+            <td
+              colSpan={recipientAboConfirmed ? 3 : 6}
+              className={recipientAboConfirmed ? 'span-3' : 'span-6'}
+            >
+              <div className="compatibility-inline">
+                <span className="compatibility-inline-label">
+                  Подтверждена группа крови донора:
+                </span>
+                <span className="compatibility-inline-value">{values.donorAbo}</span>
+              </div>
+            </td>
           )}
         </tr>
       )}
 
       <tr className="row-tests">
-        <LabeledCell
-          colSpan={3}
-          className="span-3"
-          centered
-          label="На плоскости"
-          value={planeTestResult}
-        />
-        <LabeledCell
-          colSpan={3}
-          className="span-3"
-          centered
-          label="Биологическая проба"
-          value={biologicalTestResult}
-        />
+        <td colSpan={3} className="span-3">
+          <div className="compatibility-inline">
+            <span className="compatibility-inline-label">На плоскости:</span>
+            <span className="compatibility-inline-value">{planeTestResult}</span>
+          </div>
+        </td>
+        <td colSpan={3} className="span-3">
+          <div className="compatibility-inline">
+            <span className="compatibility-inline-label">Биологическая проба:</span>
+            <span className="compatibility-inline-value">{biologicalTestResult}</span>
+          </div>
+        </td>
       </tr>
     </tbody>
   );

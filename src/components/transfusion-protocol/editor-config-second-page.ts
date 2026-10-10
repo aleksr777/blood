@@ -85,8 +85,15 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
     title: 'Реакции и осложнения',
     size: 'medium',
     fields: [
+      { name: 'complicationsStatus', label: 'complicationsStatus' },
       { name: 'symptoms', label: 'Основные симптомы', type: 'textarea', wide: true },
-      { name: 'severity', label: 'Степень тяжести', wide: true },
+      {
+        name: 'severity',
+        label: 'Степень тяжести',
+        type: 'select',
+        options: ['Средней степени тяжести', 'Тяжёлое', 'Крайне тяжёлое'],
+        wide: true,
+      },
     ],
   },
   {

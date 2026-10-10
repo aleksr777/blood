@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Modal from '../modal/modal';
 import { getProtocolBlockConfig } from './editor-config';
 import { CompatibilityTestsFields } from './compatibility-tests-fields';
@@ -27,6 +27,10 @@ const getInitialValues = (blockId: ProtocolBlockId, values: ProtocolValues) => {
 export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props) => {
   const config = getProtocolBlockConfig(blockId);
   const [draft, setDraft] = useState<ProtocolValues>(() => getInitialValues(blockId, values));
+
+  useEffect(() => {
+    setDraft(getInitialValues(blockId, values));
+  }, [blockId, values]);
 
   const changeValues = (nextValues: ProtocolValues) => {
     setDraft((current) => ({ ...current, ...nextValues }));

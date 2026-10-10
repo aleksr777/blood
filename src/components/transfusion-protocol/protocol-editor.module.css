@@ -42,27 +42,31 @@
   grid-column: 1 / -1;
 }
 
-.grid input,
+.grid input:not([type='radio']):not([type='checkbox']),
 .grid textarea {
   width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid #b8c4d6;
-  border-radius: 0.5rem;
-  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
   background: #fff;
   color: #111827;
   font: inherit;
   font-weight: 400;
 }
 
+.grid input:not([type='radio']):not([type='checkbox']) {
+  min-height: var(--control-height);
+  padding: var(--control-padding-y) var(--control-padding-x);
+}
+
 .grid textarea {
   height: 6.5rem;
   min-height: 6.5rem;
   max-height: 6.5rem;
+  padding: 0.55rem var(--control-padding-x);
   resize: none;
 }
 
-.grid input:focus,
+.grid input:not([type='radio']):not([type='checkbox']):focus,
 .grid textarea:focus {
   border-color: #2563eb;
   outline: 2px solid rgb(37 99 235 / 16%);
@@ -84,14 +88,14 @@
 }
 
 .departmentControl > input:has(+ .historyToggle) {
-  border-radius: 0.5rem 0 0 0.5rem;
+  border-radius: var(--control-radius) 0 0 var(--control-radius);
 }
 
 .historyToggle {
-  width: 2.6rem;
-  border: 1px solid #b8c4d6;
+  width: var(--control-height);
+  border: 1px solid var(--control-border);
   border-left: 0;
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-radius: 0 var(--control-radius) var(--control-radius) 0;
   background: #fff;
   color: #475569;
   cursor: pointer;
@@ -239,12 +243,12 @@
 
 .customSelectControl {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 2.6rem;
+  grid-template-columns: minmax(0, 1fr) var(--control-height);
   align-items: center;
   width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid #b8c4d6;
-  border-radius: 0.5rem;
+  min-height: var(--control-height);
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
   padding: 0;
   background: #fff;
   color: #111827;
@@ -279,7 +283,7 @@
 .customSelectValue,
 .customSelectPlaceholder {
   min-width: 0;
-  padding: 0.55rem 0.7rem;
+  padding: var(--control-padding-y) var(--control-padding-x);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

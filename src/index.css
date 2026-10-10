@@ -560,7 +560,7 @@ input[type='radio']:checked:disabled {
 }
 
 .doctor-value {
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .span-2 { width: 33.333%; }

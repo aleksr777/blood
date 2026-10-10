@@ -106,13 +106,13 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
         <LabeledCell
           colSpan={3}
           className="span-3"
-          label="Цоликлонами подтверждена группа крови реципиента"
+          label="Подтверждена группа крови реципиента"
           value={values.recipientAbo}
         />
         <LabeledCell
           colSpan={3}
           className="span-3"
-          label="Цоликлонами подтверждена группа крови донора"
+          label="Подтверждена группа крови донора"
           value={values.donorAbo}
         />
       </tr>

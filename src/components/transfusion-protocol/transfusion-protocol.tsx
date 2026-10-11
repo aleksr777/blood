@@ -166,7 +166,7 @@ export const TransfusionProtocol = () => {
         status={workspace.status}
         warning={workspace.reagentWarning}
         onClear={workspace.clearForm}
-        onNew={workspace.newBlank}
+        onNew={() => void workspace.newBlank()}
         onOpenRegistry={() => workspace.setRegistryOpen(true)}
         onSave={() => void workspace.saveToDatabase()}
         pageCount={pages.length}

@@ -1,6 +1,7 @@
 type Props = {
   status: string;
   warning: string;
+  dangerWarning: string;
   onClear: () => void;
   onNew: () => void;
   onOpenRegistry: () => void;
@@ -12,6 +13,7 @@ type Props = {
 export const ProtocolToolbar = ({
   status,
   warning,
+  dangerWarning,
   onClear,
   onNew,
   onOpenRegistry,
@@ -48,6 +50,11 @@ export const ProtocolToolbar = ({
     {status && (
       <div className="toolbar-status" role="status">
         {status}
+      </div>
+    )}
+    {dangerWarning && (
+      <div className="toolbar-danger-warning" role="alert">
+        {dangerWarning}
       </div>
     )}
     {warning && (

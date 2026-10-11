@@ -165,6 +165,7 @@ export const TransfusionProtocol = () => {
       <ProtocolToolbar
         status={workspace.status}
         warning={workspace.reagentWarning}
+        dangerWarning={workspace.compatibilityWarning}
         onClear={workspace.clearForm}
         onNew={() => void workspace.newBlank()}
         onOpenRegistry={() => workspace.setRegistryOpen(true)}

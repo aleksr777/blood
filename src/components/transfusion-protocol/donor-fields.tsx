@@ -1,7 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CustomSelectField } from './custom-select-field';
 import { DONOR_ANTIGENS } from './donor-model';
 import { INDICATION_COMPONENTS } from './indications-model';
+import {
+  loadSavedOptions,
+  removeSavedOption,
+  renameSavedOption,
+  type SavedOptionRecord,
+} from '../../storage/repositories/saved-options';
+import { SavedOptionItem } from './saved-option-item';
 import type { ProtocolValues } from './protocol-types';
 import { useOverlayDropdown } from './use-overlay-dropdown';
 import componentStyles from './indications-fields.module.css';
@@ -58,16 +65,73 @@ const SelectField = ({
 
 const ComponentNameInput = ({
   value,
-  options,
+  fixedOptions,
   onChange,
 }: {
   value: string;
-  options: string[];
+  fixedOptions: string[];
   onChange: (value: string) => void;
 }) => {
+  const [savedOptions, setSavedOptions] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
-  const hasOptions = options.length > 0;
+
+  useEffect(() => {
+    let active = true;
+    setStatus('loading');
+
+    void loadSavedOptions('componentName')
+      .then((items) => {
+        if (!active) return;
+        setSavedOptions(items);
+        setStatus('ready');
+      })
+      .catch((error: unknown) => {
+        console.error('Не удалось загрузить сохранённые наименования компонентов:', error);
+        if (active) setStatus('error');
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const fixedSet = new Set(fixedOptions.map((option) => option.trim().toLocaleLowerCase()));
+  const editableOptions = savedOptions.filter(
+    (item) => !fixedSet.has(item.value.trim().toLocaleLowerCase()),
+  );
+
+  const rename = async (item: SavedOptionRecord, nextValue: string) => {
+    try {
+      const trimmed = nextValue.trim();
+      setSavedOptions(await renameSavedOption('componentName', item.id, trimmed));
+      if (value === item.value) onChange(trimmed);
+    } catch (error) {
+      console.error('Не удалось изменить наименование компонента:', error);
+    }
+  };
+
+  const remove = async (item: SavedOptionRecord) => {
+    const previous = savedOptions;
+    setSavedOptions((current) => current.filter(({ id }) => id !== item.id));
+    if (value === item.value) onChange('');
+
+    try {
+      setSavedOptions(await removeSavedOption('componentName', item.id));
+    } catch (error) {
+      setSavedOptions(previous);
+      if (value === item.value) onChange(item.value);
+      console.error('Не удалось удалить наименование компонента:', error);
+    }
+  };
+
+  const emptyText =
+    status === 'loading'
+      ? 'Загрузка...'
+      : status === 'error'
+        ? 'Не удалось загрузить список'
+        : 'Сохранённых вариантов нет';
 
   return (
     <div ref={rootRef} className={editorStyles.departmentField}>
@@ -79,45 +143,59 @@ const ComponentNameInput = ({
           value={value}
           onChange={(event) => onChange(event.target.value)}
         />
-        {hasOptions && (
-          <button
-            type="button"
-            className={editorStyles.historyToggle}
-            aria-label="Показать варианты наименования компонента"
-            aria-expanded={open}
-            onClick={() => setOpen((current) => !current)}
-          >
-            ▾
-          </button>
-        )}
+        <button
+          type="button"
+          className={editorStyles.historyToggle}
+          aria-label="Показать варианты наименования компонента"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          ▾
+        </button>
       </div>
 
-      {hasOptions && (
-        <div
-          className={editorStyles.historyDropdown}
-          data-state={dropdownState}
-          role="listbox"
-          aria-label="Варианты наименования компонента"
-          aria-hidden={dropdownState !== 'open'}
-        >
-          {options.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={editorStyles.customSelectOption}
-              role="option"
-              aria-selected={value === option}
-              onClick={() => {
-                onChange(option);
+      <div
+        className={editorStyles.historyDropdown}
+        data-state={dropdownState}
+        role="listbox"
+        aria-label="Варианты наименования компонента"
+        aria-hidden={dropdownState !== 'open'}
+      >
+        {fixedOptions.map((option) => (
+          <button
+            key={`fixed:${option}`}
+            type="button"
+            className={editorStyles.customSelectOption}
+            role="option"
+            aria-selected={value === option}
+            onClick={() => {
+              onChange(option);
+              setOpen(false);
+            }}
+          >
+            <span>{option}</span>
+            {value === option && <span aria-hidden="true">✓</span>}
+          </button>
+        ))}
+
+        {editableOptions.length > 0 ? (
+          editableOptions.map((item) => (
+            <SavedOptionItem
+              key={item.id}
+              item={item}
+              label="наименование компонента"
+              onSelect={(selected) => {
+                onChange(selected.value);
                 setOpen(false);
               }}
-            >
-              <span>{option}</span>
-              {value === option && <span aria-hidden="true">✓</span>}
-            </button>
-          ))}
-        </div>
-      )}
+              onRename={rename}
+              onRemove={remove}
+            />
+          ))
+        ) : fixedOptions.length === 0 ? (
+          <div className={editorStyles.historyEmpty}>{emptyText}</div>
+        ) : null}
+      </div>
     </div>
   );
 };
@@ -166,7 +244,7 @@ export const DonorFields = ({ values, onChange }: Props) => {
             </div>
             <ComponentNameInput
               value={componentName}
-              options={componentNameOptions}
+              fixedOptions={componentNameOptions}
               onChange={(nextValue) =>
                 onChange({
                   componentGroup: selectedComponent,

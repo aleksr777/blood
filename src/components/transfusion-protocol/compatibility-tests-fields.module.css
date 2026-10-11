@@ -91,3 +91,15 @@
   font-weight: 700;
   line-height: 1.4;
 }
+
+.dangerOptionText {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.55rem;
+  border-radius: 0.4rem;
+  padding: 0.15rem 0.45rem;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-weight: 700;
+  line-height: 1.15;
+}

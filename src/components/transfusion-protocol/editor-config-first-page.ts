@@ -130,7 +130,12 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     title: 'Данные о донорской крови или ее компоненте',
     size: 'medium',
     fields: [
-      { name: 'componentName', label: 'Наименование компонента донорской крови', wide: true },
+      { name: 'componentGroup', label: 'Группа компонентов крови' },
+      {
+        name: 'componentName',
+        label: 'Точное наименование компонента донорской крови',
+        wide: true,
+      },
       { name: 'collectionOrganization', label: 'Организация, осуществившая заготовку', wide: true },
       {
         name: 'donorAbo',

@@ -82,14 +82,16 @@ export const ExaminationBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
         <SectionTitle>Данные медицинского обследования реципиента</SectionTitle>
         <tr>
           <LabeledCell
-            colSpan={4}
-            className="span-4"
+            colSpan={3}
+            className="span-3"
+            inline
             label="Группа крови реципиента AB0:"
             value={values.recipientAbo}
           />
           <LabeledCell
-            colSpan={2}
-            className="span-2"
+            colSpan={3}
+            className="span-3"
+            inline
             label="Резус-принадлежность"
             value={formatRh(values.recipientRh)}
           />

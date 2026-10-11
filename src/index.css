@@ -210,15 +210,26 @@ input[type='radio']:checked:disabled {
   text-align: right;
 }
 
-.toolbar-warning {
+.toolbar-warning,
+.toolbar-danger-warning {
   margin-top: 0.55rem;
-  border-left: 3px solid #f59e0b;
   padding: 0.5rem 0.7rem;
-  background: #fffbeb;
-  color: #92400e;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.35;
+}
+
+.toolbar-warning {
+  border-left: 3px solid #f59e0b;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.toolbar-danger-warning {
+  border-left: 4px solid #dc2626;
+  background: #fef2f2;
+  color: #991b1b;
+  font-weight: 700;
 }
 
 .print-button:focus-visible,

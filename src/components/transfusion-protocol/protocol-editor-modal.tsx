@@ -3,6 +3,7 @@ import Modal from '../modal/modal';
 import { getProtocolBlockConfig } from './editor-config';
 import { CompatibilityTestsFields } from './compatibility-tests-fields';
 import { ComplicationsFields } from './complications-fields';
+import { DonorFields } from './donor-fields';
 import { IndicationsFields } from './indications-fields';
 import { MonitoringFields } from './monitoring-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
@@ -52,6 +53,8 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
       <div className={[styles.grid, blockId === 'history' ? styles.historyGrid : ''].filter(Boolean).join(' ')}>
         {blockId === 'examination' ? (
           <RecipientExaminationFields values={draft} onChange={changeValues} />
+        ) : blockId === 'donor' ? (
+          <DonorFields values={draft} onChange={changeValues} />
         ) : blockId === 'indications' ? (
           <IndicationsFields values={draft} onChange={changeValues} />
         ) : blockId === 'history' ? (

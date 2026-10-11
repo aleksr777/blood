@@ -4,6 +4,10 @@ import { MonitorTable } from './monitor-table';
 import type { ProtocolPageProps, ProtocolValues } from './protocol-types';
 import { formatDate } from './protocol-types';
 
+type ChunkProps = ProtocolPageProps & {
+  part: string;
+};
+
 const REAGENT_ROWS = [
   {
     title: 'Цоликлон "анти-A"',
@@ -56,7 +60,7 @@ const LegacyReagentDetails = ({ values }: { values: ProtocolValues }) => (
   </>
 );
 
-export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => {
+export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   const detailedReagents = hasDetailedReagents(values);
   const recipientAboConfirmed =
     (values.confirmedRecipientAboResult || 'Подтверждено') === 'Подтверждено';
@@ -69,41 +73,43 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
     <tbody
       className="fill-block"
       data-protocol-block="compatibilityTests"
+      data-protocol-chunk={`compatibilityTests:${part}`}
       onClick={() => onOpenBlock('compatibilityTests')}
     >
-      <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
+      {part === 'main' && (
+        <>
+          <SectionTitle>Пробы на индивидуальную совместимость в отделении</SectionTitle>
+          <tr className="row-reagents">
+            <td colSpan={6} className="span-6 reagent-summary">
+              <div className="reagent-summary-content">
+                {!detailedReagents &&
+                (values.reagentNames || values.reagentSeries || values.reagentExpiration) ? (
+                  <LegacyReagentDetails values={values} />
+                ) : (
+                  <>
+                    <div className="reagent-name">Наименования реагентов</div>
+                    {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
+                      <div className="reagent-item" key={title}>
+                        <div className="reagent-name">{title}</div>
+                        <div className="reagent-inline-fields">
+                          <span className="reagent-label">серия:</span>
+                          <span className="reagent-value">{values[series] ?? ''}</span>
+                          <span className="reagent-label">годен до:</span>
+                          <span className="reagent-value">{formatDate(values[expiration])}</span>
+                          <span className="reagent-label">производитель:</span>
+                          <span className="reagent-value">{values[manufacturer] ?? ''}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </td>
+          </tr>
+        </>
+      )}
 
-      <tr className="row-reagents">
-        <td colSpan={6} className="span-6 reagent-summary">
-          <div className="reagent-summary-content">
-            {!detailedReagents &&
-            (values.reagentNames || values.reagentSeries || values.reagentExpiration) ? (
-              <LegacyReagentDetails values={values} />
-            ) : (
-              <>
-                <div className="reagent-name">Наименования реагентов</div>
-
-                {REAGENT_ROWS.map(({ title, series, expiration, manufacturer }) => (
-                  <div className="reagent-item" key={title}>
-                    <div className="reagent-name">{title}</div>
-                    <div className="reagent-inline-fields">
-                      <span className="reagent-label">серия:</span>
-                      <span className="reagent-value">{values[series] ?? ''}</span>
-                      <span className="reagent-label">годен до:</span>
-                      <span className="reagent-value">{formatDate(values[expiration])}</span>
-                      <span className="reagent-label">производитель:</span>
-                      <span className="reagent-value">{values[manufacturer] ?? ''}</span>
-                    </div>
-                  </div>
-                ))}
-
-              </>
-            )}
-          </div>
-        </td>
-      </tr>
-
-      {(recipientAboConfirmed || donorAboConfirmed) && (
+      {part === 'confirmed' && (recipientAboConfirmed || donorAboConfirmed) && (
         <tr className="row-confirmed-blood-groups">
           {recipientAboConfirmed && (
             <td
@@ -134,31 +140,34 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock }: ProtocolPagePro
         </tr>
       )}
 
-      <tr className="row-tests">
-        <td colSpan={3} className="span-3">
-          <div className="compatibility-inline">
-            <span className="compatibility-inline-label">На плоскости:</span>
-            <span className="compatibility-inline-value">{planeTestResult}</span>
-          </div>
-        </td>
-        <td colSpan={3} className="span-3">
-          <div className="compatibility-inline">
-            <span className="compatibility-inline-label">Биологическая проба:</span>
-            <span className="compatibility-inline-value">{biologicalTestResult}</span>
-          </div>
-        </td>
-      </tr>
+      {part === 'tests' && (
+        <tr className="row-tests">
+          <td colSpan={3} className="span-3">
+            <div className="compatibility-inline">
+              <span className="compatibility-inline-label">На плоскости:</span>
+              <span className="compatibility-inline-value">{planeTestResult}</span>
+            </div>
+          </td>
+          <td colSpan={3} className="span-3">
+            <div className="compatibility-inline">
+              <span className="compatibility-inline-label">Биологическая проба:</span>
+              <span className="compatibility-inline-value">{biologicalTestResult}</span>
+            </div>
+          </td>
+        </tr>
+      )}
     </tbody>
   );
 };
 
-export const ComplicationsBlock = ({ values, onOpenBlock }: ProtocolPageProps) => {
+export const ComplicationsBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   const status = getComplicationsStatus(values);
 
   return (
     <tbody
       className="fill-block"
       data-protocol-block="complications"
+      data-protocol-chunk={`complications:${part}`}
       onClick={() => onOpenBlock('complications')}
     >
       <SectionTitle>Реакции и осложнения</SectionTitle>
@@ -189,25 +198,30 @@ export const ComplicationsBlock = ({ values, onOpenBlock }: ProtocolPageProps) =
   );
 };
 
-export const MonitoringBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
+export const MonitoringBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
   <tbody
     className="fill-block"
     data-protocol-block="monitoring"
+    data-protocol-chunk={`monitoring:${part}`}
     onClick={() => onOpenBlock('monitoring')}
   >
-    <SectionTitle>Наблюдение за состоянием реципиента</SectionTitle>
-    <tr>
+    {part === 'main' && <SectionTitle>Наблюдение за состоянием реципиента</SectionTitle>}
+    <tr className="monitor-segment">
       <td colSpan={6} className="monitor-wrapper">
-        <MonitorTable values={values} />
+        <MonitorTable
+          values={values}
+          part={part === 'hour1' ? 'hour1' : part === 'hour2' ? 'hour2' : 'main'}
+        />
       </td>
     </tr>
   </tbody>
 );
 
-export const DoctorBlock = ({ values, onOpenBlock }: ProtocolPageProps) => (
+export const DoctorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
   <tbody
     className="fill-block"
     data-protocol-block="doctor"
+    data-protocol-chunk={`doctor:${part}`}
     onClick={() => onOpenBlock('doctor')}
   >
     <tr className="doctor-row">

@@ -81,7 +81,7 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             colSpan={3}
             rowSpan={2}
             className="span-3"
-            label="Антигены эритроцитов донора C, c, E, e, K"
+            label="Антигены эритроцитов донора C, c, Cʷ, E, e, K, k"
             value={formatDonorAntigens(values)}
           />
         </tr>

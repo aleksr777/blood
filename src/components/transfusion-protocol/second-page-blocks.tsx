@@ -116,7 +116,12 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
               <span className="compatibility-inline-label">
                 Подтверждена группа крови реципиента:
               </span>
-              <span className="compatibility-inline-value">
+              <span
+                className={[
+                  'compatibility-inline-value',
+                  recipientAboConfirmed ? '' : 'compatibility-inline-value--below',
+                ].filter(Boolean).join(' ')}
+              >
                 {recipientAboConfirmed ? values.recipientAbo : 'Не подтверждено'}
               </span>
             </div>
@@ -126,7 +131,12 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
               <span className="compatibility-inline-label">
                 Подтверждена группа крови донора:
               </span>
-              <span className="compatibility-inline-value">
+              <span
+                className={[
+                  'compatibility-inline-value',
+                  donorAboConfirmed ? '' : 'compatibility-inline-value--below',
+                ].filter(Boolean).join(' ')}
+              >
                 {donorAboConfirmed ? values.donorAbo : 'Не подтверждено'}
               </span>
             </div>

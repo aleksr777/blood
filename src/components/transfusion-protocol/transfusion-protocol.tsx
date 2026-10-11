@@ -164,7 +164,9 @@ export const TransfusionProtocol = () => {
     <main className="app-shell">
       <ProtocolToolbar
         status={workspace.status}
+        warning={workspace.reagentWarning}
         onClear={workspace.clearForm}
+        onNew={workspace.newBlank}
         onOpenRegistry={() => workspace.setRegistryOpen(true)}
         onSave={() => void workspace.saveToDatabase()}
         pageCount={pages.length}

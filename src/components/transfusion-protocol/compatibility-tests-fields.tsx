@@ -147,14 +147,19 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
       )}
 
       <div className={styles.results}>
-        {RADIO_GROUPS.filter(
-          (group) => group.name !== 'confirmedDonorAboResult' || showDonorAboConfirmation,
-        ).map((group) => {
+        {RADIO_GROUPS.map((group) => {
           const selected =
             values[group.name] || DEFAULT_RESULTS[group.name as keyof typeof DEFAULT_RESULTS];
+          const disabled =
+            group.name === 'confirmedDonorAboResult' && !showDonorAboConfirmation;
 
           return (
-            <fieldset key={group.name} className={styles.resultGroup}>
+            <fieldset
+              key={group.name}
+              className={styles.resultGroup}
+              disabled={disabled}
+              aria-disabled={disabled}
+            >
               <legend>{group.label}</legend>
               <div className={styles.options}>
                 {group.options.map((option) => (

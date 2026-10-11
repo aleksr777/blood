@@ -107,3 +107,12 @@ export const getExpiredReagentWarnings = (
     const warning = getReagentExpirationWarning(title, values[expiration], now);
     return warning ? [warning] : [];
   });
+
+export const getHemaconExpirationWarning = (
+  expirationDate?: string,
+  now = new Date(),
+) => {
+  if (!expirationDate || expirationDate >= localIsoDate(now)) return '';
+
+  return `Срок годности гемакона истёк ${formatDate(expirationDate)}`;
+};

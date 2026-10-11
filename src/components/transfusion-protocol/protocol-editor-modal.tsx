@@ -10,6 +10,7 @@ import { MonitoringFields } from './monitoring-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { RecipientHistoryFields } from './recipient-history-fields';
+import { getHemaconExpirationWarning } from './reagent-defaults';
 import { SelectionFields } from './selection-fields';
 import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
@@ -43,6 +44,7 @@ export const ProtocolEditorModal = ({
 }: Props) => {
   const config = getProtocolBlockConfig(blockId);
   const [draft, setDraft] = useState<ProtocolValues>(() => getInitialValues(blockId, values));
+  const hemaconExpirationWarning = getHemaconExpirationWarning(draft.expirationDate);
 
   useEffect(() => {
     setDraft(getInitialValues(blockId, values));
@@ -121,9 +123,7 @@ export const ProtocolEditorModal = ({
               ))}
 
             {config.fields
-              .filter((field) =>
-                ['amountMl', 'collectionDate', 'expirationDate'].includes(field.name),
-              )
+              .filter((field) => ['amountMl', 'collectionDate'].includes(field.name))
               .map((field) => (
                 <ProtocolFieldControl
                   key={field.name}
@@ -132,6 +132,25 @@ export const ProtocolEditorModal = ({
                   onChange={changeValue}
                   onValuesChange={changeValues}
                 />
+              ))}
+
+            {config.fields
+              .filter((field) => field.name === 'expirationDate')
+              .map((field) => (
+                <div key={field.name} className={styles.componentUnitNumberField}>
+                  <ProtocolFieldControl
+                    field={field}
+                    value={draft[field.name] ?? ''}
+                    onChange={changeValue}
+                    onValuesChange={changeValues}
+                  />
+
+                  {hemaconExpirationWarning && (
+                    <div className={styles.fieldWarning} role="alert">
+                      <span>{hemaconExpirationWarning}.</span>
+                    </div>
+                  )}
+                </div>
               ))}
 
             {config.fields

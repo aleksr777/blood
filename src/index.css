@@ -105,12 +105,24 @@ input[type='radio']:checked:disabled {
 }
 
 .app-shell {
-  padding: 24px 20px 48px;
+  padding: 0 20px 48px;
+}
+
+.app-header {
+  position: sticky;
+  z-index: 100;
+  top: 0;
+  margin: 0 -20px 18px;
+  padding: 12px 20px 10px;
+  border-bottom: 1px solid #d8e0ec;
+  background: rgb(237 241 245 / 96%);
+  box-shadow: 0 4px 14px rgb(18 31 48 / 8%);
+  backdrop-filter: blur(8px);
 }
 
 .toolbar-wrap {
   width: 262.5mm;
-  margin: 0 auto 18px;
+  margin: 0 auto;
 }
 
 .print-actions {
@@ -569,7 +581,20 @@ input[type='radio']:checked:disabled {
 
 @media (max-width: 900px) {
   .app-shell {
-    padding: 14px 10px 30px;
+    padding: 0 10px 30px;
+  }
+
+  .app-header {
+    margin: 0 -10px 14px;
+    padding: 10px;
+  }
+
+  .toolbar-wrap {
+    width: 100%;
+  }
+
+  .print-actions {
+    flex-wrap: wrap;
   }
 
   .sheets {
@@ -603,7 +628,7 @@ input[type='radio']:checked:disabled {
     padding: 0;
   }
 
-  .toolbar-wrap {
+  .app-header {
     display: none !important;
   }
 

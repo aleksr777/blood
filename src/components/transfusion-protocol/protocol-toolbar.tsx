@@ -4,6 +4,8 @@ type Props = {
   dangerWarning: string;
   bloodGroupWarning: string;
   onDismissBloodGroupWarning: () => void;
+  componentUnitNumberWarning: string;
+  onDismissComponentUnitNumberWarning: () => void;
   onClear: () => void;
   onNew: () => void;
   onOpenRegistry: () => void;
@@ -18,6 +20,8 @@ export const ProtocolToolbar = ({
   dangerWarning,
   bloodGroupWarning,
   onDismissBloodGroupWarning,
+  componentUnitNumberWarning,
+  onDismissComponentUnitNumberWarning,
   onClear,
   onNew,
   onOpenRegistry,
@@ -69,6 +73,19 @@ export const ProtocolToolbar = ({
           className="toolbar-warning-dismiss"
           aria-label="Закрыть предупреждение"
           onClick={onDismissBloodGroupWarning}
+        >
+          ×
+        </button>
+      </div>
+    )}
+    {componentUnitNumberWarning && (
+      <div className="toolbar-component-unit-warning" role="alert">
+        <span>{componentUnitNumberWarning}</span>
+        <button
+          type="button"
+          className="toolbar-warning-dismiss"
+          aria-label="Закрыть предупреждение"
+          onClick={onDismissComponentUnitNumberWarning}
         >
           ×
         </button>

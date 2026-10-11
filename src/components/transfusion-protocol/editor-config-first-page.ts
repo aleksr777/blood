@@ -131,6 +131,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     size: 'medium',
     fields: [
       { name: 'componentGroup', label: 'Группа компонентов крови' },
+      { name: 'indicationComponent', label: 'Группа компонента для показаний' },
       {
         name: 'componentName',
         label: 'Точное наименование компонента донорской крови',

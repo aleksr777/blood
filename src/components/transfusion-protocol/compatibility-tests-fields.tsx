@@ -73,6 +73,7 @@ const RADIO_GROUPS = [
 export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
   const change = (name: string, value: string) => onChange({ [name]: value });
   const compatibilityDangerWarning = getCompatibilityDangerWarning(values);
+  const showDonorAboConfirmation = values.componentGroup === 'erythrocytes';
 
   useEffect(() => {
     const missingDefaults = Object.fromEntries(
@@ -146,7 +147,9 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
       )}
 
       <div className={styles.results}>
-        {RADIO_GROUPS.map((group) => {
+        {RADIO_GROUPS.filter(
+          (group) => group.name !== 'confirmedDonorAboResult' || showDonorAboConfirmation,
+        ).map((group) => {
           const selected =
             values[group.name] || DEFAULT_RESULTS[group.name as keyof typeof DEFAULT_RESULTS];
 

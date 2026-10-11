@@ -5,6 +5,7 @@ import {
   type ProtocolRecord,
 } from '../../storage/repositories/recipients';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
+import { getBloodGroupMismatch } from './blood-group-validation';
 import {
   getExpiredReagentWarnings,
   hasReagentDefaultUpdate,
@@ -69,6 +70,7 @@ export const useProtocolWorkspace = () => {
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(getInitialActiveBlock);
   const [registryOpen, setRegistryOpen] = useState(getInitialRegistryOpen);
   const [status, setStatus] = useState('');
+  const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
 
   useEffect(() => {
     try {
@@ -201,6 +203,25 @@ export const useProtocolWorkspace = () => {
     setStatus('Сохранённый бланк открыт для просмотра и редактирования.');
   };
 
+  const bloodGroupMismatch = getBloodGroupMismatch(values);
+
+  useEffect(() => {
+    if (!bloodGroupMismatch.key) {
+      setDismissedBloodGroupWarningKey('');
+    }
+  }, [bloodGroupMismatch.key]);
+
+  const bloodGroupWarning =
+    bloodGroupMismatch.key && bloodGroupMismatch.key !== dismissedBloodGroupWarningKey
+      ? bloodGroupMismatch.message
+      : '';
+
+  const dismissBloodGroupWarning = () => {
+    if (bloodGroupMismatch.key) {
+      setDismissedBloodGroupWarningKey(bloodGroupMismatch.key);
+    }
+  };
+
   const expiredReagents = getExpiredReagentWarnings(values);
   const reagentWarning = expiredReagents.length
     ? `Внимание: ${expiredReagents.join('; ')}.`
@@ -220,6 +241,8 @@ export const useProtocolWorkspace = () => {
     newBlank,
     reagentWarning,
     compatibilityWarning,
+    bloodGroupWarning,
+    dismissBloodGroupWarning,
     clearForm,
     openRecord,
   };

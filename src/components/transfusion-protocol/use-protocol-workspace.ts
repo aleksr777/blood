@@ -9,6 +9,7 @@ import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
 import {
   getExpiredReagentWarnings,
+  getHemaconExpirationWarning,
   hasReagentDefaultUpdate,
   reagentDefaultsForNewBlank,
   saveReagentDefaults,
@@ -261,8 +262,13 @@ export const useProtocolWorkspace = () => {
   };
 
   const expiredReagents = getExpiredReagentWarnings(values);
-  const reagentWarning = expiredReagents.length
-    ? `Внимание: ${expiredReagents.join('; ')}.`
+  const hemaconExpirationWarning = getHemaconExpirationWarning(values.expirationDate);
+  const expirationWarnings = [
+    hemaconExpirationWarning,
+    ...expiredReagents,
+  ].filter(Boolean);
+  const reagentWarning = expirationWarnings.length
+    ? `Внимание: ${expirationWarnings.join('; ')}.`
     : '';
   const compatibilityWarning = getCompatibilityDangerWarning(values);
 

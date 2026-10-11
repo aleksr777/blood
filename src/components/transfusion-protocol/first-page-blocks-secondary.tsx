@@ -80,6 +80,7 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
           <LabeledCell
             colSpan={3}
             className="span-3"
+            inline
             label="Группа крови донора AB0:"
             value={[values.donorAbo, formatRh(values.donorRh)].filter(Boolean).join(' ')}
           />

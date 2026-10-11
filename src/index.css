@@ -212,7 +212,8 @@ input[type='radio']:checked:disabled {
 
 .toolbar-warning,
 .toolbar-danger-warning,
-.toolbar-blood-group-warning {
+.toolbar-blood-group-warning,
+.toolbar-component-unit-warning {
   margin-top: 0.55rem;
   padding: 0.5rem 0.7rem;
   font-size: 13px;
@@ -233,7 +234,8 @@ input[type='radio']:checked:disabled {
   font-weight: 700;
 }
 
-.toolbar-blood-group-warning {
+.toolbar-blood-group-warning,
+.toolbar-component-unit-warning {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;

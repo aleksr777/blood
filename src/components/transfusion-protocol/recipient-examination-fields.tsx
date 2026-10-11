@@ -15,6 +15,7 @@ const SelectField = ({
   emptyLabel,
   emptyDisplayLabel,
   compact = false,
+  tone,
 }: {
   name: string;
   label: string;
@@ -24,6 +25,7 @@ const SelectField = ({
   emptyLabel?: string;
   emptyDisplayLabel?: string;
   compact?: boolean;
+  tone?: 'positive' | 'negative';
 }) => (
   <div className={styles.selectField}>
     <div className={styles.label}>{label}</div>
@@ -35,11 +37,22 @@ const SelectField = ({
       emptyLabel={emptyLabel}
       emptyDisplayLabel={emptyDisplayLabel}
       compact={compact}
+      tone={tone}
       onChange={onChange}
     />
   </div>
 );
+const normalizeRh = (value?: string) => {
+  if (value === 'Rh(D)+' || value === 'Rh(+)') return 'Rh(+)';
+  if (value === 'Rh(D)-' || value === 'Rh(-)') return 'Rh(-)';
+  return '';
+};
+
 export const RecipientExaminationFields = ({ values, onChange }: Props) => {
+  const recipientRh = normalizeRh(values.recipientRh);
+  const bloodGroupTone =
+    recipientRh === 'Rh(-)' ? 'negative' : recipientRh === 'Rh(+)' ? 'positive' : undefined;
+
   const setStatus = (status: string) => onChange({
     alloimmuneAntibodyStatus: status,
       alloimmuneAntibodies: '',
@@ -55,13 +68,15 @@ export const RecipientExaminationFields = ({ values, onChange }: Props) => {
           label="Группа крови AB0"
           options={['O(I)', 'A(II)', 'B(III)', 'AB(IV)']}
           value={values.recipientAbo ?? ''}
+          tone={bloodGroupTone}
           onChange={(value) => onChange({ recipientAbo: value })}
         />
         <SelectField
           name="recipientRh"
           label="Резус-принадлежность"
-          options={['Rh(D)+', 'Rh(D)-']}
-          value={values.recipientRh ?? ''}
+          options={['Rh(+)', 'Rh(-)']}
+          value={recipientRh}
+          tone={bloodGroupTone}
           onChange={(value) => onChange({ recipientRh: value })}
         />
       </div>

@@ -66,6 +66,7 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
     (values.confirmedRecipientAboResult || 'Подтверждено') === 'Подтверждено';
   const donorAboConfirmed =
     (values.confirmedDonorAboResult || 'Подтверждено') === 'Подтверждено';
+  const showDonorAboConfirmation = values.componentGroup === 'erythrocytes';
   const planeTestResult = values.planeTestResult || 'Совместимо';
   const biologicalTestResult = values.biologicalTestResult || 'Совместимо';
 
@@ -111,7 +112,10 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
 
       {part === 'confirmed' && (
         <tr className="row-confirmed-blood-groups">
-          <td colSpan={3} className="span-3">
+          <td
+            colSpan={showDonorAboConfirmation ? 3 : 6}
+            className={showDonorAboConfirmation ? 'span-3' : 'span-6'}
+          >
             <div className="compatibility-inline">
               <span className="compatibility-inline-label">
                 Подтверждена группа крови реципиента:
@@ -126,21 +130,24 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
               </span>
             </div>
           </td>
-          <td colSpan={3} className="span-3">
-            <div className="compatibility-inline">
-              <span className="compatibility-inline-label">
-                Подтверждена группа крови донора:
-              </span>
-              <span
-                className={[
-                  'compatibility-inline-value',
-                  donorAboConfirmed ? '' : 'compatibility-inline-value--below',
-                ].filter(Boolean).join(' ')}
-              >
-                {donorAboConfirmed ? values.donorAbo : 'Не подтверждено'}
-              </span>
-            </div>
-          </td>
+
+          {showDonorAboConfirmation && (
+            <td colSpan={3} className="span-3">
+              <div className="compatibility-inline">
+                <span className="compatibility-inline-label">
+                  Подтверждена группа крови донора:
+                </span>
+                <span
+                  className={[
+                    'compatibility-inline-value',
+                    donorAboConfirmed ? '' : 'compatibility-inline-value--below',
+                  ].filter(Boolean).join(' ')}
+                >
+                  {donorAboConfirmed ? values.donorAbo : 'Не подтверждено'}
+                </span>
+              </div>
+            </td>
+          )}
         </tr>
       )}
 

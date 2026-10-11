@@ -6,6 +6,7 @@ import {
 } from '../../storage/repositories/recipients';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
+import { getComponentUnitNumberWarning } from './component-unit-number';
 import {
   getExpiredReagentWarnings,
   hasReagentDefaultUpdate,
@@ -71,6 +72,8 @@ export const useProtocolWorkspace = () => {
   const [registryOpen, setRegistryOpen] = useState(getInitialRegistryOpen);
   const [status, setStatus] = useState('');
   const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
+  const [componentUnitNumberChecked, setComponentUnitNumberChecked] = useState(false);
+  const [dismissedComponentUnitWarningKey, setDismissedComponentUnitWarningKey] = useState('');
 
   useEffect(() => {
     try {
@@ -171,6 +174,8 @@ export const useProtocolWorkspace = () => {
     setRegistryOpen(false);
     setRecordId(null);
     setValues(nextValues);
+    setComponentUnitNumberChecked(false);
+    setDismissedComponentUnitWarningKey('');
 
     if (sourceValues.recipientName?.trim()) {
       setStatus(
@@ -185,6 +190,8 @@ export const useProtocolWorkspace = () => {
 
   const clearForm = () => {
     draft.reset();
+    setComponentUnitNumberChecked(false);
+    setDismissedComponentUnitWarningKey('');
     setActiveBlock(null);
     setRecordId(null);
     setStatus('');
@@ -196,6 +203,8 @@ export const useProtocolWorkspace = () => {
 
   const openRecord = (record: ProtocolRecord) => {
     draft.touch();
+    setComponentUnitNumberChecked(false);
+    setDismissedComponentUnitWarningKey('');
     setActiveBlock(null);
     setRecordId(record.id);
     setValues({ ...record.values, recipientId: String(record.recipientId) });
@@ -222,6 +231,35 @@ export const useProtocolWorkspace = () => {
     }
   };
 
+  const componentUnitNumberState = getComponentUnitNumberWarning(values);
+
+  useEffect(() => {
+    if (!componentUnitNumberState.key) {
+      setDismissedComponentUnitWarningKey('');
+    }
+  }, [componentUnitNumberState.key]);
+
+  const componentUnitNumberWarning =
+    componentUnitNumberChecked &&
+    componentUnitNumberState.key &&
+    componentUnitNumberState.key !== dismissedComponentUnitWarningKey
+      ? componentUnitNumberState.message
+      : '';
+
+  const validateComponentUnitNumber = (nextValues: ProtocolValues = values) => {
+    const nextWarning = getComponentUnitNumberWarning(nextValues);
+    setComponentUnitNumberChecked(Boolean(nextWarning.key));
+    if (!nextWarning.key) {
+      setDismissedComponentUnitWarningKey('');
+    }
+  };
+
+  const dismissComponentUnitNumberWarning = () => {
+    if (componentUnitNumberState.key) {
+      setDismissedComponentUnitWarningKey(componentUnitNumberState.key);
+    }
+  };
+
   const expiredReagents = getExpiredReagentWarnings(values);
   const reagentWarning = expiredReagents.length
     ? `Внимание: ${expiredReagents.join('; ')}.`
@@ -243,6 +281,9 @@ export const useProtocolWorkspace = () => {
     compatibilityWarning,
     bloodGroupWarning,
     dismissBloodGroupWarning,
+    componentUnitNumberWarning,
+    validateComponentUnitNumber,
+    dismissComponentUnitNumberWarning,
     clearForm,
     openRecord,
   };

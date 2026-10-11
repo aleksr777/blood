@@ -30,6 +30,7 @@ export const CustomSelectField = ({
   const [open, setOpen] = useState(false);
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
   const allOptions = allowEmpty ? ['', ...options] : options;
+  const toneBloodGroupOptions = Boolean(tone && name.toLocaleLowerCase().includes('abo'));
 
   const select = (nextValue: string) => {
     onChange(nextValue);
@@ -70,6 +71,12 @@ export const CustomSelectField = ({
         className={[
           styles.historyDropdown,
           compact ? styles.historyDropdownCompact : '',
+          toneBloodGroupOptions && tone === 'positive'
+            ? styles.historyDropdownRhPositive
+            : '',
+          toneBloodGroupOptions && tone === 'negative'
+            ? styles.historyDropdownRhNegative
+            : '',
         ].filter(Boolean).join(' ')}
         data-state={dropdownState}
         role="listbox"
@@ -86,6 +93,12 @@ export const CustomSelectField = ({
               option === '-' ? styles.customSelectOptionNegative : '',
               option === 'Rh(+)' ? styles.customSelectOptionRhPositive : '',
               option === 'Rh(-)' ? styles.customSelectOptionRhNegative : '',
+              toneBloodGroupOptions && tone === 'positive'
+                ? styles.customSelectOptionTonePositive
+                : '',
+              toneBloodGroupOptions && tone === 'negative'
+                ? styles.customSelectOptionToneNegative
+                : '',
             ].filter(Boolean).join(' ')}
             role="option"
             aria-selected={value === option}

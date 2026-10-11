@@ -14,38 +14,41 @@ import {
   DoctorBlock,
   MonitoringBlock,
 } from './second-page-blocks';
-import type { ProtocolBlockId, ProtocolPageProps } from './protocol-types';
+import { getChunkBlockId, getChunkPart, type ProtocolChunkId } from './protocol-pagination';
+import type { ProtocolPageProps } from './protocol-types';
 
 type Props = ProtocolPageProps & {
-  blockIds: ProtocolBlockId[];
+  chunkIds: ProtocolChunkId[];
 };
 
-export const ProtocolBlocks = ({ blockIds, values, onOpenBlock }: Props) => (
+export const ProtocolBlocks = ({ chunkIds, values, onOpenBlock }: Props) => (
   <>
-    {blockIds.map((blockId) => {
-      const props = { values, onOpenBlock };
+    {chunkIds.map((chunkId) => {
+      const blockId = getChunkBlockId(chunkId);
+      const part = getChunkPart(chunkId);
+      const props = { values, onOpenBlock, part };
 
       switch (blockId) {
         case 'general':
-          return <GeneralBlock key={blockId} {...props} />;
+          return <GeneralBlock key={chunkId} {...props} />;
         case 'examination':
-          return <ExaminationBlock key={blockId} {...props} />;
+          return <ExaminationBlock key={chunkId} {...props} />;
         case 'indications':
-          return <IndicationsBlock key={blockId} {...props} />;
+          return <IndicationsBlock key={chunkId} {...props} />;
         case 'history':
-          return <HistoryBlock key={blockId} {...props} />;
+          return <HistoryBlock key={chunkId} {...props} />;
         case 'donor':
-          return <DonorBlock key={blockId} {...props} />;
+          return <DonorBlock key={chunkId} {...props} />;
         case 'selection':
-          return <SelectionBlock key={blockId} {...props} />;
+          return <SelectionBlock key={chunkId} {...props} />;
         case 'compatibilityTests':
-          return <CompatibilityTestsBlock key={blockId} {...props} />;
+          return <CompatibilityTestsBlock key={chunkId} {...props} />;
         case 'complications':
-          return <ComplicationsBlock key={blockId} {...props} />;
+          return <ComplicationsBlock key={chunkId} {...props} />;
         case 'monitoring':
-          return <MonitoringBlock key={blockId} {...props} />;
+          return <MonitoringBlock key={chunkId} {...props} />;
         case 'doctor':
-          return <DoctorBlock key={blockId} {...props} />;
+          return <DoctorBlock key={chunkId} {...props} />;
         default:
           return null;
       }

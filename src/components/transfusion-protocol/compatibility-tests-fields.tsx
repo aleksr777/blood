@@ -162,7 +162,15 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
                       checked={selected === option}
                       onChange={() => change(group.name, option)}
                     />
-                    <span>{option}</span>
+                    <span
+                      className={
+                        option === 'Не подтверждено' && selected === option
+                          ? styles.dangerOptionText
+                          : undefined
+                      }
+                    >
+                      {option}
+                    </span>
                   </label>
                 ))}
               </div>

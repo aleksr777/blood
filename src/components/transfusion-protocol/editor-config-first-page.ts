@@ -134,9 +134,15 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'collectionOrganization', label: 'Организация, осуществившая заготовку', wide: true },
       {
         name: 'donorAbo',
-        label: 'Группа крови донора AB0',
+        label: 'Группа крови AB0',
         type: 'select',
         options: ['O(I)', 'A(II)', 'B(III)', 'AB(IV)'],
+      },
+      {
+        name: 'donorRh',
+        label: 'Резус-принадлежность',
+        type: 'select',
+        options: ['Rh(D)+', 'Rh(D)-'],
       },
       { name: 'donorAntigenC', label: 'C (RH2)', type: 'select' },
       { name: 'donorAntigenc', label: 'c (RH4)', type: 'select' },

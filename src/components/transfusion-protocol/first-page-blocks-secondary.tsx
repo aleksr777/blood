@@ -1,3 +1,4 @@
+import { formatDonorAntigens } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatHistoryValue } from './recipient-history-model';
 import { getSelectionStatus, SELECTION_STATUS } from './selection-model';
@@ -81,7 +82,7 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             rowSpan={2}
             className="span-3"
             label="Антигены эритроцитов донора C, c, E, e, K"
-            value={values.donorAntigens}
+            value={formatDonorAntigens(values)}
           />
         </tr>
         <tr>

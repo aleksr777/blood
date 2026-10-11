@@ -48,7 +48,8 @@ export const DonorFields = ({ values, onChange }: Props) => {
   const legacyComponent = INDICATION_COMPONENTS.find(
     ({ label }) => label === values.componentName,
   );
-  const selectedComponent = values.componentGroup || legacyComponent?.value || '';
+  const selectedComponent =
+    values.componentGroup || values.indicationComponent || legacyComponent?.value || '';
   const componentName =
     legacyComponent && values.componentName === legacyComponent.label ? '' : values.componentName ?? '';
 
@@ -65,9 +66,11 @@ export const DonorFields = ({ values, onChange }: Props) => {
               data-component={value}
               data-selected={selectedComponent === value}
               aria-pressed={selectedComponent === value}
+              disabled={Boolean(selectedComponent && selectedComponent !== value)}
               onClick={() =>
                 onChange({
                   componentGroup: value,
+                  indicationComponent: value,
                   ...(selectedComponent !== value ? { componentName: '' } : {}),
                 })
               }

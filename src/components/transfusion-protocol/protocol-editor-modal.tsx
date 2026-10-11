@@ -17,6 +17,8 @@ import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 type Props = {
   blockId: ProtocolBlockId;
   values: ProtocolValues;
+  bloodGroupWarning: string;
+  onDismissBloodGroupWarning: () => void;
   onSave: (values: ProtocolValues) => void;
   onClose: () => void;
 };
@@ -26,7 +28,14 @@ const getInitialValues = (blockId: ProtocolBlockId, values: ProtocolValues) => {
   return Object.fromEntries(config.fields.map(({ name }) => [name, values[name] ?? '']));
 };
 
-export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props) => {
+export const ProtocolEditorModal = ({
+  blockId,
+  values,
+  bloodGroupWarning,
+  onDismissBloodGroupWarning,
+  onSave,
+  onClose,
+}: Props) => {
   const config = getProtocolBlockConfig(blockId);
   const [draft, setDraft] = useState<ProtocolValues>(() => getInitialValues(blockId, values));
 
@@ -51,6 +60,20 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
   return (
     <Modal title={config.title} onClose={handleClose} className={styles[config.size]}>
       <div className={[styles.grid, blockId === 'history' ? styles.historyGrid : ''].filter(Boolean).join(' ')}>
+        {bloodGroupWarning && (blockId === 'examination' || blockId === 'donor') && (
+          <div className={styles.bloodGroupWarning} role="alert">
+            <span>{bloodGroupWarning}</span>
+            <button
+              type="button"
+              className={styles.bloodGroupWarningDismiss}
+              aria-label="Закрыть предупреждение"
+              onClick={onDismissBloodGroupWarning}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {blockId === 'examination' ? (
           <RecipientExaminationFields values={draft} onChange={changeValues} />
         ) : blockId === 'donor' ? (

@@ -99,6 +99,10 @@
   transform: translateY(-1px);
 }
 
+.componentNameField {
+  margin-top: 0.75rem;
+}
+
 .choiceGrid {
   display: grid;
   gap: 0.55rem;

@@ -47,10 +47,17 @@ export const DonorFields = ({ values, onChange }: Props) => (
     <div className={styles.topGrid}>
       <SelectField
         name="donorAbo"
-        label="Группа крови донора AB0"
+        label="Группа крови AB0"
         options={['O(I)', 'A(II)', 'B(III)', 'AB(IV)']}
         value={values.donorAbo ?? ''}
         onChange={(value) => onChange({ donorAbo: value })}
+      />
+      <SelectField
+        name="donorRh"
+        label="Резус-принадлежность"
+        options={['Rh(D)+', 'Rh(D)-']}
+        value={values.donorRh ?? ''}
+        onChange={(value) => onChange({ donorRh: value })}
       />
     </div>
 

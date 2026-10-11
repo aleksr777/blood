@@ -102,14 +102,14 @@ export const ExaminationBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
     {part === 'antigens' && (
       <tr>
         <LabeledCell
-          colSpan={4}
-          className="span-4"
+          colSpan={3}
+          className="span-3"
           label="Антигены"
           value={formatRecipientAntigens(values)}
         />
         <LabeledCell
-          colSpan={2}
-          className="span-2"
+          colSpan={3}
+          className="span-3"
           label="Аллоиммунные антитела"
           value={formatAlloimmuneAntibodies(values)}
         />

@@ -7,7 +7,10 @@ export const getFailedCompatibilityChecks = (values: ProtocolValues): string[] =
     failures.push('группа крови реципиента не подтверждена');
   }
 
-  if (values.confirmedDonorAboResult === 'Не подтверждено') {
+  if (
+    values.componentGroup === 'erythrocytes' &&
+    values.confirmedDonorAboResult === 'Не подтверждено'
+  ) {
     failures.push('группа крови донора не подтверждена');
   }
 

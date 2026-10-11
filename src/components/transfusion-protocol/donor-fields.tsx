@@ -1,6 +1,8 @@
 import { CustomSelectField } from './custom-select-field';
 import { DONOR_ANTIGENS } from './donor-model';
+import { INDICATION_COMPONENTS } from './indications-model';
 import type { ProtocolValues } from './protocol-types';
+import componentStyles from './indications-fields.module.css';
 import styles from './recipient-examination-fields.module.css';
 
 type Props = {
@@ -44,6 +46,25 @@ const SelectField = ({
 
 export const DonorFields = ({ values, onChange }: Props) => (
   <div className={styles.root}>
+    <fieldset className={componentStyles.componentGroup}>
+      <legend>Компонент крови</legend>
+      <div className={componentStyles.componentChoices}>
+        {INDICATION_COMPONENTS.map(({ value, label }) => (
+          <button
+            key={value}
+            type="button"
+            className={componentStyles.componentButton}
+            data-component={value}
+            data-selected={values.componentName === label}
+            aria-pressed={values.componentName === label}
+            onClick={() => onChange({ componentName: label })}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </fieldset>
+
     <div className={styles.topGrid}>
       <SelectField
         name="donorAbo"

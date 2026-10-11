@@ -137,10 +137,30 @@ export const useProtocolWorkspace = () => {
     }
   };
 
-  const newBlank = () => {
+  const newBlank = async () => {
+    let sourceValues = values;
+    let previousBlankSaved = false;
+
+    if (recordId === null && values.recipientName?.trim()) {
+      try {
+        const record = await saveProtocolRecord(null, values);
+        sourceValues = {
+          ...values,
+          recipientId: String(record.recipientId),
+        };
+        previousBlankSaved = true;
+      } catch (error) {
+        console.error('Не удалось автоматически сохранить предыдущий бланк:', error);
+        setStatus(
+          'Новый бланк не создан: не удалось автоматически сохранить предыдущий бланк.',
+        );
+        return;
+      }
+    }
+
     const nextValues = {
-      ...currentRecipientValues(values),
-      ...reagentDefaultsForNewBlank(values),
+      ...currentRecipientValues(sourceValues),
+      ...reagentDefaultsForNewBlank(sourceValues),
     };
 
     draft.touch();
@@ -148,11 +168,16 @@ export const useProtocolWorkspace = () => {
     setRegistryOpen(false);
     setRecordId(null);
     setValues(nextValues);
-    setStatus(
-      values.recipientName?.trim()
-        ? 'Создан новый бланк для текущего реципиента.'
-        : 'Создан новый бланк.',
-    );
+
+    if (sourceValues.recipientName?.trim()) {
+      setStatus(
+        previousBlankSaved
+          ? 'Предыдущий бланк автоматически сохранён. Создан новый бланк для текущего реципиента.'
+          : 'Создан новый бланк для текущего реципиента.',
+      );
+    } else {
+      setStatus('Создан новый бланк.');
+    }
   };
 
   const clearForm = () => {

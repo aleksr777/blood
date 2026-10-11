@@ -12,6 +12,7 @@ type Props = {
   emptyDisplayLabel?: string;
   compact?: boolean;
   allowEmpty?: boolean;
+  tone?: 'positive' | 'negative';
 };
 
 export const CustomSelectField = ({
@@ -24,6 +25,7 @@ export const CustomSelectField = ({
   emptyDisplayLabel,
   compact = false,
   allowEmpty = true,
+  tone,
 }: Props) => {
   const [open, setOpen] = useState(false);
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
@@ -42,6 +44,8 @@ export const CustomSelectField = ({
         className={[
           styles.customSelectControl,
           compact ? styles.customSelectControlCompact : '',
+          tone === 'positive' ? styles.customSelectControlRhPositive : '',
+          tone === 'negative' ? styles.customSelectControlRhNegative : '',
         ].filter(Boolean).join(' ')}
         aria-label={label}
         aria-haspopup="listbox"
@@ -80,6 +84,8 @@ export const CustomSelectField = ({
               styles.customSelectOption,
               option === '+' ? styles.customSelectOptionPositive : '',
               option === '-' ? styles.customSelectOptionNegative : '',
+              option === 'Rh(+)' ? styles.customSelectOptionRhPositive : '',
+              option === 'Rh(-)' ? styles.customSelectOptionRhNegative : '',
             ].filter(Boolean).join(' ')}
             role="option"
             aria-selected={value === option}

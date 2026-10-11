@@ -7,7 +7,8 @@ import { PlateletIndications } from './indication-platelet-fields';
 import styles from './indications-fields.module.css';
 
 export const IndicationsFields = ({ values, onChange }: IndicationProps) => {
-  const component = values.indicationComponent;
+  const lockedComponent = values.componentGroup;
+  const component = lockedComponent || values.indicationComponent;
 
   return (
     <IndicationsAutoHeight>
@@ -23,6 +24,7 @@ export const IndicationsFields = ({ values, onChange }: IndicationProps) => {
                 data-component={value}
                 data-selected={component === value}
                 aria-pressed={component === value}
+                disabled={Boolean(lockedComponent && lockedComponent !== value)}
                 onClick={() => onChange({ indicationComponent: value })}
               >
                 {label}

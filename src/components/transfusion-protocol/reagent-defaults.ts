@@ -89,16 +89,21 @@ const localIsoDate = (date: Date) => {
   return `${year}-${month}-${day}`;
 };
 
+export const getReagentExpirationWarning = (
+  title: string,
+  expirationDate?: string,
+  now = new Date(),
+) => {
+  if (!expirationDate || expirationDate >= localIsoDate(now)) return '';
+
+  return `${title} — срок годности истёк ${formatDate(expirationDate)}`;
+};
+
 export const getExpiredReagentWarnings = (
   values: ProtocolValues,
   now = new Date(),
-): string[] => {
-  const today = localIsoDate(now);
-
-  return REAGENTS.flatMap(({ title, expiration }) => {
-    const expirationDate = values[expiration];
-    if (!expirationDate || expirationDate >= today) return [];
-
-    return [`${title} — срок годности истёк ${formatDate(expirationDate)}`];
+): string[] =>
+  REAGENTS.flatMap(({ title, expiration }) => {
+    const warning = getReagentExpirationWarning(title, values[expiration], now);
+    return warning ? [warning] : [];
   });
-};

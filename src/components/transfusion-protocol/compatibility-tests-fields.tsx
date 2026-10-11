@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { getExpiredReagentWarnings } from './reagent-defaults';
 import type { ProtocolValues } from './protocol-types';
 import styles from './compatibility-tests-fields.module.css';
 
@@ -70,6 +71,7 @@ const RADIO_GROUPS = [
 
 export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
   const change = (name: string, value: string) => onChange({ [name]: value });
+  const expiredReagents = getExpiredReagentWarnings(values);
 
   useEffect(() => {
     const missingDefaults = Object.fromEntries(
@@ -117,6 +119,12 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
           </fieldset>
         ))}
       </div>
+
+      {expiredReagents.length > 0 && (
+        <div className={styles.warning} role="alert">
+          <strong>Внимание:</strong> {expiredReagents.join('; ')}.
+        </div>
+      )}
 
       <div className={styles.results}>
         {RADIO_GROUPS.map((group) => {

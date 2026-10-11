@@ -4,11 +4,13 @@ import { DONOR_ANTIGENS } from './donor-model';
 import { INDICATION_COMPONENTS } from './indications-model';
 import {
   loadSavedOptions,
+  rememberSavedOption,
   removeSavedOption,
   renameSavedOption,
   type SavedOptionRecord,
 } from '../../storage/repositories/saved-options';
 import { SavedOptionItem } from './saved-option-item';
+import { getComponentNameOptionCategory } from './saved-field-config';
 import type { ProtocolValues } from './protocol-types';
 import { useOverlayDropdown } from './use-overlay-dropdown';
 import componentStyles from './indications-fields.module.css';
@@ -63,13 +65,31 @@ const SelectField = ({
   </div>
 );
 
+const inferLegacyComponentGroup = (name: string) => {
+  const normalized = name.trim().toLocaleLowerCase();
+
+  if (normalized.includes('эритроц') || normalized.includes('эритромас')) {
+    return 'erythrocytes';
+  }
+  if (normalized.includes('плазм') || normalized === 'сзп' || normalized.startsWith('сзп ')) {
+    return 'plasma-cryo';
+  }
+  if (normalized.includes('тромбоц')) {
+    return 'platelets';
+  }
+
+  return '';
+};
+
 const ComponentNameInput = ({
   value,
   fixedOptions,
+  componentGroup,
   onChange,
 }: {
   value: string;
   fixedOptions: string[];
+  componentGroup: string;
   onChange: (value: string) => void;
 }) => {
   const [savedOptions, setSavedOptions] = useState<SavedOptionRecord[]>([]);
@@ -79,23 +99,55 @@ const ComponentNameInput = ({
 
   useEffect(() => {
     let active = true;
+    const category = getComponentNameOptionCategory(componentGroup);
+
+    setOpen(false);
+    setSavedOptions([]);
     setStatus('loading');
 
-    void loadSavedOptions('componentName')
-      .then((items) => {
+    if (!category) {
+      setStatus('ready');
+      return () => {
+        active = false;
+      };
+    }
+
+    void (async () => {
+      try {
+        const [scopedItems, legacyItems] = await Promise.all([
+          loadSavedOptions(category),
+          loadSavedOptions('componentName'),
+        ]);
+
+        const existingValues = new Set(
+          scopedItems.map(({ value: itemValue }) => itemValue.trim().toLocaleLowerCase()),
+        );
+
+        for (const item of legacyItems) {
+          if (inferLegacyComponentGroup(item.value) !== componentGroup) continue;
+
+          const normalized = item.value.trim().toLocaleLowerCase();
+          if (!existingValues.has(normalized)) {
+            await rememberSavedOption(category, item.value);
+            existingValues.add(normalized);
+          }
+          await removeSavedOption('componentName', item.id);
+        }
+
+        const nextItems = await loadSavedOptions(category);
         if (!active) return;
-        setSavedOptions(items);
+        setSavedOptions(nextItems);
         setStatus('ready');
-      })
-      .catch((error: unknown) => {
+      } catch (error) {
         console.error('Не удалось загрузить сохранённые наименования компонентов:', error);
         if (active) setStatus('error');
-      });
+      }
+    })();
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [componentGroup]);
 
   const fixedSet = new Set(fixedOptions.map((option) => option.trim().toLocaleLowerCase()));
   const editableOptions = savedOptions.filter(
@@ -105,7 +157,9 @@ const ComponentNameInput = ({
   const rename = async (item: SavedOptionRecord, nextValue: string) => {
     try {
       const trimmed = nextValue.trim();
-      setSavedOptions(await renameSavedOption('componentName', item.id, trimmed));
+      const category = getComponentNameOptionCategory(componentGroup);
+      if (!category) return;
+      setSavedOptions(await renameSavedOption(category, item.id, trimmed));
       if (value === item.value) onChange(trimmed);
     } catch (error) {
       console.error('Не удалось изменить наименование компонента:', error);
@@ -118,7 +172,9 @@ const ComponentNameInput = ({
     if (value === item.value) onChange('');
 
     try {
-      setSavedOptions(await removeSavedOption('componentName', item.id));
+      const category = getComponentNameOptionCategory(componentGroup);
+      if (!category) return;
+      setSavedOptions(await removeSavedOption(category, item.id));
     } catch (error) {
       setSavedOptions(previous);
       if (value === item.value) onChange(item.value);
@@ -245,6 +301,7 @@ export const DonorFields = ({ values, onChange }: Props) => {
             <ComponentNameInput
               value={componentName}
               fixedOptions={componentNameOptions}
+              componentGroup={selectedComponent}
               onChange={(nextValue) =>
                 onChange({
                   componentGroup: selectedComponent,

@@ -1,11 +1,12 @@
 import { ProtocolBlocks } from './protocol-blocks';
-import type { ProtocolBlockId, ProtocolPageProps } from './protocol-types';
+import type { ProtocolChunkId } from './protocol-pagination';
+import type { ProtocolPageProps } from './protocol-types';
 
 type Props = ProtocolPageProps & {
-  blockIds: ProtocolBlockId[];
+  chunkIds: ProtocolChunkId[];
 };
 
-export const FirstPage = ({ values, onOpenBlock, blockIds }: Props) => (
+export const FirstPage = ({ values, onOpenBlock, chunkIds }: Props) => (
   <section className="sheet sheet--first" aria-label="Первая страница протокола трансфузии">
     <div className="legal-note">
       <div>
@@ -27,7 +28,7 @@ export const FirstPage = ({ values, onOpenBlock, blockIds }: Props) => (
         </tr>
       </tbody>
 
-      <ProtocolBlocks blockIds={blockIds} values={values} onOpenBlock={onOpenBlock} />
+      <ProtocolBlocks chunkIds={chunkIds} values={values} onOpenBlock={onOpenBlock} />
     </table>
   </section>
 );

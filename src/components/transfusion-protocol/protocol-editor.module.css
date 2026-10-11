@@ -274,6 +274,32 @@
   font-size: 0.7rem;
 }
 
+.customSelectControlRhPositive {
+  border-color: #111827;
+  background: #fff;
+  color: #111827;
+}
+
+.customSelectControlRhPositive .customSelectValue,
+.customSelectControlRhPositive .customSelectArrow {
+  color: #111827;
+}
+
+.customSelectControlRhNegative {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
+
+.customSelectControlRhNegative .customSelectValue,
+.customSelectControlRhNegative .customSelectArrow {
+  color: #fff;
+}
+
+.customSelectControlRhNegative .customSelectArrow {
+  border-left-color: rgb(255 255 255 / 45%);
+}
+
 .customSelectControl:focus-visible {
   border-color: #2563eb;
   outline: 2px solid rgb(37 99 235 / 16%);
@@ -363,6 +389,28 @@
 
 .customSelectOptionNegative[aria-selected='true'] {
   color: #1565c0;
+}
+
+.customSelectOptionRhPositive {
+  background: #fff;
+  color: #111827;
+}
+
+.customSelectOptionRhPositive:hover,
+.customSelectOptionRhPositive:focus-visible {
+  background: #f8fafc;
+  color: #111827;
+}
+
+.customSelectOptionRhNegative {
+  background: #111;
+  color: #fff;
+}
+
+.customSelectOptionRhNegative:hover,
+.customSelectOptionRhNegative:focus-visible {
+  background: #000;
+  color: #fff;
 }
 
 .customSelectOption[aria-selected='true'] {

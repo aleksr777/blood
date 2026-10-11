@@ -1,6 +1,8 @@
 type Props = {
   status: string;
+  warning: string;
   onClear: () => void;
+  onNew: () => void;
   onOpenRegistry: () => void;
   onSave: () => void;
   pageCount: number;
@@ -9,7 +11,9 @@ type Props = {
 
 export const ProtocolToolbar = ({
   status,
+  warning,
   onClear,
+  onNew,
   onOpenRegistry,
   onSave,
   pageCount,
@@ -19,6 +23,9 @@ export const ProtocolToolbar = ({
     <div className="print-actions" aria-label="Панель действий">
       <button type="button" className="clear-button" onClick={onClear}>
         Очистить бланк
+      </button>
+      <button type="button" className="new-button" onClick={onNew}>
+        Новый бланк
       </button>
       <button type="button" className="secondary-button" onClick={onOpenRegistry}>
         Реципиенты
@@ -40,6 +47,11 @@ export const ProtocolToolbar = ({
     {status && (
       <div className="toolbar-status" role="status">
         {status}
+      </div>
+    )}
+    {warning && (
+      <div className="toolbar-warning" role="alert">
+        {warning}
       </div>
     )}
   </div>

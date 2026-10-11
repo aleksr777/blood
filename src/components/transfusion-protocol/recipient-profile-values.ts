@@ -1,7 +1,7 @@
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import type { ProtocolValues } from './protocol-types';
 
-const PROFILE_FIELDS = [
+export const PROFILE_FIELDS = [
   'recipientAbo',
   'recipientRh',
   'recipientAntigens',
@@ -33,3 +33,19 @@ export const recipientValues = (
     PROFILE_FIELDS.map((field) => [field, recipient?.profile[field] ?? '']),
   ),
 });
+
+
+const CURRENT_RECIPIENT_FIELDS = [
+  'recipientName',
+  'recipientId',
+  'department',
+  'medicalRecordNumber',
+  ...PROFILE_FIELDS,
+] as const;
+
+export const currentRecipientValues = (values: ProtocolValues): ProtocolValues =>
+  Object.fromEntries(
+    CURRENT_RECIPIENT_FIELDS.flatMap((field) =>
+      values[field] !== undefined && values[field] !== '' ? [[field, values[field]]] : [],
+    ),
+  );

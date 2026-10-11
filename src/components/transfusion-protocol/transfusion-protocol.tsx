@@ -168,6 +168,8 @@ export const TransfusionProtocol = () => {
         dangerWarning={workspace.compatibilityWarning}
         bloodGroupWarning={workspace.bloodGroupWarning}
         onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
+        componentUnitNumberWarning={workspace.componentUnitNumberWarning}
+        onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}
         onClear={workspace.clearForm}
         onNew={() => void workspace.newBlank()}
         onOpenRegistry={() => workspace.setRegistryOpen(true)}
@@ -205,8 +207,15 @@ export const TransfusionProtocol = () => {
           values={workspace.values}
           bloodGroupWarning={workspace.bloodGroupWarning}
           onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
+          componentUnitNumberWarning={workspace.componentUnitNumberWarning}
+          onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}
           onSave={workspace.saveValues}
-          onClose={() => workspace.setActiveBlock(null)}
+          onClose={(draftValues) => {
+            if (workspace.activeBlock === 'donor') {
+              workspace.validateComponentUnitNumber(draftValues);
+            }
+            workspace.setActiveBlock(null);
+          }}
         />
       )}
 

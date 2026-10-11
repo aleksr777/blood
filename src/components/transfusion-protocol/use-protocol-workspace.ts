@@ -4,6 +4,7 @@ import {
   saveProtocolRecord,
   type ProtocolRecord,
 } from '../../storage/repositories/recipients';
+import { getCompatibilityDangerWarning } from './compatibility-validation';
 import {
   getExpiredReagentWarnings,
   hasReagentDefaultUpdate,
@@ -204,6 +205,7 @@ export const useProtocolWorkspace = () => {
   const reagentWarning = expiredReagents.length
     ? `Внимание: ${expiredReagents.join('; ')}.`
     : '';
+  const compatibilityWarning = getCompatibilityDangerWarning(values);
 
   return {
     values,
@@ -217,6 +219,7 @@ export const useProtocolWorkspace = () => {
     saveToDatabase,
     newBlank,
     reagentWarning,
+    compatibilityWarning,
     clearForm,
     openRecord,
   };

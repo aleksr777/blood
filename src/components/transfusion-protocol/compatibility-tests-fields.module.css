@@ -69,3 +69,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.warning {
+  border: 1px solid #f59e0b;
+  border-radius: 0.55rem;
+  padding: 0.65rem 0.8rem;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 0.86rem;
+  line-height: 1.35;
+}

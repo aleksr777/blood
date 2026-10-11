@@ -54,7 +54,39 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
         {blockId === 'examination' ? (
           <RecipientExaminationFields values={draft} onChange={changeValues} />
         ) : blockId === 'donor' ? (
-          <DonorFields values={draft} onChange={changeValues} />
+          <>
+            {config.fields
+              .filter((field) =>
+                ['componentName', 'collectionOrganization'].includes(field.name),
+              )
+              .map((field) => (
+                <ProtocolFieldControl
+                  key={field.name}
+                  field={field}
+                  value={draft[field.name] ?? ''}
+                  onChange={changeValue}
+                  onValuesChange={changeValues}
+                />
+              ))}
+
+            <DonorFields values={draft} onChange={changeValues} />
+
+            {config.fields
+              .filter((field) =>
+                ['componentUnitNumber', 'amountMl', 'collectionDate', 'expirationDate'].includes(
+                  field.name,
+                ),
+              )
+              .map((field) => (
+                <ProtocolFieldControl
+                  key={field.name}
+                  field={field}
+                  value={draft[field.name] ?? ''}
+                  onChange={changeValue}
+                  onValuesChange={changeValues}
+                />
+              ))}
+          </>
         ) : blockId === 'indications' ? (
           <IndicationsFields values={draft} onChange={changeValues} />
         ) : blockId === 'history' ? (

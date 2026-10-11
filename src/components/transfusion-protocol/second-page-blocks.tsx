@@ -109,34 +109,28 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
         </>
       )}
 
-      {part === 'confirmed' && (recipientAboConfirmed || donorAboConfirmed) && (
+      {part === 'confirmed' && (
         <tr className="row-confirmed-blood-groups">
-          {recipientAboConfirmed && (
-            <td
-              colSpan={donorAboConfirmed ? 3 : 6}
-              className={donorAboConfirmed ? 'span-3' : 'span-6'}
-            >
-              <div className="compatibility-inline">
-                <span className="compatibility-inline-label">
-                  Подтверждена группа крови реципиента:
-                </span>
-                <span className="compatibility-inline-value">{values.recipientAbo}</span>
-              </div>
-            </td>
-          )}
-          {donorAboConfirmed && (
-            <td
-              colSpan={recipientAboConfirmed ? 3 : 6}
-              className={recipientAboConfirmed ? 'span-3' : 'span-6'}
-            >
-              <div className="compatibility-inline">
-                <span className="compatibility-inline-label">
-                  Подтверждена группа крови донора:
-                </span>
-                <span className="compatibility-inline-value">{values.donorAbo}</span>
-              </div>
-            </td>
-          )}
+          <td colSpan={3} className="span-3">
+            <div className="compatibility-inline">
+              <span className="compatibility-inline-label">
+                Подтверждена группа крови реципиента:
+              </span>
+              <span className="compatibility-inline-value">
+                {recipientAboConfirmed ? values.recipientAbo : 'Не подтверждено'}
+              </span>
+            </div>
+          </td>
+          <td colSpan={3} className="span-3">
+            <div className="compatibility-inline">
+              <span className="compatibility-inline-label">
+                Подтверждена группа крови донора:
+              </span>
+              <span className="compatibility-inline-value">
+                {donorAboConfirmed ? values.donorAbo : 'Не подтверждено'}
+              </span>
+            </div>
+          </td>
         </tr>
       )}
 

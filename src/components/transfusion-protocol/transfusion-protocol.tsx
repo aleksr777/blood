@@ -1,44 +1,34 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { FirstPage } from './first-page';
+import {
+  PROTOCOL_CHUNK_ORDER,
+  type ProtocolChunkId,
+} from './protocol-pagination';
 import { ProtocolEditorModal } from './protocol-editor-modal';
 import { ProtocolToolbar } from './protocol-toolbar';
 import { RecipientDatabaseModal } from './recipient-database-modal';
 import { ContinuationPage } from './second-page';
-import type { ProtocolBlockId } from './protocol-types';
 import { useProtocolWorkspace } from './use-protocol-workspace';
 
-const PROTOCOL_BLOCK_ORDER: ProtocolBlockId[] = [
-  'general',
-  'examination',
-  'indications',
-  'history',
-  'donor',
-  'selection',
-  'compatibilityTests',
-  'complications',
-  'monitoring',
-  'doctor',
-];
-
-const INITIAL_PAGES: ProtocolBlockId[][] = [
-  PROTOCOL_BLOCK_ORDER.slice(0, 5),
-  PROTOCOL_BLOCK_ORDER.slice(5),
+const INITIAL_PAGES: ProtocolChunkId[][] = [
+  PROTOCOL_CHUNK_ORDER.slice(0, 9),
+  PROTOCOL_CHUNK_ORDER.slice(9),
 ];
 
 const PAGE_FIT_TOLERANCE_PX = 2;
 
-const samePages = (left: ProtocolBlockId[][], right: ProtocolBlockId[][]) =>
+const samePages = (left: ProtocolChunkId[][], right: ProtocolChunkId[][]) =>
   left.length === right.length &&
   left.every(
     (page, pageIndex) =>
       page.length === right[pageIndex]?.length &&
-      page.every((blockId, blockIndex) => blockId === right[pageIndex][blockIndex]),
+      page.every((chunkId, chunkIndex) => chunkId === right[pageIndex][chunkIndex]),
   );
 
 export const TransfusionProtocol = () => {
   const workspace = useProtocolWorkspace();
   const sheetsRef = useRef<HTMLDivElement>(null);
-  const [pages, setPages] = useState<ProtocolBlockId[][]>(INITIAL_PAGES);
+  const [pages, setPages] = useState<ProtocolChunkId[][]>(INITIAL_PAGES);
 
   useLayoutEffect(() => {
     const sheets = sheetsRef.current;
@@ -49,14 +39,14 @@ export const TransfusionProtocol = () => {
       const continuationSheet = sheets.querySelector<HTMLElement>('.sheet--continuation');
       if (!firstSheet || !continuationSheet) return;
 
-      const blocks = new Map<ProtocolBlockId, HTMLElement>();
-      sheets.querySelectorAll<HTMLElement>('[data-protocol-block]').forEach((element) => {
-        const blockId = element.dataset.protocolBlock as ProtocolBlockId | undefined;
-        if (blockId) blocks.set(blockId, element);
+      const chunks = new Map<ProtocolChunkId, HTMLElement>();
+      sheets.querySelectorAll<HTMLElement>('[data-protocol-chunk]').forEach((element) => {
+        const chunkId = element.dataset.protocolChunk as ProtocolChunkId | undefined;
+        if (chunkId) chunks.set(chunkId, element);
       });
 
-      const firstBlock = blocks.get(PROTOCOL_BLOCK_ORDER[0]);
-      if (!firstBlock || blocks.size !== PROTOCOL_BLOCK_ORDER.length) return;
+      const firstChunk = chunks.get(PROTOCOL_CHUNK_ORDER[0]);
+      if (!firstChunk || chunks.size !== PROTOCOL_CHUNK_ORDER.length) return;
 
       const firstStyle = window.getComputedStyle(firstSheet);
       const continuationStyle = window.getComputedStyle(continuationSheet);
@@ -68,7 +58,7 @@ export const TransfusionProtocol = () => {
       const firstCapacity =
         firstSheet.getBoundingClientRect().bottom -
         firstPaddingBottom -
-        firstBlock.getBoundingClientRect().top;
+        firstChunk.getBoundingClientRect().top;
 
       const continuationCapacity =
         (continuationSheet.clientHeight -
@@ -78,19 +68,19 @@ export const TransfusionProtocol = () => {
 
       if (firstCapacity <= 0 || continuationCapacity <= 0) return;
 
-      const nextPages: ProtocolBlockId[][] = [];
-      let currentPage: ProtocolBlockId[] = [];
+      const nextPages: ProtocolChunkId[][] = [];
+      let currentPage: ProtocolChunkId[] = [];
       let currentHeight = 0;
       let currentCapacity = firstCapacity;
 
-      PROTOCOL_BLOCK_ORDER.forEach((blockId) => {
-        const block = blocks.get(blockId);
-        if (!block) return;
+      PROTOCOL_CHUNK_ORDER.forEach((chunkId) => {
+        const chunk = chunks.get(chunkId);
+        if (!chunk) return;
 
-        const blockHeight = block.getBoundingClientRect().height;
+        const chunkHeight = chunk.getBoundingClientRect().height;
         const fitsCurrentPage =
           currentPage.length === 0 ||
-          currentHeight + blockHeight <= currentCapacity + PAGE_FIT_TOLERANCE_PX;
+          currentHeight + chunkHeight <= currentCapacity + PAGE_FIT_TOLERANCE_PX;
 
         if (!fitsCurrentPage) {
           nextPages.push(currentPage);
@@ -99,14 +89,11 @@ export const TransfusionProtocol = () => {
           currentCapacity = continuationCapacity;
         }
 
-        currentPage.push(blockId);
-        currentHeight += blockHeight;
+        currentPage.push(chunkId);
+        currentHeight += chunkHeight;
       });
 
       if (currentPage.length) nextPages.push(currentPage);
-
-      // Keep a continuation sheet available for measurement and for the
-      // protocol's normal two-page layout even if all blocks happen to fit.
       if (nextPages.length === 1) nextPages.push([]);
 
       setPages((current) => (samePages(current, nextPages) ? current : nextPages));
@@ -116,7 +103,7 @@ export const TransfusionProtocol = () => {
 
     const observer = new ResizeObserver(updatePagination);
     sheets
-      .querySelectorAll<HTMLElement>('.sheet, [data-protocol-block]')
+      .querySelectorAll<HTMLElement>('.sheet, [data-protocol-chunk]')
       .forEach((element) => observer.observe(element));
 
     window.addEventListener('resize', updatePagination);
@@ -164,15 +151,15 @@ export const TransfusionProtocol = () => {
         <FirstPage
           values={workspace.values}
           onOpenBlock={workspace.setActiveBlock}
-          blockIds={pages[0] ?? []}
+          chunkIds={pages[0] ?? []}
         />
-        {pages.slice(1).map((blockIds, index) => (
+        {pages.slice(1).map((chunkIds, index) => (
           <ContinuationPage
             key={index + 2}
             pageNumber={index + 2}
             values={workspace.values}
             onOpenBlock={workspace.setActiveBlock}
-            blockIds={blockIds}
+            chunkIds={chunkIds}
           />
         ))}
       </div>

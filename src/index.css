@@ -632,7 +632,6 @@ input[type='radio']:checked:disabled {
 
 .monitor-wrapper {
   padding: 0 !important;
-  border: 0 !important;
 }
 
 .monitor-table {
@@ -647,11 +646,18 @@ input[type='radio']:checked:disabled {
   border: 0.3mm solid #111;
 }
 
-.fill-block[data-protocol-block='monitoring']
-  + .fill-block[data-protocol-block='monitoring']
-  .monitor-table th,
-.fill-block[data-protocol-block='monitoring']
-  + .fill-block[data-protocol-block='monitoring']
-  .monitor-table td {
+.monitor-table tr:first-child > * {
   border-top: 0;
+}
+
+.monitor-table tr:last-child > * {
+  border-bottom: 0;
+}
+
+.monitor-table tr > :first-child {
+  border-left: 0;
+}
+
+.monitor-table tr > :last-child {
+  border-right: 0;
 }

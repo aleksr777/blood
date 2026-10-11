@@ -291,42 +291,26 @@ input[type='radio']:checked:disabled {
     border-right-color: #2563eb;
   }
 
-  .sheets:has(.fill-block[data-logical-block='selection']:hover)
-    .fill-block[data-logical-block='selection']
-    > tr
-    > th,
-  .sheets:has(.fill-block[data-logical-block='selection']:hover)
-    .fill-block[data-logical-block='selection']
-    > tr
-    > td {
+  .fill-block.is-logical-hovered > tr > th,
+  .fill-block.is-logical-hovered > tr > td,
+  .fill-block.is-logical-hovered .monitor-table th,
+  .fill-block.is-logical-hovered .monitor-table td {
     background: #eef6ff;
   }
 
-  .sheets:has(.fill-block[data-logical-block='selection']:hover)
-    .fill-block[data-logical-block='selection']
-    > tr:first-child
-    > * {
+  .fill-block.is-logical-hovered > tr:first-child > * {
     border-top-color: #2563eb;
   }
 
-  .sheets:has(.fill-block[data-logical-block='selection']:hover)
-    .fill-block[data-logical-block='selection']
-    > tr:last-child
-    > * {
+  .fill-block.is-logical-hovered > tr:last-child > * {
     border-bottom-color: #2563eb;
   }
 
-  .sheets:has(.fill-block[data-logical-block='selection']:hover)
-    .fill-block[data-logical-block='selection']
-    > tr
-    > :first-child {
+  .fill-block.is-logical-hovered > tr > :first-child {
     border-left-color: #2563eb;
   }
 
-  .sheets:has(.fill-block[data-logical-block='selection']:hover)
-    .fill-block[data-logical-block='selection']
-    > tr
-    > :last-child {
+  .fill-block.is-logical-hovered > tr > :last-child {
     border-right-color: #2563eb;
   }
 

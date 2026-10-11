@@ -55,9 +55,13 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
           <RecipientExaminationFields values={draft} onChange={changeValues} />
         ) : blockId === 'donor' ? (
           <>
+            <DonorFields values={draft} onChange={changeValues} />
+
             {config.fields
               .filter((field) =>
-                ['collectionOrganization'].includes(field.name),
+                ['componentUnitNumber', 'amountMl', 'collectionDate', 'expirationDate'].includes(
+                  field.name,
+                ),
               )
               .map((field) => (
                 <ProtocolFieldControl
@@ -69,14 +73,8 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
                 />
               ))}
 
-            <DonorFields values={draft} onChange={changeValues} />
-
             {config.fields
-              .filter((field) =>
-                ['componentUnitNumber', 'amountMl', 'collectionDate', 'expirationDate'].includes(
-                  field.name,
-                ),
-              )
+              .filter((field) => field.name === 'collectionOrganization')
               .map((field) => (
                 <ProtocolFieldControl
                   key={field.name}

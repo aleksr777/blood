@@ -4,6 +4,7 @@ import { getProtocolBlockConfig } from './editor-config';
 import { CompatibilityTestsFields } from './compatibility-tests-fields';
 import { ComplicationsFields } from './complications-fields';
 import { IndicationsFields } from './indications-fields';
+import { MonitoringFields } from './monitoring-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { RecipientHistoryFields } from './recipient-history-fields';
@@ -61,6 +62,8 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
           <CompatibilityTestsFields values={draft} onChange={changeValues} />
         ) : blockId === 'complications' ? (
           <ComplicationsFields values={draft} onChange={changeValues} />
+        ) : blockId === 'monitoring' ? (
+          <MonitoringFields values={draft} onChange={changeValues} />
         ) : (
           config.fields.map((field) => (
             <ProtocolFieldControl

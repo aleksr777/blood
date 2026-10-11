@@ -123,6 +123,7 @@ input[type='radio']:checked:disabled {
 
 .print-button,
 .clear-button,
+.new-button,
 .secondary-button,
 .save-button {
   display: inline-flex;
@@ -147,7 +148,6 @@ input[type='radio']:checked:disabled {
 }
 
 .clear-button {
-  margin-right: auto;
   border-color: #b91c1c;
   background: #fff;
   color: #b91c1c;
@@ -157,6 +157,17 @@ input[type='radio']:checked:disabled {
   border-color: #991b1b;
   background: #fef2f2;
   color: #991b1b;
+}
+
+.new-button {
+  margin-right: auto;
+  border-color: #1d4ed8;
+  background: #fff;
+  color: #1d4ed8;
+}
+
+.new-button:hover {
+  background: #eff6ff;
 }
 
 .secondary-button {
@@ -187,8 +198,20 @@ input[type='radio']:checked:disabled {
   text-align: right;
 }
 
+.toolbar-warning {
+  margin-top: 0.55rem;
+  border-left: 3px solid #f59e0b;
+  padding: 0.5rem 0.7rem;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .print-button:focus-visible,
 .clear-button:focus-visible,
+.new-button:focus-visible,
 .secondary-button:focus-visible,
 .save-button:focus-visible {
   outline: 2px solid currentColor;

@@ -4,6 +4,13 @@ import {
   saveProtocolRecord,
   type ProtocolRecord,
 } from '../../storage/repositories/recipients';
+import {
+  getExpiredReagentWarnings,
+  hasReagentDefaultUpdate,
+  reagentDefaultsForNewBlank,
+  saveReagentDefaults,
+} from './reagent-defaults';
+import { currentRecipientValues } from './recipient-profile-values';
 import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
@@ -100,7 +107,14 @@ export const useProtocolWorkspace = () => {
     if ('recipientId' in nextValues && nextValues.recipientId !== values.recipientId) {
       setRecordId(null);
     }
-    setValues((current) => ({ ...current, ...nextValues }));
+
+    setValues((current) => {
+      const merged = { ...current, ...nextValues };
+      if (hasReagentDefaultUpdate(nextValues)) {
+        saveReagentDefaults(merged);
+      }
+      return merged;
+    });
   };
 
   const saveToDatabase = async (afterPrint = false) => {
@@ -123,6 +137,24 @@ export const useProtocolWorkspace = () => {
     }
   };
 
+  const newBlank = () => {
+    const nextValues = {
+      ...currentRecipientValues(values),
+      ...reagentDefaultsForNewBlank(values),
+    };
+
+    draft.touch();
+    setActiveBlock(null);
+    setRegistryOpen(false);
+    setRecordId(null);
+    setValues(nextValues);
+    setStatus(
+      values.recipientName?.trim()
+        ? 'Создан новый бланк для текущего реципиента.'
+        : 'Создан новый бланк.',
+    );
+  };
+
   const clearForm = () => {
     draft.reset();
     setActiveBlock(null);
@@ -143,6 +175,11 @@ export const useProtocolWorkspace = () => {
     setStatus('Сохранённый бланк открыт для просмотра и редактирования.');
   };
 
+  const expiredReagents = getExpiredReagentWarnings(values);
+  const reagentWarning = expiredReagents.length
+    ? `Внимание: ${expiredReagents.join('; ')}.`
+    : '';
+
   return {
     values,
     recordId,
@@ -153,6 +190,8 @@ export const useProtocolWorkspace = () => {
     setRegistryOpen,
     saveValues,
     saveToDatabase,
+    newBlank,
+    reagentWarning,
     clearForm,
     openRecord,
   };

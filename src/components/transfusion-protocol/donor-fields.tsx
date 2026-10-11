@@ -49,6 +49,8 @@ export const DonorFields = ({ values, onChange }: Props) => {
     ({ label }) => label === values.componentName,
   );
   const selectedComponent = values.componentGroup || legacyComponent?.value || '';
+  const componentName =
+    legacyComponent && values.componentName === legacyComponent.label ? '' : values.componentName ?? '';
 
   return (
     <div className={styles.root}>
@@ -63,29 +65,34 @@ export const DonorFields = ({ values, onChange }: Props) => {
               data-component={value}
               data-selected={selectedComponent === value}
               aria-pressed={selectedComponent === value}
-              onClick={() => onChange({ componentGroup: value })}
+              onClick={() =>
+                onChange({
+                  componentGroup: value,
+                  ...(selectedComponent !== value ? { componentName: '' } : {}),
+                })
+              }
             >
               {label}
             </button>
           ))}
         </div>
-      </fieldset>
 
-      {selectedComponent && (
-        <label>
-          <span>Точное наименование компонента донорской крови</span>
-          <input
-            name="componentName"
-            value={values.componentName ?? ''}
-            onChange={(event) =>
-              onChange({
-                componentGroup: selectedComponent,
-                componentName: event.target.value,
-              })
-            }
-          />
-        </label>
-      )}
+        {selectedComponent && (
+          <label className={componentStyles.componentNameField}>
+            <span>Точное наименование компонента донорской крови</span>
+            <input
+              name="componentName"
+              value={componentName}
+              onChange={(event) =>
+                onChange({
+                  componentGroup: selectedComponent,
+                  componentName: event.target.value,
+                })
+              }
+            />
+          </label>
+        )}
+      </fieldset>
 
       <div className={styles.topGrid}>
       <SelectField

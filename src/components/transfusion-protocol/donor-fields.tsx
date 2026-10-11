@@ -1,7 +1,7 @@
 import { CustomSelectField } from './custom-select-field';
 import { DONOR_ANTIGENS } from './donor-model';
 import type { ProtocolValues } from './protocol-types';
-import styles from './donor-fields.module.css';
+import styles from './recipient-examination-fields.module.css';
 
 type Props = {
   values: ProtocolValues;

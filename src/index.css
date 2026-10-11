@@ -508,25 +508,14 @@ input[type='radio']:checked:disabled {
   line-height: 1.08;
 }
 
-.monitor-header th:nth-child(1) {
-  width: 38%;
+.monitor-col-period { width: 38%; }
+.monitor-col-bp { width: 17%; }
+.monitor-col-pulse { width: 12%; }
+.monitor-col-temperature { width: 13%; }
+.monitor-col-urine { width: 20%; }
+
+.monitor-header th:first-child {
   text-align: left;
-}
-
-.monitor-header th:nth-child(2) {
-  width: 17%;
-}
-
-.monitor-header th:nth-child(3) {
-  width: 12%;
-}
-
-.monitor-header th:nth-child(4) {
-  width: 13%;
-}
-
-.monitor-header th:nth-child(5) {
-  width: 20%;
 }
 
 .monitor-row th,
@@ -643,7 +632,7 @@ input[type='radio']:checked:disabled {
 
 .monitor-wrapper {
   padding: 0 !important;
-  border-top: 0 !important;
+  border: 0 !important;
 }
 
 .monitor-table {

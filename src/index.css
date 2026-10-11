@@ -718,9 +718,20 @@ input[type='radio']:checked:disabled {
     display: none !important;
   }
 
+  html[data-print-page] .sheets {
+    height: auto;
+    overflow: visible;
+  }
+
   html[data-print-page] .sheet {
+    height: auto;
+    min-height: 0;
+    break-before: auto;
     break-after: auto;
+    break-inside: avoid;
+    page-break-before: auto;
     page-break-after: auto;
+    page-break-inside: avoid;
   }
 
 }

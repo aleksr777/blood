@@ -166,6 +166,8 @@ export const TransfusionProtocol = () => {
         status={workspace.status}
         warning={workspace.reagentWarning}
         dangerWarning={workspace.compatibilityWarning}
+        bloodGroupWarning={workspace.bloodGroupWarning}
+        onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
         onClear={workspace.clearForm}
         onNew={() => void workspace.newBlank()}
         onOpenRegistry={() => workspace.setRegistryOpen(true)}
@@ -201,6 +203,8 @@ export const TransfusionProtocol = () => {
           key={workspace.activeBlock}
           blockId={workspace.activeBlock}
           values={workspace.values}
+          bloodGroupWarning={workspace.bloodGroupWarning}
+          onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
           onSave={workspace.saveValues}
           onClose={() => workspace.setActiveBlock(null)}
         />

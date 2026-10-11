@@ -1,3 +1,4 @@
+import { formatComponentUnitNumber } from './component-unit-number';
 import { formatDonorAntigens } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatHistoryValue } from './recipient-history-model';
@@ -96,7 +97,7 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
           <LabeledCell
             colSpan={2}
             label="N единицы компонента крови"
-            value={values.componentUnitNumber}
+            value={formatComponentUnitNumber(values.componentUnitNumber)}
           />
           <LabeledCell colSpan={1} label="Количество (мл)" value={values.amountMl} />
         </tr>

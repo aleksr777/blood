@@ -47,6 +47,7 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
     title: 'Пробы на индивидуальную совместимость',
     size: 'xlarge',
     fields: [
+      { name: 'componentGroup', label: 'componentGroup' },
       { name: 'reagentAntiASeries', label: 'Цоликлон анти-A: серия' },
       { name: 'reagentAntiAExpiration', label: 'Цоликлон анти-A: годен до', type: 'date' },
       { name: 'reagentAntiAManufacturer', label: 'Цоликлон анти-A: производитель' },

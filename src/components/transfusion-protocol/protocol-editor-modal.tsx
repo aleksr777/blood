@@ -57,7 +57,7 @@ export const ProtocolEditorModal = ({ blockId, values, onSave, onClose }: Props)
           <>
             {config.fields
               .filter((field) =>
-                ['componentName', 'collectionOrganization'].includes(field.name),
+                ['collectionOrganization'].includes(field.name),
               )
               .map((field) => (
                 <ProtocolFieldControl

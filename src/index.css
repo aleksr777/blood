@@ -441,6 +441,21 @@ input[type='radio']:checked:disabled {
   text-align: center;
 }
 
+.cell--inline {
+  line-height: 1.08;
+}
+
+.cell--inline .cell-label,
+.cell--inline .cell-value {
+  display: inline;
+  min-height: 0;
+  margin: 0;
+}
+
+.cell--inline .cell-value {
+  margin-left: 1.2mm;
+}
+
 .row-top-data td {
   height: 23mm;
 }

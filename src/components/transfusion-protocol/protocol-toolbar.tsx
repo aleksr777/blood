@@ -2,6 +2,8 @@ type Props = {
   status: string;
   warning: string;
   dangerWarning: string;
+  bloodGroupWarning: string;
+  onDismissBloodGroupWarning: () => void;
   onClear: () => void;
   onNew: () => void;
   onOpenRegistry: () => void;
@@ -14,6 +16,8 @@ export const ProtocolToolbar = ({
   status,
   warning,
   dangerWarning,
+  bloodGroupWarning,
+  onDismissBloodGroupWarning,
   onClear,
   onNew,
   onOpenRegistry,
@@ -55,6 +59,19 @@ export const ProtocolToolbar = ({
     {dangerWarning && (
       <div className="toolbar-danger-warning" role="alert">
         {dangerWarning}
+      </div>
+    )}
+    {bloodGroupWarning && (
+      <div className="toolbar-blood-group-warning" role="alert">
+        <span>{bloodGroupWarning}</span>
+        <button
+          type="button"
+          className="toolbar-warning-dismiss"
+          aria-label="Закрыть предупреждение"
+          onClick={onDismissBloodGroupWarning}
+        >
+          ×
+        </button>
       </div>
     )}
     {warning && (

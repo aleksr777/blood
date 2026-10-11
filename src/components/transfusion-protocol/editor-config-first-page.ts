@@ -153,7 +153,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'donorAntigenk', label: 'k (KEL2; Cellano)', type: 'select' },
       {
         name: 'donorAntigens',
-        label: 'Антигены эритроцитов донора C, c, Cʷ, E, e, K, k',
+        label: 'Антигены эритроцитов донора',
       },
       { name: 'componentUnitNumber', label: '№ единицы компонента крови' },
       { name: 'amountMl', label: 'Количество, мл', type: 'number', step: '1' },

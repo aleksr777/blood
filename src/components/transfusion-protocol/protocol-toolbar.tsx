@@ -19,7 +19,8 @@ export const ProtocolToolbar = ({
   pageCount,
   onPrintPage,
 }: Props) => (
-  <div className="toolbar-wrap">
+  <header className="app-header">
+    <div className="toolbar-wrap">
     <div className="print-actions" aria-label="Панель действий">
       <button type="button" className="clear-button" onClick={onClear}>
         Очистить бланк
@@ -54,5 +55,6 @@ export const ProtocolToolbar = ({
         {warning}
       </div>
     )}
-  </div>
+    </div>
+  </header>
 );

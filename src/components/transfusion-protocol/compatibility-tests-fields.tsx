@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
-import { getExpiredReagentWarnings } from './reagent-defaults';
+import { getReagentExpirationWarning } from './reagent-defaults';
 import type { ProtocolValues } from './protocol-types';
 import styles from './compatibility-tests-fields.module.css';
 
@@ -72,7 +72,6 @@ const RADIO_GROUPS = [
 
 export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
   const change = (name: string, value: string) => onChange({ [name]: value });
-  const expiredReagents = getExpiredReagentWarnings(values);
   const compatibilityDangerWarning = getCompatibilityDangerWarning(values);
 
   useEffect(() => {
@@ -88,45 +87,57 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
   return (
     <div className={styles.root}>
       <div className={styles.reagentList}>
-        {REAGENTS.map((reagent) => (
-          <fieldset key={reagent.key} className={styles.reagentGroup}>
-            <legend>{reagent.title}</legend>
-            <div className={styles.reagentGrid}>
-              <label>
-                <span>Серия</span>
-                <input
-                  name={reagent.series}
-                  value={values[reagent.series] ?? ''}
-                  onChange={(event) => change(reagent.series, event.target.value)}
-                />
-              </label>
-              <label>
-                <span>Годен до</span>
-                <input
-                  type="date"
-                  name={reagent.expiration}
-                  value={values[reagent.expiration] ?? ''}
-                  onChange={(event) => change(reagent.expiration, event.target.value)}
-                />
-              </label>
-              <label>
-                <span>Производитель (коротко)</span>
-                <input
-                  name={reagent.manufacturer}
-                  value={values[reagent.manufacturer] ?? ''}
-                  onChange={(event) => change(reagent.manufacturer, event.target.value)}
-                />
-              </label>
-            </div>
-          </fieldset>
-        ))}
+        {REAGENTS.map((reagent) => {
+          const expirationWarning = getReagentExpirationWarning(
+            reagent.title,
+            values[reagent.expiration],
+          );
+
+          return (
+            <fieldset key={reagent.key} className={styles.reagentGroup}>
+              <legend>{reagent.title}</legend>
+              <div className={styles.reagentGrid}>
+                <label>
+                  <span>Серия</span>
+                  <input
+                    name={reagent.series}
+                    value={values[reagent.series] ?? ''}
+                    onChange={(event) => change(reagent.series, event.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>Годен до</span>
+                  <input
+                    type="date"
+                    name={reagent.expiration}
+                    value={values[reagent.expiration] ?? ''}
+                    onChange={(event) => change(reagent.expiration, event.target.value)}
+                  />
+                </label>
+                <label>
+                  <span>Производитель (коротко)</span>
+                  <input
+                    name={reagent.manufacturer}
+                    value={values[reagent.manufacturer] ?? ''}
+                    onChange={(event) => change(reagent.manufacturer, event.target.value)}
+                  />
+                </label>
+              </div>
+
+              {expirationWarning && (
+                <div className={styles.reagentWarning} role="alert">
+                  <strong>Внимание:</strong> срок годности истёк{' '}
+                  {values[reagent.expiration] && (
+                    <span>{values[reagent.expiration].split('-').reverse().join('.')}</span>
+                  )}
+                  .
+                </div>
+              )}
+            </fieldset>
+          );
+        })}
       </div>
 
-      {expiredReagents.length > 0 && (
-        <div className={styles.warning} role="alert">
-          <strong>Внимание:</strong> {expiredReagents.join('; ')}.
-        </div>
-      )}
 
       {compatibilityDangerWarning && (
         <div className={styles.dangerWarning} role="alert">

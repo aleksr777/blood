@@ -5,6 +5,7 @@ type LabeledCellProps = {
   value?: string;
   className?: string;
   centered?: boolean;
+  inline?: boolean;
   colSpan?: number;
   rowSpan?: number;
 };
@@ -14,11 +15,16 @@ export const LabeledCell = ({
   value = '',
   className = '',
   centered = false,
+  inline = false,
   colSpan,
   rowSpan,
 }: LabeledCellProps) => (
   <td
-    className={`${className} ${centered ? 'cell--centered' : ''}`}
+    className={[
+      className,
+      centered ? 'cell--centered' : '',
+      inline ? 'cell--inline' : '',
+    ].filter(Boolean).join(' ')}
     colSpan={colSpan}
     rowSpan={rowSpan}
   >

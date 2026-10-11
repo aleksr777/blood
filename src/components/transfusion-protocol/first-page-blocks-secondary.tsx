@@ -9,6 +9,12 @@ type ChunkProps = ProtocolPageProps & {
   part: string;
 };
 
+const formatRh = (value?: string) => {
+  if (value === 'Rh(D)+' || value === 'Rh(+)') return 'Rh(+)';
+  if (value === 'Rh(D)-' || value === 'Rh(-)') return 'Rh(-)';
+  return value ?? '';
+};
+
 export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
   <tbody
     className="fill-block"
@@ -75,7 +81,7 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             colSpan={3}
             className="span-3"
             label="Группа крови донора AB0:"
-            value={[values.donorAbo, values.donorRh].filter(Boolean).join(' ')}
+            value={[values.donorAbo, formatRh(values.donorRh)].filter(Boolean).join(' ')}
           />
           <LabeledCell
             colSpan={3}

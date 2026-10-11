@@ -11,6 +11,12 @@ type ChunkProps = ProtocolPageProps & {
   part: string;
 };
 
+const formatRh = (value?: string) => {
+  if (value === 'Rh(D)+' || value === 'Rh(+)') return 'Rh(+)';
+  if (value === 'Rh(D)-' || value === 'Rh(-)') return 'Rh(-)';
+  return value ?? '';
+};
+
 export const GeneralBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
   <tbody
     className="fill-block"
@@ -85,7 +91,7 @@ export const ExaminationBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             colSpan={2}
             className="span-2"
             label="Резус-принадлежность"
-            value={values.recipientRh}
+            value={formatRh(values.recipientRh)}
           />
         </tr>
       </>

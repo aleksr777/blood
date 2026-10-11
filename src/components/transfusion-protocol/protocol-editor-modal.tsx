@@ -3,6 +3,7 @@ import Modal from '../modal/modal';
 import { getProtocolBlockConfig } from './editor-config';
 import { CompatibilityTestsFields } from './compatibility-tests-fields';
 import { ComplicationsFields } from './complications-fields';
+import { formatComponentUnitNumber } from './component-unit-number';
 import { DonorFields } from './donor-fields';
 import { IndicationsFields } from './indications-fields';
 import { MonitoringFields } from './monitoring-fields';
@@ -19,8 +20,10 @@ type Props = {
   values: ProtocolValues;
   bloodGroupWarning: string;
   onDismissBloodGroupWarning: () => void;
+  componentUnitNumberWarning: string;
+  onDismissComponentUnitNumberWarning: () => void;
   onSave: (values: ProtocolValues) => void;
-  onClose: () => void;
+  onClose: (values: ProtocolValues) => void;
 };
 
 const getInitialValues = (blockId: ProtocolBlockId, values: ProtocolValues) => {
@@ -33,6 +36,8 @@ export const ProtocolEditorModal = ({
   values,
   bloodGroupWarning,
   onDismissBloodGroupWarning,
+  componentUnitNumberWarning,
+  onDismissComponentUnitNumberWarning,
   onSave,
   onClose,
 }: Props) => {
@@ -54,7 +59,7 @@ export const ProtocolEditorModal = ({
 
   const handleClose = () => {
     persistProtocolOptions(draft);
-    onClose();
+    onClose(draft);
   };
 
   return (
@@ -81,10 +86,43 @@ export const ProtocolEditorModal = ({
             <DonorFields values={draft} onChange={changeValues} />
 
             {config.fields
+              .filter((field) => field.name === 'componentUnitNumber')
+              .map((field) => (
+                <div key={field.name} className={styles.componentUnitNumberField}>
+                  <label>
+                    <span>{field.label}</span>
+                    <input
+                      name={field.name}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      maxLength={16}
+                      value={formatComponentUnitNumber(draft[field.name])}
+                      onChange={(event) =>
+                        changeValue(field.name, formatComponentUnitNumber(event.target.value))
+                      }
+                    />
+                  </label>
+
+                  {componentUnitNumberWarning && (
+                    <div className={styles.fieldWarning} role="alert">
+                      <span>{componentUnitNumberWarning}</span>
+                      <button
+                        type="button"
+                        className={styles.fieldWarningDismiss}
+                        aria-label="Закрыть предупреждение"
+                        onClick={onDismissComponentUnitNumberWarning}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+            {config.fields
               .filter((field) =>
-                ['componentUnitNumber', 'amountMl', 'collectionDate', 'expirationDate'].includes(
-                  field.name,
-                ),
+                ['amountMl', 'collectionDate', 'expirationDate'].includes(field.name),
               )
               .map((field) => (
                 <ProtocolFieldControl

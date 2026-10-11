@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { FirstPage } from './first-page';
 import {
   PROTOCOL_CHUNK_ORDER,
@@ -114,6 +114,30 @@ export const TransfusionProtocol = () => {
     };
   }, [pages]);
 
+  const clearHoveredBlock = () => {
+    sheetsRef.current
+      ?.querySelectorAll<HTMLElement>('[data-protocol-block].is-logical-hovered')
+      .forEach((element) => element.classList.remove('is-logical-hovered'));
+  };
+
+  const highlightHoveredBlock = (blockId: string) => {
+    clearHoveredBlock();
+    sheetsRef.current
+      ?.querySelectorAll<HTMLElement>('[data-protocol-block]')
+      .forEach((element) => {
+        if (element.dataset.protocolBlock === blockId) {
+          element.classList.add('is-logical-hovered');
+        }
+      });
+  };
+
+  const handleSheetsMouseOver = (event: MouseEvent<HTMLDivElement>) => {
+    const target = (event.target as HTMLElement).closest<HTMLElement>('[data-protocol-block]');
+    if (target?.dataset.protocolBlock) {
+      highlightHoveredBlock(target.dataset.protocolBlock);
+    }
+  };
+
   const printPage = (pageIndex: number) => {
     const root = document.documentElement;
     const sheetElements = Array.from(
@@ -147,7 +171,12 @@ export const TransfusionProtocol = () => {
         onPrintPage={printPage}
       />
 
-      <div ref={sheetsRef} className="sheets">
+      <div
+        ref={sheetsRef}
+        className="sheets"
+        onMouseOver={handleSheetsMouseOver}
+        onMouseLeave={clearHoveredBlock}
+      >
         <FirstPage
           values={workspace.values}
           onOpenBlock={workspace.setActiveBlock}

@@ -40,6 +40,7 @@ const SelectField = ({
   emptyLabel,
   emptyDisplayLabel,
   compact = false,
+  tone,
 }: {
   name: string;
   label: string;
@@ -49,6 +50,7 @@ const SelectField = ({
   emptyLabel?: string;
   emptyDisplayLabel?: string;
   compact?: boolean;
+  tone?: 'positive' | 'negative';
 }) => (
   <div className={styles.selectField}>
     <div className={styles.label}>{label}</div>
@@ -60,6 +62,7 @@ const SelectField = ({
       emptyLabel={emptyLabel}
       emptyDisplayLabel={emptyDisplayLabel}
       compact={compact}
+      tone={tone}
       onChange={onChange}
     />
   </div>
@@ -256,6 +259,12 @@ const ComponentNameInput = ({
   );
 };
 
+const normalizeRh = (value?: string) => {
+  if (value === 'Rh(D)+' || value === 'Rh(+)') return 'Rh(+)';
+  if (value === 'Rh(D)-' || value === 'Rh(-)') return 'Rh(-)';
+  return '';
+};
+
 export const DonorFields = ({ values, onChange }: Props) => {
   const legacyComponent = INDICATION_COMPONENTS.find(
     ({ label }) => label === values.componentName,
@@ -266,6 +275,9 @@ export const DonorFields = ({ values, onChange }: Props) => {
       ? ''
       : values.componentName ?? '';
   const componentNameOptions = COMPONENT_NAME_OPTIONS[selectedComponent] ?? [];
+  const donorRh = normalizeRh(values.donorRh);
+  const bloodGroupTone =
+    donorRh === 'Rh(-)' ? 'negative' : donorRh === 'Rh(+)' ? 'positive' : undefined;
 
   return (
     <div className={styles.root}>
@@ -319,13 +331,15 @@ export const DonorFields = ({ values, onChange }: Props) => {
           label="Группа крови AB0"
           options={['O(I)', 'A(II)', 'B(III)', 'AB(IV)']}
           value={values.donorAbo ?? ''}
+          tone={bloodGroupTone}
           onChange={(value) => onChange({ donorAbo: value })}
         />
         <SelectField
           name="donorRh"
           label="Резус-принадлежность"
-          options={['Rh(D)+', 'Rh(D)-']}
-          value={values.donorRh ?? ''}
+          options={['Rh(+)', 'Rh(-)']}
+          value={donorRh}
+          tone={bloodGroupTone}
           onChange={(value) => onChange({ donorRh: value })}
         />
       </div>

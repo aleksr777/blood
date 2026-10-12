@@ -352,6 +352,7 @@ input[type='radio']:checked:disabled {
   .fill-block:hover > tr > td,
   .fill-block:hover .monitor-table th,
   .fill-block:hover .monitor-table td {
+    border-color: #2563eb;
     background: #eef6ff;
   }
 
@@ -375,6 +376,7 @@ input[type='radio']:checked:disabled {
   .fill-block.is-logical-hovered > tr > td,
   .fill-block.is-logical-hovered .monitor-table th,
   .fill-block.is-logical-hovered .monitor-table td {
+    border-color: #2563eb;
     background: #eef6ff;
   }
 

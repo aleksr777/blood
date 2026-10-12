@@ -58,13 +58,6 @@ body {
 
 button {
   font: inherit;
-  transform: none !important;
-  transition: opacity 160ms ease;
-}
-
-button:not(:disabled):hover {
-  opacity: 0.84;
-  transform: none !important;
 }
 
 textarea {
@@ -129,7 +122,6 @@ input[type='radio']:checked:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   .app-page-transition,
-  button,
   input[type='radio'] {
     transition: none;
   }

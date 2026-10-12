@@ -58,6 +58,7 @@ body {
 
 button {
   font: inherit;
+  transform: none !important;
   transition:
     background-color 160ms ease,
     border-color 160ms ease,

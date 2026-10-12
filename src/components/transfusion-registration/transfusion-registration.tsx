@@ -20,24 +20,27 @@ export const TransfusionRegistration = () => {
 
       <div className="registration-sheet-wrap">
         <section className="registration-sheet" aria-label="Лист регистрации трансфузии">
-          <div className="registration-page-number">21</div>
-
           <h1 className="registration-title">
             ЛИСТ РЕГИСТРАЦИИ ТРАНСФУЗИИ (ПЕРЕЛИВАНИЯ) ДОНОРСКОЙ КРОВИ И (ИЛИ) ЕЕ КОМПОНЕНТОВ
           </h1>
 
-          <div className="registration-patient-line">
-            <span>Фамилия, имя, отчество (при наличии)</span>
-            <span className="registration-blank registration-blank--name" />
-            <span>Дата рождения «</span>
-            <span className="registration-blank registration-blank--day" />
-            <span>»</span>
-            <span className="registration-blank registration-blank--date" />
-            <span className="registration-blank registration-blank--year" />
-            <span>г. № медицинской карты</span>
-            <span className="registration-blank registration-blank--card" />
-            <span>№ палаты</span>
-            <span className="registration-blank registration-blank--room" />
+          <div className="registration-patient-details">
+            <div className="registration-patient-line registration-patient-line--name">
+              <span>Фамилия, имя, отчество (при наличии)</span>
+              <span className="registration-blank registration-blank--name" />
+            </div>
+
+            <div className="registration-patient-line registration-patient-line--meta">
+              <span>Дата рождения «</span>
+              <span className="registration-blank registration-blank--day" />
+              <span>»</span>
+              <span className="registration-blank registration-blank--date" />
+              <span className="registration-blank registration-blank--year" />
+              <span>г. № медицинской карты</span>
+              <span className="registration-blank registration-blank--card" />
+              <span>№ палаты</span>
+              <span className="registration-blank registration-blank--room" />
+            </div>
           </div>
 
           <table className="registration-table">

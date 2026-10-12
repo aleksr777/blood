@@ -102,7 +102,6 @@
   font-size: 1rem;
 }
 
-.historyToggle:hover,
 .historyToggle:focus-visible {
   background: #f8fafc;
   color: #1d4ed8;
@@ -193,7 +192,6 @@
   white-space: nowrap;
 }
 
-.historyValue:hover,
 .historyValue:focus-visible {
   background: #eff6ff;
   color: #1d4ed8;
@@ -220,7 +218,6 @@
   line-height: 1;
 }
 
-.historyEdit:hover,
 .historyEdit:focus-visible {
   background: #eff6ff;
   color: #1d4ed8;
@@ -232,13 +229,11 @@
   font-weight: 700;
 }
 
-.historySave:hover,
 .historySave:focus-visible {
   background: #f0fdf4;
   color: #166534;
 }
 
-.historyDelete:hover,
 .historyDelete:focus-visible {
   background: #fef2f2;
   color: #b91c1c;
@@ -372,7 +367,6 @@
   text-align: left;
 }
 
-.customSelectOption:hover,
 .customSelectOption:focus-visible {
   background: #eff6ff;
   color: #1d4ed8;
@@ -406,7 +400,6 @@
   color: #111827;
 }
 
-.customSelectOptionRhPositive:hover,
 .customSelectOptionRhPositive:focus-visible {
   background: #f8fafc;
   color: #111827;
@@ -417,7 +410,6 @@
   color: #fff;
 }
 
-.customSelectOptionRhNegative:hover,
 .customSelectOptionRhNegative:focus-visible {
   background: #000;
   color: #fff;
@@ -428,7 +420,6 @@
   color: #111827;
 }
 
-.customSelectOptionTonePositive:hover,
 .customSelectOptionTonePositive:focus-visible {
   background: #f1f5f9;
   color: #111827;
@@ -439,7 +430,6 @@
   color: #fff;
 }
 
-.customSelectOptionToneNegative:hover,
 .customSelectOptionToneNegative:focus-visible {
   background: #000;
   color: #fff;
@@ -475,7 +465,6 @@
   line-height: 1;
 }
 
-.bloodGroupWarningDismiss:hover,
 .bloodGroupWarningDismiss:focus-visible {
   background: rgb(146 64 14 / 12%);
   outline: none;
@@ -515,7 +504,6 @@
   line-height: 1;
 }
 
-.fieldWarningDismiss:hover,
 .fieldWarningDismiss:focus-visible {
   background: rgb(146 64 14 / 12%);
   outline: none;

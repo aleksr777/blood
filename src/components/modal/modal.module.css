@@ -114,7 +114,6 @@
   line-height: 1;
 }
 
-.close:hover,
 .close:focus-visible {
   background: rgb(142 166 255 / 18%);
 }

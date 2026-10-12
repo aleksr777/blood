@@ -131,11 +131,17 @@ export const TransfusionProtocol = () => {
       });
   };
 
-  const handleSheetsMouseOver = (event: MouseEvent<HTMLDivElement>) => {
-    const target = (event.target as HTMLElement).closest<HTMLElement>('[data-protocol-block]');
-    if (target?.dataset.protocolBlock) {
-      highlightHoveredBlock(target.dataset.protocolBlock);
+  const handleSheetsMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+    const element = event.target as HTMLElement;
+    const cell = element.closest<HTMLElement>('th, td');
+    const block = cell?.closest<HTMLElement>('[data-protocol-block]');
+
+    if (block?.dataset.protocolBlock) {
+      highlightHoveredBlock(block.dataset.protocolBlock);
+      return;
     }
+
+    clearHoveredBlock();
   };
 
   const printPage = (pageIndex: number) => {
@@ -181,7 +187,7 @@ export const TransfusionProtocol = () => {
       <div
         ref={sheetsRef}
         className="sheets"
-        onMouseOver={handleSheetsMouseOver}
+        onMouseMove={handleSheetsMouseMove}
         onMouseLeave={clearHoveredBlock}
       >
         <FirstPage

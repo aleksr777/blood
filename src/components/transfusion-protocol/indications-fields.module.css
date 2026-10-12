@@ -80,10 +80,6 @@
   color: #fff;
 }
 
-.componentButton:hover:not(:disabled) {
-  filter: brightness(0.96);
-}
-
 .componentButton:disabled {
   cursor: default;
   opacity: 0.38;

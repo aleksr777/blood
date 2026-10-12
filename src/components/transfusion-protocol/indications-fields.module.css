@@ -59,10 +59,6 @@
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.2;
-  transition:
-    filter 120ms ease,
-    box-shadow 120ms ease,
-    transform 120ms ease;
 }
 
 .componentButton[data-component='erythrocytes'] {
@@ -100,7 +96,6 @@
     0 0 0 2px rgb(23 33 63 / 16%),
     0 4px 10px rgb(23 33 63 / 16%);
   filter: saturate(1.08) brightness(1.03);
-  transform: translateY(-1px);
 }
 
 .componentNameField {

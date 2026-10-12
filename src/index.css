@@ -63,19 +63,7 @@ button {
     border-color 160ms ease,
     color 160ms ease,
     box-shadow 160ms ease,
-    filter 160ms ease,
-    transform 160ms cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  button:not(:disabled):hover {
-    transform: translateY(-1px);
-  }
-
-  button:not(:disabled):active {
-    transform: translateY(0);
-    transition-duration: 80ms;
-  }
+    filter 160ms ease;
 }
 
 textarea {
@@ -146,9 +134,7 @@ input[type='radio']:checked:disabled {
   }
 
   .app-page-transition[data-transition-phase='leaving'],
-  .app-page-transition[data-transition-phase='entering'],
-  button:not(:disabled):hover,
-  button:not(:disabled):active {
+  .app-page-transition[data-transition-phase='entering'] {
     transform: none;
   }
 }

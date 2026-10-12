@@ -1,3 +1,5 @@
+import { SiteNavigation } from '../site-navigation/site-navigation';
+
 type Props = {
   status: string;
   warning: string;
@@ -31,6 +33,7 @@ export const ProtocolToolbar = ({
 }: Props) => (
   <header className="app-header">
     <div className="toolbar-wrap">
+    <SiteNavigation current="protocol" />
     <div className="print-actions" aria-label="Панель действий">
       <button type="button" className="clear-button" onClick={onClear}>
         Очистить бланк

@@ -723,27 +723,40 @@ input[type='radio']:checked:disabled {
   html[data-print-page],
   html[data-print-page] body,
   html[data-print-page] #root,
-  html[data-print-page] .app-shell,
-  html[data-print-page] .sheets {
+  html[data-print-page] .app-shell {
     width: 210mm;
-    height: 296mm;
+    height: 290mm;
     min-height: 0;
-    max-height: 296mm;
+    max-height: 290mm;
+    overflow: hidden !important;
+  }
+
+  html[data-print-page] .sheets {
+    position: relative;
+    width: 210mm;
+    height: 290mm;
+    min-height: 0;
+    max-height: 290mm;
     overflow: hidden !important;
   }
 
   html[data-print-page] .sheet {
+    position: absolute;
+    top: 0;
+    left: 5.25mm;
     width: 210mm;
-    height: 296mm;
-    min-height: 296mm;
-    max-height: 296mm;
+    height: 297mm;
+    min-height: 297mm;
+    max-height: 297mm;
+    margin: 0;
+    zoom: 0.95;
     overflow: hidden !important;
-    break-before: auto;
-    break-after: auto;
-    break-inside: auto;
-    page-break-before: auto;
-    page-break-after: auto;
-    page-break-inside: auto;
+    break-before: avoid;
+    break-after: avoid;
+    break-inside: avoid;
+    page-break-before: avoid;
+    page-break-after: avoid;
+    page-break-inside: avoid;
   }
 
 }

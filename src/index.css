@@ -58,6 +58,11 @@ body {
 
 button {
   font: inherit;
+  transition: opacity 160ms ease;
+}
+
+button:not(:disabled):hover {
+  opacity: 0.84;
 }
 
 textarea {
@@ -122,6 +127,7 @@ input[type='radio']:checked:disabled {
 
 @media (prefers-reduced-motion: reduce) {
   .app-page-transition,
+  button,
   input[type='radio'] {
     transition: none;
   }
@@ -255,21 +261,10 @@ a.site-navigation__link:focus-visible::after {
   white-space: nowrap;
 }
 
-.print-button:hover {
-  background: #1e40af;
-  border-color: #1e40af;
-}
-
 .clear-button {
   border-color: #b91c1c;
   background: #fff;
   color: #b91c1c;
-}
-
-.clear-button:hover {
-  border-color: #991b1b;
-  background: #fef2f2;
-  color: #991b1b;
 }
 
 .new-button {
@@ -279,29 +274,16 @@ a.site-navigation__link:focus-visible::after {
   color: #1d4ed8;
 }
 
-.new-button:hover {
-  background: #eff6ff;
-}
-
 .secondary-button {
   border-color: #64748b;
   background: #fff;
   color: #334155;
 }
 
-.secondary-button:hover {
-  background: #f8fafc;
-}
-
 .save-button {
   border-color: #15803d;
   background: #15803d;
   color: #fff;
-}
-
-.save-button:hover {
-  border-color: #166534;
-  background: #166534;
 }
 
 .toolbar-status {
@@ -361,7 +343,6 @@ a.site-navigation__link:focus-visible::after {
   line-height: 1;
 }
 
-.toolbar-warning-dismiss:hover,
 .toolbar-warning-dismiss:focus-visible {
   background: rgb(146 64 14 / 12%);
   outline: none;

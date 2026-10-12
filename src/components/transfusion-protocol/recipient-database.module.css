@@ -75,7 +75,6 @@
   text-align: left;
 }
 
-.person:hover,
 .person[data-selected='true'] {
   border-color: #8ea6ff;
   background: #eef4ff;
@@ -139,10 +138,6 @@
   white-space: nowrap;
 }
 
-.createRecipient:hover {
-  background: #eff6ff;
-}
-
 .secondaryAction {
   border-color: #64748b;
   background: #fff;
@@ -153,14 +148,6 @@
   border-color: #b91c1c;
   background: #fff;
   color: #b91c1c;
-}
-
-.secondaryAction:hover {
-  background: #f8fafc;
-}
-
-.dangerAction:hover {
-  background: #fef2f2;
 }
 
 .records {

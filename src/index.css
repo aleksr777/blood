@@ -125,6 +125,45 @@ input[type='radio']:checked:disabled {
   margin: 0 auto;
 }
 
+.site-navigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.site-navigation__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  padding: 0 12px;
+  background: #fff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease;
+}
+
+.site-navigation__link:hover,
+.site-navigation__link:focus-visible {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  outline: none;
+}
+
+.site-navigation__link.is-active {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+}
+
 .print-actions {
   width: 100%;
   margin: 0;
@@ -651,6 +690,155 @@ input[type='radio']:checked:disabled {
 .w-31 { width: 31%; }
 .w-39 { width: 39%; }
 
+
+.registration-app-shell {
+  min-width: fit-content;
+  padding: 0 20px 48px;
+}
+
+.registration-header {
+  margin-right: -20px;
+  margin-left: -20px;
+}
+
+.registration-toolbar-wrap {
+  width: 297mm;
+}
+
+.registration-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.registration-sheet-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.registration-sheet {
+  width: 297mm;
+  height: 210mm;
+  padding: 10mm 10mm 12mm;
+  overflow: hidden;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 8px 32px rgb(18 31 48 / 12%);
+  font-family: "Times New Roman", Times, serif;
+  page: registration-page;
+}
+
+.registration-page-number {
+  height: 5mm;
+  font-size: 10.5pt;
+  line-height: 1;
+  text-align: center;
+}
+
+.registration-title {
+  margin: 0 0 5mm;
+  font-size: 12.5pt;
+  font-weight: 700;
+  line-height: 1.05;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.registration-patient-line {
+  display: flex;
+  align-items: baseline;
+  gap: 1mm;
+  margin-bottom: 5mm;
+  font-size: 10.5pt;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.registration-blank {
+  display: inline-block;
+  height: 4mm;
+  border-bottom: 0.3mm solid #111;
+}
+
+.registration-blank--name { width: 34mm; }
+.registration-blank--day { width: 7mm; }
+.registration-blank--date { width: 24mm; }
+.registration-blank--year { width: 13mm; }
+.registration-blank--card { width: 20mm; }
+.registration-blank--room { width: 9mm; }
+
+.registration-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 8.7pt;
+  line-height: 1.05;
+}
+
+.registration-table th,
+.registration-table td {
+  border: 0.3mm solid #111;
+}
+
+.registration-table th {
+  padding: 1.1mm 1mm;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.registration-table thead tr:first-child th {
+  height: 30mm;
+}
+
+.registration-table thead tr:last-child th {
+  height: 8mm;
+}
+
+.registration-table tbody td {
+  height: 6.3mm;
+  padding: 0.6mm;
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+.registration-col-component { width: 22.3%; }
+.registration-col-liters { width: 6%; }
+.registration-col-units { width: 6%; }
+.registration-col-date { width: 8.1%; }
+.registration-col-doctor { width: 11.5%; }
+.registration-col-doctor-sign { width: 10.4%; }
+.registration-col-worker { width: 12.9%; }
+.registration-col-nurse-sign { width: 10%; }
+.registration-col-complications { width: 12.8%; }
+
+@page registration-page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+@media (max-width: 1250px) {
+  .registration-app-shell {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .registration-header {
+    margin-right: -10px;
+    margin-left: -10px;
+  }
+
+  .registration-toolbar-wrap {
+    width: 100%;
+  }
+
+  .registration-sheet-wrap {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+}
+
 @media (max-width: 900px) {
   .app-shell {
     padding: 0 10px 30px;
@@ -764,6 +952,35 @@ input[type='radio']:checked:disabled {
     page-break-before: avoid;
     page-break-after: avoid;
     page-break-inside: avoid;
+  }
+
+  html[data-app-page='registration'],
+  html[data-app-page='registration'] body,
+  html[data-app-page='registration'] #root {
+    width: 297mm;
+    height: 210mm;
+    min-width: 297mm;
+    min-height: 210mm;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important;
+  }
+
+  html[data-app-page='registration'] .registration-app-shell,
+  html[data-app-page='registration'] .registration-sheet-wrap {
+    width: 297mm;
+    height: 210mm;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important;
+  }
+
+  html[data-app-page='registration'] .registration-sheet {
+    width: 297mm;
+    height: 210mm;
+    margin: 0;
+    padding: 10mm 10mm 12mm;
+    box-shadow: none;
   }
 
 }

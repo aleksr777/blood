@@ -360,6 +360,11 @@ input[type='radio']:checked:disabled {
     border-top-color: #2563eb;
   }
 
+  .protocol-table > tbody:has(+ .fill-block:hover) > tr:last-child > *,
+  .protocol-table > tbody:has(+ .fill-block.is-logical-hovered) > tr:last-child > * {
+    border-bottom-color: #2563eb;
+  }
+
   .fill-block:hover > tr:last-child > * {
     border-bottom-color: #2563eb;
   }

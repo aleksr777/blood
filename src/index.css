@@ -789,13 +789,6 @@ a.site-navigation__link:focus-visible::after {
   page: registration-page;
 }
 
-.registration-page-number {
-  height: 5mm;
-  font-size: 10.5pt;
-  line-height: 1;
-  text-align: center;
-}
-
 .registration-title {
   margin: 0 0 5mm;
   font-size: 12.5pt;
@@ -805,15 +798,29 @@ a.site-navigation__link:focus-visible::after {
   white-space: nowrap;
 }
 
+.registration-patient-details {
+  display: grid;
+  gap: 3mm;
+  margin-bottom: 5mm;
+}
+
 .registration-patient-line {
   display: flex;
   align-items: baseline;
   gap: 1mm;
-  margin-bottom: 5mm;
+  min-width: 0;
   font-size: 10.5pt;
   font-weight: 700;
   line-height: 1;
   white-space: nowrap;
+}
+
+.registration-patient-line--name {
+  width: 100%;
+}
+
+.registration-patient-line--meta {
+  justify-content: flex-start;
 }
 
 .registration-blank {
@@ -822,12 +829,16 @@ a.site-navigation__link:focus-visible::after {
   border-bottom: 0.3mm solid #111;
 }
 
-.registration-blank--name { width: 34mm; }
+.registration-blank--name {
+  flex: 1 1 auto;
+  min-width: 40mm;
+}
+
 .registration-blank--day { width: 7mm; }
 .registration-blank--date { width: 24mm; }
 .registration-blank--year { width: 13mm; }
-.registration-blank--card { width: 20mm; }
-.registration-blank--room { width: 9mm; }
+.registration-blank--card { width: 30mm; }
+.registration-blank--room { width: 14mm; }
 
 .registration-table {
   width: 100%;

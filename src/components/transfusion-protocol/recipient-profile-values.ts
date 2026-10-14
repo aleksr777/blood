@@ -1,27 +1,8 @@
 import type { RecipientRecord } from '../../storage/repositories/recipients';
+import { RECIPIENT_PROFILE_FIELDS } from '../../storage/sqlite/recipient-data';
 import type { ProtocolValues } from './protocol-types';
 
-export const PROFILE_FIELDS = [
-  'recipientAbo',
-  'recipientRh',
-  'recipientAntigens',
-  'recipientAntigenC',
-  'recipientAntigenc',
-  'recipientAntigenCw',
-  'recipientAntigenE',
-  'recipientAntigene',
-  'recipientAntigenK',
-  'recipientAntigenk',
-  'alloimmuneAntibodies',
-  'alloimmuneAntibodyStatus',
-  'alloimmuneAntibodyDescription',
-  'previousTransfusionsStatus',
-  'previousTransfusions',
-  'previousReactionsStatus',
-  'previousReactions',
-  'individualSelectionHistoryStatus',
-  'individualSelectionHistory',
-] as const;
+export const PROFILE_FIELDS = RECIPIENT_PROFILE_FIELDS;
 
 export const recipientValues = (
   fullName: string,
@@ -38,8 +19,6 @@ export const recipientValues = (
 const CURRENT_RECIPIENT_FIELDS = [
   'recipientName',
   'recipientId',
-  'department',
-  'medicalRecordNumber',
   ...PROFILE_FIELDS,
 ] as const;
 

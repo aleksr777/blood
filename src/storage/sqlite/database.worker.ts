@@ -20,6 +20,7 @@ import {
 } from './protocol-draft-store';
 import {
   listProtocolRecords,
+  removeProtocolRecord,
   saveProtocolRecord,
 } from './protocol-record-store';
 import { createRecipient } from './recipient-create-store';
@@ -93,6 +94,8 @@ const handleRequest = async (request: DatabaseRequest) => {
       };
       return saveProtocolRecord(payload.recordId, payload.values);
     }
+    case 'protocol-records:remove':
+      return removeProtocolRecord((request.payload as { id: number }).id);
   }
 };
 

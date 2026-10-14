@@ -363,6 +363,7 @@ export const switchCurrentRecipient = async (
     };
     const registrationValues = {
       ...registrationDraft.values,
+      ...recipient.profile,
       recipientId: String(recipient.id),
       recipientName: recipient.fullName,
     };

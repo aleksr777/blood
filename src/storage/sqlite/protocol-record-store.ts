@@ -3,6 +3,14 @@ import type { ProtocolValuesRecord } from './database-types';
 import { mapProtocol } from './recipient-data';
 import { upsertRecipient } from './recipient-profile-store';
 
+export const removeProtocolRecord = async (id: number) => {
+  const db = await getDatabase();
+  db.exec({
+    sql: 'DELETE FROM protocol_records WHERE id = $id',
+    bind: { $id: id },
+  });
+};
+
 export const listProtocolRecords = async (recipientId: number) => {
   const db = await getDatabase();
   const rows = db.exec({

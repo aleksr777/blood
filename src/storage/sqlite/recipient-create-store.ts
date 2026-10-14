@@ -33,5 +33,6 @@ export const createRecipient = async (fullNameValue: string): Promise<RecipientR
     fullName,
     profile: { recipientName: fullName },
     protocolCount: 0,
+    registrationCount: 0,
   };
 };

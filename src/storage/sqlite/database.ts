@@ -38,6 +38,12 @@ const openDatabase = async () => {
       updated_at INTEGER NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS registration_draft (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      values_json TEXT NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS recipients (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       full_name TEXT NOT NULL,

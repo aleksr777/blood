@@ -104,4 +104,6 @@ export const database = {
     withDatabase<ProtocolRecord[]>('protocol-records:list', { recipientId }),
   saveProtocolRecord: (recordId: number | null, values: ProtocolValuesRecord) =>
     withDatabase<ProtocolRecord>('protocol-records:save', { recordId, values }),
+  removeProtocolRecord: (id: number) =>
+    withDatabase<void>('protocol-records:remove', { id }),
 };

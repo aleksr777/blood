@@ -34,6 +34,11 @@ const getRecipient = (db: SqliteDatabase, id: number) => {
   if (!rows[0]) throw new Error('Реципиент не найден.');
   return mapRecipient(rows[0]);
 };
+export const getRecipientById = async (id: number) => {
+  const db = await getDatabase();
+  return getRecipient(db, id);
+};
+
 export const searchRecipients = async (query: string) => {
   const db = await getDatabase();
   const value = normalizeKey(query);

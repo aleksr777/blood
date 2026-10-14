@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
+  recipientProfileValuesForForms,
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
@@ -80,16 +81,6 @@ const readPendingRegistrationRecord = (): RegistrationRecord | null => {
   }
 };
 
-const recipientValues = (recipient: {
-  id: number;
-  fullName: string;
-  profile?: ProtocolValues;
-}): ProtocolValues => ({
-  ...(recipient.profile ?? {}),
-  recipientId: String(recipient.id),
-  recipientName: recipient.fullName,
-});
-
 export const TransfusionRegistration = () => {
   const [initialRecord] = useState<RegistrationRecord | null>(readPendingRegistrationRecord);
   const [values, setValues] = useState<ProtocolValues>(() =>
@@ -145,9 +136,7 @@ export const TransfusionRegistration = () => {
           } else if (Number(draft.values.recipientId) === currentRecipient.id) {
             setValues({
               ...draft.values,
-              ...currentRecipient.profile,
-              recipientId: String(currentRecipient.id),
-              recipientName: currentRecipient.fullName,
+              ...recipientProfileValuesForForms(currentRecipient),
             });
           } else {
             setValues(draft.values);
@@ -158,7 +147,7 @@ export const TransfusionRegistration = () => {
 
         const currentRecipient = readCurrentRecipient();
         if (currentRecipient) {
-          setValues(recipientValues(currentRecipient));
+          setValues(recipientProfileValuesForForms(currentRecipient));
         }
       })
       .catch((error: unknown) =>
@@ -305,7 +294,7 @@ export const TransfusionRegistration = () => {
 
   const clearBlank = () => {
     const currentRecipient = readCurrentRecipient();
-    setValues(currentRecipient ? recipientValues(currentRecipient) : {});
+    setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
     setRecordId(null);
     setRegistryRecipientId(null);
     setStatus('');
@@ -313,7 +302,7 @@ export const TransfusionRegistration = () => {
 
   const newBlank = () => {
     const currentRecipient = readCurrentRecipient();
-    setValues(currentRecipient ? recipientValues(currentRecipient) : {});
+    setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
     setRecordId(null);
     setStatus(
       currentRecipient

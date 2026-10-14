@@ -21,13 +21,11 @@ export const TransfusionRegistration = () => {
       <div className="registration-sheet-wrap">
         <section className="registration-sheet" aria-label="Лист регистрации трансфузии">
           <div className="registration-legal-reference">
-            <a
-              href="https://publication.pravo.gov.ru/document/0001202210190009"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Приказ Минздрава России от 05.08.2022 № 530н
-            </a>
+            <div>Учетная форма № 003/у</div>
+            <div>
+              Приложение № 3 к приказу Министерства здравоохранения Российской Федерации
+            </div>
+            <div>от 5 августа 2022 г. № 530н</div>
           </div>
 
           <h1 className="registration-title">

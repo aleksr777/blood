@@ -74,6 +74,11 @@ export const TransfusionRegistration = () => {
   const currentRecipientId = Number(values.recipientId);
   const currentRecipientAvailable =
     Number.isFinite(currentRecipientId) && currentRecipientId > 0;
+  const storedCurrentRecipient = readCurrentRecipient();
+  const currentRecipientProfile =
+    storedCurrentRecipient?.id === currentRecipientId
+      ? storedCurrentRecipient.profile
+      : {};
 
   useEffect(() => {
     if (initialRecord) {
@@ -304,7 +309,12 @@ export const TransfusionRegistration = () => {
     <main className="registration-app-shell">
       <header className="app-header registration-header">
         <div className="toolbar-wrap registration-toolbar-wrap">
-          <SiteNavigation current="registration" />
+          <SiteNavigation
+            current="registration"
+            recipientName={currentRecipientAvailable ? (values.recipientName ?? '') : ''}
+            recipientAbo={values.recipientAbo ?? currentRecipientProfile.recipientAbo ?? ''}
+            recipientRh={values.recipientRh ?? currentRecipientProfile.recipientRh ?? ''}
+          />
           <div className="print-actions" aria-label="Панель действий">
             <button type="button" className="clear-button" onClick={clearBlank}>
               Очистить бланк

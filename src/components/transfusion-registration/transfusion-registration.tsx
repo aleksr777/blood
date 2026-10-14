@@ -1,14 +1,124 @@
+import { useState } from 'react';
+import {
+  saveRegistrationRecord,
+  type RecipientRecord,
+  type RegistrationRecord,
+} from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
+import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
+import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 
 const ROW_COUNT = 14;
 
 export const TransfusionRegistration = () => {
+  const [values, setValues] = useState<ProtocolValues>({});
+  const [recordId, setRecordId] = useState<number | null>(null);
+  const [registryOpen, setRegistryOpen] = useState(false);
+  const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
+  const [status, setStatus] = useState('');
+
+  const currentRecipientId = Number(values.recipientId);
+  const currentRecipientAvailable =
+    Number.isFinite(currentRecipientId) && currentRecipientId > 0;
+
+  const selectRecipient = (recipient: RecipientRecord) => {
+    const nextRecipientId = String(recipient.id);
+    if (values.recipientId !== nextRecipientId) {
+      setRecordId(null);
+      setValues({
+        recipientId: nextRecipientId,
+        recipientName: recipient.fullName,
+      });
+    } else {
+      setValues((current) => ({
+        ...current,
+        recipientName: recipient.fullName,
+      }));
+    }
+    setStatus(`Выбран реципиент: ${recipient.fullName}.`);
+  };
+
+  const openRegistrationRecord = (record: RegistrationRecord) => {
+    setRecordId(record.id);
+    setValues({
+      ...record.values,
+      recipientId: String(record.recipientId),
+    });
+    setRegistryRecipientId(null);
+    setRegistryOpen(false);
+    setStatus('Сохранённый лист регистрации открыт.');
+  };
+
+  const save = async (afterPrint = false) => {
+    if (!currentRecipientAvailable || !values.recipientName?.trim()) {
+      setStatus('Для сохранения выберите реципиента.');
+      if (!afterPrint) {
+        setRegistryRecipientId(null);
+        setRegistryOpen(true);
+      }
+      return false;
+    }
+
+    try {
+      const record = await saveRegistrationRecord(recordId, values);
+      setRecordId(record.id);
+      setValues((current) => ({
+        ...current,
+        recipientId: String(record.recipientId),
+      }));
+      setStatus(afterPrint ? 'Лист регистрации сохранён после печати.' : 'Лист регистрации сохранён.');
+      return true;
+    } catch (error) {
+      console.error('Не удалось сохранить лист регистрации:', error);
+      setStatus(
+        error instanceof Error ? error.message : 'Не удалось сохранить лист регистрации.',
+      );
+      return false;
+    }
+  };
+
+  const clearBlank = () => {
+    setValues({});
+    setRecordId(null);
+    setRegistryRecipientId(null);
+    setStatus('');
+  };
+
+  const newBlank = () => {
+    const recipientValues = currentRecipientAvailable
+      ? {
+          recipientId: String(currentRecipientId),
+          recipientName: values.recipientName ?? '',
+        }
+      : {};
+
+    setValues(recipientValues);
+    setRecordId(null);
+    setStatus(
+      currentRecipientAvailable
+        ? 'Создан новый лист регистрации для текущего реципиента.'
+        : 'Создан новый лист регистрации.',
+    );
+  };
+
+  const openRecipients = () => {
+    setRegistryRecipientId(null);
+    setRegistryOpen(true);
+  };
+
+  const openCurrentRecipient = () => {
+    if (!currentRecipientAvailable) return;
+    setRegistryRecipientId(currentRecipientId);
+    setRegistryOpen(true);
+  };
+
   const print = () => {
     const root = document.documentElement;
 
     const restoreOrientation = () => {
       delete root.dataset.registrationPrintRotated;
       window.removeEventListener('afterprint', restoreOrientation);
+      void save(true);
     };
 
     root.dataset.registrationPrintRotated = 'true';
@@ -25,50 +135,40 @@ export const TransfusionRegistration = () => {
         <div className="toolbar-wrap registration-toolbar-wrap">
           <SiteNavigation current="registration" />
           <div className="print-actions" aria-label="Панель действий">
-            <button
-              type="button"
-              className="clear-button"
-              disabled
-              title="Будет доступно после подключения данных листа регистрации"
-            >
+            <button type="button" className="clear-button" onClick={clearBlank}>
               Очистить бланк
             </button>
-            <button
-              type="button"
-              className="new-button"
-              disabled
-              title="Будет доступно после подключения данных листа регистрации"
-            >
+            <button type="button" className="new-button" onClick={newBlank}>
               Новый бланк
             </button>
-            <button
-              type="button"
-              className="secondary-button"
-              disabled
-              title="Будет доступно после подключения листа регистрации к базе реципиентов"
-            >
+            <button type="button" className="secondary-button" onClick={openRecipients}>
               Реципиенты
             </button>
             <button
               type="button"
               className="secondary-button"
-              disabled
-              title="Текущий реципиент не выбран"
+              disabled={!currentRecipientAvailable}
+              title={
+                currentRecipientAvailable
+                  ? values.recipientName
+                  : 'Текущий реципиент не выбран'
+              }
+              onClick={openCurrentRecipient}
             >
               Текущий реципиент
             </button>
-            <button
-              type="button"
-              className="save-button"
-              disabled
-              title="Будет доступно после подключения сохранения листов регистрации"
-            >
+            <button type="button" className="save-button" onClick={() => void save()}>
               Сохранить
             </button>
             <button type="button" className="print-button" onClick={print}>
               Печать страницы 1
             </button>
           </div>
+          {status && (
+            <div className="toolbar-status" role="status">
+              {status}
+            </div>
+          )}
         </div>
       </header>
 
@@ -89,7 +189,9 @@ export const TransfusionRegistration = () => {
           <div className="registration-patient-details">
             <div className="registration-patient-line registration-patient-line--name">
               <span>Фамилия, имя, отчество (при наличии)</span>
-              <span className="registration-blank registration-blank--name" />
+              <span className="registration-blank registration-blank--name">
+                {values.recipientName ?? ''}
+              </span>
             </div>
 
             <div className="registration-patient-line registration-patient-line--meta">
@@ -99,9 +201,13 @@ export const TransfusionRegistration = () => {
               <span className="registration-blank registration-blank--date" />
               <span className="registration-blank registration-blank--year" />
               <span>г. № медицинской карты</span>
-              <span className="registration-blank registration-blank--card" />
+              <span className="registration-blank registration-blank--card">
+                {values.medicalRecordNumber ?? ''}
+              </span>
               <span>№ палаты</span>
-              <span className="registration-blank registration-blank--room" />
+              <span className="registration-blank registration-blank--room">
+                {values.roomNumber ?? ''}
+              </span>
             </div>
           </div>
 
@@ -155,6 +261,21 @@ export const TransfusionRegistration = () => {
           </table>
         </section>
       </div>
+
+      {registryOpen && (
+        <RecipientDatabaseModal
+          initialRecipientId={registryRecipientId}
+          initialRecipientName={
+            registryRecipientId ? (values.recipientName ?? '') : ''
+          }
+          onUseRecipient={selectRecipient}
+          onOpenRegistrationRecord={openRegistrationRecord}
+          onClose={() => {
+            setRegistryRecipientId(null);
+            setRegistryOpen(false);
+          }}
+        />
+      )}
     </main>
   );
 };

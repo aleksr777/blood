@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   createRecipient,
   listProtocolRecords,
@@ -19,10 +19,18 @@ import styles from './recipient-database.module.css';
 type Props = {
   onClose: () => void;
   onOpenRecord: (record: ProtocolRecord) => void;
+  initialRecipientId?: number | null;
+  initialRecipientName?: string;
 };
 
-export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
-  const [query, setQuery] = useState('');
+export const RecipientDatabaseModal = ({
+  onClose,
+  onOpenRecord,
+  initialRecipientId = null,
+  initialRecipientName = '',
+}: Props) => {
+  const [query, setQuery] = useState(initialRecipientName);
+  const initialSelectionPending = useRef(Boolean(initialRecipientId));
   const [recipients, setRecipients] = useState<RecipientRecord[]>([]);
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
@@ -39,9 +47,16 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
         .then((items) => {
           if (!active) return;
           setRecipients(items);
-          setSelected((current) =>
-            current && !items.some(({ id }) => id === current.id) ? null : current,
-          );
+          setSelected((current) => {
+            if (current && items.some(({ id }) => id === current.id)) return current;
+
+            if (initialSelectionPending.current && initialRecipientId) {
+              initialSelectionPending.current = false;
+              return items.find(({ id }) => id === initialRecipientId) ?? null;
+            }
+
+            return null;
+          });
         })
         .catch((error: unknown) => console.error('Не удалось найти реципиентов:', error))
         .finally(() => active && setLoading(false));

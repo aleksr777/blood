@@ -23,4 +23,19 @@ export const saveProtocolRecord = (
   values: ProtocolValuesRecord,
 ) => database.saveProtocolRecord(recordId, values);
 
-export type { ProtocolRecord, RecipientRecord } from '../sqlite/database-types';
+export const listRegistrationRecords = (recipientId: number) =>
+  database.listRegistrationRecords(recipientId);
+
+export const saveRegistrationRecord = (
+  recordId: number | null,
+  values: ProtocolValuesRecord,
+) => database.saveRegistrationRecord(recordId, values);
+
+export const removeRegistrationRecord = (id: number) =>
+  database.removeRegistrationRecord(id);
+
+export type {
+  ProtocolRecord,
+  RecipientRecord,
+  RegistrationRecord,
+} from '../sqlite/database-types';

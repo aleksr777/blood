@@ -184,6 +184,10 @@ export const TransfusionProtocol = () => {
           workspace.setRegistryOpen(true);
         }}
         currentRecipientName={workspace.values.recipientName ?? ''}
+        currentRecipientAvailable={
+          Number.isFinite(Number(workspace.values.recipientId)) &&
+          Number(workspace.values.recipientId) > 0
+        }
         onOpenCurrentRecipient={() => {
           const recipientId = Number(workspace.values.recipientId);
           if (!Number.isFinite(recipientId) || recipientId <= 0) return;

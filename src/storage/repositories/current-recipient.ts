@@ -170,19 +170,24 @@ export const adoptCurrentRecipientFromValues = (values: ProtocolValuesRecord) =>
   return recipient;
 };
 
-const protocolValuesForRecipient = (recipient: RecipientRecord): ProtocolValuesRecord => ({
-  ...recipient.profile,
+export const recipientProfileValuesForForms = (recipient: {
+  id: number;
+  fullName: string;
+  profile: ProtocolValuesRecord;
+}): ProtocolValuesRecord => ({
+  ...Object.fromEntries(
+    RECIPIENT_PROFILE_FIELDS.map((field) => [field, recipient.profile[field] ?? '']),
+  ),
   recipientId: String(recipient.id),
   recipientName: recipient.fullName,
 });
 
+const protocolValuesForRecipient = (recipient: RecipientRecord): ProtocolValuesRecord =>
+  recipientProfileValuesForForms(recipient);
+
 const registrationValuesForRecipient = (
   recipient: RecipientRecord,
-): ProtocolValuesRecord => ({
-  ...recipient.profile,
-  recipientId: String(recipient.id),
-  recipientName: recipient.fullName,
-});
+): ProtocolValuesRecord => recipientProfileValuesForForms(recipient);
 
 const savePreviousProtocol = async (draft: ProtocolDraftState, nextRecipientId: number) => {
   const recipientId = getRecipientId(draft.values);
@@ -267,10 +272,8 @@ export const syncCurrentRecipientProfile = async (
   });
 
   const sharedValues: ProtocolValuesRecord = {
-    ...recipient.profile,
+    ...recipientProfileValuesForForms(recipient),
     ...profilePatch,
-    recipientId: String(recipient.id),
-    recipientName: recipient.fullName,
   };
 
   const protocolRecipientId = getRecipientId(protocolDraft.values);
@@ -355,17 +358,14 @@ export const switchCurrentRecipient = async (
     (registrationRecipientId !== null && registrationRecipientId !== recipient.id);
 
   if (activeRecipientId === recipient.id && !hasConflictingDraft) {
+    const profileValues = recipientProfileValuesForForms(recipient);
     const protocolValues = {
       ...protocolDraft.values,
-      ...recipient.profile,
-      recipientId: String(recipient.id),
-      recipientName: recipient.fullName,
+      ...profileValues,
     };
     const registrationValues = {
       ...registrationDraft.values,
-      ...recipient.profile,
-      recipientId: String(recipient.id),
-      recipientName: recipient.fullName,
+      ...profileValues,
     };
     const now = Date.now();
 

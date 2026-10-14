@@ -50,7 +50,9 @@ export const RecipientListPanel = ({
           onClick={() => onSelect(recipient)}
         >
           <span className={styles.personName}>{recipient.fullName}</span>
-          <span className={styles.meta}>Карточка № {recipient.id} · бланков: {recipient.protocolCount}</span>
+          <span className={styles.meta}>
+            Карточка № {recipient.id} · протоколов: {recipient.protocolCount}
+          </span>
         </button>
       ))}
     </div>

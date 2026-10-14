@@ -11,8 +11,11 @@ type Props = {
   recipient: RecipientRecord | null;
   records: ProtocolRecord[];
   registrationRecords: RegistrationRecord[];
-  onOpenRecord?: (record: ProtocolRecord) => void;
-  onOpenRegistrationRecord?: (record: RegistrationRecord) => void;
+  onOpenRecord?: (record: ProtocolRecord, recipient: RecipientRecord) => void;
+  onOpenRegistrationRecord?: (
+    record: RegistrationRecord,
+    recipient: RecipientRecord,
+  ) => void;
   onUseRecipient?: (recipient: RecipientRecord) => void;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
@@ -143,7 +146,7 @@ export const RecipientHistoryPanel = ({
                           <button
                             type="button"
                             className={styles.open}
-                            onClick={() => onOpenRecord(record)}
+                            onClick={() => onOpenRecord(record, recipient)}
                           >
                             Открыть
                           </button>
@@ -181,7 +184,7 @@ export const RecipientHistoryPanel = ({
                           <button
                             type="button"
                             className={styles.open}
-                            onClick={() => onOpenRegistrationRecord(record)}
+                            onClick={() => onOpenRegistrationRecord(record, recipient)}
                           >
                             Открыть
                           </button>

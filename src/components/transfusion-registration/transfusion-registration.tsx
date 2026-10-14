@@ -1,4 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  readCurrentRecipient,
+  switchCurrentRecipient,
+} from '../../storage/repositories/current-recipient';
+import {
+  clearRegistrationDraft,
+  loadRegistrationDraft,
+  saveRegistrationDraft,
+} from '../../storage/repositories/registration-draft';
 import { saveProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   saveRegistrationRecord,
@@ -37,6 +46,14 @@ const readPendingRegistrationRecord = (): RegistrationRecord | null => {
   }
 };
 
+const recipientValues = (recipient: {
+  id: number;
+  fullName: string;
+}): ProtocolValues => ({
+  recipientId: String(recipient.id),
+  recipientName: recipient.fullName,
+});
+
 export const TransfusionRegistration = () => {
   const [initialRecord] = useState<RegistrationRecord | null>(readPendingRegistrationRecord);
   const [values, setValues] = useState<ProtocolValues>(() =>
@@ -48,6 +65,7 @@ export const TransfusionRegistration = () => {
       : {},
   );
   const [recordId, setRecordId] = useState<number | null>(initialRecord?.id ?? null);
+  const [draftLoaded, setDraftLoaded] = useState(Boolean(initialRecord));
   const [registryOpen, setRegistryOpen] = useState(false);
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
   const [status, setStatus] = useState('');
@@ -56,40 +74,134 @@ export const TransfusionRegistration = () => {
   const currentRecipientAvailable =
     Number.isFinite(currentRecipientId) && currentRecipientId > 0;
 
-  const selectRecipient = (recipient: RecipientRecord) => {
-    const nextRecipientId = String(recipient.id);
-    if (values.recipientId !== nextRecipientId) {
-      setRecordId(null);
-      setValues({
-        recipientId: nextRecipientId,
-        recipientName: recipient.fullName,
-      });
-    } else {
-      setValues((current) => ({
-        ...current,
-        recipientName: recipient.fullName,
-      }));
+  useEffect(() => {
+    if (initialRecord) {
+      void saveRegistrationDraft({
+        values: {
+          ...initialRecord.values,
+          recipientId: String(initialRecord.recipientId),
+        },
+        registrationRecordId: initialRecord.id,
+        updatedAt: Date.now(),
+      }).catch((error: unknown) =>
+        console.error('Не удалось сохранить открытый лист регистрации как текущий:', error),
+      );
+      return;
     }
-    setStatus(`Выбран реципиент: ${recipient.fullName}.`);
+
+    let active = true;
+    void loadRegistrationDraft()
+      .then((draft) => {
+        if (!active) return;
+
+        if (Object.keys(draft.values).length > 0) {
+          setValues(draft.values);
+          setRecordId(draft.registrationRecordId);
+          return;
+        }
+
+        const currentRecipient = readCurrentRecipient();
+        if (currentRecipient) {
+          setValues(recipientValues(currentRecipient));
+        }
+      })
+      .catch((error: unknown) =>
+        console.error('Не удалось загрузить текущий лист регистрации:', error),
+      )
+      .finally(() => active && setDraftLoaded(true));
+
+    return () => {
+      active = false;
+    };
+  }, [initialRecord]);
+
+  useEffect(() => {
+    if (!draftLoaded) return;
+
+    if (Object.keys(values).length === 0) {
+      void clearRegistrationDraft().catch((error: unknown) =>
+        console.error('Не удалось очистить текущий лист регистрации:', error),
+      );
+      return;
+    }
+
+    void saveRegistrationDraft({
+      values,
+      registrationRecordId: recordId,
+      updatedAt: Date.now(),
+    }).catch((error: unknown) =>
+      console.error('Не удалось сохранить текущий лист регистрации:', error),
+    );
+  }, [draftLoaded, recordId, values]);
+
+  const selectRecipient = async (recipient: RecipientRecord) => {
+    try {
+      const result = await switchCurrentRecipient(recipient, {
+        kind: 'registration',
+        values,
+        recordId,
+      });
+
+      if (result.changed) {
+        setRecordId(null);
+        setValues(result.registrationValues);
+        setStatus(
+          result.protocolSaved || result.registrationSaved
+            ? 'Бланки предыдущего реципиента автоматически сохранены. Выбран новый реципиент.'
+            : `Выбран реципиент: ${recipient.fullName}.`,
+        );
+      } else {
+        setValues((current) => ({
+          ...current,
+          recipientId: String(recipient.id),
+          recipientName: recipient.fullName,
+        }));
+        setStatus(`Текущий реципиент: ${recipient.fullName}.`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Не удалось сменить текущего реципиента:', error);
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось сменить текущего реципиента.',
+      );
+      return false;
+    }
   };
 
-  const openRegistrationRecord = (record: RegistrationRecord) => {
+  const openRegistrationRecord = async (
+    record: RegistrationRecord,
+    recipient: RecipientRecord,
+  ) => {
+    const switched = await selectRecipient(recipient);
+    if (!switched) return;
+
     setRecordId(record.id);
     setValues({
       ...record.values,
       recipientId: String(record.recipientId),
+      recipientName: recipient.fullName,
     });
     setRegistryRecipientId(null);
     setRegistryOpen(false);
     setStatus('Сохранённый лист регистрации открыт.');
   };
 
-  const openProtocolRecord = async (record: ProtocolRecord) => {
+  const openProtocolRecord = async (
+    record: ProtocolRecord,
+    recipient: RecipientRecord,
+  ) => {
+    const switched = await selectRecipient(recipient);
+    if (!switched) return;
+
     try {
       await saveProtocolDraft({
         values: {
           ...record.values,
           recipientId: String(record.recipientId),
+          recipientName: recipient.fullName,
         },
         protocolRecordId: record.id,
         updatedAt: Date.now(),
@@ -120,36 +232,37 @@ export const TransfusionRegistration = () => {
         ...current,
         recipientId: String(record.recipientId),
       }));
-      setStatus(afterPrint ? 'Лист регистрации сохранён после печати.' : 'Лист регистрации сохранён.');
+      setStatus(
+        afterPrint
+          ? 'Лист регистрации сохранён после печати.'
+          : 'Лист регистрации сохранён.',
+      );
       return true;
     } catch (error) {
       console.error('Не удалось сохранить лист регистрации:', error);
       setStatus(
-        error instanceof Error ? error.message : 'Не удалось сохранить лист регистрации.',
+        error instanceof Error
+          ? error.message
+          : 'Не удалось сохранить лист регистрации.',
       );
       return false;
     }
   };
 
   const clearBlank = () => {
-    setValues({});
+    const currentRecipient = readCurrentRecipient();
+    setValues(currentRecipient ? recipientValues(currentRecipient) : {});
     setRecordId(null);
     setRegistryRecipientId(null);
     setStatus('');
   };
 
   const newBlank = () => {
-    const recipientValues = currentRecipientAvailable
-      ? {
-          recipientId: String(currentRecipientId),
-          recipientName: values.recipientName ?? '',
-        }
-      : {};
-
-    setValues(recipientValues);
+    const currentRecipient = readCurrentRecipient();
+    setValues(currentRecipient ? recipientValues(currentRecipient) : {});
     setRecordId(null);
     setStatus(
-      currentRecipientAvailable
+      currentRecipient
         ? 'Создан новый лист регистрации для текущего реципиента.'
         : 'Создан новый лист регистрации.',
     );
@@ -323,8 +436,12 @@ export const TransfusionRegistration = () => {
             registryRecipientId ? (values.recipientName ?? '') : ''
           }
           onUseRecipient={selectRecipient}
-          onOpenRecord={(record) => void openProtocolRecord(record)}
-          onOpenRegistrationRecord={openRegistrationRecord}
+          onOpenRecord={(record, recipient) =>
+            void openProtocolRecord(record, recipient)
+          }
+          onOpenRegistrationRecord={(record, recipient) =>
+            void openRegistrationRecord(record, recipient)
+          }
           onClose={() => {
             setRegistryRecipientId(null);
             setRegistryOpen(false);

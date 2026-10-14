@@ -1,6 +1,12 @@
 import type { SqliteDatabase } from './database';
 import type { ProtocolValuesRecord } from './database-types';
-import { normalizeKey, normalizeName, profileFromValues } from './recipient-data';
+import {
+  mergeProfileValues,
+  normalizeKey,
+  normalizeName,
+  parseValues,
+  profileFromValues,
+} from './recipient-data';
 
 export const upsertRecipient = (
   db: SqliteDatabase,
@@ -11,21 +17,25 @@ export const upsertRecipient = (
   if (!fullName) throw new Error('Укажите ФИО реципиента.');
 
   const now = Date.now();
-  const bind = {
+  const baseBind = {
     $fullName: fullName,
     $normalizedName: normalizeKey(fullName),
-    $profile: JSON.stringify(profileFromValues(values)),
     $now: now,
   };
 
   if (recipientId !== null) {
     const existing = db.exec({
-      sql: 'SELECT id FROM recipients WHERE id = $id',
+      sql: 'SELECT id, profile_json AS profileJson FROM recipients WHERE id = $id',
       bind: { $id: recipientId },
       rowMode: 'object',
       returnValue: 'resultRows',
-    }) as Array<{ id: number }>;
+    }) as Array<{ id: number; profileJson: string }>;
     if (!existing[0]) throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
+
+    const profile = mergeProfileValues(
+      parseValues(existing[0].profileJson),
+      values,
+    );
 
     db.exec({
       sql: `
@@ -34,7 +44,11 @@ export const upsertRecipient = (
           profile_json = $profile, updated_at = $now
         WHERE id = $id
       `,
-      bind: { ...bind, $id: recipientId },
+      bind: {
+        ...baseBind,
+        $profile: JSON.stringify(profile),
+        $id: recipientId,
+      },
     });
     return recipientId;
   }
@@ -45,7 +59,10 @@ export const upsertRecipient = (
         (full_name, normalized_name, birth_date, profile_json, created_at, updated_at)
       VALUES ($fullName, $normalizedName, '', $profile, $now, $now)
     `,
-    bind,
+    bind: {
+      ...baseBind,
+      $profile: JSON.stringify(profileFromValues(values)),
+    },
   });
   const rows = db.exec({
     sql: 'SELECT last_insert_rowid() AS id',

@@ -25,6 +25,11 @@ import {
 } from './protocol-record-store';
 import { createRecipient } from './recipient-create-store';
 import {
+  clearRegistrationDraft,
+  loadRegistrationDraft,
+  saveRegistrationDraft,
+} from './registration-draft-store';
+import {
   listRegistrationRecords,
   removeRegistrationRecord,
   saveRegistrationRecord,
@@ -75,6 +80,14 @@ const handleRequest = async (request: DatabaseRequest) => {
       );
     case 'protocol-draft:clear':
       return clearProtocolDraft();
+    case 'registration-draft:load':
+      return loadRegistrationDraft();
+    case 'registration-draft:save':
+      return saveRegistrationDraft(
+        (request.payload as { state: Parameters<typeof saveRegistrationDraft>[0] }).state,
+      );
+    case 'registration-draft:clear':
+      return clearRegistrationDraft();
     case 'recipients:search':
       return searchRecipients((request.payload as { query: string }).query);
     case 'recipients:find-name':

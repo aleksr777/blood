@@ -16,7 +16,7 @@ type Props = {
     record: RegistrationRecord,
     recipient: RecipientRecord,
   ) => void;
-  onUseRecipient?: (recipient: RecipientRecord) => void;
+  onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
   onDeleteRecord: (record: ProtocolRecord) => void;

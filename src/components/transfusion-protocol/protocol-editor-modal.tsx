@@ -14,6 +14,7 @@ import { getHemaconExpirationWarning } from './reagent-defaults';
 import { SelectionFields } from './selection-fields';
 import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
+import type { RecipientRecord } from '../../storage/repositories/recipients';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
 type Props = {
@@ -24,6 +25,7 @@ type Props = {
   componentUnitNumberWarning: string;
   onDismissComponentUnitNumberWarning: () => void;
   onOpenRecipients: () => void;
+  onSelectRecipient: (recipient: RecipientRecord) => void | Promise<void>;
   onSave: (values: ProtocolValues) => void;
   onClose: (values: ProtocolValues) => void;
 };
@@ -41,6 +43,7 @@ export const ProtocolEditorModal = ({
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
   onOpenRecipients,
+  onSelectRecipient,
   onSave,
   onClose,
 }: Props) => {
@@ -140,6 +143,7 @@ export const ProtocolEditorModal = ({
                   onChange={changeValue}
                   onValuesChange={changeValues}
                   onOpenRecipients={handleOpenRecipients}
+                  onSelectRecipient={onSelectRecipient}
                 />
               ))}
 
@@ -153,6 +157,7 @@ export const ProtocolEditorModal = ({
                     onChange={changeValue}
                     onValuesChange={changeValues}
                     onOpenRecipients={handleOpenRecipients}
+                    onSelectRecipient={onSelectRecipient}
                   />
 
                   {hemaconExpirationWarning && (
@@ -173,6 +178,7 @@ export const ProtocolEditorModal = ({
                   onChange={changeValue}
                   onValuesChange={changeValues}
                   onOpenRecipients={handleOpenRecipients}
+                  onSelectRecipient={onSelectRecipient}
                 />
               ))}
           </>
@@ -197,6 +203,7 @@ export const ProtocolEditorModal = ({
               onChange={changeValue}
               onValuesChange={changeValues}
               onOpenRecipients={handleOpenRecipients}
+              onSelectRecipient={onSelectRecipient}
             />
           ))
         )}

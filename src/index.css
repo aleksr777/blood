@@ -280,7 +280,10 @@ a.site-navigation__link:focus-visible::after {
   color: #fff;
 }
 
-.secondary-button:disabled {
+.clear-button:disabled,
+.new-button:disabled,
+.secondary-button:disabled,
+.save-button:disabled {
   border-color: #cbd5e1;
   background: #f8fafc;
   color: #94a3b8;

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  adoptCurrentRecipientFromValues,
   readCurrentRecipient,
   switchCurrentRecipient,
 } from '../../storage/repositories/current-recipient';
@@ -95,6 +96,9 @@ export const TransfusionRegistration = () => {
         if (!active) return;
 
         if (Object.keys(draft.values).length > 0) {
+          if (!readCurrentRecipient()) {
+            adoptCurrentRecipientFromValues(draft.values);
+          }
           setValues(draft.values);
           setRecordId(draft.registrationRecordId);
           return;

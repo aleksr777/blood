@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type {
   ProtocolRecord,
   RecipientRecord,
+  RegistrationRecord,
 } from '../../storage/repositories/recipients';
 import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
@@ -9,10 +10,14 @@ import styles from './recipient-database.module.css';
 type Props = {
   recipient: RecipientRecord | null;
   records: ProtocolRecord[];
-  onOpenRecord: (record: ProtocolRecord) => void;
+  registrationRecords: RegistrationRecord[];
+  onOpenRecord?: (record: ProtocolRecord) => void;
+  onOpenRegistrationRecord?: (record: RegistrationRecord) => void;
+  onUseRecipient?: (recipient: RecipientRecord) => void;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
   onDeleteRecord: (record: ProtocolRecord) => void;
+  onDeleteRegistrationRecord: (record: RegistrationRecord) => void;
 };
 
 type RecordCategory = 'protocols' | 'registrations';
@@ -26,10 +31,14 @@ const formatUpdated = (value: number) =>
 export const RecipientHistoryPanel = ({
   recipient,
   records,
+  registrationRecords,
   onOpenRecord,
+  onOpenRegistrationRecord,
+  onUseRecipient,
   onEdit,
   onDelete,
   onDeleteRecord,
+  onDeleteRegistrationRecord,
 }: Props) => {
   const [category, setCategory] = useState<RecordCategory | null>(null);
 
@@ -49,6 +58,15 @@ export const RecipientHistoryPanel = ({
               <div className={styles.meta}>Карточка № {recipient.id}</div>
             </div>
             <div className={styles.headerActions}>
+              {onUseRecipient && (
+                <button
+                  type="button"
+                  className={styles.action}
+                  onClick={() => onUseRecipient(recipient)}
+                >
+                  Выбрать
+                </button>
+              )}
               <button
                 type="button"
                 className={styles.secondaryAction}
@@ -85,7 +103,9 @@ export const RecipientHistoryPanel = ({
                 onClick={() => setCategory('registrations')}
               >
                 <span className={styles.categoryTitle}>Листы регистрации трансфузий</span>
-                <span className={styles.categoryMeta}>Сохранено: 0</span>
+                <span className={styles.categoryMeta}>
+                  Сохранено: {recipient.registrationCount}
+                </span>
               </button>
             </div>
           ) : (
@@ -119,13 +139,15 @@ export const RecipientHistoryPanel = ({
                         <div className={styles.meta}>Изменён: {formatUpdated(record.updatedAt)}</div>
                       </div>
                       <div className={styles.recordActions}>
-                        <button
-                          type="button"
-                          className={styles.open}
-                          onClick={() => onOpenRecord(record)}
-                        >
-                          Открыть
-                        </button>
+                        {onOpenRecord && (
+                          <button
+                            type="button"
+                            className={styles.open}
+                            onClick={() => onOpenRecord(record)}
+                          >
+                            Открыть
+                          </button>
+                        )}
                         <button
                           type="button"
                           className={styles.recordDelete}
@@ -139,9 +161,41 @@ export const RecipientHistoryPanel = ({
                 </div>
               ) : (
                 <div className={styles.records}>
-                  <div className={styles.empty}>
-                    Сохранённых листов регистрации трансфузий пока нет.
-                  </div>
+                  {registrationRecords.length === 0 && (
+                    <div className={styles.empty}>
+                      Сохранённых листов регистрации трансфузий пока нет.
+                    </div>
+                  )}
+                  {registrationRecords.map((record) => (
+                    <div key={record.id} className={styles.record}>
+                      <div>
+                        <div className={styles.recordTitle}>
+                          Лист регистрации
+                        </div>
+                        <div className={styles.meta}>
+                          Изменён: {formatUpdated(record.updatedAt)}
+                        </div>
+                      </div>
+                      <div className={styles.recordActions}>
+                        {onOpenRegistrationRecord && (
+                          <button
+                            type="button"
+                            className={styles.open}
+                            onClick={() => onOpenRegistrationRecord(record)}
+                          >
+                            Открыть
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className={styles.recordDelete}
+                          onClick={() => onDeleteRegistrationRecord(record)}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </>

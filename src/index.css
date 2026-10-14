@@ -870,7 +870,7 @@ a.site-navigation__link:focus-visible::after {
 .registration-col-complications { width: 12.8%; }
 
 @page registration-page {
-  size: A4 landscape;
+  size: A4 portrait;
   margin: 0;
 }
 
@@ -1021,10 +1021,10 @@ a.site-navigation__link:focus-visible::after {
   html[data-app-page='registration'],
   html[data-app-page='registration'] body,
   html[data-app-page='registration'] #root {
-    width: 297mm;
-    height: 210mm;
-    min-width: 297mm;
-    min-height: 210mm;
+    width: 210mm;
+    height: 297mm;
+    min-width: 210mm;
+    min-height: 297mm;
     margin: 0;
     padding: 0;
     overflow: hidden !important;
@@ -1032,19 +1032,56 @@ a.site-navigation__link:focus-visible::after {
 
   html[data-app-page='registration'] .registration-app-shell,
   html[data-app-page='registration'] .registration-sheet-wrap {
-    width: 297mm;
-    height: 210mm;
+    width: 210mm;
+    height: 297mm;
     margin: 0;
     padding: 0;
     overflow: hidden !important;
   }
 
   html[data-app-page='registration'] .registration-sheet {
-    width: 297mm;
-    height: 210mm;
+    width: 210mm;
+    height: 297mm;
     margin: 0;
     padding: 10mm 10mm 12mm;
     box-shadow: none;
+  }
+
+  html[data-app-page='registration'] .registration-legal-reference {
+    width: 140mm;
+  }
+
+  html[data-app-page='registration'] .registration-title {
+    font-size: 11pt;
+    line-height: 1.1;
+    white-space: normal;
+  }
+
+  html[data-app-page='registration'] .registration-patient-line--meta {
+    flex-wrap: wrap;
+    row-gap: 2mm;
+  }
+
+  html[data-app-page='registration'] .registration-table {
+    font-size: 7pt;
+    line-height: 1.02;
+  }
+
+  html[data-app-page='registration'] .registration-table th {
+    padding: 0.8mm 0.55mm;
+  }
+
+  html[data-app-page='registration'] .registration-table thead tr:first-child th {
+    height: 43mm;
+  }
+
+  html[data-app-page='registration'] .registration-table thead tr:last-child th {
+    height: 8mm;
+  }
+
+  html[data-app-page='registration'] .registration-table tbody td {
+    height: 9mm;
+    padding: 0.5mm;
   }
 
 }

@@ -25,7 +25,9 @@ export const RegistrationPatientDetailsModal = ({
         <div className={styles.fieldLabel}>Фамилия, имя, отчество (при наличии)</div>
         <RecipientField
           value={values.recipientName ?? ''}
-          onSelectRecipient={onSelectRecipient}
+          onSelectRecipient={async (recipient) => {
+            await onSelectRecipient(recipient);
+          }}
           onOpenRecipients={onOpenRecipients}
         />
       </div>

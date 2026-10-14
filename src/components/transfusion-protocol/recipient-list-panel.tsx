@@ -51,7 +51,8 @@ export const RecipientListPanel = ({
         >
           <span className={styles.personName}>{recipient.fullName}</span>
           <span className={styles.meta}>
-            Карточка № {recipient.id} · протоколов: {recipient.protocolCount}
+            Карточка № {recipient.id} · протоколов: {recipient.protocolCount} · листов регистрации:{' '}
+            {recipient.registrationCount}
           </span>
         </button>
       ))}

@@ -51,10 +51,20 @@ export const useProtocolDraft = ({
           return;
         }
         if (Object.keys(draft.values).length > 0) {
-          if (!readCurrentRecipient()) {
+          const currentRecipient = readCurrentRecipient();
+          if (!currentRecipient) {
             adoptCurrentRecipientFromValues(draft.values);
+            setValues(draft.values);
+          } else if (Number(draft.values.recipientId) === currentRecipient.id) {
+            setValues({
+              ...draft.values,
+              ...currentRecipient.profile,
+              recipientId: String(currentRecipient.id),
+              recipientName: currentRecipient.fullName,
+            });
+          } else {
+            setValues(draft.values);
           }
-          setValues(draft.values);
           setRecordId(draft.protocolRecordId);
           setLastInputAt(draft.updatedAt);
           return;

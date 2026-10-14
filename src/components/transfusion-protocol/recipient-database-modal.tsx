@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   createRecipient,
+  getRecipientById,
   listProtocolRecords,
   listRegistrationRecords,
   removeProtocolRecord,
@@ -40,7 +41,7 @@ export const RecipientDatabaseModal = ({
   initialRecipientName = '',
 }: Props) => {
   const [query, setQuery] = useState(initialRecipientName);
-  const initialSelectionPending = useRef(Boolean(initialRecipientId));
+  const [initializingRecipient, setInitializingRecipient] = useState(Boolean(initialRecipientId));
   const [recipients, setRecipients] = useState<RecipientRecord[]>([]);
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
@@ -52,7 +53,40 @@ export const RecipientDatabaseModal = ({
   const [deletingRegistrationRecord, setDeletingRegistrationRecord] =
     useState<RegistrationRecord | null>(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    if (!initialRecipientId) {
+      setInitializingRecipient(false);
+      return undefined;
+    }
+
+    let active = true;
+    setLoading(true);
+
+    void getRecipientById(initialRecipientId)
+      .then((recipient) => {
+        if (!active) return;
+        setSelected(recipient);
+        setRecipients([recipient]);
+        setQuery(recipient.fullName);
+      })
+      .catch((error: unknown) =>
+        console.error('Не удалось открыть текущего реципиента:', error),
+      )
+      .finally(() => {
+        if (!active) return;
+        setInitializingRecipient(false);
+        setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [initialRecipientId]);
+
+  useEffect(() => {
+    if (initializingRecipient) return undefined;
+
     let active = true;
     const timer = window.setTimeout(() => {
       setLoading(true);
@@ -60,16 +94,9 @@ export const RecipientDatabaseModal = ({
         .then((items) => {
           if (!active) return;
           setRecipients(items);
-          setSelected((current) => {
-            if (current && items.some(({ id }) => id === current.id)) return current;
-
-            if (initialSelectionPending.current && initialRecipientId) {
-              initialSelectionPending.current = false;
-              return items.find(({ id }) => id === initialRecipientId) ?? null;
-            }
-
-            return null;
-          });
+          setSelected((current) =>
+            current && items.some(({ id }) => id === current.id) ? current : null,
+          );
         })
         .catch((error: unknown) => console.error('Не удалось найти реципиентов:', error))
         .finally(() => active && setLoading(false));
@@ -78,7 +105,7 @@ export const RecipientDatabaseModal = ({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [query]);
+  }, [initializingRecipient, query]);
   useEffect(() => {
     if (!selected) {
       setRecords([]);

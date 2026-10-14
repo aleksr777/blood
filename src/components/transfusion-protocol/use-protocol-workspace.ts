@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
+import {
+  readCurrentRecipient,
+  switchCurrentRecipient,
+} from '../../storage/repositories/current-recipient';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   saveProtocolRecord,
   type ProtocolRecord,
+  type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
@@ -124,6 +129,51 @@ export const useProtocolWorkspace = () => {
     });
   };
 
+  const selectRecipient = async (recipient: RecipientRecord) => {
+    try {
+      const result = await switchCurrentRecipient(recipient, {
+        kind: 'protocol',
+        values,
+        recordId,
+      });
+
+      draft.touch();
+      setComponentUnitNumberChecked(false);
+      setDismissedComponentUnitWarningKey('');
+
+      if (result.changed) {
+        setRecordId(null);
+        setValues({
+          ...result.protocolValues,
+          ...reagentDefaultsForNewBlank(values),
+        });
+        setStatus(
+          result.protocolSaved || result.registrationSaved
+            ? 'Бланки предыдущего реципиента автоматически сохранены. Выбран новый реципиент.'
+            : 'Выбран новый реципиент.',
+        );
+      } else {
+        setValues((current) => ({
+          ...current,
+          ...recipient.profile,
+          recipientId: String(recipient.id),
+          recipientName: recipient.fullName,
+        }));
+        setStatus(`Текущий реципиент: ${recipient.fullName}.`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Не удалось сменить текущего реципиента:', error);
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось сменить текущего реципиента.',
+      );
+      return false;
+    }
+  };
+
   const saveToDatabase = async (afterPrint = false) => {
     if (!values.recipientName?.trim()) {
       setStatus('Для сохранения укажите ФИО реципиента.');
@@ -190,19 +240,37 @@ export const useProtocolWorkspace = () => {
   };
 
   const clearForm = () => {
+    const currentRecipient = readCurrentRecipient();
+    const nextValues = currentRecipient
+      ? {
+          ...currentRecipient.profile,
+          recipientId: String(currentRecipient.id),
+          recipientName: currentRecipient.fullName,
+          ...reagentDefaultsForNewBlank(values),
+        }
+      : {};
+
     draft.reset();
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
     setActiveBlock(null);
     setRecordId(null);
     setStatus('');
-    setValues({});
-    void clearProtocolDraft().catch((error: unknown) =>
-      console.error('Не удалось очистить сохранённый бланк:', error),
-    );
+    setValues(nextValues);
+
+    void clearProtocolDraft()
+      .then(() => {
+        if (currentRecipient) draft.touch();
+      })
+      .catch((error: unknown) =>
+        console.error('Не удалось очистить сохранённый бланк:', error),
+      );
   };
 
-  const openRecord = (record: ProtocolRecord) => {
+  const openRecord = async (record: ProtocolRecord, recipient: RecipientRecord) => {
+    const switched = await selectRecipient(recipient);
+    if (!switched) return;
+
     draft.touch();
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
@@ -281,6 +349,7 @@ export const useProtocolWorkspace = () => {
     setActiveBlock,
     setRegistryOpen,
     saveValues,
+    selectRecipient,
     saveToDatabase,
     newBlank,
     reagentWarning,

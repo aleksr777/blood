@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
+import { recipientProfileValuesForForms } from '../../storage/repositories/current-recipient';
 import type {
   RecipientRecord,
   RegistrationRecord,
@@ -158,7 +159,16 @@ export const TransfusionProtocol = () => {
     if (!switched) return;
 
     try {
-      window.sessionStorage.setItem(PENDING_REGISTRATION_RECORD_KEY, JSON.stringify(record));
+      window.sessionStorage.setItem(
+        PENDING_REGISTRATION_RECORD_KEY,
+        JSON.stringify({
+          ...record,
+          values: {
+            ...record.values,
+            ...recipientProfileValuesForForms(recipient),
+          },
+        }),
+      );
     } catch (error) {
       console.error('Не удалось подготовить лист регистрации к открытию:', error);
       return;

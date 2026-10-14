@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
 import {
   createRecipient,
   getRecipientById,
@@ -141,6 +142,10 @@ export const RecipientDatabaseModal = ({
     const updated = await updateRecipient(recipient.id, values);
     setRecipients((current) => current.map((item) => (item.id === updated.id ? updated : item)));
     setSelected(updated);
+
+    if (readCurrentRecipient()?.id === updated.id && onUseRecipient) {
+      await onUseRecipient(updated);
+    }
   };
 
   const deleteRecipient = async (recipient: RecipientRecord) => {

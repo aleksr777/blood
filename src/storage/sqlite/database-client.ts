@@ -7,6 +7,7 @@ import type {
   ProtocolRecord,
   ProtocolValuesRecord,
   RecipientRecord,
+  RegistrationDraftState,
   RegistrationRecord,
   SavedOptionRecord,
 } from './database-types';
@@ -91,6 +92,11 @@ export const database = {
   saveProtocolDraft: (state: ProtocolDraftState) =>
     withDatabase<void>('protocol-draft:save', { state }),
   clearProtocolDraft: () => withDatabase<void>('protocol-draft:clear'),
+  loadRegistrationDraft: () =>
+    withDatabase<RegistrationDraftState>('registration-draft:load'),
+  saveRegistrationDraft: (state: RegistrationDraftState) =>
+    withDatabase<void>('registration-draft:save', { state }),
+  clearRegistrationDraft: () => withDatabase<void>('registration-draft:clear'),
   searchRecipients: (query: string) =>
     withDatabase<RecipientRecord[]>('recipients:search', { query }),
   findRecipientsByName: (fullName: string) =>

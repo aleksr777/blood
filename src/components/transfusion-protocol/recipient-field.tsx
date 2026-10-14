@@ -4,7 +4,6 @@ import {
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import { RecipientNewModal } from './recipient-new-modal';
-import { RecipientSelectModal } from './recipient-select-modal';
 import { recipientValues } from './recipient-profile-values';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-field.module.css';
@@ -12,10 +11,11 @@ import styles from './recipient-field.module.css';
 type Props = {
   value: string;
   onChange: (values: ProtocolValues) => void;
+  onOpenRecipients: () => void;
 };
 
-export const RecipientField = ({ value, onChange }: Props) => {
-  const [mode, setMode] = useState<'search' | 'new' | null>(null);
+export const RecipientField = ({ value, onChange, onOpenRecipients }: Props) => {
+  const [newRecipientOpen, setNewRecipientOpen] = useState(false);
 
   const select = (recipient: RecipientRecord) => {
     onChange(recipientValues(recipient.fullName, recipient));
@@ -33,21 +33,18 @@ export const RecipientField = ({ value, onChange }: Props) => {
           {value || 'Реципиент не выбран'}
         </div>
         <div className={styles.actions}>
-          <button type="button" className={styles.secondary} onClick={() => setMode('search')}>
-            Найти
+          <button type="button" className="secondary-button" onClick={onOpenRecipients}>
+            Реципиенты
           </button>
-          <button type="button" className={styles.primary} onClick={() => setMode('new')}>
+          <button type="button" className={styles.primary} onClick={() => setNewRecipientOpen(true)}>
             Новый
           </button>
         </div>
       </div>
 
-      {mode === 'search' && (
-        <RecipientSelectModal onClose={() => setMode(null)} onSelect={select} />
-      )}
-      {mode === 'new' && (
+      {newRecipientOpen && (
         <RecipientNewModal
-          onClose={() => setMode(null)}
+          onClose={() => setNewRecipientOpen(false)}
           onCreate={create}
           onExisting={select}
           existingActionLabel="Использовать данные"

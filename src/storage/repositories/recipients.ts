@@ -3,6 +3,8 @@ import type { ProtocolValuesRecord } from '../sqlite/database-types';
 
 export const searchRecipients = (query = '') => database.searchRecipients(query);
 
+export const getRecipientById = (id: number) => database.getRecipientById(id);
+
 export const findRecipientsByName = (fullName: string) => database.findRecipientsByName(fullName);
 
 export const createRecipient = (fullName: string) => database.createRecipient(fullName);

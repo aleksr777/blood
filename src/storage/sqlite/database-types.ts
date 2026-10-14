@@ -51,7 +51,8 @@ export type DatabaseAction =
   | 'recipients:update'
   | 'recipients:remove'
   | 'protocol-records:list'
-  | 'protocol-records:save';
+  | 'protocol-records:save'
+  | 'protocol-records:remove';
 
 export type DatabaseRequest = {
   id: number;

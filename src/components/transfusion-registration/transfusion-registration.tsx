@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { saveProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   saveRegistrationRecord,
+  type ProtocolRecord,
   type RecipientRecord,
   type RegistrationRecord,
 } from '../../storage/repositories/recipients';
@@ -9,10 +11,43 @@ import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-databa
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 
 const ROW_COUNT = 14;
+const PENDING_REGISTRATION_RECORD_KEY = 'blood:registration-open-record';
+
+const readPendingRegistrationRecord = (): RegistrationRecord | null => {
+  try {
+    const raw = window.sessionStorage.getItem(PENDING_REGISTRATION_RECORD_KEY);
+    if (!raw) return null;
+
+    window.sessionStorage.removeItem(PENDING_REGISTRATION_RECORD_KEY);
+    const parsed = JSON.parse(raw) as Partial<RegistrationRecord>;
+
+    if (
+      typeof parsed.id !== 'number' ||
+      typeof parsed.recipientId !== 'number' ||
+      !parsed.values ||
+      typeof parsed.values !== 'object'
+    ) {
+      return null;
+    }
+
+    return parsed as RegistrationRecord;
+  } catch (error) {
+    console.error('Не удалось восстановить лист регистрации:', error);
+    return null;
+  }
+};
 
 export const TransfusionRegistration = () => {
-  const [values, setValues] = useState<ProtocolValues>({});
-  const [recordId, setRecordId] = useState<number | null>(null);
+  const [initialRecord] = useState<RegistrationRecord | null>(readPendingRegistrationRecord);
+  const [values, setValues] = useState<ProtocolValues>(() =>
+    initialRecord
+      ? {
+          ...initialRecord.values,
+          recipientId: String(initialRecord.recipientId),
+        }
+      : {},
+  );
+  const [recordId, setRecordId] = useState<number | null>(initialRecord?.id ?? null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
   const [status, setStatus] = useState('');
@@ -47,6 +82,25 @@ export const TransfusionRegistration = () => {
     setRegistryRecipientId(null);
     setRegistryOpen(false);
     setStatus('Сохранённый лист регистрации открыт.');
+  };
+
+  const openProtocolRecord = async (record: ProtocolRecord) => {
+    try {
+      await saveProtocolDraft({
+        values: {
+          ...record.values,
+          recipientId: String(record.recipientId),
+        },
+        protocolRecordId: record.id,
+        updatedAt: Date.now(),
+      });
+      setRegistryRecipientId(null);
+      setRegistryOpen(false);
+      window.location.hash = '#/protocol';
+    } catch (error) {
+      console.error('Не удалось открыть протокол трансфузии:', error);
+      setStatus('Не удалось открыть протокол трансфузии.');
+    }
   };
 
   const save = async (afterPrint = false) => {
@@ -269,6 +323,7 @@ export const TransfusionRegistration = () => {
             registryRecipientId ? (values.recipientName ?? '') : ''
           }
           onUseRecipient={selectRecipient}
+          onOpenRecord={(record) => void openProtocolRecord(record)}
           onOpenRegistrationRecord={openRegistrationRecord}
           onClose={() => {
             setRegistryRecipientId(null);

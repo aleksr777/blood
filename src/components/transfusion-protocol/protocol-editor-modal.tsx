@@ -141,7 +141,6 @@ export const ProtocolEditorModal = ({
                   field={field}
                   value={draft[field.name] ?? ''}
                   onChange={changeValue}
-                  onValuesChange={changeValues}
                   onOpenRecipients={handleOpenRecipients}
                   onSelectRecipient={onSelectRecipient}
                 />
@@ -155,8 +154,7 @@ export const ProtocolEditorModal = ({
                     field={field}
                     value={draft[field.name] ?? ''}
                     onChange={changeValue}
-                    onValuesChange={changeValues}
-                    onOpenRecipients={handleOpenRecipients}
+                      onOpenRecipients={handleOpenRecipients}
                     onSelectRecipient={onSelectRecipient}
                   />
 
@@ -176,7 +174,6 @@ export const ProtocolEditorModal = ({
                   field={field}
                   value={draft[field.name] ?? ''}
                   onChange={changeValue}
-                  onValuesChange={changeValues}
                   onOpenRecipients={handleOpenRecipients}
                   onSelectRecipient={onSelectRecipient}
                 />
@@ -201,7 +198,6 @@ export const ProtocolEditorModal = ({
               field={field}
               value={draft[field.name] ?? ''}
               onChange={changeValue}
-              onValuesChange={changeValues}
               onOpenRecipients={handleOpenRecipients}
               onSelectRecipient={onSelectRecipient}
             />

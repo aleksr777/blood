@@ -23,6 +23,7 @@ type Props = {
   onDismissBloodGroupWarning: () => void;
   componentUnitNumberWarning: string;
   onDismissComponentUnitNumberWarning: () => void;
+  onOpenRecipients: () => void;
   onSave: (values: ProtocolValues) => void;
   onClose: (values: ProtocolValues) => void;
 };
@@ -39,6 +40,7 @@ export const ProtocolEditorModal = ({
   onDismissBloodGroupWarning,
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
+  onOpenRecipients,
   onSave,
   onClose,
 }: Props) => {
@@ -62,6 +64,12 @@ export const ProtocolEditorModal = ({
   const handleClose = () => {
     persistProtocolOptions(draft);
     onClose(draft);
+  };
+
+  const handleOpenRecipients = () => {
+    persistProtocolOptions(draft);
+    onClose(draft);
+    onOpenRecipients();
   };
 
   return (
@@ -131,6 +139,7 @@ export const ProtocolEditorModal = ({
                   value={draft[field.name] ?? ''}
                   onChange={changeValue}
                   onValuesChange={changeValues}
+                  onOpenRecipients={handleOpenRecipients}
                 />
               ))}
 
@@ -143,6 +152,7 @@ export const ProtocolEditorModal = ({
                     value={draft[field.name] ?? ''}
                     onChange={changeValue}
                     onValuesChange={changeValues}
+                    onOpenRecipients={handleOpenRecipients}
                   />
 
                   {hemaconExpirationWarning && (
@@ -162,6 +172,7 @@ export const ProtocolEditorModal = ({
                   value={draft[field.name] ?? ''}
                   onChange={changeValue}
                   onValuesChange={changeValues}
+                  onOpenRecipients={handleOpenRecipients}
                 />
               ))}
           </>
@@ -185,6 +196,7 @@ export const ProtocolEditorModal = ({
               value={draft[field.name] ?? ''}
               onChange={changeValue}
               onValuesChange={changeValues}
+              onOpenRecipients={handleOpenRecipients}
             />
           ))
         )}

@@ -25,6 +25,11 @@ import {
 } from './protocol-record-store';
 import { createRecipient } from './recipient-create-store';
 import {
+  listRegistrationRecords,
+  removeRegistrationRecord,
+  saveRegistrationRecord,
+} from './registration-record-store';
+import {
   findRecipientsByName,
   removeRecipient,
   searchRecipients,
@@ -96,6 +101,17 @@ const handleRequest = async (request: DatabaseRequest) => {
     }
     case 'protocol-records:remove':
       return removeProtocolRecord((request.payload as { id: number }).id);
+    case 'registration-records:list':
+      return listRegistrationRecords((request.payload as { recipientId: number }).recipientId);
+    case 'registration-records:save': {
+      const payload = request.payload as {
+        recordId: number | null;
+        values: Record<string, string>;
+      };
+      return saveRegistrationRecord(payload.recordId, payload.values);
+    }
+    case 'registration-records:remove':
+      return removeRegistrationRecord((request.payload as { id: number }).id);
   }
 };
 

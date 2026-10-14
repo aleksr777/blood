@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   createRecipient,
   listProtocolRecords,
+  removeProtocolRecord,
   removeRecipient,
   searchRecipients,
   updateRecipient,
@@ -28,6 +29,7 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<RecipientRecord | null>(null);
   const [deleting, setDeleting] = useState<RecipientRecord | null>(null);
+  const [deletingRecord, setDeletingRecord] = useState<ProtocolRecord | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let active = true;
@@ -85,6 +87,23 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
     setRecords([]);
   };
 
+  const deleteRecord = async (record: ProtocolRecord) => {
+    await removeProtocolRecord(record.id);
+    setRecords((current) => current.filter(({ id }) => id !== record.id));
+    setRecipients((current) =>
+      current.map((recipient) =>
+        recipient.id === record.recipientId
+          ? { ...recipient, protocolCount: Math.max(0, recipient.protocolCount - 1) }
+          : recipient,
+      ),
+    );
+    setSelected((current) =>
+      current?.id === record.recipientId
+        ? { ...current, protocolCount: Math.max(0, current.protocolCount - 1) }
+        : current,
+    );
+  };
+
   return (
     <Modal title="База реципиентов" onClose={onClose} className={styles.modal}>
       <div className={styles.body}>
@@ -103,19 +122,24 @@ export const RecipientDatabaseModal = ({ onClose, onOpenRecord }: Props) => {
           onOpenRecord={onOpenRecord}
           onEdit={setEditing}
           onDelete={setDeleting}
+          onDeleteRecord={setDeletingRecord}
         />
       </div>
       <RecipientDatabaseDialogs
         creating={creating}
         editing={editing}
         deleting={deleting}
+        deletingRecord={deletingRecord}
+        selectedRecipient={selected}
         onCloseCreate={() => setCreating(false)}
         onCloseEdit={() => setEditing(null)}
         onCloseDelete={() => setDeleting(null)}
+        onCloseRecordDelete={() => setDeletingRecord(null)}
         onCreate={addRecipient}
         onExisting={openExistingRecipient}
         onSave={saveRecipient}
         onDelete={deleteRecipient}
+        onDeleteRecord={deleteRecord}
       />
     </Modal>
   );

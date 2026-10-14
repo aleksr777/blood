@@ -11,6 +11,7 @@ type Props = {
   value: string;
   onChange: (name: string, value: string) => void;
   onValuesChange: (values: ProtocolValues) => void;
+  onOpenRecipients?: () => void;
 };
 
 const BasicControl = ({
@@ -45,6 +46,7 @@ export const ProtocolFieldControl = ({
   value,
   onChange,
   onValuesChange,
+  onOpenRecipients,
 }: Props) => {
   const className = field.wide ? styles.wide : undefined;
   const change = (nextValue: string) => onChange(field.name, nextValue);
@@ -53,7 +55,11 @@ export const ProtocolFieldControl = ({
     return (
       <div className={className}>
         <div className={styles.fieldLabel}>{field.label}</div>
-        <RecipientField value={value} onChange={onValuesChange} />
+        <RecipientField
+          value={value}
+          onChange={onValuesChange}
+          onOpenRecipients={onOpenRecipients ?? (() => undefined)}
+        />
       </div>
     );
   }

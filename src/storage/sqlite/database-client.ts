@@ -99,6 +99,8 @@ export const database = {
   clearRegistrationDraft: () => withDatabase<void>('registration-draft:clear'),
   searchRecipients: (query: string) =>
     withDatabase<RecipientRecord[]>('recipients:search', { query }),
+  getRecipientById: (id: number) =>
+    withDatabase<RecipientRecord>('recipients:get', { id }),
   findRecipientsByName: (fullName: string) =>
     withDatabase<RecipientRecord[]>('recipients:find-name', { fullName }),
   createRecipient: (fullName: string) =>

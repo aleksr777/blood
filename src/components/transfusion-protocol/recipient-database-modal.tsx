@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import {
   createRecipient,
   listProtocolRecords,
+  listRegistrationRecords,
   removeProtocolRecord,
   removeRecipient,
+  removeRegistrationRecord,
   searchRecipients,
   updateRecipient,
   type ProtocolRecord,
   type RecipientRecord,
+  type RegistrationRecord,
 } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
 import { RecipientDatabaseDialogs } from './recipient-database-dialogs';
@@ -18,7 +21,9 @@ import styles from './recipient-database.module.css';
 
 type Props = {
   onClose: () => void;
-  onOpenRecord: (record: ProtocolRecord) => void;
+  onOpenRecord?: (record: ProtocolRecord) => void;
+  onOpenRegistrationRecord?: (record: RegistrationRecord) => void;
+  onUseRecipient?: (recipient: RecipientRecord) => void;
   initialRecipientId?: number | null;
   initialRecipientName?: string;
 };
@@ -26,6 +31,8 @@ type Props = {
 export const RecipientDatabaseModal = ({
   onClose,
   onOpenRecord,
+  onOpenRegistrationRecord,
+  onUseRecipient,
   initialRecipientId = null,
   initialRecipientName = '',
 }: Props) => {
@@ -34,10 +41,13 @@ export const RecipientDatabaseModal = ({
   const [recipients, setRecipients] = useState<RecipientRecord[]>([]);
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
+  const [registrationRecords, setRegistrationRecords] = useState<RegistrationRecord[]>([]);
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<RecipientRecord | null>(null);
   const [deleting, setDeleting] = useState<RecipientRecord | null>(null);
   const [deletingRecord, setDeletingRecord] = useState<ProtocolRecord | null>(null);
+  const [deletingRegistrationRecord, setDeletingRegistrationRecord] =
+    useState<RegistrationRecord | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     let active = true;
@@ -69,10 +79,18 @@ export const RecipientDatabaseModal = ({
   useEffect(() => {
     if (!selected) {
       setRecords([]);
+      setRegistrationRecords([]);
       return;
     }
-    void listProtocolRecords(selected.id)
-      .then(setRecords)
+
+    void Promise.all([
+      listProtocolRecords(selected.id),
+      listRegistrationRecords(selected.id),
+    ])
+      .then(([protocolItems, registrationItems]) => {
+        setRecords(protocolItems);
+        setRegistrationRecords(registrationItems);
+      })
       .catch((error: unknown) => console.error('Не удалось загрузить бланки:', error));
   }, [selected]);
   const addRecipient = async (fullName: string) => {
@@ -100,6 +118,7 @@ export const RecipientDatabaseModal = ({
     setRecipients((current) => current.filter(({ id }) => id !== recipient.id));
     setSelected(null);
     setRecords([]);
+    setRegistrationRecords([]);
   };
 
   const deleteRecord = async (record: ProtocolRecord) => {
@@ -119,6 +138,23 @@ export const RecipientDatabaseModal = ({
     );
   };
 
+  const deleteRegistrationRecord = async (record: RegistrationRecord) => {
+    await removeRegistrationRecord(record.id);
+    setRegistrationRecords((current) => current.filter(({ id }) => id !== record.id));
+    setRecipients((current) =>
+      current.map((recipient) =>
+        recipient.id === record.recipientId
+          ? { ...recipient, registrationCount: Math.max(0, recipient.registrationCount - 1) }
+          : recipient,
+      ),
+    );
+    setSelected((current) =>
+      current?.id === record.recipientId
+        ? { ...current, registrationCount: Math.max(0, current.registrationCount - 1) }
+        : current,
+    );
+  };
+
   return (
     <Modal title="База реципиентов" onClose={onClose} className={styles.modal}>
       <div className={styles.body}>
@@ -134,10 +170,21 @@ export const RecipientDatabaseModal = ({
         <RecipientHistoryPanel
           recipient={selected}
           records={records}
+          registrationRecords={registrationRecords}
           onOpenRecord={onOpenRecord}
+          onOpenRegistrationRecord={onOpenRegistrationRecord}
+          onUseRecipient={
+            onUseRecipient
+              ? (recipient) => {
+                  onUseRecipient(recipient);
+                  onClose();
+                }
+              : undefined
+          }
           onEdit={setEditing}
           onDelete={setDeleting}
           onDeleteRecord={setDeletingRecord}
+          onDeleteRegistrationRecord={setDeletingRegistrationRecord}
         />
       </div>
       <RecipientDatabaseDialogs
@@ -145,16 +192,19 @@ export const RecipientDatabaseModal = ({
         editing={editing}
         deleting={deleting}
         deletingRecord={deletingRecord}
+        deletingRegistrationRecord={deletingRegistrationRecord}
         selectedRecipient={selected}
         onCloseCreate={() => setCreating(false)}
         onCloseEdit={() => setEditing(null)}
         onCloseDelete={() => setDeleting(null)}
         onCloseRecordDelete={() => setDeletingRecord(null)}
+        onCloseRegistrationRecordDelete={() => setDeletingRegistrationRecord(null)}
         onCreate={addRecipient}
         onExisting={openExistingRecipient}
         onSave={saveRecipient}
         onDelete={deleteRecipient}
         onDeleteRecord={deleteRecord}
+        onDeleteRegistrationRecord={deleteRegistrationRecord}
       />
     </Modal>
   );

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
 import {
   clearProtocolDraft,
   loadProtocolDraft,
@@ -46,9 +47,28 @@ export const useProtocolDraft = ({
           expire();
           return;
         }
-        setValues(draft.values);
-        setRecordId(draft.protocolRecordId);
-        setLastInputAt(draft.updatedAt);
+        if (Object.keys(draft.values).length > 0) {
+          setValues(draft.values);
+          setRecordId(draft.protocolRecordId);
+          setLastInputAt(draft.updatedAt);
+          return;
+        }
+
+        const currentRecipient = readCurrentRecipient();
+        if (currentRecipient) {
+          setValues({
+            ...currentRecipient.profile,
+            recipientId: String(currentRecipient.id),
+            recipientName: currentRecipient.fullName,
+          });
+          setRecordId(null);
+          setLastInputAt(Date.now());
+          return;
+        }
+
+        setValues({});
+        setRecordId(null);
+        setLastInputAt(0);
       })
       .catch((error: unknown) => console.error('Не удалось загрузить бланк:', error))
       .finally(() => active && setLoaded(true));

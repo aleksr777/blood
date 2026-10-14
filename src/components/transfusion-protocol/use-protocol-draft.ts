@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } 
 import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
+  recipientProfileValuesForForms,
 } from '../../storage/repositories/current-recipient';
 import {
   clearProtocolDraft,
@@ -58,9 +59,7 @@ export const useProtocolDraft = ({
           } else if (Number(draft.values.recipientId) === currentRecipient.id) {
             setValues({
               ...draft.values,
-              ...currentRecipient.profile,
-              recipientId: String(currentRecipient.id),
-              recipientName: currentRecipient.fullName,
+              ...recipientProfileValuesForForms(currentRecipient),
             });
           } else {
             setValues(draft.values);
@@ -72,11 +71,7 @@ export const useProtocolDraft = ({
 
         const currentRecipient = readCurrentRecipient();
         if (currentRecipient) {
-          setValues({
-            ...currentRecipient.profile,
-            recipientId: String(currentRecipient.id),
-            recipientName: currentRecipient.fullName,
-          });
+          setValues(recipientProfileValuesForForms(currentRecipient));
           setRecordId(null);
           setLastInputAt(Date.now());
           return;

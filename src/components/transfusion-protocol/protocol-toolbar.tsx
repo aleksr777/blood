@@ -48,6 +48,8 @@ export const ProtocolToolbar = ({
       recipientName={currentRecipientName}
       recipientAbo={currentRecipientAbo}
       recipientRh={currentRecipientRh}
+      currentRecipientAvailable={currentRecipientAvailable}
+      onOpenCurrentRecipient={onOpenCurrentRecipient}
     />
     <div className="print-actions" aria-label="Панель действий">
       <button type="button" className="clear-button" onClick={onClear}>
@@ -58,15 +60,6 @@ export const ProtocolToolbar = ({
       </button>
       <button type="button" className="secondary-button" onClick={onOpenRegistry}>
         Реципиенты
-      </button>
-      <button
-        type="button"
-        className="secondary-button"
-        disabled={!currentRecipientAvailable}
-        title={currentRecipientAvailable ? currentRecipientName : 'Текущий реципиент не выбран'}
-        onClick={onOpenCurrentRecipient}
-      >
-        Текущий реципиент
       </button>
       <button type="button" className="save-button" onClick={onSave}>
         Сохранить

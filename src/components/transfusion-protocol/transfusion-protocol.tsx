@@ -1,5 +1,8 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
-import type { RegistrationRecord } from '../../storage/repositories/recipients';
+import type {
+  RecipientRecord,
+  RegistrationRecord,
+} from '../../storage/repositories/recipients';
 import { FirstPage } from './first-page';
 import {
   PROTOCOL_CHUNK_ORDER,
@@ -147,7 +150,13 @@ export const TransfusionProtocol = () => {
     clearHoveredBlock();
   };
 
-  const openRegistrationRecord = (record: RegistrationRecord) => {
+  const openRegistrationRecord = async (
+    record: RegistrationRecord,
+    recipient: RecipientRecord,
+  ) => {
+    const switched = await workspace.selectRecipient(recipient);
+    if (!switched) return;
+
     try {
       window.sessionStorage.setItem(PENDING_REGISTRATION_RECORD_KEY, JSON.stringify(record));
     } catch (error) {
@@ -250,6 +259,7 @@ export const TransfusionProtocol = () => {
             workspace.setActiveBlock(null);
             workspace.setRegistryOpen(true);
           }}
+          onSelectRecipient={workspace.selectRecipient}
           onSave={workspace.saveValues}
           onClose={(draftValues) => {
             if (workspace.activeBlock === 'donor') {
@@ -271,7 +281,10 @@ export const TransfusionProtocol = () => {
             workspace.setRegistryOpen(false);
           }}
           onOpenRecord={workspace.openRecord}
-          onOpenRegistrationRecord={openRegistrationRecord}
+          onOpenRegistrationRecord={(record, recipient) =>
+            void openRegistrationRecord(record, recipient)
+          }
+          onUseRecipient={workspace.selectRecipient}
         />
       )}
     </main>

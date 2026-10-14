@@ -19,9 +19,41 @@ import {
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
+import { RegistrationPatientDetailsModal } from './registration-patient-details-modal';
 
 const ROW_COUNT = 14;
 const PENDING_REGISTRATION_RECORD_KEY = 'blood:registration-open-record';
+
+const BIRTH_MONTHS = [
+  'января',
+  'февраля',
+  'марта',
+  'апреля',
+  'мая',
+  'июня',
+  'июля',
+  'августа',
+  'сентября',
+  'октября',
+  'ноября',
+  'декабря',
+] as const;
+
+const getBirthDateParts = (value?: string) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? '');
+  if (!match) return { day: '', month: '', year: '' };
+
+  const monthIndex = Number(match[2]) - 1;
+  if (monthIndex < 0 || monthIndex >= BIRTH_MONTHS.length) {
+    return { day: '', month: '', year: '' };
+  }
+
+  return {
+    day: String(Number(match[3])),
+    month: BIRTH_MONTHS[monthIndex],
+    year: match[1],
+  };
+};
 
 const readPendingRegistrationRecord = (): RegistrationRecord | null => {
   try {
@@ -69,6 +101,7 @@ export const TransfusionRegistration = () => {
   const [draftLoaded, setDraftLoaded] = useState(Boolean(initialRecord));
   const [registryOpen, setRegistryOpen] = useState(false);
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
+  const [patientDetailsOpen, setPatientDetailsOpen] = useState(false);
   const [status, setStatus] = useState('');
 
   const currentRecipientId = Number(values.recipientId);
@@ -79,6 +112,7 @@ export const TransfusionRegistration = () => {
     storedCurrentRecipient?.id === currentRecipientId
       ? storedCurrentRecipient.profile
       : {};
+  const birthDateParts = getBirthDateParts(values.recipientBirthDate);
 
   useEffect(() => {
     if (initialRecord) {
@@ -282,6 +316,15 @@ export const TransfusionRegistration = () => {
     setRegistryOpen(true);
   };
 
+  const updatePatientDetails = (nextValues: ProtocolValues) => {
+    setValues((current) => ({ ...current, ...nextValues }));
+  };
+
+  const openRecipientsFromPatientDetails = () => {
+    setPatientDetailsOpen(false);
+    openRecipients();
+  };
+
   const openCurrentRecipient = () => {
     if (!currentRecipientAvailable) return;
     setRegistryRecipientId(currentRecipientId);
@@ -356,7 +399,19 @@ export const TransfusionRegistration = () => {
             ЛИСТ РЕГИСТРАЦИИ ТРАНСФУЗИИ (ПЕРЕЛИВАНИЯ) ДОНОРСКОЙ КРОВИ И (ИЛИ) ЕЕ КОМПОНЕНТОВ
           </h1>
 
-          <div className="registration-patient-details">
+          <div
+            className="registration-patient-details"
+            role="button"
+            tabIndex={0}
+            aria-label="Данные реципиента. Нажмите для заполнения"
+            onClick={() => setPatientDetailsOpen(true)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setPatientDetailsOpen(true);
+              }
+            }}
+          >
             <div className="registration-patient-line registration-patient-line--name">
               <span>Фамилия, имя, отчество (при наличии)</span>
               <span className="registration-blank registration-blank--name">
@@ -366,10 +421,16 @@ export const TransfusionRegistration = () => {
 
             <div className="registration-patient-line registration-patient-line--meta">
               <span>Дата рождения «</span>
-              <span className="registration-blank registration-blank--day" />
+              <span className="registration-blank registration-blank--day">
+                {birthDateParts.day}
+              </span>
               <span>»</span>
-              <span className="registration-blank registration-blank--date" />
-              <span className="registration-blank registration-blank--year" />
+              <span className="registration-blank registration-blank--date">
+                {birthDateParts.month}
+              </span>
+              <span className="registration-blank registration-blank--year">
+                {birthDateParts.year}
+              </span>
               <span>г. № медицинской карты</span>
               <span className="registration-blank registration-blank--card">
                 {values.medicalRecordNumber ?? ''}
@@ -431,6 +492,16 @@ export const TransfusionRegistration = () => {
           </table>
         </section>
       </div>
+
+      {patientDetailsOpen && (
+        <RegistrationPatientDetailsModal
+          values={values}
+          onChange={updatePatientDetails}
+          onOpenRecipients={openRecipientsFromPatientDetails}
+          onSelectRecipient={selectRecipient}
+          onClose={() => setPatientDetailsOpen(false)}
+        />
+      )}
 
       {registryOpen && (
         <RecipientDatabaseModal

@@ -57,6 +57,23 @@ export const profileFromValues = (values: ProtocolValuesRecord) =>
     ),
   );
 
+export const mergeProfileValues = (
+  current: ProtocolValuesRecord,
+  values: ProtocolValuesRecord,
+): ProtocolValuesRecord => {
+  const next = { ...current };
+
+  RECIPIENT_PROFILE_FIELDS.forEach((field) => {
+    if (!(field in values)) return;
+
+    const value = values[field];
+    if (value) next[field] = value;
+    else delete next[field];
+  });
+
+  return next;
+};
+
 export const mapProtocol = (row: Record<string, unknown>): ProtocolRecord => ({
   id: Number(row.id),
   recipientId: Number(row.recipientId),

@@ -13,6 +13,7 @@ type Props = {
   onOpenRegistry: () => void;
   onOpenCurrentRecipient: () => void;
   currentRecipientName: string;
+  currentRecipientAvailable: boolean;
   onSave: () => void;
   pageCount: number;
   onPrintPage: (pageIndex: number) => void;
@@ -31,6 +32,7 @@ export const ProtocolToolbar = ({
   onOpenRegistry,
   onOpenCurrentRecipient,
   currentRecipientName,
+  currentRecipientAvailable,
   onSave,
   pageCount,
   onPrintPage,
@@ -51,8 +53,8 @@ export const ProtocolToolbar = ({
       <button
         type="button"
         className="secondary-button"
-        disabled={!currentRecipientName}
-        title={currentRecipientName || 'Текущий реципиент не выбран'}
+        disabled={!currentRecipientAvailable}
+        title={currentRecipientAvailable ? currentRecipientName : 'Текущий реципиент не выбран'}
         onClick={onOpenCurrentRecipient}
       >
         Текущий реципиент

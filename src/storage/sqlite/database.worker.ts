@@ -36,6 +36,7 @@ import {
 } from './registration-record-store';
 import {
   findRecipientsByName,
+  getRecipientById,
   removeRecipient,
   searchRecipients,
   updateRecipient,
@@ -90,6 +91,8 @@ const handleRequest = async (request: DatabaseRequest) => {
       return clearRegistrationDraft();
     case 'recipients:search':
       return searchRecipients((request.payload as { query: string }).query);
+    case 'recipients:get':
+      return getRecipientById((request.payload as { id: number }).id);
     case 'recipients:find-name':
       return findRecipientsByName((request.payload as { fullName: string }).fullName);
     case 'recipients:create':

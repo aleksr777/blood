@@ -280,6 +280,13 @@ a.site-navigation__link:focus-visible::after {
   color: #fff;
 }
 
+.secondary-button:disabled {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: default;
+}
+
 .toolbar-status {
   margin-top: 0.45rem;
   color: #475569;

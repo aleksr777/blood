@@ -11,6 +11,7 @@ type Props = {
   onOpenRecord: (record: ProtocolRecord) => void;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
+  onDeleteRecord: (record: ProtocolRecord) => void;
 };
 
 const formatUpdated = (value: number) =>
@@ -25,6 +26,7 @@ export const RecipientHistoryPanel = ({
   onOpenRecord,
   onEdit,
   onDelete,
+  onDeleteRecord,
 }: Props) => (
   <section className={styles.panel}>
     {!recipient ? (
@@ -57,9 +59,18 @@ export const RecipientHistoryPanel = ({
                 </div>
                 <div className={styles.meta}>Изменён: {formatUpdated(record.updatedAt)}</div>
               </div>
-              <button type="button" className={styles.open} onClick={() => onOpenRecord(record)}>
-                Открыть
-              </button>
+              <div className={styles.recordActions}>
+                <button type="button" className={styles.open} onClick={() => onOpenRecord(record)}>
+                  Открыть
+                </button>
+                <button
+                  type="button"
+                  className={styles.recordDelete}
+                  onClick={() => onDeleteRecord(record)}
+                >
+                  Удалить
+                </button>
+              </div>
             </div>
           ))}
         </div>

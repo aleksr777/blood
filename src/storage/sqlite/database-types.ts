@@ -15,9 +15,18 @@ export type RecipientRecord = {
   fullName: string;
   profile: ProtocolValuesRecord;
   protocolCount: number;
+  registrationCount: number;
 };
 
 export type ProtocolRecord = {
+  id: number;
+  recipientId: number;
+  values: ProtocolValuesRecord;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type RegistrationRecord = {
   id: number;
   recipientId: number;
   values: ProtocolValuesRecord;
@@ -52,7 +61,10 @@ export type DatabaseAction =
   | 'recipients:remove'
   | 'protocol-records:list'
   | 'protocol-records:save'
-  | 'protocol-records:remove';
+  | 'protocol-records:remove'
+  | 'registration-records:list'
+  | 'registration-records:save'
+  | 'registration-records:remove';
 
 export type DatabaseRequest = {
   id: number;

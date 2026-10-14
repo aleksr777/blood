@@ -37,9 +37,9 @@ export const TransfusionRegistration = () => {
           <div className="registration-legal-reference">
             <div>Учетная форма № 003/у</div>
             <div>
-              Приложение № 3 к приказу Министерства здравоохранения Российской Федерации
+              Приложение № 3 к приказу Министерства здравоохранения Российской Федерации от 5 августа
+              2022 г. № 530н
             </div>
-            <div>от 5 августа 2022 г. № 530н</div>
           </div>
 
           <h1 className="registration-title">

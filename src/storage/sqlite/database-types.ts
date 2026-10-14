@@ -64,6 +64,7 @@ export type DatabaseAction =
   | 'registration-draft:save'
   | 'registration-draft:clear'
   | 'recipients:search'
+  | 'recipients:get'
   | 'recipients:find-name'
   | 'recipients:create'
   | 'recipients:update'

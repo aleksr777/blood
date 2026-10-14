@@ -111,6 +111,7 @@
 
 .action,
 .open,
+.recordDelete,
 .secondaryAction,
 .dangerAction,
 .createRecipient {
@@ -170,6 +171,18 @@
 
 .recordTitle {
   font-weight: 600;
+}
+
+.recordActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.4rem;
+}
+
+.recordDelete {
+  border-color: #b91c1c;
+  background: #fff;
+  color: #b91c1c;
 }
 
 @media (max-width: 760px) {

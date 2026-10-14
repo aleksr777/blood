@@ -3,7 +3,21 @@ import { SiteNavigation } from '../site-navigation/site-navigation';
 const ROW_COUNT = 14;
 
 export const TransfusionRegistration = () => {
-  const print = () => window.print();
+  const print = () => {
+    const root = document.documentElement;
+
+    const restoreOrientation = () => {
+      delete root.dataset.registrationPrintRotated;
+      window.removeEventListener('afterprint', restoreOrientation);
+    };
+
+    root.dataset.registrationPrintRotated = 'true';
+    window.addEventListener('afterprint', restoreOrientation);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => window.print());
+    });
+  };
 
   return (
     <main className="registration-app-shell">

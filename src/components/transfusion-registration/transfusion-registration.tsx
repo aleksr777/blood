@@ -20,6 +20,16 @@ export const TransfusionRegistration = () => {
 
       <div className="registration-sheet-wrap">
         <section className="registration-sheet" aria-label="Лист регистрации трансфузии">
+          <div className="registration-legal-reference">
+            <a
+              href="https://publication.pravo.gov.ru/document/0001202210190009"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Приказ Минздрава России от 05.08.2022 № 530н
+            </a>
+          </div>
+
           <h1 className="registration-title">
             ЛИСТ РЕГИСТРАЦИИ ТРАНСФУЗИИ (ПЕРЕЛИВАНИЯ) ДОНОРСКОЙ КРОВИ И (ИЛИ) ЕЕ КОМПОНЕНТОВ
           </h1>

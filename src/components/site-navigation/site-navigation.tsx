@@ -3,6 +3,8 @@ type Props = {
   recipientName?: string;
   recipientAbo?: string;
   recipientRh?: string;
+  currentRecipientAvailable?: boolean;
+  onOpenCurrentRecipient?: () => void;
 };
 
 type NavigationItem = {
@@ -29,6 +31,8 @@ export const SiteNavigation = ({
   recipientName = '',
   recipientAbo = '',
   recipientRh = '',
+  currentRecipientAvailable = false,
+  onOpenCurrentRecipient,
 }: Props) => {
   const name = recipientName.trim();
   const bloodGroup = [recipientAbo.trim(), recipientRh.trim()].filter(Boolean).join(' ');
@@ -54,9 +58,12 @@ export const SiteNavigation = ({
           )}
         </nav>
 
-        <div
+        <button
+          type="button"
           className={`current-recipient-summary${name ? '' : ' current-recipient-summary--empty'}`}
           title={name ? `Текущий реципиент: ${name}` : 'Текущий реципиент не выбран'}
+          disabled={!currentRecipientAvailable}
+          onClick={onOpenCurrentRecipient}
         >
           <span className="current-recipient-summary__label">Текущий реципиент:</span>
           {name ? (
@@ -69,7 +76,7 @@ export const SiteNavigation = ({
           ) : (
             <span className="current-recipient-summary__empty">не выбран</span>
           )}
-        </div>
+        </button>
       </div>
     </div>
   );

@@ -225,12 +225,17 @@ export const switchCurrentRecipient = async (
   }
 
   const storedRecipient = readCurrentRecipient();
+  const protocolRecipientId = getRecipientId(protocolDraft.values);
+  const registrationRecipientId = getRecipientId(registrationDraft.values);
   const activeRecipientId =
     storedRecipient?.id ??
-    getRecipientId(protocolDraft.values) ??
-    getRecipientId(registrationDraft.values);
+    protocolRecipientId ??
+    registrationRecipientId;
+  const hasConflictingDraft =
+    (protocolRecipientId !== null && protocolRecipientId !== recipient.id) ||
+    (registrationRecipientId !== null && registrationRecipientId !== recipient.id);
 
-  if (activeRecipientId === recipient.id) {
+  if (activeRecipientId === recipient.id && !hasConflictingDraft) {
     writeCurrentRecipient(recipient);
     return {
       changed: false,

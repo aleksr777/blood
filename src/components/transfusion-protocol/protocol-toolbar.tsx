@@ -13,6 +13,8 @@ type Props = {
   onOpenRegistry: () => void;
   onOpenCurrentRecipient: () => void;
   currentRecipientName: string;
+  currentRecipientAbo: string;
+  currentRecipientRh: string;
   currentRecipientAvailable: boolean;
   onSave: () => void;
   pageCount: number;
@@ -32,6 +34,8 @@ export const ProtocolToolbar = ({
   onOpenRegistry,
   onOpenCurrentRecipient,
   currentRecipientName,
+  currentRecipientAbo,
+  currentRecipientRh,
   currentRecipientAvailable,
   onSave,
   pageCount,
@@ -39,7 +43,12 @@ export const ProtocolToolbar = ({
 }: Props) => (
   <header className="app-header">
     <div className="toolbar-wrap">
-    <SiteNavigation current="protocol" />
+    <SiteNavigation
+      current="protocol"
+      recipientName={currentRecipientName}
+      recipientAbo={currentRecipientAbo}
+      recipientRh={currentRecipientRh}
+    />
     <div className="print-actions" aria-label="Панель действий">
       <button type="button" className="clear-button" onClick={onClear}>
         Очистить бланк

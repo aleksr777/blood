@@ -57,10 +57,21 @@ const openDatabase = async () => {
       FOREIGN KEY(recipient_id) REFERENCES recipients(id)
     );
 
+    CREATE TABLE IF NOT EXISTS registration_records (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      recipient_id INTEGER NOT NULL,
+      values_json TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      FOREIGN KEY(recipient_id) REFERENCES recipients(id)
+    );
+
     CREATE INDEX IF NOT EXISTS idx_recipients_name
       ON recipients(normalized_name);
     CREATE INDEX IF NOT EXISTS idx_protocol_records_recipient
       ON protocol_records(recipient_id, updated_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_registration_records_recipient
+      ON registration_records(recipient_id, updated_at DESC);
   `);
 
   migrateRecipientNameConstraint(db);

@@ -1,7 +1,6 @@
 import { getDatabase, type SqliteDatabase } from './database';
 import type { ProtocolValuesRecord } from './database-types';
 import { mapRegistration } from './recipient-data';
-import { upsertRecipient } from './recipient-profile-store';
 
 export const listRegistrationRecords = async (recipientId: number) => {
   const db = await getDatabase();
@@ -69,7 +68,22 @@ export const saveRegistrationRecord = async (
     throw new Error('Для другого реципиента создайте новый лист регистрации.');
   }
 
-  const recipientId = upsertRecipient(db, values, selectedId ?? linkedId);
+  const recipientId = selectedId ?? linkedId;
+  if (recipientId === null) {
+    throw new Error('Выберите реципиента перед сохранением листа регистрации.');
+  }
+
+  const recipientRows = db.exec({
+    sql: 'SELECT id FROM recipients WHERE id = $id',
+    bind: { $id: recipientId },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ id: number }>;
+
+  if (!recipientRows[0]) {
+    throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
+  }
+
   const now = Date.now();
   const canUpdate = linkedId !== null && recordId !== null;
   const id = canUpdate ? recordId : insertRegistration(db, recipientId, values, now);

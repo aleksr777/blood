@@ -869,6 +869,24 @@ a.site-navigation__link:focus-visible::after {
   display: grid;
   gap: 3mm;
   margin-bottom: 5mm;
+  border-radius: 2px;
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.registration-patient-details:focus-visible {
+  background: #eef6ff;
+  box-shadow: 0 0 0 1px #2563eb;
+  outline: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .registration-patient-details:hover {
+    background: #eef6ff;
+    box-shadow: 0 0 0 1px #2563eb;
+  }
 }
 
 .registration-patient-line {
@@ -1054,6 +1072,12 @@ a.site-navigation__link:focus-visible::after {
 
   .app-header {
     display: none !important;
+  }
+
+  .registration-patient-details {
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
   }
 
   .sheets {

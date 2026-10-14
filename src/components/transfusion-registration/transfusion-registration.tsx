@@ -222,8 +222,7 @@ export const TransfusionRegistration = () => {
     setRecordId(record.id);
     setValues({
       ...record.values,
-      recipientId: String(record.recipientId),
-      recipientName: recipient.fullName,
+      ...recipientProfileValuesForForms(recipient),
     });
     setRegistryRecipientId(null);
     setRegistryOpen(false);
@@ -241,8 +240,7 @@ export const TransfusionRegistration = () => {
       await saveProtocolDraft({
         values: {
           ...record.values,
-          recipientId: String(record.recipientId),
-          recipientName: recipient.fullName,
+          ...recipientProfileValuesForForms(recipient),
         },
         protocolRecordId: record.id,
         updatedAt: Date.now(),

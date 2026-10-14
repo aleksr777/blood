@@ -1,6 +1,7 @@
 import type {
   ProtocolRecord,
   ProtocolValuesRecord,
+  RegistrationRecord,
 } from './database-types';
 
 const PROFILE_FIELDS = [
@@ -52,6 +53,15 @@ export const profileFromValues = (values: ProtocolValuesRecord) =>
   );
 
 export const mapProtocol = (row: Record<string, unknown>): ProtocolRecord => ({
+  id: Number(row.id),
+  recipientId: Number(row.recipientId),
+  values: parseValues(String(row.valuesJson)),
+  createdAt: Number(row.createdAt),
+  updatedAt: Number(row.updatedAt),
+});
+
+
+export const mapRegistration = (row: Record<string, unknown>): RegistrationRecord => ({
   id: Number(row.id),
   recipientId: Number(row.recipientId),
   values: parseValues(String(row.valuesJson)),

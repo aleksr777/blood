@@ -40,6 +40,12 @@ export type ProtocolDraftState = {
   updatedAt: number;
 };
 
+export type RegistrationDraftState = {
+  values: ProtocolValuesRecord;
+  registrationRecordId: number | null;
+  updatedAt: number;
+};
+
 export type DatabaseAction =
   | 'init'
   | 'departments:list'
@@ -54,6 +60,9 @@ export type DatabaseAction =
   | 'protocol-draft:load'
   | 'protocol-draft:save'
   | 'protocol-draft:clear'
+  | 'registration-draft:load'
+  | 'registration-draft:save'
+  | 'registration-draft:clear'
   | 'recipients:search'
   | 'recipients:find-name'
   | 'recipients:create'

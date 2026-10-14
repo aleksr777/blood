@@ -215,6 +215,10 @@ export const TransfusionProtocol = () => {
           onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
           componentUnitNumberWarning={workspace.componentUnitNumberWarning}
           onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}
+          onOpenRecipients={() => {
+            workspace.setActiveBlock(null);
+            workspace.setRegistryOpen(true);
+          }}
           onSave={workspace.saveValues}
           onClose={(draftValues) => {
             if (workspace.activeBlock === 'donor') {

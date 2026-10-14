@@ -3,6 +3,7 @@ import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
   switchCurrentRecipient,
+  syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
 import {
   clearRegistrationDraft,
@@ -82,7 +83,9 @@ const readPendingRegistrationRecord = (): RegistrationRecord | null => {
 const recipientValues = (recipient: {
   id: number;
   fullName: string;
+  profile?: ProtocolValues;
 }): ProtocolValues => ({
+  ...(recipient.profile ?? {}),
   recipientId: String(recipient.id),
   recipientName: recipient.fullName,
 });
@@ -135,10 +138,20 @@ export const TransfusionRegistration = () => {
         if (!active) return;
 
         if (Object.keys(draft.values).length > 0) {
-          if (!readCurrentRecipient()) {
+          const currentRecipient = readCurrentRecipient();
+          if (!currentRecipient) {
             adoptCurrentRecipientFromValues(draft.values);
+            setValues(draft.values);
+          } else if (Number(draft.values.recipientId) === currentRecipient.id) {
+            setValues({
+              ...draft.values,
+              ...currentRecipient.profile,
+              recipientId: String(currentRecipient.id),
+              recipientName: currentRecipient.fullName,
+            });
+          } else {
+            setValues(draft.values);
           }
-          setValues(draft.values);
           setRecordId(draft.registrationRecordId);
           return;
         }
@@ -194,11 +207,7 @@ export const TransfusionRegistration = () => {
             : `Выбран реципиент: ${recipient.fullName}.`,
         );
       } else {
-        setValues((current) => ({
-          ...current,
-          recipientId: String(recipient.id),
-          recipientName: recipient.fullName,
-        }));
+        setValues(result.registrationValues);
         setStatus(`Текущий реципиент: ${recipient.fullName}.`);
       }
 
@@ -271,10 +280,12 @@ export const TransfusionRegistration = () => {
     try {
       const record = await saveRegistrationRecord(recordId, values);
       setRecordId(record.id);
-      setValues((current) => ({
-        ...current,
+      const savedValues = {
+        ...values,
         recipientId: String(record.recipientId),
-      }));
+      };
+      setValues(savedValues);
+      adoptCurrentRecipientFromValues(savedValues);
       setStatus(
         afterPrint
           ? 'Лист регистрации сохранён после печати.'
@@ -317,7 +328,16 @@ export const TransfusionRegistration = () => {
   };
 
   const updatePatientDetails = (nextValues: ProtocolValues) => {
-    setValues((current) => ({ ...current, ...nextValues }));
+    const merged = { ...values, ...nextValues };
+    setValues(merged);
+
+    void syncCurrentRecipientProfile(nextValues, {
+      kind: 'registration',
+      values: merged,
+      recordId,
+    }).catch((error: unknown) =>
+      console.error('Не удалось синхронизировать данные реципиента:', error),
+    );
   };
 
   const openRecipientsFromPatientDetails = () => {

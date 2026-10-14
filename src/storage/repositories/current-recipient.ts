@@ -236,13 +236,39 @@ export const switchCurrentRecipient = async (
     (registrationRecipientId !== null && registrationRecipientId !== recipient.id);
 
   if (activeRecipientId === recipient.id && !hasConflictingDraft) {
+    const protocolValues = {
+      ...protocolDraft.values,
+      ...recipient.profile,
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    };
+    const registrationValues = {
+      ...registrationDraft.values,
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    };
+    const now = Date.now();
+
+    await Promise.all([
+      saveProtocolDraft({
+        values: protocolValues,
+        protocolRecordId: protocolDraft.protocolRecordId,
+        updatedAt: now,
+      }),
+      saveRegistrationDraft({
+        values: registrationValues,
+        registrationRecordId: registrationDraft.registrationRecordId,
+        updatedAt: now,
+      }),
+    ]);
+
     writeCurrentRecipient(recipient);
     return {
       changed: false,
       protocolSaved: false,
       registrationSaved: false,
-      protocolValues: protocolDraft.values,
-      registrationValues: registrationDraft.values,
+      protocolValues,
+      registrationValues,
     };
   }
 

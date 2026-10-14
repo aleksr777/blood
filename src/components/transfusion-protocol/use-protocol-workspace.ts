@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  adoptCurrentRecipientFromValues,
   readCurrentRecipient,
   switchCurrentRecipient,
 } from '../../storage/repositories/current-recipient';
@@ -125,6 +126,7 @@ export const useProtocolWorkspace = () => {
       if (hasReagentDefaultUpdate(nextValues)) {
         saveReagentDefaults(merged);
       }
+      adoptCurrentRecipientFromValues(merged);
       return merged;
     });
   };

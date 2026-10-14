@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
+import type { RegistrationRecord } from '../../storage/repositories/recipients';
 import { FirstPage } from './first-page';
 import {
   PROTOCOL_CHUNK_ORDER,
@@ -16,6 +17,7 @@ const INITIAL_PAGES: ProtocolChunkId[][] = [
 ];
 
 const PAGE_FIT_TOLERANCE_PX = 2;
+const PENDING_REGISTRATION_RECORD_KEY = 'blood:registration-open-record';
 
 const samePages = (left: ProtocolChunkId[][], right: ProtocolChunkId[][]) =>
   left.length === right.length &&
@@ -145,6 +147,19 @@ export const TransfusionProtocol = () => {
     clearHoveredBlock();
   };
 
+  const openRegistrationRecord = (record: RegistrationRecord) => {
+    try {
+      window.sessionStorage.setItem(PENDING_REGISTRATION_RECORD_KEY, JSON.stringify(record));
+    } catch (error) {
+      console.error('Не удалось подготовить лист регистрации к открытию:', error);
+      return;
+    }
+
+    setRegistryRecipientId(null);
+    workspace.setRegistryOpen(false);
+    window.location.hash = '#/registration';
+  };
+
   const printPage = (pageIndex: number) => {
     const root = document.documentElement;
     const sheetElements = Array.from(
@@ -256,6 +271,7 @@ export const TransfusionProtocol = () => {
             workspace.setRegistryOpen(false);
           }}
           onOpenRecord={workspace.openRecord}
+          onOpenRegistrationRecord={openRegistrationRecord}
         />
       )}
     </main>

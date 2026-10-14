@@ -15,16 +15,17 @@ const mapRecipient = (row: Record<string, unknown>): RecipientRecord => ({
   fullName: String(row.fullName),
   profile: profileFromValues(parseValues(String(row.profileJson))),
   protocolCount: Number(row.protocolCount ?? 0),
+  registrationCount: Number(row.registrationCount ?? 0),
 });
 const getRecipient = (db: SqliteDatabase, id: number) => {
   const rows = db.exec({
     sql: `
       SELECT r.id, r.full_name AS fullName, r.profile_json AS profileJson,
-        COUNT(p.id) AS protocolCount
+        (SELECT COUNT(*) FROM protocol_records p WHERE p.recipient_id = r.id) AS protocolCount,
+        (SELECT COUNT(*) FROM registration_records rr WHERE rr.recipient_id = r.id)
+          AS registrationCount
       FROM recipients r
-      LEFT JOIN protocol_records p ON p.recipient_id = r.id
       WHERE r.id = $id
-      GROUP BY r.id
     `,
     bind: { $id: id },
     rowMode: 'object',
@@ -39,11 +40,11 @@ export const searchRecipients = async (query: string) => {
   const rows = db.exec({
     sql: `
       SELECT r.id, r.full_name AS fullName, r.profile_json AS profileJson,
-        COUNT(p.id) AS protocolCount
+        (SELECT COUNT(*) FROM protocol_records p WHERE p.recipient_id = r.id) AS protocolCount,
+        (SELECT COUNT(*) FROM registration_records rr WHERE rr.recipient_id = r.id)
+          AS registrationCount
       FROM recipients r
-      LEFT JOIN protocol_records p ON p.recipient_id = r.id
       WHERE $query = '' OR r.normalized_name LIKE $like
-      GROUP BY r.id
       ORDER BY r.full_name
       LIMIT 100
     `,
@@ -58,11 +59,11 @@ export const findRecipientsByName = async (fullName: string) => {
   const rows = db.exec({
     sql: `
       SELECT r.id, r.full_name AS fullName, r.profile_json AS profileJson,
-        COUNT(p.id) AS protocolCount
+        (SELECT COUNT(*) FROM protocol_records p WHERE p.recipient_id = r.id) AS protocolCount,
+        (SELECT COUNT(*) FROM registration_records rr WHERE rr.recipient_id = r.id)
+          AS registrationCount
       FROM recipients r
-      LEFT JOIN protocol_records p ON p.recipient_id = r.id
       WHERE r.normalized_name = $name
-      GROUP BY r.id
       ORDER BY r.updated_at DESC, r.id DESC
     `,
     bind: { $name: normalizeKey(fullName) },
@@ -113,10 +114,26 @@ export const updateRecipient = async (
     });
   }
 
+  const registrationRecords = db.exec({
+    sql: 'SELECT id, values_json AS valuesJson FROM registration_records WHERE recipient_id = $id',
+    bind: { $id: id },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ id: number; valuesJson: string }>;
+  for (const record of registrationRecords) {
+    const recordValues = parseValues(record.valuesJson);
+    recordValues.recipientName = fullName;
+    db.exec({
+      sql: 'UPDATE registration_records SET values_json = $values, updated_at = $now WHERE id = $id',
+      bind: { $values: JSON.stringify(recordValues), $now: now, $id: record.id },
+    });
+  }
+
   return getRecipient(db, id);
 };
 export const removeRecipient = async (id: number) => {
   const db = await getDatabase();
   db.exec({ sql: 'DELETE FROM protocol_records WHERE recipient_id = $id', bind: { $id: id } });
+  db.exec({ sql: 'DELETE FROM registration_records WHERE recipient_id = $id', bind: { $id: id } });
   db.exec({ sql: 'DELETE FROM recipients WHERE id = $id', bind: { $id: id } });
 };

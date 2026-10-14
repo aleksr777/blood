@@ -9,9 +9,13 @@ import {
 import {
   saveProtocolRecord,
   saveRegistrationRecord,
+  updateRecipient,
   type RecipientRecord,
 } from './recipients';
-import { profileFromValues } from '../sqlite/recipient-data';
+import {
+  profileFromValues,
+  RECIPIENT_PROFILE_FIELDS,
+} from '../sqlite/recipient-data';
 import type {
   ProtocolDraftState,
   ProtocolValuesRecord,
@@ -20,28 +24,12 @@ import type {
 
 const CURRENT_RECIPIENT_STORAGE_KEY = 'blood:current-recipient';
 
+const recipientProfileFieldSet = new Set<string>(RECIPIENT_PROFILE_FIELDS);
+
 const protocolRecipientOnlyFields = new Set([
   'recipientId',
   'recipientName',
-  'recipientAbo',
-  'recipientRh',
-  'recipientAntigens',
-  'recipientAntigenC',
-  'recipientAntigenc',
-  'recipientAntigenCw',
-  'recipientAntigenE',
-  'recipientAntigene',
-  'recipientAntigenK',
-  'recipientAntigenk',
-  'alloimmuneAntibodies',
-  'alloimmuneAntibodyStatus',
-  'alloimmuneAntibodyDescription',
-  'previousTransfusionsStatus',
-  'previousTransfusions',
-  'previousReactionsStatus',
-  'previousReactions',
-  'individualSelectionHistoryStatus',
-  'individualSelectionHistory',
+  ...RECIPIENT_PROFILE_FIELDS,
   'reagentAntiASeries',
   'reagentAntiAExpiration',
   'reagentAntiAManufacturer',
@@ -59,6 +47,7 @@ const protocolRecipientOnlyFields = new Set([
 const registrationRecipientOnlyFields = new Set([
   'recipientId',
   'recipientName',
+  ...RECIPIENT_PROFILE_FIELDS,
 ]);
 
 const hasDocumentData = (
@@ -96,6 +85,12 @@ export type RecipientSwitchResult = {
   changed: boolean;
   protocolSaved: boolean;
   registrationSaved: boolean;
+  protocolValues: ProtocolValuesRecord;
+  registrationValues: ProtocolValuesRecord;
+};
+
+export type RecipientProfileSyncResult = {
+  recipient: RecipientRecord;
   protocolValues: ProtocolValuesRecord;
   registrationValues: ProtocolValuesRecord;
 };
@@ -184,6 +179,7 @@ const protocolValuesForRecipient = (recipient: RecipientRecord): ProtocolValuesR
 const registrationValuesForRecipient = (
   recipient: RecipientRecord,
 ): ProtocolValuesRecord => ({
+  ...recipient.profile,
   recipientId: String(recipient.id),
   recipientName: recipient.fullName,
 });
@@ -223,6 +219,105 @@ const savePreviousRegistration = async (
 
   await saveRegistrationRecord(draft.registrationRecordId, draft.values);
   return true;
+};
+
+export const syncCurrentRecipientProfile = async (
+  changes: ProtocolValuesRecord,
+  activeDraft: ActiveDraftOverride,
+): Promise<RecipientProfileSyncResult | null> => {
+  const profilePatch = Object.fromEntries(
+    Object.entries(changes).filter(([key]) => recipientProfileFieldSet.has(key)),
+  );
+
+  if (Object.keys(profilePatch).length === 0) return null;
+
+  let [protocolDraft, registrationDraft] = await Promise.all([
+    loadProtocolDraft(),
+    loadRegistrationDraft(),
+  ]);
+
+  if (activeDraft.kind === 'protocol') {
+    protocolDraft = {
+      values: activeDraft.values,
+      protocolRecordId: activeDraft.recordId,
+      updatedAt: Date.now(),
+    };
+  } else {
+    registrationDraft = {
+      values: activeDraft.values,
+      registrationRecordId: activeDraft.recordId,
+      updatedAt: Date.now(),
+    };
+  }
+
+  const activeValues = activeDraft.values;
+  const recipientId = getRecipientId(activeValues);
+  const fullName = activeValues.recipientName?.trim();
+  if (!recipientId || !fullName) return null;
+
+  const storedRecipient = readCurrentRecipient();
+  if (storedRecipient && storedRecipient.id !== recipientId) return null;
+
+  const recipient = await updateRecipient(recipientId, {
+    ...(storedRecipient?.profile ?? {}),
+    ...profileFromValues(activeValues),
+    ...profilePatch,
+    recipientId: String(recipientId),
+    recipientName: fullName,
+  });
+
+  const sharedValues: ProtocolValuesRecord = {
+    ...recipient.profile,
+    ...profilePatch,
+    recipientId: String(recipient.id),
+    recipientName: recipient.fullName,
+  };
+
+  const protocolRecipientId = getRecipientId(protocolDraft.values);
+  const registrationRecipientId = getRecipientId(registrationDraft.values);
+
+  if (protocolRecipientId !== null && protocolRecipientId !== recipient.id) {
+    await savePreviousProtocol(protocolDraft, recipient.id);
+    protocolDraft = {
+      values: sharedValues,
+      protocolRecordId: null,
+      updatedAt: Date.now(),
+    };
+  } else {
+    protocolDraft = {
+      ...protocolDraft,
+      values: { ...protocolDraft.values, ...sharedValues },
+      updatedAt: Date.now(),
+    };
+  }
+
+  if (registrationRecipientId !== null && registrationRecipientId !== recipient.id) {
+    await savePreviousRegistration(registrationDraft, recipient.id);
+    registrationDraft = {
+      values: sharedValues,
+      registrationRecordId: null,
+      updatedAt: Date.now(),
+    };
+  } else {
+    registrationDraft = {
+      ...registrationDraft,
+      values: { ...registrationDraft.values, ...sharedValues },
+      updatedAt: Date.now(),
+    };
+  }
+
+  await Promise.all([
+    saveProtocolDraft(protocolDraft),
+    saveRegistrationDraft(registrationDraft),
+  ]);
+
+  writeCurrentRecipient(recipient);
+
+  return {
+    recipient,
+    protocolValues: protocolDraft.values,
+    registrationValues: registrationDraft.values,
+  };
 };
 
 export const switchCurrentRecipient = async (

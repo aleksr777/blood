@@ -5,13 +5,12 @@ import { RecipientField } from './recipient-field';
 import { SavedOptionsField } from './saved-options-field';
 import styles from './protocol-editor.module.css';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
-import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
+import type { ProtocolFieldConfig } from './protocol-types';
 
 type Props = {
   field: ProtocolFieldConfig;
   value: string;
   onChange: (name: string, value: string) => void;
-  onValuesChange: (values: ProtocolValues) => void;
   onOpenRecipients?: () => void;
   onSelectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
 };
@@ -20,7 +19,7 @@ const BasicControl = ({
   field,
   value,
   onChange,
-}: Omit<Props, 'onValuesChange'>) => {
+}: Pick<Props, 'field' | 'value' | 'onChange'>) => {
   if (field.type === 'textarea') {
     return (
       <textarea
@@ -47,7 +46,6 @@ export const ProtocolFieldControl = ({
   field,
   value,
   onChange,
-  onValuesChange,
   onOpenRecipients,
   onSelectRecipient,
 }: Props) => {

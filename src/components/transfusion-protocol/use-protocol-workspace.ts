@@ -3,6 +3,7 @@ import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
   switchCurrentRecipient,
+  syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
@@ -121,14 +122,19 @@ export const useProtocolWorkspace = () => {
       setRecordId(null);
     }
 
-    setValues((current) => {
-      const merged = { ...current, ...nextValues };
-      if (hasReagentDefaultUpdate(nextValues)) {
-        saveReagentDefaults(merged);
-      }
-      adoptCurrentRecipientFromValues(merged);
-      return merged;
-    });
+    const merged = { ...values, ...nextValues };
+    if (hasReagentDefaultUpdate(nextValues)) {
+      saveReagentDefaults(merged);
+    }
+    setValues(merged);
+
+    void syncCurrentRecipientProfile(nextValues, {
+      kind: 'protocol',
+      values: merged,
+      recordId,
+    }).catch((error: unknown) =>
+      console.error('Не удалось синхронизировать данные реципиента:', error),
+    );
   };
 
   const selectRecipient = async (recipient: RecipientRecord) => {
@@ -186,7 +192,9 @@ export const useProtocolWorkspace = () => {
     try {
       const record = await saveProtocolRecord(recordId, values);
       setRecordId(record.id);
-      setValues((current) => ({ ...current, recipientId: String(record.recipientId) }));
+      const savedValues = { ...values, recipientId: String(record.recipientId) };
+      setValues(savedValues);
+      adoptCurrentRecipientFromValues(savedValues);
       setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
       return true;
     } catch (error) {

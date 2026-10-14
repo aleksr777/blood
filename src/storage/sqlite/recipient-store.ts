@@ -4,6 +4,7 @@ import type {
   RecipientRecord,
 } from './database-types';
 import {
+  mergeProfileValues,
   normalizeKey,
   normalizeName,
   parseValues,
@@ -85,8 +86,23 @@ export const updateRecipient = async (
   if (!fullName) throw new Error('Укажите ФИО реципиента.');
 
   const db = await getDatabase();
+  const existingRows = db.exec({
+    sql: 'SELECT profile_json AS profileJson FROM recipients WHERE id = $id',
+    bind: { $id: id },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ profileJson: string }>;
+  if (!existingRows[0]) {
+    throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
+  }
+
   const normalizedName = normalizeKey(fullName);
   const now = Date.now();
+  const profile = mergeProfileValues(
+    parseValues(existingRows[0].profileJson),
+    values,
+  );
+
   db.exec({
     sql: `
       UPDATE recipients
@@ -97,7 +113,7 @@ export const updateRecipient = async (
     bind: {
       $fullName: fullName,
       $name: normalizedName,
-      $profile: JSON.stringify(profileFromValues(values)),
+      $profile: JSON.stringify(profile),
       $now: now,
       $id: id,
     },

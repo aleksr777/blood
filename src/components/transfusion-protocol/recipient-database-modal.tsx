@@ -26,7 +26,7 @@ type Props = {
     record: RegistrationRecord,
     recipient: RecipientRecord,
   ) => void;
-  onUseRecipient?: (recipient: RecipientRecord) => void;
+  onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   initialRecipientId?: number | null;
   initialRecipientName?: string;
 };
@@ -178,9 +178,10 @@ export const RecipientDatabaseModal = ({
           onOpenRegistrationRecord={onOpenRegistrationRecord}
           onUseRecipient={
             onUseRecipient
-              ? (recipient) => {
-                  onUseRecipient(recipient);
-                  onClose();
+              ? async (recipient) => {
+                  const accepted = await onUseRecipient(recipient);
+                  if (accepted !== false) onClose();
+                  return accepted;
                 }
               : undefined
           }

@@ -24,9 +24,49 @@ export const TransfusionRegistration = () => {
       <header className="app-header registration-header">
         <div className="toolbar-wrap registration-toolbar-wrap">
           <SiteNavigation current="registration" />
-          <div className="registration-actions">
+          <div className="print-actions" aria-label="Панель действий">
+            <button
+              type="button"
+              className="clear-button"
+              disabled
+              title="Будет доступно после подключения данных листа регистрации"
+            >
+              Очистить бланк
+            </button>
+            <button
+              type="button"
+              className="new-button"
+              disabled
+              title="Будет доступно после подключения данных листа регистрации"
+            >
+              Новый бланк
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              disabled
+              title="Будет доступно после подключения листа регистрации к базе реципиентов"
+            >
+              Реципиенты
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              disabled
+              title="Текущий реципиент не выбран"
+            >
+              Текущий реципиент
+            </button>
+            <button
+              type="button"
+              className="save-button"
+              disabled
+              title="Будет доступно после подключения сохранения листов регистрации"
+            >
+              Сохранить
+            </button>
             <button type="button" className="print-button" onClick={print}>
-              Печать
+              Печать страницы 1
             </button>
           </div>
         </div>

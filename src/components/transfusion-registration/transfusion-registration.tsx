@@ -314,6 +314,8 @@ export const TransfusionRegistration = () => {
             recipientName={currentRecipientAvailable ? (values.recipientName ?? '') : ''}
             recipientAbo={values.recipientAbo ?? currentRecipientProfile.recipientAbo ?? ''}
             recipientRh={values.recipientRh ?? currentRecipientProfile.recipientRh ?? ''}
+            currentRecipientAvailable={currentRecipientAvailable}
+            onOpenCurrentRecipient={openCurrentRecipient}
           />
           <div className="print-actions" aria-label="Панель действий">
             <button type="button" className="clear-button" onClick={clearBlank}>
@@ -324,19 +326,6 @@ export const TransfusionRegistration = () => {
             </button>
             <button type="button" className="secondary-button" onClick={openRecipients}>
               Реципиенты
-            </button>
-            <button
-              type="button"
-              className="secondary-button"
-              disabled={!currentRecipientAvailable}
-              title={
-                currentRecipientAvailable
-                  ? values.recipientName
-                  : 'Текущий реципиент не выбран'
-              }
-              onClick={openCurrentRecipient}
-            >
-              Текущий реципиент
             </button>
             <button type="button" className="save-button" onClick={() => void save()}>
               Сохранить

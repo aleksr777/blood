@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
-import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
+import {
+  adoptCurrentRecipientFromValues,
+  readCurrentRecipient,
+} from '../../storage/repositories/current-recipient';
 import {
   clearProtocolDraft,
   loadProtocolDraft,
@@ -48,6 +51,9 @@ export const useProtocolDraft = ({
           return;
         }
         if (Object.keys(draft.values).length > 0) {
+          if (!readCurrentRecipient()) {
+            adoptCurrentRecipientFromValues(draft.values);
+          }
           setValues(draft.values);
           setRecordId(draft.protocolRecordId);
           setLastInputAt(draft.updatedAt);

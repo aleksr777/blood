@@ -7,6 +7,7 @@ import type {
   ProtocolRecord,
   ProtocolValuesRecord,
   RecipientRecord,
+  RegistrationRecord,
   SavedOptionRecord,
 } from './database-types';
 
@@ -106,4 +107,10 @@ export const database = {
     withDatabase<ProtocolRecord>('protocol-records:save', { recordId, values }),
   removeProtocolRecord: (id: number) =>
     withDatabase<void>('protocol-records:remove', { id }),
+  listRegistrationRecords: (recipientId: number) =>
+    withDatabase<RegistrationRecord[]>('registration-records:list', { recipientId }),
+  saveRegistrationRecord: (recordId: number | null, values: ProtocolValuesRecord) =>
+    withDatabase<RegistrationRecord>('registration-records:save', { recordId, values }),
+  removeRegistrationRecord: (id: number) =>
+    withDatabase<void>('registration-records:remove', { id }),
 };

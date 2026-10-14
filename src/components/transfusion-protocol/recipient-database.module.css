@@ -114,7 +114,8 @@
 .recordDelete,
 .secondaryAction,
 .dangerAction,
-.createRecipient {
+.createRecipient,
+.categoryBack {
   border: 1px solid #1d4ed8;
   border-radius: 0.45rem;
   padding: 0.45rem 0.7rem;
@@ -149,6 +150,64 @@
   border-color: #b91c1c;
   background: #fff;
   color: #b91c1c;
+}
+
+.categories {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.categoryButton {
+  display: flex;
+  min-height: 6.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid #cbd7f0;
+  border-radius: 0.65rem;
+  padding: 1rem;
+  background: #f8faff;
+  color: #17213f;
+  cursor: pointer;
+  text-align: left;
+}
+
+.categoryTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.categoryMeta {
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.categoryHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.categoryBack {
+  border-color: #64748b;
+  background: #fff;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.categoryHeading {
+  min-width: 0;
+  color: #17213f;
+  font-size: 0.95rem;
+  font-weight: 700;
 }
 
 .records {
@@ -189,5 +248,14 @@
   .body {
     grid-template-columns: 1fr;
     grid-template-rows: repeat(2, minmax(0, 1fr));
+  }
+
+  .categories {
+    grid-template-columns: 1fr;
+  }
+
+  .categoryHeader {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

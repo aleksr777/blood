@@ -15,6 +15,9 @@ export const removeRecipient = (id: number) => database.removeRecipient(id);
 export const listProtocolRecords = (recipientId: number) =>
   database.listProtocolRecords(recipientId);
 
+export const removeProtocolRecord = (id: number) =>
+  database.removeProtocolRecord(id);
+
 export const saveProtocolRecord = (
   recordId: number | null,
   values: ProtocolValuesRecord,

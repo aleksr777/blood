@@ -764,6 +764,24 @@ a.site-navigation__link:focus-visible::after {
   page: registration-page;
 }
 
+.registration-legal-reference {
+  margin: 0 0 2.5mm;
+  font-size: 8.5pt;
+  font-weight: 400;
+  line-height: 1.1;
+  text-align: right;
+}
+
+.registration-legal-reference a {
+  color: #315a8a;
+  text-decoration: underline;
+  text-underline-offset: 1px;
+}
+
+.registration-legal-reference a:visited {
+  color: #315a8a;
+}
+
 .registration-title {
   margin: 0 0 5mm;
   font-size: 12.5pt;
@@ -1036,6 +1054,11 @@ a.site-navigation__link:focus-visible::after {
     margin: 0;
     padding: 10mm 10mm 12mm;
     box-shadow: none;
+  }
+
+  html[data-app-page='registration'] .registration-legal-reference a {
+    color: #000;
+    text-decoration: none;
   }
 
 }

@@ -11,6 +11,7 @@ import {
   saveRegistrationRecord,
   type RecipientRecord,
 } from './recipients';
+import { profileFromValues } from '../sqlite/recipient-data';
 import type {
   ProtocolDraftState,
   ProtocolValuesRecord,
@@ -149,6 +150,29 @@ const writeCurrentRecipient = (recipient: RecipientRecord) => {
   } catch (error) {
     console.error('Не удалось сохранить текущего реципиента:', error);
   }
+};
+
+export const adoptCurrentRecipientFromValues = (values: ProtocolValuesRecord) => {
+  const id = getRecipientId(values);
+  const fullName = values.recipientName?.trim();
+  if (!id || !fullName) return null;
+
+  const recipient: CurrentRecipient = {
+    id,
+    fullName,
+    profile: profileFromValues(values),
+  };
+
+  try {
+    window.localStorage.setItem(
+      CURRENT_RECIPIENT_STORAGE_KEY,
+      JSON.stringify(recipient),
+    );
+  } catch (error) {
+    console.error('Не удалось восстановить текущего реципиента:', error);
+  }
+
+  return recipient;
 };
 
 const protocolValuesForRecipient = (recipient: RecipientRecord): ProtocolValuesRecord => ({

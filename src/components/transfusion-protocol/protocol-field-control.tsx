@@ -4,6 +4,7 @@ import { getSavedOptionCategory } from './saved-field-config';
 import { RecipientField } from './recipient-field';
 import { SavedOptionsField } from './saved-options-field';
 import styles from './protocol-editor.module.css';
+import type { RecipientRecord } from '../../storage/repositories/recipients';
 import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
   onChange: (name: string, value: string) => void;
   onValuesChange: (values: ProtocolValues) => void;
   onOpenRecipients?: () => void;
+  onSelectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
 };
 
 const BasicControl = ({
@@ -47,6 +49,7 @@ export const ProtocolFieldControl = ({
   onChange,
   onValuesChange,
   onOpenRecipients,
+  onSelectRecipient,
 }: Props) => {
   const className = field.wide ? styles.wide : undefined;
   const change = (nextValue: string) => onChange(field.name, nextValue);
@@ -57,7 +60,7 @@ export const ProtocolFieldControl = ({
         <div className={styles.fieldLabel}>{field.label}</div>
         <RecipientField
           value={value}
-          onChange={onValuesChange}
+          onSelectRecipient={onSelectRecipient ?? (() => undefined)}
           onOpenRecipients={onOpenRecipients ?? (() => undefined)}
         />
       </div>

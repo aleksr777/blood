@@ -29,6 +29,7 @@ export const TransfusionProtocol = () => {
   const workspace = useProtocolWorkspace();
   const sheetsRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<ProtocolChunkId[][]>(INITIAL_PAGES);
+  const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
 
   useLayoutEffect(() => {
     const sheets = sheetsRef.current;
@@ -178,7 +179,17 @@ export const TransfusionProtocol = () => {
         onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}
         onClear={workspace.clearForm}
         onNew={() => void workspace.newBlank()}
-        onOpenRegistry={() => workspace.setRegistryOpen(true)}
+        onOpenRegistry={() => {
+          setRegistryRecipientId(null);
+          workspace.setRegistryOpen(true);
+        }}
+        currentRecipientName={workspace.values.recipientName ?? ''}
+        onOpenCurrentRecipient={() => {
+          const recipientId = Number(workspace.values.recipientId);
+          if (!Number.isFinite(recipientId) || recipientId <= 0) return;
+          setRegistryRecipientId(recipientId);
+          workspace.setRegistryOpen(true);
+        }}
         onSave={() => void workspace.saveToDatabase()}
         pageCount={pages.length}
         onPrintPage={printPage}
@@ -216,6 +227,7 @@ export const TransfusionProtocol = () => {
           componentUnitNumberWarning={workspace.componentUnitNumberWarning}
           onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}
           onOpenRecipients={() => {
+            setRegistryRecipientId(null);
             workspace.setActiveBlock(null);
             workspace.setRegistryOpen(true);
           }}
@@ -231,7 +243,14 @@ export const TransfusionProtocol = () => {
 
       {workspace.registryOpen && (
         <RecipientDatabaseModal
-          onClose={() => workspace.setRegistryOpen(false)}
+          initialRecipientId={registryRecipientId}
+          initialRecipientName={
+            registryRecipientId ? (workspace.values.recipientName ?? '') : ''
+          }
+          onClose={() => {
+            setRegistryRecipientId(null);
+            workspace.setRegistryOpen(false);
+          }}
           onOpenRecord={workspace.openRecord}
         />
       )}

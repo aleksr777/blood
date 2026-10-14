@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type {
   ProtocolRecord,
   RecipientRecord,
@@ -14,6 +15,8 @@ type Props = {
   onDeleteRecord: (record: ProtocolRecord) => void;
 };
 
+type RecordCategory = 'protocols' | 'registrations';
+
 const formatUpdated = (value: number) =>
   new Intl.DateTimeFormat('ru-RU', {
     dateStyle: 'short',
@@ -27,54 +30,124 @@ export const RecipientHistoryPanel = ({
   onEdit,
   onDelete,
   onDeleteRecord,
-}: Props) => (
-  <section className={styles.panel}>
-    {!recipient ? (
-      <div className={styles.empty}>Выберите реципиента слева.</div>
-    ) : (
-      <>
-        <div className={styles.header}>
-          <div>
-            <h3 className={styles.title}>{recipient.fullName}</h3>
-            <div className={styles.meta}>Сохранённых бланков: {recipient.protocolCount}</div>
+}: Props) => {
+  const [category, setCategory] = useState<RecordCategory | null>(null);
+
+  useEffect(() => {
+    setCategory(null);
+  }, [recipient?.id]);
+
+  return (
+    <section className={styles.panel}>
+      {!recipient ? (
+        <div className={styles.empty}>Выберите реципиента слева.</div>
+      ) : (
+        <>
+          <div className={styles.header}>
+            <div>
+              <h3 className={styles.title}>{recipient.fullName}</h3>
+              <div className={styles.meta}>Карточка № {recipient.id}</div>
+            </div>
+            <div className={styles.headerActions}>
+              <button
+                type="button"
+                className={styles.secondaryAction}
+                onClick={() => onEdit(recipient)}
+              >
+                Редактировать
+              </button>
+              <button
+                type="button"
+                className={styles.dangerAction}
+                onClick={() => onDelete(recipient)}
+              >
+                Удалить
+              </button>
+            </div>
           </div>
-          <div className={styles.headerActions}>
-            <button type="button" className={styles.secondaryAction} onClick={() => onEdit(recipient)}>
-              Редактировать
-            </button>
-            <button type="button" className={styles.dangerAction} onClick={() => onDelete(recipient)}>
-              Удалить
-            </button>
-          </div>
-        </div>
-        <div className={styles.records}>
-          {records.length === 0 && (
-            <div className={styles.empty}>Сохранённых бланков пока нет.</div>
-          )}
-          {records.map((record) => (
-            <div key={record.id} className={styles.record}>
-              <div>
-                <div className={styles.recordTitle}>
-                  Трансфузия: {formatDate(record.values.transfusionDate) || 'дата не указана'}
-                </div>
-                <div className={styles.meta}>Изменён: {formatUpdated(record.updatedAt)}</div>
-              </div>
-              <div className={styles.recordActions}>
-                <button type="button" className={styles.open} onClick={() => onOpenRecord(record)}>
-                  Открыть
-                </button>
+
+          {category === null ? (
+            <div className={styles.categories} aria-label="Категории бланков">
+              <button
+                type="button"
+                className={styles.categoryButton}
+                onClick={() => setCategory('protocols')}
+              >
+                <span className={styles.categoryTitle}>Протоколы трансфузии</span>
+                <span className={styles.categoryMeta}>
+                  Сохранено: {recipient.protocolCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.categoryButton}
+                onClick={() => setCategory('registrations')}
+              >
+                <span className={styles.categoryTitle}>Листы регистрации трансфузий</span>
+                <span className={styles.categoryMeta}>Сохранено: 0</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className={styles.categoryHeader}>
                 <button
                   type="button"
-                  className={styles.recordDelete}
-                  onClick={() => onDeleteRecord(record)}
+                  className={styles.categoryBack}
+                  onClick={() => setCategory(null)}
                 >
-                  Удалить
+                  ← К категориям
                 </button>
+                <div className={styles.categoryHeading}>
+                  {category === 'protocols'
+                    ? 'Протоколы трансфузии'
+                    : 'Листы регистрации трансфузий'}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </>
-    )}
-  </section>
-);
+
+              {category === 'protocols' ? (
+                <div className={styles.records}>
+                  {records.length === 0 && (
+                    <div className={styles.empty}>Сохранённых протоколов пока нет.</div>
+                  )}
+                  {records.map((record) => (
+                    <div key={record.id} className={styles.record}>
+                      <div>
+                        <div className={styles.recordTitle}>
+                          Трансфузия: {formatDate(record.values.transfusionDate) || 'дата не указана'}
+                        </div>
+                        <div className={styles.meta}>Изменён: {formatUpdated(record.updatedAt)}</div>
+                      </div>
+                      <div className={styles.recordActions}>
+                        <button
+                          type="button"
+                          className={styles.open}
+                          onClick={() => onOpenRecord(record)}
+                        >
+                          Открыть
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.recordDelete}
+                          onClick={() => onDeleteRecord(record)}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.records}>
+                  <div className={styles.empty}>
+                    Сохранённых листов регистрации трансфузий пока нет.
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
+    </section>
+  );
+};

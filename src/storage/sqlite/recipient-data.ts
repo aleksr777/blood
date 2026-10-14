@@ -4,8 +4,11 @@ import type {
   RegistrationRecord,
 } from './database-types';
 
-const PROFILE_FIELDS = [
-  'recipientName',
+export const RECIPIENT_PROFILE_FIELDS = [
+  'recipientBirthDate',
+  'department',
+  'medicalRecordNumber',
+  'roomNumber',
   'recipientAbo',
   'recipientRh',
   'recipientAntigens',
@@ -49,7 +52,9 @@ export const parseValues = (value: string): ProtocolValuesRecord => {
 
 export const profileFromValues = (values: ProtocolValuesRecord) =>
   Object.fromEntries(
-    PROFILE_FIELDS.flatMap((field) => (values[field] ? [[field, values[field]]] : [])),
+    RECIPIENT_PROFILE_FIELDS.flatMap((field) =>
+      values[field] ? [[field, values[field]]] : [],
+    ),
   );
 
 export const mapProtocol = (row: Record<string, unknown>): ProtocolRecord => ({

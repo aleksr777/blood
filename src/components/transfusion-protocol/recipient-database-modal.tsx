@@ -21,8 +21,11 @@ import styles from './recipient-database.module.css';
 
 type Props = {
   onClose: () => void;
-  onOpenRecord?: (record: ProtocolRecord) => void;
-  onOpenRegistrationRecord?: (record: RegistrationRecord) => void;
+  onOpenRecord?: (record: ProtocolRecord, recipient: RecipientRecord) => void;
+  onOpenRegistrationRecord?: (
+    record: RegistrationRecord,
+    recipient: RecipientRecord,
+  ) => void;
   onUseRecipient?: (recipient: RecipientRecord) => void;
   initialRecipientId?: number | null;
   initialRecipientName?: string;

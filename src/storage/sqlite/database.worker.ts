@@ -19,6 +19,7 @@ import {
   saveProtocolDraft,
 } from './protocol-draft-store';
 import {
+  findProtocolRecordsByComponentUnitNumber,
   listProtocolRecords,
   removeProtocolRecord,
   saveProtocolRecord,
@@ -108,6 +109,16 @@ const handleRequest = async (request: DatabaseRequest) => {
       return removeRecipient((request.payload as { id: number }).id);
     case 'protocol-records:list':
       return listProtocolRecords((request.payload as { recipientId: number }).recipientId);
+    case 'protocol-records:find-component-unit': {
+      const payload = request.payload as {
+        componentUnitNumber: string;
+        excludeRecordId: number | null;
+      };
+      return findProtocolRecordsByComponentUnitNumber(
+        payload.componentUnitNumber,
+        payload.excludeRecordId,
+      );
+    }
     case 'protocol-records:save': {
       const payload = request.payload as {
         recordId: number | null;

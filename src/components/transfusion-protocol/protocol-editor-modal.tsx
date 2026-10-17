@@ -153,6 +153,13 @@ export const ProtocolEditorModal = ({
               'recipientSex',
               'recipientAge',
             ])}
+            {draft.recipientSex === 'Женский' &&
+              renderGeneralGroup('Акушерский анамнез', [
+                'recipientPregnanciesCount',
+                'recipientBirthsCount',
+                'recipientSpontaneousAbortionsCount',
+                'recipientHemolyticDiseaseNewbornHistory',
+              ])}
             {renderGeneralGroup('Госпитализация', [
               'department',
               'medicalRecordNumber',

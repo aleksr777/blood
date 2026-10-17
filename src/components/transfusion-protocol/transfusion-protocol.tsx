@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
-import { recipientProfileValuesForForms } from '../../storage/repositories/current-recipient';
 import type {
   RecipientRecord,
   RegistrationRecord,
@@ -165,7 +164,7 @@ export const TransfusionProtocol = () => {
           ...record,
           values: {
             ...record.values,
-            ...recipientProfileValuesForForms(recipient),
+            recipientId: String(record.recipientId),
           },
         }),
       );

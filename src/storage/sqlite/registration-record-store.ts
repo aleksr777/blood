@@ -74,10 +74,12 @@ export const saveRegistrationRecord = async (
     throw new Error('Выберите реципиента перед сохранением листа регистрации.');
   }
 
-  upsertRecipient(db, values, recipientId);
+  const canUpdate = linkedId !== null && recordId !== null;
+  if (!canUpdate) {
+    upsertRecipient(db, values, recipientId);
+  }
 
   const now = Date.now();
-  const canUpdate = linkedId !== null && recordId !== null;
   const id = canUpdate ? recordId : insertRegistration(db, recipientId, values, now);
 
   if (canUpdate) {

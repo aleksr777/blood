@@ -56,23 +56,17 @@ export const RecipientHistoryFields = ({
 
     if (
       values.previousReactionsStatus ||
-      values.previousReactions ||
-      values.individualSelectionHistoryStatus ||
-      values.individualSelectionHistory
+      values.individualSelectionHistoryStatus
     ) {
       onChange({
         previousReactionsStatus: '',
-        previousReactions: '',
         individualSelectionHistoryStatus: '',
-        individualSelectionHistory: '',
       });
     }
   }, [
     dependentHistoryDisabled,
     onChange,
-    values.individualSelectionHistory,
     values.individualSelectionHistoryStatus,
-    values.previousReactions,
     values.previousReactionsStatus,
   ]);
 
@@ -84,9 +78,7 @@ export const RecipientHistoryFields = ({
       onChange({
         previousTransfusionsStatus: value,
         previousReactionsStatus: '',
-        previousReactions: '',
         individualSelectionHistoryStatus: '',
-        individualSelectionHistory: '',
       });
       return;
     }

@@ -280,7 +280,7 @@ export const useProtocolWorkspace = () => {
     }
 
     const merged = { ...values, ...appliedValues };
-    if (hasReagentDefaultUpdate(appliedValues)) {
+    if (recordId === null && hasReagentDefaultUpdate(appliedValues)) {
       saveReagentDefaults(merged);
     }
     setValues(merged);
@@ -368,6 +368,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const newBlank = async () => {
+    const openedFromDatabase = recordId !== null;
     let sourceValues = values;
     let previousBlankSaved = false;
 
@@ -396,7 +397,9 @@ export const useProtocolWorkspace = () => {
       }
     }
 
-    const previousComponent = getIndicationComponent(sourceValues);
+    const previousComponent = openedFromDatabase
+      ? ''
+      : getIndicationComponent(sourceValues);
     previousBlankIndicationsRef.current = previousComponent
       ? {
           component: previousComponent,
@@ -404,11 +407,25 @@ export const useProtocolWorkspace = () => {
         }
       : null;
 
+    const currentRecipient = readCurrentRecipient();
+    const nextRecipientValues =
+      openedFromDatabase && currentRecipient
+        ? {
+            ...currentRecipient.profile,
+            recipientId: String(currentRecipient.id),
+            recipientName: currentRecipient.fullName,
+          }
+        : currentRecipientValues(sourceValues);
+
     const nextValues = {
-      ...currentRecipientValues(sourceValues),
-      ...reagentDefaultsForNewBlank(sourceValues),
-      doctorName: sourceValues.doctorName ?? '',
-      nurseName: sourceValues.nurseName ?? '',
+      ...nextRecipientValues,
+      ...reagentDefaultsForNewBlank(openedFromDatabase ? {} : sourceValues),
+      ...(openedFromDatabase
+        ? {}
+        : {
+            doctorName: sourceValues.doctorName ?? '',
+            nurseName: sourceValues.nurseName ?? '',
+          }),
     };
 
     draft.touch();

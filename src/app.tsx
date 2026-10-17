@@ -6,7 +6,7 @@ import { TransfusionRegistration } from './components/transfusion-registration/t
 type AppPage = 'protocol' | 'registration';
 type TransitionPhase = 'idle' | 'leaving' | 'entering';
 
-const TRANSITION_DURATION_MS = 170;
+const TRANSITION_DURATION_MS = 160;
 
 const getPage = (): AppPage =>
   window.location.hash === '#/registration' ? 'registration' : 'protocol';

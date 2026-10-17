@@ -24,6 +24,7 @@ export const RECIPIENT_PROFILE_FIELDS = [
   'alloimmuneAntibodyDescription',
   'previousTransfusionsStatus',
   'previousTransfusions',
+  'previousTransfusionsAutoText',
   'previousReactionsStatus',
   'previousReactions',
   'individualSelectionHistoryStatus',

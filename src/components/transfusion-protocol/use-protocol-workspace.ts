@@ -16,6 +16,7 @@ import {
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
+import { hasHemaconData } from './donor-model';
 import {
   getIndicationComponent,
   indicationValuesForComponent,
@@ -287,9 +288,17 @@ export const useProtocolWorkspace = () => {
     let sourceValues = values;
     let previousBlankSaved = false;
 
-    if (recordId === null && values.recipientName?.trim()) {
+    if (hasHemaconData(values)) {
+      if (!values.recipientName?.trim()) {
+        setStatus(
+          'Новый бланк не создан: для сохранения предыдущего бланка укажите ФИО реципиента.',
+        );
+        setActiveBlock('general');
+        return;
+      }
+
       try {
-        const record = await saveProtocolRecord(null, values);
+        const record = await saveProtocolRecord(recordId, values);
         sourceValues = {
           ...values,
           recipientId: String(record.recipientId),

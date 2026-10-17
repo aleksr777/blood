@@ -13,6 +13,15 @@
   padding: 0.8rem 0.9rem;
 }
 
+.groupDisabled {
+  background: #f8fafc;
+  opacity: 0.58;
+}
+
+.groupDisabled .option {
+  cursor: default;
+}
+
 .group legend {
   padding: 0 0.35rem;
   color: #263552;

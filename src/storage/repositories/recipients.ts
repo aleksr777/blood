@@ -17,6 +17,15 @@ export const removeRecipient = (id: number) => database.removeRecipient(id);
 export const listProtocolRecords = (recipientId: number) =>
   database.listProtocolRecords(recipientId);
 
+export const findProtocolRecordsByComponentUnitNumber = (
+  componentUnitNumber: string,
+  excludeRecordId: number | null,
+) =>
+  database.findProtocolRecordsByComponentUnitNumber(
+    componentUnitNumber,
+    excludeRecordId,
+  );
+
 export const removeProtocolRecord = (id: number) =>
   database.removeProtocolRecord(id);
 
@@ -37,6 +46,7 @@ export const removeRegistrationRecord = (id: number) =>
   database.removeRegistrationRecord(id);
 
 export type {
+  ComponentUnitNumberMatch,
   ProtocolRecord,
   RecipientRecord,
   RegistrationRecord,

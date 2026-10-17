@@ -9,6 +9,7 @@ import {
   loadProtocolDraft,
   saveProtocolDraft,
 } from '../../storage/repositories/protocol-draft';
+import { reagentDefaultsForNewBlank } from './reagent-defaults';
 import type { ProtocolValues } from './protocol-types';
 
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
@@ -61,18 +62,25 @@ export const useProtocolDraft = ({
           return;
         }
         if (Object.keys(draft.values).length > 0) {
+          const draftValues =
+            draft.protocolRecordId === null
+              ? {
+                  ...draft.values,
+                  ...reagentDefaultsForNewBlank(draft.values),
+                }
+              : draft.values;
           const currentRecipient = readCurrentRecipient();
           if (!currentRecipient) {
-            adoptCurrentRecipientFromValues(draft.values);
-            setValues(draft.values);
-          } else if (Number(draft.values.recipientId) === currentRecipient.id) {
+            adoptCurrentRecipientFromValues(draftValues);
+            setValues(draftValues);
+          } else if (Number(draftValues.recipientId) === currentRecipient.id) {
             setValues({
-              ...draft.values,
+              ...draftValues,
               ...recipientProfileValuesForForms(currentRecipient),
-              ...generatedHistoryValues(draft.values),
+              ...generatedHistoryValues(draftValues),
             });
           } else {
-            setValues(draft.values);
+            setValues(draftValues);
           }
           setRecordId(draft.protocolRecordId);
           setLastInputAt(draft.updatedAt);
@@ -81,15 +89,21 @@ export const useProtocolDraft = ({
 
         const currentRecipient = readCurrentRecipient();
         if (currentRecipient) {
-          setValues(recipientProfileValuesForForms(currentRecipient));
+          setValues({
+            ...recipientProfileValuesForForms(currentRecipient),
+            ...reagentDefaultsForNewBlank({}),
+          });
           setRecordId(null);
           setLastInputAt(Date.now());
           return;
         }
 
-        setValues({});
+        const reagentDefaults = reagentDefaultsForNewBlank({});
+        setValues(reagentDefaults);
         setRecordId(null);
-        setLastInputAt(0);
+        setLastInputAt(
+          Object.values(reagentDefaults).some((value) => value.trim()) ? Date.now() : 0,
+        );
       })
       .catch((error: unknown) => console.error('Не удалось загрузить бланк:', error))
       .finally(() => active && setLoaded(true));

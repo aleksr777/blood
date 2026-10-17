@@ -38,6 +38,14 @@
   margin-bottom: 0.4rem;
 }
 
+.calculatedValue {
+  min-height: var(--control-height);
+  padding: var(--control-padding-y) 0;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 .wide {
   grid-column: 1 / -1;
 }

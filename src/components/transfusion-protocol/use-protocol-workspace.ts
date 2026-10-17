@@ -27,7 +27,6 @@ import {
   buildPreviousTransfusionHistory,
   getLocalDateKey,
 } from './previous-transfusion-history';
-import { HISTORY_STATUS } from './recipient-history-model';
 import { currentRecipientValues } from './recipient-profile-values';
 import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
@@ -90,6 +89,7 @@ export const useProtocolWorkspace = () => {
   const [componentUnitNumberChecked, setComponentUnitNumberChecked] = useState(false);
   const [dismissedComponentUnitWarningKey, setDismissedComponentUnitWarningKey] = useState('');
   const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
+  const [previousTransfusionSuggestion, setPreviousTransfusionSuggestion] = useState('');
 
   useEffect(() => {
     try {
@@ -126,75 +126,40 @@ export const useProtocolWorkspace = () => {
 
   useEffect(() => {
     const recipientId = Number(values.recipientId);
-    if (!Number.isFinite(recipientId) || recipientId <= 0) return undefined;
+    if (!Number.isFinite(recipientId) || recipientId <= 0) {
+      setPreviousTransfusionSuggestion('');
+      return undefined;
+    }
 
     const today = getLocalDateKey();
-    if (values.transfusionDate && values.transfusionDate !== today) return undefined;
+    if (values.transfusionDate && values.transfusionDate !== today) {
+      setPreviousTransfusionSuggestion('');
+      return undefined;
+    }
 
     let active = true;
 
     void listProtocolRecords(recipientId)
       .then((records) => {
         if (!active) return;
-
-        const generated = buildPreviousTransfusionHistory(records, today);
-        const previousAutoText = values.previousTransfusionsAutoText ?? '';
-        let patch: ProtocolValues | null = null;
-
-        if (generated) {
-          if (
-            values.previousTransfusionsStatus !== HISTORY_STATUS.had ||
-            values.previousTransfusions !== generated ||
-            previousAutoText !== generated
-          ) {
-            patch = {
-              previousTransfusionsStatus: HISTORY_STATUS.had,
-              previousTransfusions: generated,
-              previousTransfusionsAutoText: generated,
-            };
-          }
-        } else if (
-          previousAutoText &&
-          values.previousTransfusions === previousAutoText
-        ) {
-          patch = {
-            previousTransfusionsStatus:
-              values.previousTransfusionsStatus === HISTORY_STATUS.had
-                ? ''
-                : (values.previousTransfusionsStatus ?? ''),
-            previousTransfusions: '',
-            previousTransfusionsAutoText: '',
-          };
-        } else if (previousAutoText) {
-          patch = { previousTransfusionsAutoText: '' };
-        }
-
-        if (!patch) return;
-
-        const merged = { ...values, ...patch };
-        setValues(merged);
-
-        void syncCurrentRecipientProfile(patch, {
-          kind: 'protocol',
-          values: merged,
-          recordId,
-        }).catch((error: unknown) =>
-          console.error(
-            'Не удалось синхронизировать автоматически сформированный анамнез:',
-            error,
-          ),
+        setPreviousTransfusionSuggestion(
+          buildPreviousTransfusionHistory(records, today),
         );
       })
-      .catch((error: unknown) =>
-        console.error('Не удалось сформировать анамнез по предыдущим трансфузиям:', error),
-      );
+      .catch((error: unknown) => {
+        if (!active) return;
+        setPreviousTransfusionSuggestion('');
+        console.error(
+          'Не удалось сформировать предложение по предыдущим трансфузиям:',
+          error,
+        );
+      });
 
     return () => {
       active = false;
     };
   }, [
     historyRefreshToken,
-    recordId,
     values.recipientId,
     values.transfusionDate,
   ]);
@@ -313,6 +278,7 @@ export const useProtocolWorkspace = () => {
     setRegistryOpen(false);
     setRecordId(null);
     setValues(nextValues);
+    setPreviousTransfusionSuggestion('');
     setHistoryRefreshToken((current) => current + 1);
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
@@ -346,6 +312,7 @@ export const useProtocolWorkspace = () => {
     setRecordId(null);
     setStatus('');
     setValues(nextValues);
+    setPreviousTransfusionSuggestion('');
     setHistoryRefreshToken((current) => current + 1);
 
     void clearProtocolDraft()
@@ -439,6 +406,7 @@ export const useProtocolWorkspace = () => {
     activeBlock,
     registryOpen,
     status,
+    previousTransfusionSuggestion,
     setActiveBlock,
     setRegistryOpen,
     saveValues,

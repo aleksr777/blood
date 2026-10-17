@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
@@ -16,6 +16,10 @@ import {
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
+import {
+  getIndicationComponent,
+  indicationValuesForComponent,
+} from './indications-model';
 import {
   getExpiredReagentWarnings,
   getHemaconExpirationWarning,
@@ -90,6 +94,10 @@ export const useProtocolWorkspace = () => {
   const [dismissedComponentUnitWarningKey, setDismissedComponentUnitWarningKey] = useState('');
   const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
   const [previousTransfusionSuggestion, setPreviousTransfusionSuggestion] = useState('');
+  const previousBlankIndicationsRef = useRef<{
+    component: string;
+    values: ProtocolValues;
+  } | null>(null);
 
   useEffect(() => {
     try {
@@ -175,13 +183,28 @@ export const useProtocolWorkspace = () => {
       setRecordId(null);
     }
 
-    const merged = { ...values, ...nextValues };
-    if (hasReagentDefaultUpdate(nextValues)) {
+    const selectedComponent =
+      nextValues.componentGroup || nextValues.indicationComponent || '';
+    const carriedIndications = previousBlankIndicationsRef.current;
+    const shouldCarryIndications =
+      recordId === null &&
+      Boolean(selectedComponent) &&
+      carriedIndications?.component === selectedComponent;
+    const appliedValues = shouldCarryIndications
+      ? { ...carriedIndications.values, ...nextValues }
+      : nextValues;
+
+    if (shouldCarryIndications) {
+      previousBlankIndicationsRef.current = null;
+    }
+
+    const merged = { ...values, ...appliedValues };
+    if (hasReagentDefaultUpdate(appliedValues)) {
       saveReagentDefaults(merged);
     }
     setValues(merged);
 
-    void syncCurrentRecipientProfile(nextValues, {
+    void syncCurrentRecipientProfile(appliedValues, {
       kind: 'protocol',
       values: merged,
       recordId,
@@ -191,6 +214,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const selectRecipient = async (recipient: RecipientRecord) => {
+    previousBlankIndicationsRef.current = null;
     try {
       const result = await switchCurrentRecipient(recipient, {
         kind: 'protocol',
@@ -280,6 +304,14 @@ export const useProtocolWorkspace = () => {
       }
     }
 
+    const previousComponent = getIndicationComponent(sourceValues);
+    previousBlankIndicationsRef.current = previousComponent
+      ? {
+          component: previousComponent,
+          values: indicationValuesForComponent(sourceValues, previousComponent),
+        }
+      : null;
+
     const nextValues = {
       ...currentRecipientValues(sourceValues),
       ...reagentDefaultsForNewBlank(sourceValues),
@@ -307,6 +339,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const clearForm = () => {
+    previousBlankIndicationsRef.current = null;
     const currentRecipient = readCurrentRecipient();
     const nextValues = currentRecipient
       ? {
@@ -337,6 +370,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const openRecord = async (record: ProtocolRecord, recipient: RecipientRecord) => {
+    previousBlankIndicationsRef.current = null;
     const switched = await selectRecipient(recipient);
     if (!switched) return;
 

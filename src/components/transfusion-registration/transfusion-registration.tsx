@@ -134,7 +134,9 @@ export const TransfusionRegistration = () => {
 
         if (Object.keys(draft.values).length > 0) {
           const currentRecipient = readCurrentRecipient();
-          if (!currentRecipient) {
+          if (draft.registrationRecordId !== null) {
+            setValues(draft.values);
+          } else if (!currentRecipient) {
             adoptCurrentRecipientFromValues(draft.values);
             setValues(draft.values);
           } else if (Number(draft.values.recipientId) === currentRecipient.id) {
@@ -226,7 +228,7 @@ export const TransfusionRegistration = () => {
     setRecordId(record.id);
     setValues({
       ...record.values,
-      ...recipientProfileValuesForForms(recipient),
+      recipientId: String(record.recipientId),
     });
     setRegistryRecipientId(null);
     setRegistryOpen(false);
@@ -244,7 +246,7 @@ export const TransfusionRegistration = () => {
       await saveProtocolDraft({
         values: {
           ...record.values,
-          ...recipientProfileValuesForForms(recipient),
+          recipientId: String(record.recipientId),
         },
         protocolRecordId: record.id,
         updatedAt: Date.now(),

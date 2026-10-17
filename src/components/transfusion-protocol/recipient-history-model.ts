@@ -17,6 +17,8 @@ export const getHistoryStatus = (status?: string, text?: string): HistoryStatus 
     return status;
   }
 
+  if (status === '') return '';
+
   // Existing records created before status fields were added contain only free text.
   return text?.trim() ? HISTORY_STATUS.had : '';
 };

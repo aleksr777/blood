@@ -237,9 +237,15 @@ export const DoctorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
   >
     <tr className="doctor-row">
       <td colSpan={6} className="span-6">
-        <div className="doctor-inline">
-          <span>Врач, осуществивший трансфузию:</span>
-          {values.doctorName && <span className="doctor-value">{values.doctorName}</span>}
+        <div className="doctor-staff">
+          <div className="doctor-inline">
+            <span>Врач, осуществивший трансфузию:</span>
+            {values.doctorName && <span className="doctor-value">{values.doctorName}</span>}
+          </div>
+          <div className="doctor-inline">
+            <span>Медицинская сестра:</span>
+            {values.nurseName && <span className="doctor-value">{values.nurseName}</span>}
+          </div>
         </div>
       </td>
     </tr>

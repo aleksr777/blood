@@ -36,6 +36,7 @@ import {
 import {
   buildPreviousTransfusionHistory,
   getLocalDateKey,
+  getNextPreviousTransfusionEligibilityTime,
 } from './previous-transfusion-history';
 import { currentRecipientValues } from './recipient-profile-values';
 import { useProtocolDraft } from './use-protocol-draft';
@@ -209,13 +210,32 @@ export const useProtocolWorkspace = () => {
     }
 
     let active = true;
+    let refreshTimer: number | null = null;
 
     void listProtocolRecords(recipientId)
       .then((records) => {
         if (!active) return;
+
+        const previousRecords = recordId === null
+          ? records
+          : records.filter(({ id }) => id !== recordId);
+        const now = new Date();
+
         setPreviousTransfusionSuggestion(
-          buildPreviousTransfusionHistory(records, today),
+          buildPreviousTransfusionHistory(previousRecords, now),
         );
+
+        const nextEligibleAt = getNextPreviousTransfusionEligibilityTime(
+          previousRecords,
+          now,
+        );
+        if (nextEligibleAt !== null) {
+          const delay = Math.max(0, nextEligibleAt - Date.now() + 1000);
+          refreshTimer = window.setTimeout(
+            () => setHistoryRefreshToken((current) => current + 1),
+            Math.min(delay, 2_147_483_647),
+          );
+        }
       })
       .catch((error: unknown) => {
         if (!active) return;
@@ -228,6 +248,9 @@ export const useProtocolWorkspace = () => {
 
     return () => {
       active = false;
+      if (refreshTimer !== null) {
+        window.clearTimeout(refreshTimer);
+      }
     };
   }, [
     historyRefreshToken,

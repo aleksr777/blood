@@ -1,7 +1,53 @@
 import { getDatabase, type SqliteDatabase } from './database';
-import type { ProtocolValuesRecord } from './database-types';
+import type {
+  ComponentUnitNumberMatch,
+  ProtocolValuesRecord,
+} from './database-types';
 import { mapProtocol } from './recipient-data';
 import { upsertRecipient } from './recipient-profile-store';
+
+
+const normalizeComponentUnitNumber = (value?: string) =>
+  (value ?? '').replace(/\D/g, '');
+
+export const findProtocolRecordsByComponentUnitNumber = async (
+  componentUnitNumber: string,
+  excludeRecordId: number | null,
+): Promise<ComponentUnitNumberMatch[]> => {
+  const digits = normalizeComponentUnitNumber(componentUnitNumber);
+  if (!digits) return [];
+
+  const db = await getDatabase();
+  const rows = db.exec({
+    sql: `
+      SELECT p.id, p.recipient_id AS recipientId, p.values_json AS valuesJson,
+        r.full_name AS recipientName
+      FROM protocol_records p
+      JOIN recipients r ON r.id = p.recipient_id
+      WHERE ($excludeRecordId IS NULL OR p.id <> $excludeRecordId)
+      ORDER BY p.updated_at DESC, p.id DESC
+    `,
+    bind: { $excludeRecordId: excludeRecordId },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<Record<string, unknown>>;
+
+  return rows.flatMap((row) => {
+    try {
+      const values = JSON.parse(String(row.valuesJson ?? '{}')) as ProtocolValuesRecord;
+      if (normalizeComponentUnitNumber(values.componentUnitNumber) !== digits) return [];
+
+      return [{
+        id: Number(row.id),
+        recipientId: Number(row.recipientId),
+        recipientName: String(row.recipientName ?? ''),
+        transfusionDate: values.transfusionDate ?? '',
+      }];
+    } catch {
+      return [];
+    }
+  });
+};
 
 export const removeProtocolRecord = async (id: number) => {
   const db = await getDatabase();

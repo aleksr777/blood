@@ -23,5 +23,5 @@ export const getSelectionStatus = (values: ProtocolValues): SelectionStatus | ''
   // Preserve existing records created before the status selector was added.
   return SELECTION_DETAIL_FIELDS.some((field) => values[field]?.trim())
     ? SELECTION_STATUS.performed
-    : '';
+    : SELECTION_STATUS.notPerformed;
 };

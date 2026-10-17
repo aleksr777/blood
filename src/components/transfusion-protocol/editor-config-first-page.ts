@@ -101,6 +101,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     size: 'large',
     fields: [
       { name: 'previousTransfusionsStatus', label: 'previousTransfusionsStatus' },
+      { name: 'previousTransfusionsAutoText', label: 'previousTransfusionsAutoText' },
       {
         name: 'previousTransfusions',
         label: 'Трансфузии компонентов крови в анамнезе',

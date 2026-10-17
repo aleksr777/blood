@@ -230,8 +230,20 @@ export const syncCurrentRecipientProfile = async (
   changes: ProtocolValuesRecord,
   activeDraft: ActiveDraftOverride,
 ): Promise<RecipientProfileSyncResult | null> => {
+  const hasGeneratedTransfusionHistory = Boolean(
+    changes.previousTransfusionsAutoText?.trim(),
+  );
   const profilePatch = Object.fromEntries(
-    Object.entries(changes).filter(([key]) => recipientProfileFieldSet.has(key)),
+    Object.entries(changes).filter(([key]) => {
+      if (!recipientProfileFieldSet.has(key)) return false;
+      if (
+        hasGeneratedTransfusionHistory &&
+        (key === 'previousTransfusionsStatus' || key === 'previousTransfusions')
+      ) {
+        return false;
+      }
+      return true;
+    }),
   );
 
   if (Object.keys(profilePatch).length === 0) return null;

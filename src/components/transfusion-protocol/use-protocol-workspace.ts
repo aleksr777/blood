@@ -332,10 +332,19 @@ export const useProtocolWorkspace = () => {
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
     setActiveBlock(null);
+    const generatedHistory = record.values.previousTransfusionsAutoText?.trim()
+      ? {
+          previousTransfusionsStatus: record.values.previousTransfusionsStatus ?? '',
+          previousTransfusions: record.values.previousTransfusions ?? '',
+          previousTransfusionsAutoText: record.values.previousTransfusionsAutoText,
+        }
+      : {};
+
     setRecordId(record.id);
     setValues({
       ...record.values,
       ...recipientProfileValuesForForms(recipient),
+      ...generatedHistory,
     });
     setRegistryOpen(false);
     setStatus('Сохранённый бланк открыт для просмотра и редактирования.');

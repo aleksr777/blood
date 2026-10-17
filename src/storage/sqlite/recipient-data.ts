@@ -7,6 +7,10 @@ import type {
 export const RECIPIENT_PROFILE_FIELDS = [
   'recipientBirthDate',
   'recipientSex',
+  'recipientPregnanciesCount',
+  'recipientBirthsCount',
+  'recipientSpontaneousAbortionsCount',
+  'recipientHemolyticDiseaseNewbornHistory',
   'department',
   'medicalRecordNumber',
   'roomNumber',

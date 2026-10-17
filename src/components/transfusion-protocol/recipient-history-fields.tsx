@@ -4,6 +4,7 @@ import styles from './recipient-history-fields.module.css';
 
 type Props = {
   values: ProtocolValues;
+  previousTransfusionSuggestion?: string;
   onChange: (values: ProtocolValues) => void;
 };
 
@@ -31,39 +32,88 @@ const STATUS_OPTIONS = [
   [HISTORY_STATUS.had, 'Были'],
 ] as const;
 
-export const RecipientHistoryFields = ({ values, onChange }: Props) => (
-  <div className={styles.root}>
-    {HISTORY_FIELDS.map(({ statusName, textName, label }) => {
-      const status = getHistoryStatus(values[statusName], values[textName]);
+export const RecipientHistoryFields = ({
+  values,
+  previousTransfusionSuggestion = '',
+  onChange,
+}: Props) => {
+  const suggestion = previousTransfusionSuggestion.trim();
+  const suggestionApplied =
+    Boolean(suggestion) &&
+    values.previousTransfusionsAutoText === suggestion &&
+    values.previousTransfusions === suggestion;
 
-      return (
-        <fieldset key={statusName} className={styles.group}>
-          <legend>{label}</legend>
+  const applySuggestion = () => {
+    if (!suggestion) return;
 
-          <div className={styles.options}>
-            {STATUS_OPTIONS.map(([value, optionLabel]) => (
-              <label key={value} className={styles.option}>
-                <input
-                  type="radio"
-                  name={statusName}
-                  checked={status === value}
-                  onChange={() => onChange({ [statusName]: value })}
-                />
-                <span>{optionLabel}</span>
-              </label>
-            ))}
+    onChange({
+      previousTransfusionsStatus: HISTORY_STATUS.had,
+      previousTransfusions: suggestion,
+      previousTransfusionsAutoText: suggestion,
+    });
+  };
+
+  return (
+    <div className={styles.root}>
+      {suggestion && (
+        <div className={styles.suggestion}>
+          <div className={styles.suggestionHeader}>
+            <div>
+              <div className={styles.suggestionTitle}>
+                Найдены предыдущие трансфузии
+              </div>
+              <div className={styles.suggestionHint}>
+                Текст сформирован по предыдущим протоколам и не будет внесён без подтверждения.
+              </div>
+            </div>
+            <button
+              type="button"
+              className={styles.suggestionButton}
+              disabled={suggestionApplied}
+              onClick={applySuggestion}
+            >
+              {suggestionApplied ? 'Внесено' : 'Внести в анамнез'}
+            </button>
           </div>
 
-          {status === HISTORY_STATUS.had && (
-            <textarea
-              name={textName}
-              rows={4}
-              value={values[textName] ?? ''}
-              onChange={(event) => onChange({ [textName]: event.target.value })}
-            />
-          )}
-        </fieldset>
-      );
-    })}
-  </div>
-);
+          <div className={styles.suggestionPreview} aria-label="Предварительный просмотр">
+            {suggestion}
+          </div>
+        </div>
+      )}
+
+      {HISTORY_FIELDS.map(({ statusName, textName, label }) => {
+        const status = getHistoryStatus(values[statusName], values[textName]);
+
+        return (
+          <fieldset key={statusName} className={styles.group}>
+            <legend>{label}</legend>
+
+            <div className={styles.options}>
+              {STATUS_OPTIONS.map(([value, optionLabel]) => (
+                <label key={value} className={styles.option}>
+                  <input
+                    type="radio"
+                    name={statusName}
+                    checked={status === value}
+                    onChange={() => onChange({ [statusName]: value })}
+                  />
+                  <span>{optionLabel}</span>
+                </label>
+              ))}
+            </div>
+
+            {status === HISTORY_STATUS.had && (
+              <textarea
+                name={textName}
+                rows={4}
+                value={values[textName] ?? ''}
+                onChange={(event) => onChange({ [textName]: event.target.value })}
+              />
+            )}
+          </fieldset>
+        );
+      })}
+    </div>
+  );
+};

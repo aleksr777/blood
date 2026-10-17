@@ -6,6 +6,7 @@ import type {
 
 export const RECIPIENT_PROFILE_FIELDS = [
   'recipientBirthDate',
+  'recipientSex',
   'department',
   'medicalRecordNumber',
   'roomNumber',

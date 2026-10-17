@@ -57,7 +57,9 @@ export const SiteNavigation = ({
             ),
           )}
         </nav>
+      </div>
 
+      <div className="site-current-recipient-row">
         <button
           type="button"
           className={`current-recipient-summary${name ? '' : ' current-recipient-summary--empty'}`}

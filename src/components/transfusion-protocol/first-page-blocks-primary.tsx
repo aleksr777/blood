@@ -1,5 +1,6 @@
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatIndications } from './indications-model';
+import { formatRecipientAge } from './recipient-demographics';
 import {
   formatAlloimmuneAntibodies,
   formatRecipientAntigens,
@@ -17,7 +18,23 @@ const formatRh = (value?: string) => {
   return value ?? '';
 };
 
-export const GeneralBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
+export const GeneralBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
+  const demographics = [
+    values.recipientBirthDate
+      ? `Дата рождения: ${formatDate(values.recipientBirthDate)}`
+      : '',
+    values.recipientSex ? `Пол: ${values.recipientSex}` : '',
+    values.recipientBirthDate
+      ? `Возраст: ${formatRecipientAge(
+          values.recipientBirthDate,
+          values.transfusionDate,
+        )}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  return (
   <tbody
     className="fill-block"
     data-protocol-block="general"
@@ -30,7 +47,7 @@ export const GeneralBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
           colSpan={2}
           className="w-30"
           label="Фамилия, имя, отчество (при наличии) реципиента"
-          value={values.recipientName}
+          value={[values.recipientName, demographics].filter(Boolean).join('\n')}
         />
         <LabeledCell
           colSpan={2}
@@ -68,7 +85,8 @@ export const GeneralBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
       </tr>
     )}
   </tbody>
-);
+  );
+};
 
 export const ExaminationBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
   <tbody

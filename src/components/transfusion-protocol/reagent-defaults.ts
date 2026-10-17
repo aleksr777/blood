@@ -72,14 +72,14 @@ export const saveReagentDefaults = (values: ProtocolValues) => {
 
 export const reagentDefaultsForNewBlank = (values: ProtocolValues): ProtocolValues => {
   const stored = loadReagentDefaults();
+
+  if (Object.keys(stored).length > 0) {
+    return stored;
+  }
+
   const current = pickReagentDefaults(values);
-
-  const merged = Object.fromEntries(
-    REAGENT_DEFAULT_FIELDS.map((name) => [name, current[name] || stored[name] || '']),
-  );
-
-  saveReagentDefaults(merged);
-  return merged;
+  saveReagentDefaults(current);
+  return current;
 };
 
 const localIsoDate = (date: Date) => {

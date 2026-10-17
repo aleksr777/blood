@@ -350,11 +350,14 @@ export const useProtocolWorkspace = () => {
     }
 
     try {
+      const wasSavedRecord = recordId !== null;
       const record = await saveProtocolRecord(recordId, values);
       setRecordId(record.id);
       const savedValues = { ...values, recipientId: String(record.recipientId) };
       setValues(savedValues);
-      adoptCurrentRecipientFromValues(savedValues);
+      if (!wasSavedRecord) {
+        adoptCurrentRecipientFromValues(savedValues);
+      }
       setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
       return true;
     } catch (error) {

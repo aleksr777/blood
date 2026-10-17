@@ -24,7 +24,6 @@ export const RECIPIENT_PROFILE_FIELDS = [
   'alloimmuneAntibodyDescription',
   'previousTransfusionsStatus',
   'previousTransfusions',
-  'previousTransfusionsAutoText',
   'previousReactionsStatus',
   'previousReactions',
   'individualSelectionHistoryStatus',
@@ -51,21 +50,47 @@ export const parseValues = (value: string): ProtocolValuesRecord => {
   }
 };
 
-export const profileFromValues = (values: ProtocolValuesRecord) =>
-  Object.fromEntries(
-    RECIPIENT_PROFILE_FIELDS.flatMap((field) =>
-      values[field] ? [[field, values[field]]] : [],
-    ),
+const GENERATED_TRANSFUSION_HISTORY_FIELDS = new Set([
+  'previousTransfusionsStatus',
+  'previousTransfusions',
+]);
+
+export const profileFromValues = (values: ProtocolValuesRecord) => {
+  const hasGeneratedTransfusionHistory = Boolean(
+    values.previousTransfusionsAutoText?.trim(),
   );
+
+  return Object.fromEntries(
+    RECIPIENT_PROFILE_FIELDS.flatMap((field) => {
+      if (
+        hasGeneratedTransfusionHistory &&
+        GENERATED_TRANSFUSION_HISTORY_FIELDS.has(field)
+      ) {
+        return [];
+      }
+
+      return values[field] ? [[field, values[field]]] : [];
+    }),
+  );
+};
 
 export const mergeProfileValues = (
   current: ProtocolValuesRecord,
   values: ProtocolValuesRecord,
 ): ProtocolValuesRecord => {
-  const next = { ...current };
+  const next = profileFromValues(current);
+  const hasGeneratedTransfusionHistory = Boolean(
+    values.previousTransfusionsAutoText?.trim(),
+  );
 
   RECIPIENT_PROFILE_FIELDS.forEach((field) => {
     if (!(field in values)) return;
+    if (
+      hasGeneratedTransfusionHistory &&
+      GENERATED_TRANSFUSION_HISTORY_FIELDS.has(field)
+    ) {
+      return;
+    }
 
     const value = values[field];
     if (value) next[field] = value;

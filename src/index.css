@@ -778,8 +778,14 @@ a.site-navigation__link:focus-visible::after {
 }
 
 .doctor-row td {
-  height: 13mm;
+  height: auto;
+  min-height: 13mm;
   vertical-align: middle;
+}
+
+.doctor-staff {
+  display: grid;
+  gap: 1.8mm;
 }
 
 .doctor-inline {

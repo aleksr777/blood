@@ -214,10 +214,14 @@ export const useProtocolWorkspace = () => {
             : 'Выбран новый реципиент.',
         );
       } else {
-        setValues({
-          ...result.protocolValues,
-          ...reagentDefaultsForNewBlank(result.protocolValues),
-        });
+        setValues(
+          recordId === null
+            ? {
+                ...result.protocolValues,
+                ...reagentDefaultsForNewBlank(result.protocolValues),
+              }
+            : result.protocolValues,
+        );
         setStatus(`Текущий реципиент: ${recipient.fullName}.`);
       }
 

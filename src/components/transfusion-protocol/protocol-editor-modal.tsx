@@ -106,7 +106,23 @@ export const ProtocolEditorModal = ({
       <div className={styles.generalGroupGrid}>
         {fieldNames.flatMap((fieldName) => {
           const field = config.fields.find(({ name }) => name === fieldName);
-          return field ? [renderStandardField(field)] : [];
+          if (!field) return [];
+
+          if (field.name === 'recipientAge') {
+            return [
+              <div key={field.name}>
+                <div className={styles.fieldLabel}>{field.label}</div>
+                <div className={styles.calculatedValue}>
+                  {formatRecipientAge(
+                    draft.recipientBirthDate,
+                    draft.transfusionDate,
+                  ) || '—'}
+                </div>
+              </div>,
+            ];
+          }
+
+          return [renderStandardField(field)];
         })}
       </div>
     </fieldset>

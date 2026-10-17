@@ -63,6 +63,18 @@ const getRecipientId = (values: ProtocolValuesRecord) => {
   return Number.isFinite(id) && id > 0 ? id : null;
 };
 
+const generatedTransfusionHistoryValues = (
+  values: ProtocolValuesRecord,
+): ProtocolValuesRecord => {
+  if (!values.previousTransfusionsAutoText?.trim()) return {};
+
+  return {
+    previousTransfusionsStatus: values.previousTransfusionsStatus ?? '',
+    previousTransfusions: values.previousTransfusions ?? '',
+    previousTransfusionsAutoText: values.previousTransfusionsAutoText,
+  };
+};
+
 export type CurrentRecipient = {
   id: number;
   fullName: string;
@@ -301,7 +313,11 @@ export const syncCurrentRecipientProfile = async (
   } else {
     protocolDraft = {
       ...protocolDraft,
-      values: { ...protocolDraft.values, ...sharedValues },
+      values: {
+        ...protocolDraft.values,
+        ...sharedValues,
+        ...generatedTransfusionHistoryValues(protocolDraft.values),
+      },
       updatedAt: Date.now(),
     };
   }
@@ -374,6 +390,7 @@ export const switchCurrentRecipient = async (
     const protocolValues = {
       ...protocolDraft.values,
       ...profileValues,
+      ...generatedTransfusionHistoryValues(protocolDraft.values),
     };
     const registrationValues = {
       ...registrationDraft.values,

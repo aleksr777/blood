@@ -37,6 +37,7 @@ const BasicControl = ({
       type={field.type ?? 'text'}
       step={field.step}
       value={value}
+      readOnly={field.readOnly}
       onChange={(event) => onChange(field.name, event.target.value)}
     />
   );

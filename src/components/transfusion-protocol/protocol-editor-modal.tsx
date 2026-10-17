@@ -16,7 +16,11 @@ import { SelectionFields } from './selection-fields';
 import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
-import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
+import type {
+  ProtocolBlockId,
+  ProtocolFieldConfig,
+  ProtocolValues,
+} from './protocol-types';
 
 type Props = {
   blockId: ProtocolBlockId;
@@ -78,6 +82,36 @@ export const ProtocolEditorModal = ({
     onOpenRecipients();
   };
 
+  const renderStandardField = (field: ProtocolFieldConfig) => (
+    <ProtocolFieldControl
+      key={field.name}
+      field={field}
+      value={
+        field.name === 'recipientAge'
+          ? formatRecipientAge(
+              draft.recipientBirthDate,
+              draft.transfusionDate,
+            )
+          : (draft[field.name] ?? '')
+      }
+      onChange={changeValue}
+      onOpenRecipients={handleOpenRecipients}
+      onSelectRecipient={onSelectRecipient}
+    />
+  );
+
+  const renderGeneralGroup = (title: string, fieldNames: string[]) => (
+    <fieldset className={styles.generalGroup}>
+      <legend>{title}</legend>
+      <div className={styles.generalGroupGrid}>
+        {fieldNames.flatMap((fieldName) => {
+          const field = config.fields.find(({ name }) => name === fieldName);
+          return field ? [renderStandardField(field)] : [];
+        })}
+      </div>
+    </fieldset>
+  );
+
   return (
     <Modal title={config.title} onClose={handleClose} className={styles[config.size]}>
       <div className={[styles.grid, blockId === 'history' ? styles.historyGrid : ''].filter(Boolean).join(' ')}>
@@ -95,7 +129,26 @@ export const ProtocolEditorModal = ({
           </div>
         )}
 
-        {blockId === 'examination' ? (
+        {blockId === 'general' ? (
+          <>
+            {renderGeneralGroup('Данные реципиента', [
+              'recipientName',
+              'recipientBirthDate',
+              'recipientSex',
+              'recipientAge',
+            ])}
+            {renderGeneralGroup('Госпитализация', [
+              'department',
+              'medicalRecordNumber',
+            ])}
+            {renderGeneralGroup('Данные трансфузии', [
+              'requestDateTime',
+              'transfusionDate',
+              'startTime',
+              'endTime',
+            ])}
+          </>
+        ) : blockId === 'examination' ? (
           <RecipientExaminationFields values={draft} onChange={changeValues} />
         ) : blockId === 'donor' ? (
           <>
@@ -199,23 +252,7 @@ export const ProtocolEditorModal = ({
         ) : blockId === 'monitoring' ? (
           <MonitoringFields values={draft} onChange={changeValues} />
         ) : (
-          config.fields.map((field) => (
-            <ProtocolFieldControl
-              key={field.name}
-              field={field}
-              value={
-                field.name === 'recipientAge'
-                  ? formatRecipientAge(
-                      draft.recipientBirthDate,
-                      draft.transfusionDate,
-                    )
-                  : (draft[field.name] ?? '')
-              }
-              onChange={changeValue}
-              onOpenRecipients={handleOpenRecipients}
-              onSelectRecipient={onSelectRecipient}
-            />
-          ))
+          config.fields.map(renderStandardField)
         )}
       </div>
     </Modal>

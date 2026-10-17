@@ -30,6 +30,7 @@ type Props = {
   componentUnitNumberWarning: string;
   onDismissComponentUnitNumberWarning: () => void;
   previousTransfusionSuggestion: string;
+  persistReusableOptions: boolean;
   onOpenRecipients: () => void;
   onSelectRecipient: (recipient: RecipientRecord) => void | Promise<void>;
   onSave: (values: ProtocolValues) => void;
@@ -49,6 +50,7 @@ export const ProtocolEditorModal = ({
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
   previousTransfusionSuggestion,
+  persistReusableOptions,
   onOpenRecipients,
   onSelectRecipient,
   onSave,
@@ -72,12 +74,16 @@ export const ProtocolEditorModal = ({
   };
 
   const handleClose = () => {
-    persistProtocolOptions(draft);
+    if (persistReusableOptions) {
+      persistProtocolOptions(draft);
+    }
     onClose(draft);
   };
 
   const handleOpenRecipients = () => {
-    persistProtocolOptions(draft);
+    if (persistReusableOptions) {
+      persistProtocolOptions(draft);
+    }
     onClose(draft);
     onOpenRecipients();
   };

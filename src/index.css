@@ -162,8 +162,14 @@ input[type='radio']:checked:disabled {
 .site-navigation-row {
   display: flex;
   align-items: center;
-  gap: 24px;
   min-width: 0;
+}
+
+.site-current-recipient-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin-top: 8px;
 }
 
 .current-recipient-summary {
@@ -171,7 +177,7 @@ input[type='radio']:checked:disabled {
   align-items: center;
   gap: 7px;
   min-width: 0;
-  margin-left: auto;
+  margin-left: 0;
   padding: 6px 10px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
@@ -1020,12 +1026,14 @@ a.site-navigation__link:focus-visible::after {
 
   .site-navigation-row {
     flex-wrap: wrap;
-    gap: 8px 16px;
+  }
+
+  .site-current-recipient-row {
+    width: 100%;
   }
 
   .current-recipient-summary {
     width: 100%;
-    margin-left: 0;
   }
 
   .print-actions {

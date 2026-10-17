@@ -37,7 +37,7 @@ export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
       <SectionTitle>Анамнез реципиента</SectionTitle>
       <tr className="row-history">
         <LabeledCell
-          colSpan={2}
+          colSpan={previousTransfusionsHad ? 2 : 6}
           label="Трансфузии компонентов крови в анамнезе"
           value={formatHistoryValue(
             values,
@@ -45,32 +45,28 @@ export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
             'previousTransfusions',
           )}
         />
-        <LabeledCell
-          colSpan={2}
-          label="Реакции и осложнения на трансфузии в анамнезе"
-          value={
-            previousTransfusionsHad
-              ? formatHistoryValue(
-                  values,
-                  'previousReactionsStatus',
-                  'previousReactions',
-                )
-              : ''
-          }
-        />
-        <LabeledCell
-          colSpan={2}
-          label="Трансфузии по индивидуальному подбору"
-          value={
-            previousTransfusionsHad
-              ? formatHistoryValue(
-                  values,
-                  'individualSelectionHistoryStatus',
-                  'individualSelectionHistory',
-                )
-              : ''
-          }
-        />
+        {previousTransfusionsHad && (
+          <>
+            <LabeledCell
+              colSpan={2}
+              label="Реакции и осложнения на трансфузии в анамнезе"
+              value={formatHistoryValue(
+                values,
+                'previousReactionsStatus',
+                'previousReactions',
+              )}
+            />
+            <LabeledCell
+              colSpan={2}
+              label="Трансфузии по индивидуальному подбору"
+              value={formatHistoryValue(
+                values,
+                'individualSelectionHistoryStatus',
+                'individualSelectionHistory',
+              )}
+            />
+          </>
+        )}
       </tr>
     </tbody>
   );

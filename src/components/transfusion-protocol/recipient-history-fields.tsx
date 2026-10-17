@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { HISTORY_STATUS, getHistoryStatus } from './recipient-history-model';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-history-fields.module.css';
@@ -38,11 +39,60 @@ export const RecipientHistoryFields = ({
   onChange,
 }: Props) => {
   const suggestion = previousTransfusionSuggestion.trim();
+  const previousTransfusionsStatus = getHistoryStatus(
+    values.previousTransfusionsStatus,
+    values.previousTransfusions,
+  );
+  const dependentHistoryDisabled =
+    previousTransfusionsStatus !== HISTORY_STATUS.had;
   const suggestionApplied =
     Boolean(suggestion) &&
     values.previousTransfusionsStatus === HISTORY_STATUS.had &&
     values.previousTransfusionsAutoText === suggestion &&
     values.previousTransfusions === suggestion;
+
+  useEffect(() => {
+    if (!dependentHistoryDisabled) return;
+
+    if (
+      values.previousReactionsStatus ||
+      values.previousReactions ||
+      values.individualSelectionHistoryStatus ||
+      values.individualSelectionHistory
+    ) {
+      onChange({
+        previousReactionsStatus: '',
+        previousReactions: '',
+        individualSelectionHistoryStatus: '',
+        individualSelectionHistory: '',
+      });
+    }
+  }, [
+    dependentHistoryDisabled,
+    onChange,
+    values.individualSelectionHistory,
+    values.individualSelectionHistoryStatus,
+    values.previousReactions,
+    values.previousReactionsStatus,
+  ]);
+
+  const changeStatus = (statusName: string, value: string) => {
+    if (
+      statusName === 'previousTransfusionsStatus' &&
+      value !== HISTORY_STATUS.had
+    ) {
+      onChange({
+        previousTransfusionsStatus: value,
+        previousReactionsStatus: '',
+        previousReactions: '',
+        individualSelectionHistoryStatus: '',
+        individualSelectionHistory: '',
+      });
+      return;
+    }
+
+    onChange({ [statusName]: value });
+  };
 
   const applySuggestion = () => {
     if (!suggestion) return;
@@ -83,11 +133,18 @@ export const RecipientHistoryFields = ({
         </div>
       )}
 
-      {HISTORY_FIELDS.map(({ statusName, textName, label }) => {
+      {HISTORY_FIELDS.map(({ statusName, textName, label }, index) => {
         const status = getHistoryStatus(values[statusName], values[textName]);
+        const disabled = index > 0 && dependentHistoryDisabled;
 
         return (
-          <fieldset key={statusName} className={styles.group}>
+          <fieldset
+            key={statusName}
+            className={[styles.group, disabled ? styles.groupDisabled : '']
+              .filter(Boolean)
+              .join(' ')}
+            disabled={disabled}
+          >
             <legend>{label}</legend>
 
             <div className={styles.options}>
@@ -97,7 +154,7 @@ export const RecipientHistoryFields = ({
                     type="radio"
                     name={statusName}
                     checked={status === value}
-                    onChange={() => onChange({ [statusName]: value })}
+                    onChange={() => changeStatus(statusName, value)}
                   />
                   <span>{optionLabel}</span>
                 </label>

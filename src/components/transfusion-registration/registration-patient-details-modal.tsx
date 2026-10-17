@@ -56,14 +56,12 @@ export const RegistrationPatientDetailsModal = ({
         </select>
       </label>
 
-      <label>
-        <span>Возраст</span>
-        <input
-          type="text"
-          value={formatRecipientAge(values.recipientBirthDate)}
-          readOnly
-        />
-      </label>
+      <div>
+        <div className={styles.fieldLabel}>Возраст</div>
+        <div className={styles.calculatedValue}>
+          {formatRecipientAge(values.recipientBirthDate) || '—'}
+        </div>
+      </div>
 
       <label>
         <span>№ медицинской карты</span>
@@ -75,15 +73,6 @@ export const RegistrationPatientDetailsModal = ({
         />
       </label>
 
-      <label>
-        <span>№ палаты</span>
-        <input
-          name="roomNumber"
-          type="text"
-          value={values.roomNumber ?? ''}
-          onChange={(event) => onChange({ roomNumber: event.target.value })}
-        />
-      </label>
     </div>
   </Modal>
 );

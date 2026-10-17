@@ -40,6 +40,7 @@ export const RecipientHistoryFields = ({
   const suggestion = previousTransfusionSuggestion.trim();
   const suggestionApplied =
     Boolean(suggestion) &&
+    values.previousTransfusionsStatus === HISTORY_STATUS.had &&
     values.previousTransfusionsAutoText === suggestion &&
     values.previousTransfusions === suggestion;
 

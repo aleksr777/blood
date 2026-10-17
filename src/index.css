@@ -935,7 +935,9 @@ a.site-navigation__link:focus-visible::after {
 .registration-blank--day { width: 7mm; }
 .registration-blank--date { width: 24mm; }
 .registration-blank--year { width: 13mm; }
-.registration-blank--card { width: 30mm; }
+.registration-blank--sex { width: 20mm; }
+.registration-blank--age { width: 17mm; }
+.registration-blank--card { width: 26mm; }
 .registration-blank--room { width: 14mm; }
 
 .registration-table {

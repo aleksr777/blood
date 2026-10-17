@@ -7,6 +7,7 @@ const SAVED_OPTION_FIELDS = new Set([
   'selectionOrganization',
   'responsiblePerson',
   'doctorName',
+  'nurseName',
 ]);
 
 export const getSavedOptionCategory = (fieldName: string) =>

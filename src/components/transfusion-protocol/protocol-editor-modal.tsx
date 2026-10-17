@@ -8,6 +8,7 @@ import { DonorFields } from './donor-fields';
 import { IndicationsFields } from './indications-fields';
 import { MonitoringFields } from './monitoring-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
+import { formatRecipientAge } from './recipient-demographics';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { RecipientHistoryFields } from './recipient-history-fields';
 import { getHemaconExpirationWarning } from './reagent-defaults';
@@ -202,7 +203,14 @@ export const ProtocolEditorModal = ({
             <ProtocolFieldControl
               key={field.name}
               field={field}
-              value={draft[field.name] ?? ''}
+              value={
+                field.name === 'recipientAge'
+                  ? formatRecipientAge(
+                      draft.recipientBirthDate,
+                      draft.transfusionDate,
+                    )
+                  : (draft[field.name] ?? '')
+              }
               onChange={changeValue}
               onOpenRecipients={handleOpenRecipients}
               onSelectRecipient={onSelectRecipient}

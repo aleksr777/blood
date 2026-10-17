@@ -453,9 +453,7 @@ export const TransfusionRegistration = () => {
                 {values.medicalRecordNumber ?? ''}
               </span>
               <span>№ палаты</span>
-              <span className="registration-blank registration-blank--room">
-                {values.roomNumber ?? ''}
-              </span>
+              <span className="registration-blank registration-blank--room" />
             </div>
           </div>
 

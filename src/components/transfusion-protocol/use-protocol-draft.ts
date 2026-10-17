@@ -70,7 +70,9 @@ export const useProtocolDraft = ({
                 }
               : draft.values;
           const currentRecipient = readCurrentRecipient();
-          if (!currentRecipient) {
+          if (draft.protocolRecordId !== null) {
+            setValues(draftValues);
+          } else if (!currentRecipient) {
             adoptCurrentRecipientFromValues(draftValues);
             setValues(draftValues);
           } else if (Number(draftValues.recipientId) === currentRecipient.id) {

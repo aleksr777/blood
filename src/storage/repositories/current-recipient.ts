@@ -313,7 +313,7 @@ export const syncCurrentRecipientProfile = async (
       protocolRecordId: null,
       updatedAt: Date.now(),
     };
-  } else {
+  } else if (protocolDraft.protocolRecordId === null) {
     protocolDraft = {
       ...protocolDraft,
       values: {
@@ -332,7 +332,7 @@ export const syncCurrentRecipientProfile = async (
       registrationRecordId: null,
       updatedAt: Date.now(),
     };
-  } else {
+  } else if (registrationDraft.registrationRecordId === null) {
     registrationDraft = {
       ...registrationDraft,
       values: { ...registrationDraft.values, ...sharedValues },

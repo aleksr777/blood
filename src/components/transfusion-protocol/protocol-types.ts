@@ -29,6 +29,7 @@ export type ProtocolFieldConfig = {
   wide?: boolean;
   step?: string;
   required?: boolean;
+  readOnly?: boolean;
 };
 
 export type ProtocolBlockSize = 'small' | 'medium' | 'large' | 'xlarge';

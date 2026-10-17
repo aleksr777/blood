@@ -266,6 +266,7 @@ export const TransfusionProtocol = () => {
           onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
           componentUnitNumberWarning={workspace.componentUnitNumberWarning}
           onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}
+          previousTransfusionSuggestion={workspace.previousTransfusionSuggestion}
           onOpenRecipients={() => {
             setRegistryRecipientId(null);
             workspace.setActiveBlock(null);

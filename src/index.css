@@ -859,26 +859,41 @@ a.site-navigation__link:focus-visible::after {
 }
 
 .registration-patient-details {
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: 3mm;
   margin-bottom: 5mm;
-  border-radius: 2px;
   cursor: pointer;
+}
+
+.registration-patient-details::before {
+  position: absolute;
+  z-index: -1;
+  inset: -2.5mm -3mm;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  content: '';
+  pointer-events: none;
   transition:
     background-color 140ms ease,
-    box-shadow 140ms ease;
+    border-color 140ms ease;
 }
 
 .registration-patient-details:focus-visible {
-  background: #eef6ff;
-  box-shadow: 0 0 0 1px #2563eb;
   outline: none;
 }
 
+.registration-patient-details:focus-visible::before {
+  border-color: #2563eb;
+  background: #eef6ff;
+}
+
 @media (hover: hover) and (pointer: fine) {
-  .registration-patient-details:hover {
+  .registration-patient-details:hover::before {
+    border-color: #2563eb;
     background: #eef6ff;
-    box-shadow: 0 0 0 1px #2563eb;
   }
 }
 
@@ -1074,6 +1089,10 @@ a.site-navigation__link:focus-visible::after {
     background: transparent !important;
     box-shadow: none !important;
     outline: none !important;
+  }
+
+  .registration-patient-details::before {
+    display: none !important;
   }
 
   .sheets {

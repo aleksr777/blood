@@ -116,9 +116,11 @@ export const saveProtocolRecord = async (
   if (linkedId !== null && selectedId !== null && selectedId !== linkedId) {
     throw new Error('Для другого реципиента создайте новый бланк.');
   }
-  const recipientId = upsertRecipient(db, values, selectedId ?? linkedId);
-  const now = Date.now();
   const canUpdate = linkedId !== null && recordId !== null;
+  const recipientId = canUpdate
+    ? linkedId
+    : upsertRecipient(db, values, selectedId ?? linkedId);
+  const now = Date.now();
   const id = canUpdate ? recordId : insertProtocol(db, recipientId, values, now);
 
   if (canUpdate) {

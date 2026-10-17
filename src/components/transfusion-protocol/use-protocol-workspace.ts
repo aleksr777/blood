@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
-  recipientProfileValuesForForms,
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
@@ -481,7 +480,7 @@ export const useProtocolWorkspace = () => {
     setRecordId(record.id);
     setValues({
       ...record.values,
-      ...recipientProfileValuesForForms(recipient),
+      recipientId: String(record.recipientId),
       ...generatedHistory,
     });
     setRegistryOpen(false);

@@ -106,7 +106,7 @@ export const TransfusionRegistration = () => {
     Number.isFinite(currentRecipientId) && currentRecipientId > 0;
   const storedCurrentRecipient = readCurrentRecipient();
   const currentRecipientProfile =
-    storedCurrentRecipient?.id === currentRecipientId
+    recordId === null && storedCurrentRecipient?.id === currentRecipientId
       ? storedCurrentRecipient.profile
       : {};
   const birthDateParts = getBirthDateParts(values.recipientBirthDate);

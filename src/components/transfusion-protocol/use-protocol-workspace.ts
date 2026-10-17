@@ -214,7 +214,10 @@ export const useProtocolWorkspace = () => {
             : 'Выбран новый реципиент.',
         );
       } else {
-        setValues(result.protocolValues);
+        setValues({
+          ...result.protocolValues,
+          ...reagentDefaultsForNewBlank(result.protocolValues),
+        });
         setStatus(`Текущий реципиент: ${recipient.fullName}.`);
       }
 
@@ -308,7 +311,7 @@ export const useProtocolWorkspace = () => {
           recipientName: currentRecipient.fullName,
           ...reagentDefaultsForNewBlank(values),
         }
-      : {};
+      : reagentDefaultsForNewBlank(values);
 
     draft.reset();
     setComponentUnitNumberChecked(false);

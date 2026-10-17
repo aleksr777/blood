@@ -32,8 +32,8 @@ export const buildPreviousTransfusionHistory = (
 ) =>
   records
     .filter(({ values }) => {
-      const date = values.transfusionDate;
-      return isIsoDate(date) && Boolean(date) && date! < today;
+      const date = values.transfusionDate ?? '';
+      return isIsoDate(date) && date < today;
     })
     .sort((left, right) =>
       (right.values.transfusionDate ?? '').localeCompare(

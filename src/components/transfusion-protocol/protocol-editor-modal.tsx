@@ -24,6 +24,7 @@ type Props = {
   onDismissBloodGroupWarning: () => void;
   componentUnitNumberWarning: string;
   onDismissComponentUnitNumberWarning: () => void;
+  previousTransfusionSuggestion: string;
   onOpenRecipients: () => void;
   onSelectRecipient: (recipient: RecipientRecord) => void | Promise<void>;
   onSave: (values: ProtocolValues) => void;
@@ -42,6 +43,7 @@ export const ProtocolEditorModal = ({
   onDismissBloodGroupWarning,
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
+  previousTransfusionSuggestion,
   onOpenRecipients,
   onSelectRecipient,
   onSave,
@@ -182,7 +184,11 @@ export const ProtocolEditorModal = ({
         ) : blockId === 'indications' ? (
           <IndicationsFields values={draft} onChange={changeValues} />
         ) : blockId === 'history' ? (
-          <RecipientHistoryFields values={draft} onChange={changeValues} />
+          <RecipientHistoryFields
+            values={draft}
+            previousTransfusionSuggestion={previousTransfusionSuggestion}
+            onChange={changeValues}
+          />
         ) : blockId === 'selection' ? (
           <SelectionFields values={draft} onChange={changeValues} />
         ) : blockId === 'compatibilityTests' ? (

@@ -132,7 +132,11 @@ export const useProtocolWorkspace = () => {
     }
 
     const today = getLocalDateKey();
-    if (values.transfusionDate && values.transfusionDate !== today) {
+    if (
+      recordId !== null &&
+      values.transfusionDate &&
+      values.transfusionDate !== today
+    ) {
       setPreviousTransfusionSuggestion('');
       return undefined;
     }
@@ -160,6 +164,7 @@ export const useProtocolWorkspace = () => {
     };
   }, [
     historyRefreshToken,
+    recordId,
     values.recipientId,
     values.transfusionDate,
   ]);

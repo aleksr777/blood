@@ -6,6 +6,62 @@ export const INDICATION_COMPONENTS = [
   { value: 'platelets', label: 'Тромбоциты' },
 ] as const;
 
+const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
+  erythrocytes: [
+    'indications',
+    'indicationRbcBloodLoss',
+    'indicationRbcBloodLossPercent',
+    'indicationRbcOngoingBleeding',
+    'indicationRbcCirculatoryDisturbances',
+    'indicationRbcHemicHypoxia',
+    'indicationRbcThreshold',
+    'indicationRbcHgb',
+    'indicationRbcHct',
+    'indicationRbcOther',
+    'indicationRbcOtherText',
+  ],
+  'plasma-cryo': [
+    'indications',
+    'indicationPlasmaBloodLoss',
+    'indicationPlasmaBloodLossPercent',
+    'indicationPlasmaOngoingBleeding',
+    'indicationPlasmaFactorDeficiency',
+    'indicationPlasmaFibrinogenBleeding',
+    'indicationPlasmaFibrinogenLow',
+    'indicationPlasmaOther',
+    'indicationPlasmaOtherText',
+  ],
+  platelets: [
+    'indications',
+    'indicationPlateletHemorrhagicSyndrome',
+    'indicationPlateletHighBleedingRisk',
+    'indicationPlateletThrombocytopenia',
+    'indicationPlateletCount',
+    'indicationPlateletOther',
+    'indicationPlateletOtherText',
+  ],
+};
+
+export const getIndicationComponent = (values: ProtocolValues) =>
+  values.componentGroup || values.indicationComponent || '';
+
+export const indicationValuesForComponent = (
+  values: ProtocolValues,
+  component = getIndicationComponent(values),
+): ProtocolValues => {
+  const fields = INDICATION_FIELDS_BY_COMPONENT[component];
+  if (!fields) return {};
+
+  return {
+    indicationComponent: component,
+    ...Object.fromEntries(
+      fields.flatMap((field) =>
+        values[field] !== undefined ? [[field, values[field]]] : [],
+      ),
+    ),
+  };
+};
+
 const yes = (value?: string) => value === '1';
 
 const joinIndications = (items: string[]) => {

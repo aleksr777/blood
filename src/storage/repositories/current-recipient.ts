@@ -243,7 +243,6 @@ export const syncCurrentRecipientProfile = async (
   changes: ProtocolValuesRecord,
   activeDraft: ActiveDraftOverride,
 ): Promise<RecipientProfileSyncResult | null> => {
-  if (activeDraft.recordId !== null) return null;
   const hasGeneratedTransfusionHistory = Boolean(
     changes.previousTransfusionsAutoText?.trim() ||
       activeDraft.values.previousTransfusionsAutoText?.trim(),

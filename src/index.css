@@ -948,6 +948,36 @@ a.site-navigation__link:focus-visible::after {
 .registration-blank--card { width: 26mm; }
 .registration-blank--room { width: 14mm; }
 
+.registration-table-section {
+  position: relative;
+  cursor: pointer;
+}
+
+.registration-table-section:focus-visible {
+  outline: none;
+}
+
+.registration-table-section .registration-table th,
+.registration-table-section .registration-table td {
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.registration-table-section:focus-visible .registration-table th,
+.registration-table-section:focus-visible .registration-table td {
+  border-color: #2563eb;
+  background: #eef6ff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .registration-table-section:hover .registration-table th,
+  .registration-table-section:hover .registration-table td {
+    border-color: #2563eb;
+    background: #eef6ff;
+  }
+}
+
 .registration-table {
   width: 100%;
   border-collapse: collapse;
@@ -1099,6 +1129,18 @@ a.site-navigation__link:focus-visible::after {
 
   .registration-patient-details::before {
     display: none !important;
+  }
+
+  .registration-table-section {
+    cursor: default;
+    outline: none !important;
+  }
+
+  .registration-table-section .registration-table th,
+  .registration-table-section .registration-table td {
+    border-color: #111 !important;
+    background: transparent !important;
+    transition: none !important;
   }
 
   .sheets {

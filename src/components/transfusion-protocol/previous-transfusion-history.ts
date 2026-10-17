@@ -23,15 +23,10 @@ const hasCompleteComponentData = (record: ProtocolRecord) => {
 
 const describeProtocol = (record: ProtocolRecord) => {
   const { values } = record;
-  const component = values.componentName!.trim();
-  const amount = values.amountMl!.trim();
+  const component = values.componentName?.trim() ?? '';
+  const amount = values.amountMl?.trim() ?? '';
 
-  return [
-    formatDate(values.transfusionDate),
-    `${component}, ${amount} мл`,
-  ]
-    .filter(Boolean)
-    .join(' — ');
+  return `${formatDate(values.transfusionDate)} — ${component}, ${amount} мл`;
 };
 
 export const buildPreviousTransfusionHistory = (

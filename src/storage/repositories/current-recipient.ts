@@ -122,7 +122,7 @@ export const readCurrentRecipient = (): CurrentRecipient | null => {
       return null;
     }
 
-    const profile =
+    const rawProfile =
       parsed.profile &&
       typeof parsed.profile === 'object' &&
       !Array.isArray(parsed.profile)
@@ -132,6 +132,7 @@ export const readCurrentRecipient = (): CurrentRecipient | null => {
             ),
           )
         : {};
+    const profile = profileFromValues(rawProfile);
 
     return {
       id: parsed.id,
@@ -243,7 +244,8 @@ export const syncCurrentRecipientProfile = async (
   activeDraft: ActiveDraftOverride,
 ): Promise<RecipientProfileSyncResult | null> => {
   const hasGeneratedTransfusionHistory = Boolean(
-    changes.previousTransfusionsAutoText?.trim(),
+    changes.previousTransfusionsAutoText?.trim() ||
+      activeDraft.values.previousTransfusionsAutoText?.trim(),
   );
   const profilePatch = Object.fromEntries(
     Object.entries(changes).filter(([key]) => {

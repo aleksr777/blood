@@ -18,6 +18,7 @@ import {
   type RecipientRecord,
   type RegistrationRecord,
 } from '../../storage/repositories/recipients';
+import Modal from '../modal/modal';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
@@ -97,6 +98,7 @@ export const TransfusionRegistration = () => {
   const [registryOpen, setRegistryOpen] = useState(false);
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
   const [patientDetailsOpen, setPatientDetailsOpen] = useState(false);
+  const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [status, setStatus] = useState('');
 
   const currentRecipientId = Number(values.recipientId);
@@ -457,7 +459,20 @@ export const TransfusionRegistration = () => {
             </div>
           </div>
 
-          <table className="registration-table">
+          <div
+            className="registration-table-section"
+            role="button"
+            tabIndex={0}
+            aria-label="Таблица регистрации трансфузий. Нажмите для заполнения"
+            onClick={() => setTableEditorOpen(true)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                setTableEditorOpen(true);
+              }
+            }}
+          >
+            <table className="registration-table">
             <colgroup>
               <col className="registration-col-component" />
               <col className="registration-col-liters" />
@@ -504,9 +519,19 @@ export const TransfusionRegistration = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </section>
       </div>
+
+      {tableEditorOpen && (
+        <Modal
+          title="Регистрация трансфузии"
+          onClose={() => setTableEditorOpen(false)}
+        >
+          <div />
+        </Modal>
+      )}
 
       {patientDetailsOpen && (
         <RegistrationPatientDetailsModal

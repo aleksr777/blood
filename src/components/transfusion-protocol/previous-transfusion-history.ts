@@ -10,17 +10,25 @@ export const getLocalDateKey = (date = new Date()) => {
 
 const isIsoDate = (value?: string) => /^\d{4}-\d{2}-\d{2}$/.test(value ?? '');
 
+const hasCompleteComponentData = (record: ProtocolRecord) => {
+  const { values } = record;
+
+  return Boolean(
+    values.componentName?.trim() &&
+      values.amountMl?.trim() &&
+      values.componentUnitNumber?.trim() &&
+      values.expirationDate?.trim(),
+  );
+};
+
 const describeProtocol = (record: ProtocolRecord) => {
   const { values } = record;
-  const component =
-    values.componentName?.trim() ||
-    values.componentGroup?.trim() ||
-    'компонент крови';
-  const amount = values.amountMl?.trim();
+  const component = values.componentName!.trim();
+  const amount = values.amountMl!.trim();
 
   return [
     formatDate(values.transfusionDate),
-    [component, amount ? `${amount} мл` : ''].filter(Boolean).join(', '),
+    `${component}, ${amount} мл`,
   ]
     .filter(Boolean)
     .join(' — ');
@@ -31,9 +39,9 @@ export const buildPreviousTransfusionHistory = (
   today = getLocalDateKey(),
 ) =>
   records
-    .filter(({ values }) => {
-      const date = values.transfusionDate ?? '';
-      return isIsoDate(date) && date < today;
+    .filter((record) => {
+      const date = record.values.transfusionDate ?? '';
+      return isIsoDate(date) && date < today && hasCompleteComponentData(record);
     })
     .sort((left, right) =>
       (right.values.transfusionDate ?? '').localeCompare(

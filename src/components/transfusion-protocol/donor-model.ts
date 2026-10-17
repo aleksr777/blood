@@ -10,6 +10,22 @@ export const DONOR_ANTIGENS = [
   { name: 'donorAntigenk', symbol: 'k', label: 'k' },
 ] as const;
 
+const HEMACON_DATA_FIELDS = [
+  'componentName',
+  'collectionOrganization',
+  'donorAbo',
+  'donorRh',
+  'donorAntigens',
+  'componentUnitNumber',
+  'amountMl',
+  'collectionDate',
+  'expirationDate',
+  ...DONOR_ANTIGENS.map(({ name }) => name),
+] as const;
+
+export const hasHemaconData = (values: ProtocolValues) =>
+  HEMACON_DATA_FIELDS.some((field) => Boolean(values[field]?.trim()));
+
 export const formatDonorAntigens = (values: ProtocolValues) => {
   const hasStructured = DONOR_ANTIGENS.some(({ name }) => Boolean(values[name]));
   if (!hasStructured) return values.donorAntigens ?? '';

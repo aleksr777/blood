@@ -271,6 +271,7 @@ export const TransfusionRegistration = () => {
     }
 
     try {
+      const wasSavedRecord = recordId !== null;
       const record = await saveRegistrationRecord(recordId, values);
       setRecordId(record.id);
       const savedValues = {
@@ -278,7 +279,9 @@ export const TransfusionRegistration = () => {
         recipientId: String(record.recipientId),
       };
       setValues(savedValues);
-      adoptCurrentRecipientFromValues(savedValues);
+      if (!wasSavedRecord) {
+        adoptCurrentRecipientFromValues(savedValues);
+      }
       setStatus(
         afterPrint
           ? 'Лист регистрации сохранён после печати.'

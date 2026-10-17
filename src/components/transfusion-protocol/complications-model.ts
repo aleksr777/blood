@@ -17,5 +17,5 @@ export const getComplicationsStatus = (values: ProtocolValues): ComplicationsSta
 
   return values.symptoms?.trim() || values.severity?.trim()
     ? COMPLICATIONS_STATUS.had
-    : '';
+    : COMPLICATIONS_STATUS.none;
 };

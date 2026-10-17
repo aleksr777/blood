@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal, { ModalDismissButton } from '../modal/modal';
+import { formatRecipientAge } from './recipient-demographics';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { RecipientHistoryFields } from './recipient-history-fields';
 import type { ProtocolValues } from './protocol-types';
@@ -45,6 +46,33 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
           <input
             value={values.recipientName ?? ''}
             onChange={(event) => change('recipientName', event.target.value)}
+          />
+        </label>
+        <label>
+          <span>Дата рождения</span>
+          <input
+            type="date"
+            value={values.recipientBirthDate ?? ''}
+            onChange={(event) => change('recipientBirthDate', event.target.value)}
+          />
+        </label>
+        <label>
+          <span>Пол</span>
+          <select
+            value={values.recipientSex ?? ''}
+            onChange={(event) => change('recipientSex', event.target.value)}
+          >
+            <option value="">Не указано</option>
+            <option value="Мужской">Мужской</option>
+            <option value="Женский">Женский</option>
+          </select>
+        </label>
+        <label>
+          <span>Возраст</span>
+          <input
+            type="text"
+            value={formatRecipientAge(values.recipientBirthDate)}
+            readOnly
           />
         </label>
         <div className={styles.wide}>

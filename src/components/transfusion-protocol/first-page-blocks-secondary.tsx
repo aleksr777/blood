@@ -1,7 +1,11 @@
 import { formatComponentUnitNumber } from './component-unit-number';
 import { formatDonorAntigens } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
-import { formatHistoryValue } from './recipient-history-model';
+import {
+  formatHistoryValue,
+  getHistoryStatus,
+  HISTORY_STATUS,
+} from './recipient-history-model';
 import { getSelectionStatus, SELECTION_STATUS } from './selection-model';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate } from './protocol-types';
@@ -16,37 +20,61 @@ const formatRh = (value?: string) => {
   return value ?? '';
 };
 
-export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
-  <tbody
-    className="fill-block"
-    data-protocol-block="history"
-    data-protocol-chunk={`history:${part}`}
-    onClick={() => onOpenBlock('history')}
-  >
-    <SectionTitle>Анамнез реципиента</SectionTitle>
-    <tr className="row-history">
-      <LabeledCell
-        colSpan={2}
-        label="Трансфузии компонентов крови в анамнезе"
-        value={formatHistoryValue(values, 'previousTransfusionsStatus', 'previousTransfusions')}
-      />
-      <LabeledCell
-        colSpan={2}
-        label="Реакции и осложнения на трансфузии в анамнезе"
-        value={formatHistoryValue(values, 'previousReactionsStatus', 'previousReactions')}
-      />
-      <LabeledCell
-        colSpan={2}
-        label="Трансфузии по индивидуальному подбору"
-        value={formatHistoryValue(
-          values,
-          'individualSelectionHistoryStatus',
-          'individualSelectionHistory',
-        )}
-      />
-    </tr>
-  </tbody>
-);
+export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
+  const previousTransfusionsHad =
+    getHistoryStatus(
+      values.previousTransfusionsStatus,
+      values.previousTransfusions,
+    ) === HISTORY_STATUS.had;
+
+  return (
+    <tbody
+      className="fill-block"
+      data-protocol-block="history"
+      data-protocol-chunk={`history:${part}`}
+      onClick={() => onOpenBlock('history')}
+    >
+      <SectionTitle>Анамнез реципиента</SectionTitle>
+      <tr className="row-history">
+        <LabeledCell
+          colSpan={2}
+          label="Трансфузии компонентов крови в анамнезе"
+          value={formatHistoryValue(
+            values,
+            'previousTransfusionsStatus',
+            'previousTransfusions',
+          )}
+        />
+        <LabeledCell
+          colSpan={2}
+          label="Реакции и осложнения на трансфузии в анамнезе"
+          value={
+            previousTransfusionsHad
+              ? formatHistoryValue(
+                  values,
+                  'previousReactionsStatus',
+                  'previousReactions',
+                )
+              : ''
+          }
+        />
+        <LabeledCell
+          colSpan={2}
+          label="Трансфузии по индивидуальному подбору"
+          value={
+            previousTransfusionsHad
+              ? formatHistoryValue(
+                  values,
+                  'individualSelectionHistoryStatus',
+                  'individualSelectionHistory',
+                )
+              : ''
+          }
+        />
+      </tr>
+    </tbody>
+  );
+};
 
 export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
   <tbody

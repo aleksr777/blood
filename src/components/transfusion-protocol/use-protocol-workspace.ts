@@ -315,6 +315,8 @@ export const useProtocolWorkspace = () => {
     const nextValues = {
       ...currentRecipientValues(sourceValues),
       ...reagentDefaultsForNewBlank(sourceValues),
+      doctorName: sourceValues.doctorName ?? '',
+      nurseName: sourceValues.nurseName ?? '',
     };
 
     draft.touch();

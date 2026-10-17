@@ -4,6 +4,7 @@ import type {
   RecipientRecord,
   RegistrationRecord,
 } from '../../storage/repositories/recipients';
+import { formatRecipientAge } from './recipient-demographics';
 import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
@@ -44,6 +45,21 @@ export const RecipientHistoryPanel = ({
   onDeleteRegistrationRecord,
 }: Props) => {
   const [category, setCategory] = useState<RecordCategory | null>(null);
+  const demographics = recipient
+    ? [
+        recipient.profile.recipientBirthDate
+          ? `Дата рождения: ${formatDate(recipient.profile.recipientBirthDate)}`
+          : '',
+        recipient.profile.recipientSex
+          ? `Пол: ${recipient.profile.recipientSex}`
+          : '',
+        recipient.profile.recipientBirthDate
+          ? `Возраст: ${formatRecipientAge(recipient.profile.recipientBirthDate)}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : '';
 
   useEffect(() => {
     setCategory(null);
@@ -59,6 +75,7 @@ export const RecipientHistoryPanel = ({
             <div>
               <h3 className={styles.title}>{recipient.fullName}</h3>
               <div className={styles.meta}>Карточка № {recipient.id}</div>
+              {demographics && <div className={styles.meta}>{demographics}</div>}
             </div>
             <div className={styles.headerActions}>
               {onUseRecipient && (

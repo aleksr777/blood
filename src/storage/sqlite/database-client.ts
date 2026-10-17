@@ -1,4 +1,5 @@
 import type {
+  ComponentUnitNumberMatch,
   DatabaseAction,
   DatabaseRequest,
   DatabaseResponse,
@@ -111,6 +112,14 @@ export const database = {
     withDatabase<void>('recipients:remove', { id }),
   listProtocolRecords: (recipientId: number) =>
     withDatabase<ProtocolRecord[]>('protocol-records:list', { recipientId }),
+  findProtocolRecordsByComponentUnitNumber: (
+    componentUnitNumber: string,
+    excludeRecordId: number | null,
+  ) =>
+    withDatabase<ComponentUnitNumberMatch[]>('protocol-records:find-component-unit', {
+      componentUnitNumber,
+      excludeRecordId,
+    }),
   saveProtocolRecord: (recordId: number | null, values: ProtocolValuesRecord) =>
     withDatabase<ProtocolRecord>('protocol-records:save', { recordId, values }),
   removeProtocolRecord: (id: number) =>

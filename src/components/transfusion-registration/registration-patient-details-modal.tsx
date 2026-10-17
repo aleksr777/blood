@@ -1,5 +1,6 @@
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
+import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { RecipientField } from '../transfusion-protocol/recipient-field';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import styles from '../transfusion-protocol/protocol-editor.module.css';
@@ -39,6 +40,28 @@ export const RegistrationPatientDetailsModal = ({
           type="date"
           value={values.recipientBirthDate ?? ''}
           onChange={(event) => onChange({ recipientBirthDate: event.target.value })}
+        />
+      </label>
+
+      <label>
+        <span>Пол</span>
+        <select
+          name="recipientSex"
+          value={values.recipientSex ?? ''}
+          onChange={(event) => onChange({ recipientSex: event.target.value })}
+        >
+          <option value="">Не указано</option>
+          <option value="Мужской">Мужской</option>
+          <option value="Женский">Женский</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Возраст</span>
+        <input
+          type="text"
+          value={formatRecipientAge(values.recipientBirthDate)}
+          readOnly
         />
       </label>
 

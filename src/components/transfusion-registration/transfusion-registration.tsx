@@ -19,6 +19,7 @@ import {
   type RegistrationRecord,
 } from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
+import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { RegistrationPatientDetailsModal } from './registration-patient-details-modal';
@@ -107,6 +108,7 @@ export const TransfusionRegistration = () => {
       ? storedCurrentRecipient.profile
       : {};
   const birthDateParts = getBirthDateParts(values.recipientBirthDate);
+  const recipientAge = formatRecipientAge(values.recipientBirthDate);
 
   useEffect(() => {
     if (initialRecord) {
@@ -438,7 +440,15 @@ export const TransfusionRegistration = () => {
               <span className="registration-blank registration-blank--year">
                 {birthDateParts.year}
               </span>
-              <span>г. № медицинской карты</span>
+              <span>г. Пол</span>
+              <span className="registration-blank registration-blank--sex">
+                {values.recipientSex ?? ''}
+              </span>
+              <span>Возраст</span>
+              <span className="registration-blank registration-blank--age">
+                {recipientAge}
+              </span>
+              <span>№ медицинской карты</span>
               <span className="registration-blank registration-blank--card">
                 {values.medicalRecordNumber ?? ''}
               </span>

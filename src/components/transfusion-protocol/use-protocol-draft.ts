@@ -14,6 +14,15 @@ import type { ProtocolValues } from './protocol-types';
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 const hasValues = (values: ProtocolValues) => Object.keys(values).length > 0;
 
+const generatedHistoryValues = (values: ProtocolValues): ProtocolValues =>
+  values.previousTransfusionsAutoText?.trim()
+    ? {
+        previousTransfusionsStatus: values.previousTransfusionsStatus ?? '',
+        previousTransfusions: values.previousTransfusions ?? '',
+        previousTransfusionsAutoText: values.previousTransfusionsAutoText,
+      }
+    : {};
+
 type Props = {
   values: ProtocolValues;
   recordId: number | null;
@@ -60,6 +69,7 @@ export const useProtocolDraft = ({
             setValues({
               ...draft.values,
               ...recipientProfileValuesForForms(currentRecipient),
+              ...generatedHistoryValues(draft.values),
             });
           } else {
             setValues(draft.values);

@@ -106,8 +106,11 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
   },
   {
     id: 'doctor',
-    title: 'Врач, осуществивший трансфузию',
-    size: 'small',
-    fields: [{ name: 'doctorName', label: 'Фамилия, имя, отчество врача', wide: true }],
+    title: 'Персонал, осуществивший трансфузию',
+    size: 'medium',
+    fields: [
+      { name: 'doctorName', label: 'ФИО врача', wide: true },
+      { name: 'nurseName', label: 'ФИО медицинской сестры', wide: true },
+    ],
   },
 ];

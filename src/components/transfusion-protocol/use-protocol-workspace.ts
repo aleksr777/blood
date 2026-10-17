@@ -179,7 +179,10 @@ export const useProtocolWorkspace = () => {
           values: merged,
           recordId,
         }).catch((error: unknown) =>
-          console.error('Не удалось синхронизировать автоматически сформированный анамнез:', error),
+          console.error(
+            'Не удалось синхронизировать автоматически сформированный анамнез:',
+            error,
+          ),
         );
       })
       .catch((error: unknown) =>

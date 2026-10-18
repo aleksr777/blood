@@ -27,19 +27,32 @@
   grid-column: 1 / -1;
 }
 
-.localGrid input {
+.localGrid input,
+.localGrid textarea {
   width: 100%;
-  min-height: var(--control-height);
   border: 1px solid var(--control-border);
   border-radius: var(--control-radius);
-  padding: var(--control-padding-y) var(--control-padding-x);
   background: #fff;
   color: #111827;
   font: inherit;
   font-weight: 400;
 }
 
-.localGrid input:focus {
+.localGrid input {
+  min-height: var(--control-height);
+  padding: var(--control-padding-y) var(--control-padding-x);
+}
+
+.localGrid textarea {
+  height: 6.5rem;
+  min-height: 6.5rem;
+  max-height: 6.5rem;
+  padding: 0.55rem var(--control-padding-x);
+  resize: none;
+}
+
+.localGrid input:focus,
+.localGrid textarea:focus {
   border-color: #2563eb;
   outline: 2px solid rgb(37 99 235 / 16%);
   outline-offset: 1px;

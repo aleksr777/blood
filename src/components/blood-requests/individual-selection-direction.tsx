@@ -23,6 +23,7 @@ import {
 } from '../transfusion-protocol/recipient-history-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
+import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import {
   RequestEditorModal,
   type RequestEditorField,
@@ -86,13 +87,6 @@ const ORGANIZATION_FIELDS: RequestEditorField[] = [
     wide: true,
   },
   { name: 'department', label: 'Отделение', wide: true },
-];
-
-const RECIPIENT_FIELDS: RequestEditorField[] = [
-  { name: 'recipientName', label: 'Ф.И.О. реципиента', wide: true },
-  { name: 'recipientAge', label: 'Возраст' },
-  { name: 'medicalRecordNumber', label: '№ медицинской карты' },
-  { name: 'diagnosis', label: 'Диагноз', type: 'textarea', wide: true },
 ];
 
 const TRANSFUSION_FIELDS: RequestEditorField[] = [
@@ -442,12 +436,6 @@ export const IndividualSelectionDirection = () => {
           fields: ORGANIZATION_FIELDS,
           values: valuesFor(ORGANIZATION_FIELDS),
         };
-      case 'recipient':
-        return {
-          title: 'Данные реципиента',
-          fields: RECIPIENT_FIELDS,
-          values: valuesFor(RECIPIENT_FIELDS),
-        };
       case 'transfusion':
         return {
           title: 'Гемотрансфузионный анамнез',
@@ -697,6 +685,21 @@ export const IndividualSelectionDirection = () => {
           </div>
         </section>
       </div>
+
+      {editor === 'recipient' && (
+        <IndividualSelectionRecipientModal
+          values={examinationValues}
+          diagnosis={draft.diagnosis}
+          onRecipientChange={updateExamination}
+          onDiagnosisChange={(value) => updateFields({ diagnosis: value })}
+          onOpenRecipients={() => {
+            setEditor(null);
+            setRegistryOpen(true);
+          }}
+          onSelectRecipient={selectRecipient}
+          onClose={() => setEditor(null)}
+        />
+      )}
 
       {editor === 'component' && (
         <IndividualSelectionComponentModal

@@ -1,15 +1,27 @@
 import { useEffect, useRef, useState } from 'react';
+import { ComponentRequest } from './components/blood-requests/component-request';
+import { ConsolidatedRequest } from './components/blood-requests/consolidated-request';
 import CustomScrollbar from './components/scrollbar/custom-scrollbar';
 import { TransfusionProtocol } from './components/transfusion-protocol/transfusion-protocol';
 import { TransfusionRegistration } from './components/transfusion-registration/transfusion-registration';
 
-type AppPage = 'protocol' | 'registration';
+type AppPage = 'protocol' | 'registration' | 'summary-request' | 'component-request';
 type TransitionPhase = 'idle' | 'leaving' | 'entering';
 
 const TRANSITION_DURATION_MS = 160;
 
-const getPage = (): AppPage =>
-  window.location.hash === '#/registration' ? 'registration' : 'protocol';
+const getPage = (): AppPage => {
+  switch (window.location.hash) {
+    case '#/registration':
+      return 'registration';
+    case '#/summary-request':
+      return 'summary-request';
+    case '#/component-request':
+      return 'component-request';
+    default:
+      return 'protocol';
+  }
+};
 
 const App = () => {
   const [page, setPage] = useState<AppPage>(getPage);
@@ -63,7 +75,15 @@ const App = () => {
         data-transition-phase={transitionPhase}
         aria-live="polite"
       >
-        {page === 'registration' ? <TransfusionRegistration /> : <TransfusionProtocol />}
+        {page === 'registration' ? (
+          <TransfusionRegistration />
+        ) : page === 'summary-request' ? (
+          <ConsolidatedRequest />
+        ) : page === 'component-request' ? (
+          <ComponentRequest />
+        ) : (
+          <TransfusionProtocol />
+        )}
       </div>
       <CustomScrollbar />
     </>

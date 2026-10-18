@@ -1,8 +1,6 @@
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
-import { RecipientExaminationFields } from '../transfusion-protocol/recipient-examination-fields';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
-import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import styles from './individual-selection-component-modal.module.css';
 
 const REQUIRED_COMPONENT_CATEGORY = 'individualSelectionRequiredComponent';
@@ -14,18 +12,16 @@ const REQUIRED_COMPONENT_FIXED_OPTIONS = [
 type Props = {
   requiredComponent: string;
   quantity: string;
-  examinationValues: ProtocolValues;
+  individualSelectionIndications: string;
   onLocalChange: (values: Record<string, string>) => void;
-  onExaminationChange: (values: ProtocolValues) => void | Promise<void>;
   onClose: () => void;
 };
 
 export const IndividualSelectionComponentModal = ({
   requiredComponent,
   quantity,
-  examinationValues,
+  individualSelectionIndications,
   onLocalChange,
-  onExaminationChange,
   onClose,
 }: Props) => {
   const handleClose = () => {
@@ -51,7 +47,7 @@ export const IndividualSelectionComponentModal = ({
 
   return (
     <Modal
-      title="Компонент крови и данные реципиента"
+      title="Компонент крови и показания для индивидуального подбора"
       onClose={handleClose}
       className={styles.modal}
     >
@@ -68,6 +64,7 @@ export const IndividualSelectionComponentModal = ({
               onChange={(value) => onLocalChange({ requiredComponent: value })}
             />
           </label>
+
           <label className={styles.wide}>
             <span>Количество</span>
             <input
@@ -75,16 +72,19 @@ export const IndividualSelectionComponentModal = ({
               onChange={(event) => onLocalChange({ quantity: event.target.value })}
             />
           </label>
+
+          <label className={styles.wide}>
+            <span>Показания для индивидуального подбора</span>
+            <textarea
+              value={individualSelectionIndications}
+              onChange={(event) =>
+                onLocalChange({
+                  individualSelectionIndications: event.target.value,
+                })
+              }
+            />
+          </label>
         </div>
-
-        <div className={styles.divider} />
-
-        <RecipientExaminationFields
-          values={examinationValues}
-          onChange={(values) => {
-            void onExaminationChange(values);
-          }}
-        />
       </div>
     </Modal>
   );

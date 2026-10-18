@@ -400,44 +400,54 @@ export const IndividualSelectionDirection = () => {
   };
 
   const editorConfig = useMemo(() => {
+    const valuesFor = (fields: RequestEditorField[]) =>
+      Object.fromEntries(
+        fields.map(({ name }) => [
+          name,
+          typeof draft[name as keyof DirectionDraft] === 'string'
+            ? String(draft[name as keyof DirectionDraft])
+            : '',
+        ]),
+      );
+
     switch (editor) {
       case 'component':
         return {
           title: 'Компонент крови',
           fields: COMPONENT_FIELDS,
-          values: draft,
+          values: valuesFor(COMPONENT_FIELDS),
         };
       case 'recipient':
         return {
           title: 'Данные реципиента',
           fields: RECIPIENT_FIELDS,
-          values: draft,
+          values: valuesFor(COMPONENT_FIELDS),
         };
       case 'transfusion':
         return {
           title: 'Гемотрансфузионный анамнез',
           fields: TRANSFUSION_FIELDS,
-          values: draft,
+          values: valuesFor(COMPONENT_FIELDS),
         };
       case 'obstetric':
         return draft.recipientSex === 'Женский'
           ? {
               title: 'Акушерский анамнез',
               fields: OBSTETRIC_FIELDS,
-              values: draft,
+              values: valuesFor(COMPONENT_FIELDS),
             }
           : null;
       case 'allergy':
         return {
           title: 'Аллергоанамнез',
           fields: ALLERGY_FIELDS,
-          values: draft,
+          values: valuesFor(COMPONENT_FIELDS),
         };
       case 'footer':
         return {
           title: 'Оформление направления',
           fields: FOOTER_FIELDS,
-          values: draft,
+          values: valuesFor(COMPONENT_FIELDS),
         };
       default:
         return null;

@@ -1,0 +1,66 @@
+.modal {
+  --modal-width: 58rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.2rem;
+}
+
+.grid label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: #263552;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.grid input,
+.grid select,
+.grid textarea {
+  width: 100%;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: #fff;
+  color: #111827;
+  font: inherit;
+  font-weight: 400;
+}
+
+.grid input,
+.grid select {
+  min-height: var(--control-height);
+  padding: var(--control-padding-y) var(--control-padding-x);
+}
+
+.grid textarea {
+  height: 6rem !important;
+  min-height: 6rem !important;
+  max-height: 6rem !important;
+  padding: 0.55rem var(--control-padding-x);
+}
+
+.grid input:focus,
+.grid select:focus,
+.grid textarea:focus {
+  border-color: #2563eb;
+  outline: 2px solid rgb(37 99 235 / 16%);
+  outline-offset: 1px;
+}
+
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wide {
+    grid-column: auto;
+  }
+}

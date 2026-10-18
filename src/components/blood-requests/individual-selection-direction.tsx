@@ -414,12 +414,22 @@ const AdaptiveRuledField = ({
 
   return (
     <div ref={rootRef} className={styles.adaptiveField}>
-      <span className={styles.adaptiveRules} aria-hidden="true">
-        {Array.from({ length: rowCount }, (_, index) => (
-          <span key={index} />
-        ))}
-      </span>
-      <div className={styles.adaptiveContent}>{content}</div>
+      {breakBeforeValue ? (
+        <>
+          <span className={styles.adaptiveRules} aria-hidden="true">
+            {Array.from({ length: rowCount }, (_, index) => (
+              <span key={index} />
+            ))}
+          </span>
+          <div className={styles.adaptiveContent}>{content}</div>
+        </>
+      ) : (
+        <div className={styles.adaptiveSingleLine}>
+          <span className={styles.adaptiveSingleLabel}>{label}</span>
+          <span className={styles.adaptiveSingleValue}>{value || ' '}</span>
+        </div>
+      )}
+
       <div ref={measureRef} className={styles.adaptiveMeasure} aria-hidden="true">
         {content}
       </div>

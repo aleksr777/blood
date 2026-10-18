@@ -127,11 +127,16 @@ const loadDraft = (): DirectionDraft => {
 
     const parsed = JSON.parse(raw) as Partial<DirectionDraft>;
     const blank = emptyDraft();
+    const savedValues = Object.fromEntries(
+      Object.keys(blank).flatMap((key) => {
+        if (key === 'autoValues') return [];
+        const value = parsed[key as keyof DirectionDraft];
+        return typeof value === 'string' ? [[key, value]] : [];
+      }),
+    );
     const next = {
       ...blank,
-      ...Object.fromEntries(
-        Object.entries(parsed).filter(([, value]) => typeof value === 'string'),
-      ),
+      ...savedValues,
       autoValues:
         parsed.autoValues &&
         typeof parsed.autoValues === 'object' &&
@@ -144,7 +149,6 @@ const loadDraft = (): DirectionDraft => {
           : {},
     } as DirectionDraft;
 
-    delete (next as Record<string, unknown>).allergyHistory;
     if (!next.directionDate) next.directionDate = todayKey();
     return next;
   } catch {

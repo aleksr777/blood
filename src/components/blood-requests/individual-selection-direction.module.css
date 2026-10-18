@@ -29,6 +29,7 @@
   box-shadow: 0 8px 32px rgb(18 31 48 / 12%);
   font-family: "Times New Roman", Times, serif;
   font-size: 12pt;
+  font-weight: 700;
   line-height: 1.15;
   page: individual-selection-direction-page;
 }
@@ -119,7 +120,7 @@
   box-sizing: border-box;
   width: 100%;
   padding: 0 0.8mm;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 7mm;
   overflow-wrap: anywhere;
   white-space: pre-wrap;
@@ -146,9 +147,11 @@
 .adaptiveLabel {
   padding-right: 1mm;
   background: #fff;
+  font-weight: 700;
 }
 
-.adaptiveText {
+.adaptiveText,
+.enteredValue {
   font-weight: 400;
 }
 

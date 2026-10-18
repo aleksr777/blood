@@ -63,6 +63,7 @@ type DirectionDraft = Record<AutoField, string> & {
   individualSelectionIndications: string;
   medicalOrganization: string;
   directionDate: string;
+  doctorName: string;
   doctorPhone: string;
   autoValues: Partial<Record<AutoField, string>>;
 };
@@ -102,7 +103,18 @@ const ORGANIZATION_FIELDS: RequestEditorField[] = [
 
 const FOOTER_FIELDS: RequestEditorField[] = [
   { name: 'directionDate', label: 'Дата направления', type: 'date' },
-  { name: 'doctorPhone', label: 'Телефон лечащего врача', wide: true },
+  {
+    name: 'doctorName',
+    label: 'Врач, назначивший трансфузию',
+    savedOptionsCategory: 'individualSelectionDoctorName',
+    wide: true,
+  },
+  {
+    name: 'doctorPhone',
+    label: 'Контактный телефон',
+    savedOptionsCategory: 'individualSelectionContactPhone',
+    wide: true,
+  },
 ];
 
 const emptyDraft = (): DirectionDraft => ({
@@ -122,6 +134,7 @@ const emptyDraft = (): DirectionDraft => ({
   obstetricHistory: '',
   recipientSex: '',
   directionDate: '',
+  doctorName: '',
   doctorPhone: '',
   autoValues: {},
 });
@@ -737,12 +750,14 @@ export const IndividualSelectionDirection = () => {
               Дата направления: {formatDirectionDate(draft.directionDate)}
             </div>
 
-            <div className={styles.signatureLineRow}>
-              <span>Подпись лечащего врача:</span>
-              <span className={styles.signatureBlank} />
+            <div className={styles.singleLine}>
+              <span>Врач, назначивший трансфузию:</span>
+              <span className={styles.valueLine}>
+                {displayValue(draft.doctorName)}
+              </span>
             </div>
             <div className={styles.singleLine}>
-              <span>Телефон лечащего врача:</span>
+              <span>Контактный телефон:</span>
               <span className={styles.valueLine}>
                 {displayValue(draft.doctorPhone)}
               </span>

@@ -387,24 +387,6 @@ const AdaptiveRuledField = ({
     return () => observer.disconnect();
   }, [breakBeforeValue, label, updateLayout, value]);
 
-  const content = (
-    <>
-      <span className={styles.adaptiveLabel}>{label}</span>
-      {value && (
-        <span
-          className={[
-            styles.adaptiveText,
-            breakBeforeValue ? styles.adaptiveTextNewLine : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {breakBeforeValue ? value : ` ${value}`}
-        </span>
-      )}
-    </>
-  );
-
   const inlineContent = (
     <>
       <span className={styles.adaptiveLabel}>{label}</span>

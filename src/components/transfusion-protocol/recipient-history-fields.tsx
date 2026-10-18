@@ -7,6 +7,7 @@ import styles from './recipient-history-fields.module.css';
 type Props = {
   values: ProtocolValues;
   previousTransfusionSuggestion?: string;
+  showObstetricHistory?: boolean;
   onChange: (values: ProtocolValues) => void;
 };
 
@@ -64,6 +65,7 @@ const OBSTETRIC_FIELDS: ProtocolFieldConfig[] = [
 export const RecipientHistoryFields = ({
   values,
   previousTransfusionSuggestion = '',
+  showObstetricHistory = true,
   onChange,
 }: Props) => {
   const suggestion = previousTransfusionSuggestion.trim();
@@ -126,7 +128,7 @@ export const RecipientHistoryFields = ({
 
   return (
     <div className={styles.root}>
-      {values.recipientSex === 'Женский' && (
+      {showObstetricHistory && values.recipientSex === 'Женский' && (
         <fieldset className={styles.group}>
           <legend>Акушерский анамнез</legend>
           <div className={styles.obstetricGrid}>

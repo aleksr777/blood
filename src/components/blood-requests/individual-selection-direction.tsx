@@ -827,13 +827,14 @@ export const IndividualSelectionDirection = () => {
     return () => observer.disconnect();
   }, [formSections.length, page2StartIndex, paginationKey]);
 
-  const printSecondPage = () => {
-    document.body.classList.add('print-individual-selection-page-2');
+  const printPage = (page: 1 | 2) => {
+    const className = `print-individual-selection-page-${page}`;
+    document.body.classList.add(className);
 
     try {
       window.print();
     } finally {
-      document.body.classList.remove('print-individual-selection-page-2');
+      document.body.classList.remove(className);
     }
   };
 
@@ -860,16 +861,30 @@ export const IndividualSelectionDirection = () => {
             >
               Реципиенты
             </button>
-            <button type="button" className="print-button" onClick={() => window.print()}>
-              Печать
-            </button>
-            {hasSecondPage && (
+            {hasSecondPage ? (
+              <>
+                <button
+                  type="button"
+                  className="print-button"
+                  onClick={() => printPage(1)}
+                >
+                  Печать страницы 1
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => printPage(2)}
+                >
+                  Печать страницы 2
+                </button>
+              </>
+            ) : (
               <button
                 type="button"
-                className="secondary-button"
-                onClick={printSecondPage}
+                className="print-button"
+                onClick={() => window.print()}
               >
-                Печать страницы 2
+                Печать страницы
               </button>
             )}
           </div>

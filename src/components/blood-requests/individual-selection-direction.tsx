@@ -432,6 +432,9 @@ export const IndividualSelectionDirection = () => {
   const [draft, setDraft] = useState<DirectionDraft>(loadDraft);
   const [editor, setEditor] = useState<Editor>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
+  const [page2StartIndex, setPage2StartIndex] = useState(7);
+  const page1Ref = useRef<HTMLElement>(null);
+  const page1ContentRef = useRef<HTMLDivElement>(null);
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
@@ -577,6 +580,235 @@ export const IndividualSelectionDirection = () => {
     }
   }, [draft, editor]);
 
+  const formSections = [
+    <div
+      key="organization"
+      className={styles.fillSection}
+      role="button"
+      tabIndex={0}
+      onClick={() => setEditor('organization')}
+      onKeyDown={(event) =>
+        activateOnKeyboard(event, () => setEditor('organization'))
+      }
+    >
+      <AdaptiveRuledField
+        label="Наименование ЛПУ:"
+        value={draft.medicalOrganization}
+      />
+      <AdaptiveRuledField label="Отделение:" value={draft.department} />
+    </div>,
+
+    <div
+      key="recipient"
+      className={styles.fillSection}
+      role="button"
+      tabIndex={0}
+      onClick={() => setEditor('recipient')}
+      onKeyDown={(event) =>
+        activateOnKeyboard(event, () => setEditor('recipient'))
+      }
+    >
+      <AdaptiveRuledField
+        label="Ф.И.О. реципиента:"
+        value={draft.recipientName}
+      />
+      <div className={styles.singleLine}>
+        <span>Возраст:</span>
+        <span className={styles.valueLine}>
+          {displayValue(draft.recipientAge)}
+        </span>
+      </div>
+      <div className={styles.singleLine}>
+        <span>№ медицинской карты:</span>
+        <span className={styles.valueLine}>
+          {displayValue(draft.medicalRecordNumber)}
+        </span>
+      </div>
+      <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
+    </div>,
+
+    <div
+      key="examination"
+      className={styles.fillSection}
+      role="button"
+      tabIndex={0}
+      onClick={() => setEditor('examination')}
+      onKeyDown={(event) =>
+        activateOnKeyboard(event, () => setEditor('examination'))
+      }
+    >
+      <div className={styles.singleLine}>
+        <span>Группа крови и резус-фактор реципиента:</span>
+        <span className={styles.valueLine}>
+          {displayValue(draft.recipientAboRh)}
+        </span>
+      </div>
+      <AdaptiveRuledField
+        label="Фенотип реципиента:"
+        value={draft.recipientPhenotype}
+      />
+      <AdaptiveRuledField
+        label="Аллоиммунные антитела:"
+        value={formatAlloimmuneAntibodies(examinationValues)}
+      />
+    </div>,
+
+    <div
+      key="transfusion"
+      className={styles.fillSection}
+      role="button"
+      tabIndex={0}
+      onClick={() => setEditor('transfusion')}
+      onKeyDown={(event) =>
+        activateOnKeyboard(event, () => setEditor('transfusion'))
+      }
+    >
+      <AdaptiveRuledField
+        label="Гемотрансфузионный анамнез:"
+        value={draft.transfusionHistory}
+      />
+    </div>,
+
+    ...(draft.recipientSex === 'Женский'
+      ? [
+          <div
+            key="obstetric"
+            className={styles.fillSection}
+            role="button"
+            tabIndex={0}
+            onClick={() => setEditor('obstetric')}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor('obstetric'))
+            }
+          >
+            <AdaptiveRuledField
+              label="Акушерский анамнез у женщин:"
+              value={draft.obstetricHistory}
+            />
+          </div>,
+        ]
+      : []),
+
+    <div
+      key="component"
+      className={styles.fillSection}
+      role="button"
+      tabIndex={0}
+      onClick={() => setEditor('component')}
+      onKeyDown={(event) =>
+        activateOnKeyboard(event, () => setEditor('component'))
+      }
+    >
+      <AdaptiveRuledField
+        label="Наименование требуемого компонента:"
+        value={draft.requiredComponent}
+      />
+      <div className={styles.singleLine}>
+        <span>Количество:</span>
+        <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
+      </div>
+      <AdaptiveRuledField
+        label="Показания для индивидуального подбора:"
+        value={draft.individualSelectionIndications}
+      />
+    </div>,
+
+    <div
+      key="footer"
+      className={styles.fillSection}
+      role="button"
+      tabIndex={0}
+      onClick={() => setEditor('footer')}
+      onKeyDown={(event) =>
+        activateOnKeyboard(event, () => setEditor('footer'))
+      }
+    >
+      <div className={styles.directionDate}>
+        <span>Дата направления:</span>{' '}
+        <span className={styles.enteredValue}>
+          {formatDirectionDate(draft.directionDate)}
+        </span>
+      </div>
+
+      <div className={`${styles.singleLine} ${styles.doctorLine}`}>
+        <span>Врач, назначивший трансфузию:</span>
+        <span className={styles.valueLine}>
+          {displayValue(draft.doctorName)}
+        </span>
+      </div>
+      <div className={styles.singleLine}>
+        <span>Контактный телефон:</span>
+        <span className={styles.valueLine}>
+          {displayValue(draft.doctorPhone)}
+        </span>
+      </div>
+    </div>,
+  ];
+
+  const paginationKey = [
+    draft.medicalOrganization,
+    draft.department,
+    draft.recipientName,
+    draft.recipientAge,
+    draft.medicalRecordNumber,
+    draft.diagnosis,
+    draft.recipientAboRh,
+    draft.recipientPhenotype,
+    formatAlloimmuneAntibodies(examinationValues),
+    draft.transfusionHistory,
+    draft.recipientSex,
+    draft.obstetricHistory,
+    draft.requiredComponent,
+    draft.quantity,
+    draft.individualSelectionIndications,
+    draft.directionDate,
+    draft.doctorName,
+    draft.doctorPhone,
+  ].join('\u0001');
+
+  const splitIndex = Math.min(page2StartIndex, formSections.length);
+  const hasSecondPage = splitIndex < formSections.length;
+
+  useLayoutEffect(() => {
+    setPage2StartIndex(formSections.length);
+  }, [formSections.length, paginationKey]);
+
+  useLayoutEffect(() => {
+    const page = page1Ref.current;
+    const content = page1ContentRef.current;
+    if (!page || !content) return undefined;
+
+    const fitPage = () => {
+      if (
+        page.scrollHeight > page.clientHeight + 1 &&
+        page2StartIndex > 0
+      ) {
+        setPage2StartIndex((current) =>
+          Math.max(0, Math.min(current, formSections.length) - 1),
+        );
+      }
+    };
+
+    fitPage();
+
+    if (typeof ResizeObserver === 'undefined') return undefined;
+
+    const observer = new ResizeObserver(fitPage);
+    observer.observe(content);
+
+    return () => observer.disconnect();
+  }, [formSections.length, page2StartIndex, paginationKey]);
+
+  const printSecondPage = () => {
+    document.body.classList.add('print-individual-selection-page-2');
+
+    try {
+      window.print();
+    } finally {
+      document.body.classList.remove('print-individual-selection-page-2');
+    }
+  };
+
   return (
     <main className={styles.shell}>
       <header className={`app-header ${styles.header}`}>
@@ -603,171 +835,44 @@ export const IndividualSelectionDirection = () => {
             <button type="button" className="print-button" onClick={() => window.print()}>
               Печать
             </button>
+            {hasSecondPage && (
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={printSecondPage}
+              >
+                Печать страницы 2
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       <div className={styles.sheetWrap}>
-        <section className={styles.sheet} aria-label="Направление на индивидуальный подбор">
-          <h1 className={styles.title}>
-            Направление на индивидуальный подбор компонентов крови.
-          </h1>
+        <section
+          ref={page1Ref}
+          className={`${styles.sheet} ${styles.pageOne}`}
+          aria-label="Направление на индивидуальный подбор, страница 1"
+        >
+          <div ref={page1ContentRef} className={styles.pageContent}>
+            <h1 className={styles.title}>
+              Направление на индивидуальный подбор компонентов крови.
+            </h1>
 
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
-            onClick={() => setEditor('organization')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('organization'))
-            }
-          >
-            <AdaptiveRuledField
-              label="Наименование ЛПУ:"
-              value={draft.medicalOrganization}
-            />
-            <AdaptiveRuledField label="Отделение:" value={draft.department} />
-          </div>
-
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
-            onClick={() => setEditor('recipient')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('recipient'))
-            }
-          >
-            <AdaptiveRuledField
-              label="Ф.И.О. реципиента:"
-              value={draft.recipientName}
-            />
-            <div className={styles.singleLine}>
-              <span>Возраст:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.recipientAge)}
-              </span>
-            </div>
-            <div className={styles.singleLine}>
-              <span>№ медицинской карты:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.medicalRecordNumber)}
-              </span>
-            </div>
-            <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
-          </div>
-
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
-            onClick={() => setEditor('examination')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('examination'))
-            }
-          >
-            <div className={styles.singleLine}>
-              <span>Группа крови и резус-фактор реципиента:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.recipientAboRh)}
-              </span>
-            </div>
-            <AdaptiveRuledField
-              label="Фенотип реципиента:"
-              value={draft.recipientPhenotype}
-            />
-            <AdaptiveRuledField
-              label="Аллоиммунные антитела:"
-              value={formatAlloimmuneAntibodies(examinationValues)}
-            />
-          </div>
-
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
-            onClick={() => setEditor('transfusion')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('transfusion'))
-            }
-          >
-            <AdaptiveRuledField
-              label="Гемотрансфузионный анамнез:"
-              value={draft.transfusionHistory}
-            />
-          </div>
-
-          {draft.recipientSex === 'Женский' && (
-            <div
-              className={styles.fillSection}
-              role="button"
-              tabIndex={0}
-              onClick={() => setEditor('obstetric')}
-              onKeyDown={(event) =>
-                activateOnKeyboard(event, () => setEditor('obstetric'))
-              }
-            >
-              <AdaptiveRuledField
-                label="Акушерский анамнез у женщин:"
-                value={draft.obstetricHistory}
-              />
-            </div>
-          )}
-
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
-            onClick={() => setEditor('component')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('component'))
-            }
-          >
-            <AdaptiveRuledField
-              label="Наименование требуемого компонента:"
-              value={draft.requiredComponent}
-            />
-            <div className={styles.singleLine}>
-              <span>Количество:</span>
-              <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
-            </div>
-            <AdaptiveRuledField
-              label="Показания для индивидуального подбора:"
-              value={draft.individualSelectionIndications}
-            />
-          </div>
-
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
-            onClick={() => setEditor('footer')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('footer'))
-            }
-          >
-            <div className={styles.directionDate}>
-              <span>Дата направления:</span>{' '}
-              <span className={styles.enteredValue}>
-                {formatDirectionDate(draft.directionDate)}
-              </span>
-            </div>
-
-            <div className={`${styles.singleLine} ${styles.doctorLine}`}>
-              <span>Врач, назначивший трансфузию:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.doctorName)}
-              </span>
-            </div>
-            <div className={styles.singleLine}>
-              <span>Контактный телефон:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.doctorPhone)}
-              </span>
-            </div>
-
+            {formSections.slice(0, splitIndex)}
           </div>
         </section>
+
+        {hasSecondPage && (
+          <section
+            className={`${styles.sheet} ${styles.pageTwo}`}
+            aria-label="Направление на индивидуальный подбор, страница 2"
+          >
+            <div className={styles.pageContent}>
+              {formSections.slice(splitIndex)}
+            </div>
+          </section>
+        )}
       </div>
 
       {editor === 'recipient' && (

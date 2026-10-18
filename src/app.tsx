@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ComponentRequest } from './components/blood-requests/component-request';
-import { ConsolidatedRequest } from './components/blood-requests/consolidated-request';
+import { IndividualSelectionDirection } from './components/blood-requests/individual-selection-direction';
 import CustomScrollbar from './components/scrollbar/custom-scrollbar';
 import { TransfusionProtocol } from './components/transfusion-protocol/transfusion-protocol';
 import { TransfusionRegistration } from './components/transfusion-registration/transfusion-registration';
@@ -78,7 +78,7 @@ const App = () => {
         {page === 'registration' ? (
           <TransfusionRegistration />
         ) : page === 'summary-request' ? (
-          <ConsolidatedRequest />
+          <IndividualSelectionDirection />
         ) : page === 'component-request' ? (
           <ComponentRequest />
         ) : (

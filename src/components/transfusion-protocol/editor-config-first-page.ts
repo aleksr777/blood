@@ -15,30 +15,6 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
         options: ['Мужской', 'Женский'],
       },
       { name: 'recipientAge', label: 'Возраст', readOnly: true },
-      {
-        name: 'recipientPregnanciesCount',
-        label: 'Количество беременностей',
-        type: 'number',
-        step: '1',
-      },
-      {
-        name: 'recipientBirthsCount',
-        label: 'Количество родов',
-        type: 'number',
-        step: '1',
-      },
-      {
-        name: 'recipientSpontaneousAbortionsCount',
-        label: 'Самопроизвольные аборты в анамнезе',
-        type: 'number',
-        step: '1',
-      },
-      {
-        name: 'recipientHemolyticDiseaseNewbornHistory',
-        label: 'Гемолитическая болезнь новорождённого в анамнезе',
-        type: 'select',
-        options: ['Нет', 'Да'],
-      },
       { name: 'requestDateTime', label: 'Дата и время подачи заявки', type: 'datetime-local' },
       { name: 'transfusionDate', label: 'Дата трансфузии', type: 'date' },
       { name: 'department', label: 'Отделение' },
@@ -132,6 +108,31 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     title: 'Анамнез реципиента',
     size: 'large',
     fields: [
+      { name: 'recipientSex', label: 'Пол' },
+      {
+        name: 'recipientPregnanciesCount',
+        label: 'Количество беременностей',
+        type: 'number',
+        step: '1',
+      },
+      {
+        name: 'recipientBirthsCount',
+        label: 'Количество родов',
+        type: 'number',
+        step: '1',
+      },
+      {
+        name: 'recipientSpontaneousAbortionsCount',
+        label: 'Самопроизвольные аборты в анамнезе',
+        type: 'number',
+        step: '1',
+      },
+      {
+        name: 'recipientHemolyticDiseaseNewbornHistory',
+        label: 'Гемолитическая болезнь новорождённого в анамнезе',
+        type: 'select',
+        options: ['Нет', 'Да'],
+      },
       { name: 'previousTransfusionsStatus', label: 'previousTransfusionsStatus' },
       { name: 'previousTransfusionsAutoText', label: 'previousTransfusionsAutoText' },
       {

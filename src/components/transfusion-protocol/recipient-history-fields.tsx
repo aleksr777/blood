@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
+import { ProtocolFieldControl } from './protocol-field-control';
 import { HISTORY_STATUS, getHistoryStatus } from './recipient-history-model';
-import type { ProtocolValues } from './protocol-types';
+import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 import styles from './recipient-history-fields.module.css';
 
 type Props = {
@@ -32,6 +33,33 @@ const STATUS_OPTIONS = [
   [HISTORY_STATUS.unknown, 'Не известно'],
   [HISTORY_STATUS.had, 'Были'],
 ] as const;
+
+const OBSTETRIC_FIELDS: ProtocolFieldConfig[] = [
+  {
+    name: 'recipientPregnanciesCount',
+    label: 'Количество беременностей',
+    type: 'number',
+    step: '1',
+  },
+  {
+    name: 'recipientBirthsCount',
+    label: 'Количество родов',
+    type: 'number',
+    step: '1',
+  },
+  {
+    name: 'recipientSpontaneousAbortionsCount',
+    label: 'Самопроизвольные аборты в анамнезе',
+    type: 'number',
+    step: '1',
+  },
+  {
+    name: 'recipientHemolyticDiseaseNewbornHistory',
+    label: 'Гемолитическая болезнь новорождённого в анамнезе',
+    type: 'select',
+    options: ['Нет', 'Да'],
+  },
+];
 
 export const RecipientHistoryFields = ({
   values,
@@ -98,6 +126,22 @@ export const RecipientHistoryFields = ({
 
   return (
     <div className={styles.root}>
+      {values.recipientSex === 'Женский' && (
+        <fieldset className={styles.group}>
+          <legend>Акушерский анамнез</legend>
+          <div className={styles.obstetricGrid}>
+            {OBSTETRIC_FIELDS.map((field) => (
+              <ProtocolFieldControl
+                key={field.name}
+                field={field}
+                value={values[field.name] ?? ''}
+                onChange={(name, value) => onChange({ [name]: value })}
+              />
+            ))}
+          </div>
+        </fieldset>
+      )}
+
       {suggestion && (
         <div className={styles.suggestion}>
           <div className={styles.suggestionHeader}>

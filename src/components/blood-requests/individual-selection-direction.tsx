@@ -137,7 +137,6 @@ const emptyDraft = (): DirectionDraft => ({
   transfusionHistory: '',
   obstetricHistory: '',
   recipientSex: '',
-  diagnosis: '',
   allergyHistory: '',
   directionDate: '',
   doctorPhone: '',
@@ -312,6 +311,15 @@ const activateOnKeyboard = (
 };
 
 const displayValue = (value?: string) => value?.trim() || ' ';
+
+const MultilineRules = () => (
+  <span className={styles.multilineRules} aria-hidden="true">
+    <span />
+    <span />
+    <span />
+    <span />
+  </span>
+);
 
 const formatDirectionDate = (value: string) => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -596,6 +604,7 @@ export const IndividualSelectionDirection = () => {
               </span>
             </div>
             <div className={styles.multilineBlock}>
+              <MultilineRules />
               <span className={styles.multilineLabel}>Диагноз:</span>
               <div className={styles.multilineValue}>{draft.diagnosis}</div>
             </div>
@@ -653,6 +662,7 @@ export const IndividualSelectionDirection = () => {
             }
           >
             <div className={styles.multilineBlock}>
+              <MultilineRules />
               <span className={styles.multilineLabel}>Гемотрансфузионный анамнез:</span>
               <div className={styles.multilineValue}>{draft.transfusionHistory}</div>
             </div>
@@ -675,6 +685,7 @@ export const IndividualSelectionDirection = () => {
             }}
           >
             <div className={styles.multilineBlock}>
+              <MultilineRules />
               <span className={styles.multilineLabel}>
                 Акушерский анамнез анамнез у женщин:
               </span>
@@ -692,6 +703,7 @@ export const IndividualSelectionDirection = () => {
             }
           >
             <div className={styles.multilineBlock}>
+              <MultilineRules />
               <span className={styles.multilineLabel}>Аллергоанамнез:</span>
               <div className={styles.multilineValue}>{draft.allergyHistory}</div>
             </div>

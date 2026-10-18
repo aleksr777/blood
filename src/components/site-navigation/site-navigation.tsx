@@ -1,10 +1,11 @@
 type Props = {
-  current: 'protocol' | 'registration';
+  current: 'protocol' | 'registration' | 'summary-request' | 'component-request';
   recipientName?: string;
   recipientAbo?: string;
   recipientRh?: string;
   currentRecipientAvailable?: boolean;
   onOpenCurrentRecipient?: () => void;
+  showRecipient?: boolean;
 };
 
 type NavigationItem = {
@@ -24,6 +25,16 @@ const items: NavigationItem[] = [
     href: '#/registration',
     label: 'Лист регистрации трансфузий',
   },
+  {
+    id: 'component-request',
+    href: '#/component-request',
+    label: 'Заявка на компоненты',
+  },
+  {
+    id: 'summary-request',
+    href: '#/summary-request',
+    label: 'Сводная заявка',
+  },
 ];
 
 export const SiteNavigation = ({
@@ -33,6 +44,7 @@ export const SiteNavigation = ({
   recipientRh = '',
   currentRecipientAvailable = false,
   onOpenCurrentRecipient,
+  showRecipient = true,
 }: Props) => {
   const name = recipientName.trim();
   const bloodGroup = [recipientAbo.trim(), recipientRh.trim()].filter(Boolean).join(' ');
@@ -59,27 +71,29 @@ export const SiteNavigation = ({
         </nav>
       </div>
 
-      <div className="site-current-recipient-row">
-        <button
-          type="button"
-          className={`current-recipient-summary${name ? '' : ' current-recipient-summary--empty'}`}
-          title={name ? `Текущий реципиент: ${name}` : 'Текущий реципиент не выбран'}
-          disabled={!currentRecipientAvailable}
-          onClick={onOpenCurrentRecipient}
-        >
-          <span className="current-recipient-summary__label">Текущий реципиент:</span>
-          {name ? (
-            <>
-              <strong className="current-recipient-summary__name">{name}</strong>
-              {bloodGroup && (
-                <span className="current-recipient-summary__blood-group">{bloodGroup}</span>
-              )}
-            </>
-          ) : (
-            <span className="current-recipient-summary__empty">не выбран</span>
-          )}
-        </button>
-      </div>
+      {showRecipient && (
+        <div className="site-current-recipient-row">
+          <button
+            type="button"
+            className={`current-recipient-summary${name ? '' : ' current-recipient-summary--empty'}`}
+            title={name ? `Текущий реципиент: ${name}` : 'Текущий реципиент не выбран'}
+            disabled={!currentRecipientAvailable}
+            onClick={onOpenCurrentRecipient}
+          >
+            <span className="current-recipient-summary__label">Текущий реципиент:</span>
+            {name ? (
+              <>
+                <strong className="current-recipient-summary__name">{name}</strong>
+                {bloodGroup && (
+                  <span className="current-recipient-summary__blood-group">{bloodGroup}</span>
+                )}
+              </>
+            ) : (
+              <span className="current-recipient-summary__empty">не выбран</span>
+            )}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

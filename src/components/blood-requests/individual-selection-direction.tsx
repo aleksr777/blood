@@ -421,33 +421,33 @@ export const IndividualSelectionDirection = () => {
         return {
           title: 'Данные реципиента',
           fields: RECIPIENT_FIELDS,
-          values: valuesFor(COMPONENT_FIELDS),
+          values: valuesFor(RECIPIENT_FIELDS),
         };
       case 'transfusion':
         return {
           title: 'Гемотрансфузионный анамнез',
           fields: TRANSFUSION_FIELDS,
-          values: valuesFor(COMPONENT_FIELDS),
+          values: valuesFor(TRANSFUSION_FIELDS),
         };
       case 'obstetric':
         return draft.recipientSex === 'Женский'
           ? {
               title: 'Акушерский анамнез',
               fields: OBSTETRIC_FIELDS,
-              values: valuesFor(COMPONENT_FIELDS),
+              values: valuesFor(OBSTETRIC_FIELDS),
             }
           : null;
       case 'allergy':
         return {
           title: 'Аллергоанамнез',
           fields: ALLERGY_FIELDS,
-          values: valuesFor(COMPONENT_FIELDS),
+          values: valuesFor(ALLERGY_FIELDS),
         };
       case 'footer':
         return {
           title: 'Оформление направления',
           fields: FOOTER_FIELDS,
-          values: valuesFor(COMPONENT_FIELDS),
+          values: valuesFor(FOOTER_FIELDS),
         };
       default:
         return null;

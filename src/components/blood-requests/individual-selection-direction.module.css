@@ -141,6 +141,7 @@
   display: flex;
   align-items: baseline;
   min-height: 7mm;
+  margin-bottom: 3mm;
   gap: 1mm;
 }
 

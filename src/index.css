@@ -297,7 +297,7 @@ a.site-navigation__link:focus-visible::after {
   margin: 0;
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 7px;
 }
 
 .print-button,
@@ -308,42 +308,95 @@ a.site-navigation__link:focus-visible::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 0 16px;
-  border: 1px solid #1d4ed8;
-  border-radius: 8px;
-  background: #1d4ed8;
-  color: #fff;
-  font-size: 14px;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 12.5px;
   font-weight: 600;
+  line-height: 1;
   cursor: pointer;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.print-button {
+  border-color: #426b96;
+  background: #426b96;
+  color: #fff;
 }
 
 .clear-button {
-  border-color: #b91c1c;
+  border-color: #c58b8b;
   background: #fff;
-  color: #b91c1c;
+  color: #9a4b4b;
 }
 
 .new-button {
   margin-right: auto;
-  border-color: #1d4ed8;
-  background: #fff;
-  color: #1d4ed8;
+  border-color: #9fb2c7;
+  background: #f8fafc;
+  color: #36536f;
 }
 
 .secondary-button {
-  border-color: #64748b;
-  background: #fff;
-  color: #334155;
+  border-color: #b8c4d6;
+  background: #f8fafc;
+  color: #475569;
 }
 
 .save-button {
-  border-color: #15803d;
-  background: #15803d;
+  border-color: #5f8575;
+  background: #5f8575;
   color: #fff;
+}
+
+.print-button:hover {
+  border-color: #365d84;
+  background: #365d84;
+}
+
+.save-button:hover {
+  border-color: #527565;
+  background: #527565;
+}
+
+.new-button:hover,
+.secondary-button:hover {
+  border-color: #829bb5;
+  background: #fff;
+  color: #294a68;
+}
+
+.clear-button:hover {
+  border-color: #b56f6f;
+  background: #fff8f8;
+  color: #8b3f3f;
+}
+
+.print-button:hover,
+.clear-button:hover,
+.new-button:hover,
+.secondary-button:hover,
+.save-button:hover {
+  box-shadow: 0 2px 6px rgb(15 23 42 / 10%);
+  transform: translateY(-1px);
+}
+
+.print-button:active,
+.clear-button:active,
+.new-button:active,
+.secondary-button:active,
+.save-button:active {
+  box-shadow: 0 1px 2px rgb(15 23 42 / 7%);
+  transform: translateY(0);
 }
 
 .clear-button:disabled,
@@ -353,7 +406,9 @@ a.site-navigation__link:focus-visible::after {
   border-color: #cbd5e1;
   background: #f8fafc;
   color: #94a3b8;
+  box-shadow: none;
   cursor: default;
+  transform: none;
 }
 
 .toolbar-status {
@@ -423,8 +478,8 @@ a.site-navigation__link:focus-visible::after {
 .new-button:focus-visible,
 .secondary-button:focus-visible,
 .save-button:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 1px;
+  outline: 2px solid rgb(66 107 150 / 28%);
+  outline-offset: 2px;
 }
 
 .sheets {

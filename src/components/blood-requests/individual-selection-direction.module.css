@@ -258,6 +258,10 @@
     break-before: page;
   }
 
+  :global(body.print-individual-selection-page-1) .pageTwo {
+    display: none !important;
+  }
+
   :global(body.print-individual-selection-page-2) .pageOne {
     display: none !important;
   }

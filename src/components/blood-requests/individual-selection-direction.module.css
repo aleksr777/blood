@@ -161,18 +161,8 @@
   padding-top: 4mm;
 }
 
-.signatureLineRow {
-  display: flex;
-  align-items: baseline;
-  min-height: 7mm;
+.doctorLine {
   margin-bottom: 3mm;
-  gap: 1mm;
-}
-
-.signatureBlank {
-  flex: 1 1 auto;
-  min-height: 6mm;
-  border-bottom: var(--form-line-width) solid #111;
 }
 
 .transfusionHead {

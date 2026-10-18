@@ -5,7 +5,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem 1.2rem;
+  gap: 1rem 1.25rem;
 }
 
 .grid label {
@@ -41,9 +41,9 @@
 }
 
 .grid textarea {
-  height: 6rem !important;
-  min-height: 6rem !important;
-  max-height: 6rem !important;
+  height: 6.5rem !important;
+  min-height: 6.5rem !important;
+  max-height: 6.5rem !important;
   padding: 0.55rem var(--control-padding-x);
 }
 

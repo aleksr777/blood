@@ -359,6 +359,42 @@ export const IndividualSelectionDirection = () => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   }, [draft]);
 
+  useEffect(() => {
+    if (!currentRecipient) return;
+    if (currentRecipient.profile.diagnosis?.trim()) return;
+    if (draft.sourceRecipientId !== String(currentRecipient.id)) return;
+
+    const legacyDiagnosis = draft.diagnosis?.trim();
+    if (!legacyDiagnosis) return;
+
+    let active = true;
+
+    void updateRecipient(currentRecipient.id, {
+      ...currentRecipient.profile,
+      diagnosis: legacyDiagnosis,
+      recipientId: String(currentRecipient.id),
+      recipientName: currentRecipient.fullName,
+    })
+      .then(async (updatedRecipient) => {
+        if (!active) return;
+        await switchCurrentRecipient(updatedRecipient);
+        if (!active) return;
+        await refreshCurrentData(readCurrentRecipient());
+      })
+      .catch((error: unknown) => {
+        console.error('Не удалось перенести диагноз в общий профиль реципиента:', error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    currentRecipient,
+    draft.diagnosis,
+    draft.sourceRecipientId,
+    refreshCurrentData,
+  ]);
+
   const updateFields = (changes: Record<string, string>) => {
     setDraft((current) => {
       const next = { ...current };

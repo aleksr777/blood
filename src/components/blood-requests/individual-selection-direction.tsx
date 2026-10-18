@@ -657,9 +657,6 @@ export const IndividualSelectionDirection = () => {
               </span>
             </div>
 
-            <div className={styles.transfusionHead}>
-              Зав. трансфузиологическим кабинетом:
-            </div>
           </div>
         </section>
       </div>

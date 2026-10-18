@@ -41,6 +41,7 @@ type AutoField =
   | 'recipientAge'
   | 'department'
   | 'medicalRecordNumber'
+  | 'diagnosis'
   | 'transfusionHistory'
   | 'obstetricHistory'
   | 'recipientSex';
@@ -50,7 +51,6 @@ type DirectionDraft = Record<AutoField, string> & {
   requiredComponent: string;
   quantity: string;
   medicalOrganization: string;
-  diagnosis: string;
   allergyHistory: string;
   directionDate: string;
   doctorPhone: string;
@@ -74,6 +74,7 @@ const AUTO_FIELDS: AutoField[] = [
   'recipientAge',
   'department',
   'medicalRecordNumber',
+  'diagnosis',
   'transfusionHistory',
   'obstetricHistory',
   'recipientSex',
@@ -132,6 +133,7 @@ const emptyDraft = (): DirectionDraft => ({
   department: '',
   medicalRecordNumber: '',
   medicalOrganization: DEFAULT_MEDICAL_ORGANIZATION,
+  diagnosis: '',
   transfusionHistory: '',
   obstetricHistory: '',
   recipientSex: '',
@@ -265,6 +267,7 @@ const currentAutoValues = async (
     recipientAge: formatRecipientAge(values.recipientBirthDate),
     department: values.department?.trim() ?? '',
     medicalRecordNumber: values.medicalRecordNumber?.trim() ?? '',
+    diagnosis: values.diagnosis?.trim() ?? '',
     transfusionHistory: formatTransfusionHistory(values),
     obstetricHistory:
       values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '',
@@ -689,9 +692,7 @@ export const IndividualSelectionDirection = () => {
       {editor === 'recipient' && (
         <IndividualSelectionRecipientModal
           values={examinationValues}
-          diagnosis={draft.diagnosis}
           onRecipientChange={updateExamination}
-          onDiagnosisChange={(value) => updateFields({ diagnosis: value })}
           onOpenRecipients={() => {
             setEditor(null);
             setRegistryOpen(true);

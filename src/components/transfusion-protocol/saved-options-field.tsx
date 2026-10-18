@@ -14,10 +14,18 @@ type Props = {
   label: string;
   category: string;
   value: string;
+  fixedOptions?: string[];
   onChange: (value: string) => void;
 };
 
-export const SavedOptionsField = ({ name, label, category, value, onChange }: Props) => {
+export const SavedOptionsField = ({
+  name,
+  label,
+  category,
+  value,
+  fixedOptions = [],
+  onChange,
+}: Props) => {
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -73,6 +81,13 @@ export const SavedOptionsField = ({ name, label, category, value, onChange }: Pr
         ? 'Не удалось загрузить список'
         : 'Сохранённых вариантов нет';
 
+  const normalizedFixedOptions = new Set(
+    fixedOptions.map((option) => option.trim().toLocaleLowerCase('ru-RU')),
+  );
+  const editableItems = items.filter(
+    (item) => !normalizedFixedOptions.has(item.value.trim().toLocaleLowerCase('ru-RU')),
+  );
+
   return (
     <div ref={rootRef} className={styles.departmentField}>
       <div className={styles.departmentControl}>
@@ -98,10 +113,25 @@ export const SavedOptionsField = ({ name, label, category, value, onChange }: Pr
         data-state={dropdownState}
         aria-hidden={dropdownState !== 'open'}
       >
-        {items.length === 0 ? (
+        {fixedOptions.map((option) => (
+          <div key={option} className={styles.historyFixedRow}>
+            <button
+              type="button"
+              className={styles.historyValue}
+              title="Подставить значение"
+              onClick={() => {
+                onChange(option);
+                setOpen(false);
+              }}
+            >
+              {option}
+            </button>
+          </div>
+        ))}
+        {editableItems.length === 0 && fixedOptions.length === 0 ? (
           <div className={styles.historyEmpty}>{emptyText}</div>
         ) : (
-          items.map((item) => (
+          editableItems.map((item) => (
             <SavedOptionItem
               key={item.id}
               item={item}

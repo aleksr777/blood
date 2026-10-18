@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { rememberDepartment } from '../../storage/repositories/departments';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
+import { DepartmentField } from '../transfusion-protocol/department-field';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import styles from './request-editor-modal.module.css';
 
@@ -43,9 +45,17 @@ export const RequestEditorModal = ({
 
   const handleClose = () => {
     fields.forEach((field) => {
-      if (!field.savedOptionsCategory) return;
       const value = draft[field.name]?.trim();
       if (!value) return;
+
+      if (field.name === 'department') {
+        void rememberDepartment(value).catch((error: unknown) => {
+          console.error('Не удалось сохранить отделение:', error);
+        });
+        return;
+      }
+
+      if (!field.savedOptionsCategory) return;
 
       void rememberSavedOption(field.savedOptionsCategory, value).catch((error: unknown) => {
         console.error(`Не удалось сохранить вариант поля ${field.name}:`, error);
@@ -64,7 +74,12 @@ export const RequestEditorModal = ({
             className={field.wide ? styles.wide : undefined}
           >
             <span>{field.label}</span>
-            {field.savedOptionsCategory ? (
+            {field.name === 'department' ? (
+              <DepartmentField
+                value={draft[field.name] ?? ''}
+                onChange={(value) => changeValue(field.name, value)}
+              />
+            ) : field.savedOptionsCategory ? (
               <SavedOptionsField
                 name={field.name}
                 label={field.label}

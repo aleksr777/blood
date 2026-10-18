@@ -5,17 +5,24 @@ import {
   type CurrentRecipient,
 } from '../../storage/repositories/current-recipient';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
-import type { RecipientRecord } from '../../storage/repositories/recipients';
+import {
+  updateRecipient,
+  type RecipientRecord,
+} from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
-import { formatRecipientAntigens } from '../transfusion-protocol/recipient-examination-model';
+import {
+  formatAlloimmuneAntibodies,
+  formatRecipientAntigens,
+} from '../transfusion-protocol/recipient-examination-model';
 import {
   formatHistoryValue,
   HISTORY_STATUS,
   getHistoryStatus,
 } from '../transfusion-protocol/recipient-history-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
+import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import {
   RequestEditorModal,
   type RequestEditorField,
@@ -28,6 +35,7 @@ const ORGANIZATION = 'ФБУЗ "Медико-санитарная часть №
 type AutoField =
   | 'recipientAboRh'
   | 'recipientPhenotype'
+  | 'recipientAlloimmuneAntibodies'
   | 'recipientName'
   | 'recipientAge'
   | 'department'
@@ -59,6 +67,7 @@ type Editor =
 const AUTO_FIELDS: AutoField[] = [
   'recipientAboRh',
   'recipientPhenotype',
+  'recipientAlloimmuneAntibodies',
   'recipientName',
   'recipientAge',
   'department',
@@ -66,21 +75,6 @@ const AUTO_FIELDS: AutoField[] = [
   'transfusionHistory',
   'obstetricHistory',
   'recipientSex',
-];
-
-const COMPONENT_FIELDS: RequestEditorField[] = [
-  {
-    name: 'requiredComponent',
-    label: 'Наименование требуемого компонента',
-    wide: true,
-  },
-  { name: 'quantity', label: 'Количество', wide: true },
-  {
-    name: 'recipientAboRh',
-    label: 'Группа крови и резус-фактор реципиента',
-    wide: true,
-  },
-  { name: 'recipientPhenotype', label: 'Фенотип реципиента', wide: true },
 ];
 
 const RECIPIENT_FIELDS: RequestEditorField[] = [
@@ -129,6 +123,7 @@ const emptyDraft = (): DirectionDraft => ({
   quantity: '',
   recipientAboRh: '',
   recipientPhenotype: '',
+  recipientAlloimmuneAntibodies: '',
   recipientName: '',
   recipientAge: '',
   department: '',
@@ -262,6 +257,7 @@ const currentAutoValues = async (
       .filter(Boolean)
       .join(' '),
     recipientPhenotype: formatRecipientAntigens(values),
+    recipientAlloimmuneAntibodies: formatAlloimmuneAntibodies(values),
     recipientName: recipient.fullName,
     recipientAge: formatRecipientAge(values.recipientBirthDate),
     department: values.department?.trim() ?? '',
@@ -393,6 +389,32 @@ export const IndividualSelectionDirection = () => {
     }
   };
 
+  const examinationValues = useMemo<ProtocolValues>(
+    () => ({
+      ...(currentRecipient?.profile ?? {}),
+      recipientId: currentRecipient ? String(currentRecipient.id) : '',
+      recipientName: currentRecipient?.fullName ?? '',
+    }),
+    [currentRecipient],
+  );
+
+  const updateExamination = async (changes: ProtocolValues) => {
+    if (!currentRecipient) return;
+
+    try {
+      const updatedRecipient = await updateRecipient(currentRecipient.id, {
+        ...currentRecipient.profile,
+        ...changes,
+        recipientId: String(currentRecipient.id),
+        recipientName: currentRecipient.fullName,
+      });
+      await switchCurrentRecipient(updatedRecipient);
+      await refreshCurrentData(readCurrentRecipient());
+    } catch (error) {
+      console.error('Не удалось обновить данные медицинского обследования реципиента:', error);
+    }
+  };
+
   const editorConfig = useMemo(() => {
     const valuesFor = (fields: RequestEditorField[]) =>
       Object.fromEntries(
@@ -405,12 +427,6 @@ export const IndividualSelectionDirection = () => {
       );
 
     switch (editor) {
-      case 'component':
-        return {
-          title: 'Компонент крови',
-          fields: COMPONENT_FIELDS,
-          values: valuesFor(COMPONENT_FIELDS),
-        };
       case 'recipient':
         return {
           title: 'Данные реципиента',
@@ -516,6 +532,12 @@ export const IndividualSelectionDirection = () => {
               <span>Фенотип реципиента:</span>
               <span className={styles.valueLine}>
                 {displayValue(draft.recipientPhenotype)}
+              </span>
+            </div>
+            <div className={styles.singleLine}>
+              <span>Аллоиммунные антитела:</span>
+              <span className={styles.valueLine}>
+                {displayValue(draft.recipientAlloimmuneAntibodies)}
               </span>
             </div>
           </div>
@@ -645,6 +667,17 @@ export const IndividualSelectionDirection = () => {
           </div>
         </section>
       </div>
+
+      {editor === 'component' && (
+        <IndividualSelectionComponentModal
+          requiredComponent={draft.requiredComponent}
+          quantity={draft.quantity}
+          examinationValues={examinationValues}
+          onLocalChange={updateFields}
+          onExaminationChange={updateExamination}
+          onClose={() => setEditor(null)}
+        />
+      )}
 
       {editorConfig && (
         <RequestEditorModal

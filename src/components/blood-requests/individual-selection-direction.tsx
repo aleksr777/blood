@@ -35,7 +35,6 @@ const ORGANIZATION = 'ФБУЗ "Медико-санитарная часть №
 type AutoField =
   | 'recipientAboRh'
   | 'recipientPhenotype'
-  | 'recipientAlloimmuneAntibodies'
   | 'recipientName'
   | 'recipientAge'
   | 'department'
@@ -67,7 +66,6 @@ type Editor =
 const AUTO_FIELDS: AutoField[] = [
   'recipientAboRh',
   'recipientPhenotype',
-  'recipientAlloimmuneAntibodies',
   'recipientName',
   'recipientAge',
   'department',
@@ -123,7 +121,6 @@ const emptyDraft = (): DirectionDraft => ({
   quantity: '',
   recipientAboRh: '',
   recipientPhenotype: '',
-  recipientAlloimmuneAntibodies: '',
   recipientName: '',
   recipientAge: '',
   department: '',
@@ -257,7 +254,6 @@ const currentAutoValues = async (
       .filter(Boolean)
       .join(' '),
     recipientPhenotype: formatRecipientAntigens(values),
-    recipientAlloimmuneAntibodies: formatAlloimmuneAntibodies(values),
     recipientName: recipient.fullName,
     recipientAge: formatRecipientAge(values.recipientBirthDate),
     department: values.department?.trim() ?? '',
@@ -578,7 +574,7 @@ export const IndividualSelectionDirection = () => {
             <div className={styles.singleLine}>
               <span>Аллоиммунные антитела:</span>
               <span className={styles.valueLine}>
-                {displayValue(draft.recipientAlloimmuneAntibodies)}
+                {displayValue(formatAlloimmuneAntibodies(examinationValues))}
               </span>
             </div>
           </div>

@@ -52,7 +52,6 @@ type DirectionDraft = Record<AutoField, string> & {
   requiredComponent: string;
   quantity: string;
   medicalOrganization: string;
-  allergyHistory: string;
   directionDate: string;
   doctorPhone: string;
   autoValues: Partial<Record<AutoField, string>>;
@@ -64,7 +63,6 @@ type Editor =
   | 'recipient'
   | 'transfusion'
   | 'obstetric'
-  | 'allergy'
   | 'footer'
   | null;
 
@@ -91,15 +89,6 @@ const ORGANIZATION_FIELDS: RequestEditorField[] = [
   { name: 'department', label: 'Отделение', wide: true },
 ];
 
-const ALLERGY_FIELDS: RequestEditorField[] = [
-  {
-    name: 'allergyHistory',
-    label: 'Аллергоанамнез',
-    type: 'textarea',
-    wide: true,
-  },
-];
-
 const FOOTER_FIELDS: RequestEditorField[] = [
   { name: 'directionDate', label: 'Дата направления', type: 'date' },
   { name: 'doctorPhone', label: 'Телефон лечащего врача', wide: true },
@@ -120,7 +109,6 @@ const emptyDraft = (): DirectionDraft => ({
   transfusionHistory: '',
   obstetricHistory: '',
   recipientSex: '',
-  allergyHistory: '',
   directionDate: '',
   doctorPhone: '',
   autoValues: {},
@@ -156,6 +144,7 @@ const loadDraft = (): DirectionDraft => {
           : {},
     } as DirectionDraft;
 
+    delete (next as Record<string, unknown>).allergyHistory;
     if (!next.directionDate) next.directionDate = todayKey();
     return next;
   } catch {
@@ -474,12 +463,6 @@ export const IndividualSelectionDirection = () => {
           fields: ORGANIZATION_FIELDS,
           values: valuesFor(ORGANIZATION_FIELDS),
         };
-      case 'allergy':
-        return {
-          title: 'Аллергоанамнез',
-          fields: ALLERGY_FIELDS,
-          values: valuesFor(ALLERGY_FIELDS),
-        };
       case 'footer':
         return {
           title: 'Оформление направления',
@@ -667,22 +650,6 @@ export const IndividualSelectionDirection = () => {
                 Акушерский анамнез анамнез у женщин:
               </span>
               <div className={styles.multilineValue}>{draft.obstetricHistory}</div>
-            </div>
-          </div>
-
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
-            onClick={() => setEditor('allergy')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('allergy'))
-            }
-          >
-            <div className={styles.multilineBlock}>
-              <MultilineRules />
-              <span className={styles.multilineLabel}>Аллергоанамнез:</span>
-              <div className={styles.multilineValue}>{draft.allergyHistory}</div>
             </div>
           </div>
 

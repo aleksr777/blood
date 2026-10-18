@@ -26,8 +26,6 @@ const STORAGE_KEY = 'blood:individual-selection-direction-draft';
 const ORGANIZATION = 'ФБУЗ "Медико-санитарная часть №32" ФМБА России, г. Заречный.';
 
 type AutoField =
-  | 'requiredComponent'
-  | 'quantity'
   | 'recipientAboRh'
   | 'recipientPhenotype'
   | 'recipientName'
@@ -40,6 +38,8 @@ type AutoField =
 
 type DirectionDraft = Record<AutoField, string> & {
   sourceRecipientId: string;
+  requiredComponent: string;
+  quantity: string;
   diagnosis: string;
   allergyHistory: string;
   directionDate: string;
@@ -57,8 +57,6 @@ type Editor =
   | null;
 
 const AUTO_FIELDS: AutoField[] = [
-  'requiredComponent',
-  'quantity',
   'recipientAboRh',
   'recipientPhenotype',
   'recipientName',
@@ -89,7 +87,7 @@ const RECIPIENT_FIELDS: RequestEditorField[] = [
   { name: 'recipientName', label: 'Ф.И.О. реципиента', wide: true },
   { name: 'recipientAge', label: 'Возраст' },
   { name: 'department', label: 'Отделение' },
-  { name: 'medicalRecordNumber', label: '№ истории болезни' },
+  { name: 'medicalRecordNumber', label: '№ медицинской карты' },
   { name: 'diagnosis', label: 'Диагноз', type: 'textarea', wide: true },
 ];
 
@@ -259,11 +257,7 @@ const currentAutoValues = async (
     ...currentProtocolValues,
   };
 
-  const amount = values.amountMl?.trim();
-
   return {
-    requiredComponent: values.componentName?.trim() ?? '',
-    quantity: amount ? `${amount} мл` : '',
     recipientAboRh: [values.recipientAbo, values.recipientRh]
       .filter(Boolean)
       .join(' '),
@@ -556,7 +550,7 @@ export const IndividualSelectionDirection = () => {
               <span className={styles.valueLine}>{displayValue(draft.department)}</span>
             </div>
             <div className={styles.singleLine}>
-              <span>№ истории болезни:</span>
+              <span>№ медицинской карты:</span>
               <span className={styles.valueLine}>
                 {displayValue(draft.medicalRecordNumber)}
               </span>

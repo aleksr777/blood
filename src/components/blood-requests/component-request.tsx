@@ -1,5 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
+import { formatDateTime } from '../transfusion-protocol/protocol-types';
 import { SiteNavigation } from '../site-navigation/site-navigation';
+import {
+  RequestEditorModal,
+  type RequestEditorField,
+} from './request-editor-modal';
 import styles from './request-form.module.css';
 
 const STORAGE_KEY = 'blood:component-request-draft';
@@ -28,6 +33,99 @@ type Draft = {
   doctorName: string;
   rows: RequestRow[];
 };
+
+type Editor =
+  | { kind: 'details' }
+  | { kind: 'row'; index: number }
+  | { kind: 'doctor' }
+  | null;
+
+const DETAIL_FIELDS: RequestEditorField[] = [
+  {
+    name: 'department',
+    label:
+      'Наименование и контактный телефон подразделения медицинской организации, осуществляющего клиническое использование донорской крови и (или) ее компонентов',
+    wide: true,
+  },
+  {
+    name: 'requestDateTime',
+    label: 'Дата и время подачи заявки',
+    type: 'datetime-local',
+  },
+  {
+    name: 'plannedDateTime',
+    label: 'Предполагаемые дата и время трансфузии',
+    type: 'datetime-local',
+  },
+  {
+    name: 'careForm',
+    label: 'Форма оказания медицинской помощи',
+    type: 'select',
+    options: [
+      { value: 'urgent', label: 'Экстренная или неотложная' },
+      { value: 'planned', label: 'Плановая трансфузия' },
+    ],
+    wide: true,
+  },
+];
+
+const ROW_FIELDS: RequestEditorField[] = [
+  {
+    name: 'recipientIdentity',
+    label: 'ФИО, дата рождения и диагноз реципиента',
+    type: 'textarea',
+    wide: true,
+  },
+  { name: 'medicalRecordNumber', label: '№ медицинской карты' },
+  { name: 'recipientAbo', label: 'Группа крови AB0' },
+  { name: 'recipientRh', label: 'Резус-принадлежность' },
+  {
+    name: 'recipientAntigens',
+    label: 'Антигены эритроцитов C, c, E, e, K, k, антигены других систем',
+    type: 'textarea',
+    wide: true,
+  },
+  {
+    name: 'componentCode',
+    label: 'Идентификационный код донорской крови и (или) ее компонента',
+    wide: true,
+  },
+  { name: 'quantity', label: 'Количество (единицы измерения)' },
+  { name: 'indicationCode', label: 'Код показания к трансфузии' },
+  {
+    name: 'individualSelection',
+    label: 'Необходимость индивидуального подбора',
+    type: 'select',
+    options: [
+      { value: 'Да', label: 'Да' },
+      { value: 'Нет', label: 'Нет' },
+    ],
+  },
+  {
+    name: 'individualSelectionCode',
+    label: 'Код показания для индивидуального подбора',
+  },
+  {
+    name: 'donorAbo',
+    label: 'Группа крови по системе AB0 донора аллогенного КМ или ГСК',
+    wide: true,
+  },
+  {
+    name: 'donorRhAntigens',
+    label:
+      'Резус-принадлежность и антигены эритроцитов C, c, E, e, K, k донора аллогенного КМ или ГСК',
+    type: 'textarea',
+    wide: true,
+  },
+];
+
+const DOCTOR_FIELDS: RequestEditorField[] = [
+  {
+    name: 'doctorName',
+    label: 'Врач, проводящий трансфузию',
+    wide: true,
+  },
+];
 
 const emptyRow = (): RequestRow => ({
   recipientIdentity: '',
@@ -75,25 +173,50 @@ const loadDraft = (): Draft => {
   }
 };
 
+const activateOnKeyboard = (
+  event: KeyboardEvent<HTMLElement>,
+  action: () => void,
+) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    action();
+  }
+};
+
+const displayValue = (value?: string) => value?.trim() || ' ';
+
+const careFormText = (value: Draft['careForm']) => {
+  if (value === 'urgent') return 'экстренная или неотложная';
+  if (value === 'planned') return 'плановая трансфузия';
+  return '';
+};
+
 export const ComponentRequest = () => {
   const [draft, setDraft] = useState<Draft>(loadDraft);
+  const [editor, setEditor] = useState<Editor>(null);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   }, [draft]);
 
-  const updateField = (
-    name: keyof Omit<Draft, 'rows' | 'careForm'>,
-    value: string,
-  ) => {
-    setDraft((current) => ({ ...current, [name]: value }));
+  const updateFields = (changes: Record<string, string>) => {
+    setDraft((current) => ({
+      ...current,
+      ...changes,
+      careForm:
+        changes.careForm === 'urgent' || changes.careForm === 'planned'
+          ? changes.careForm
+          : changes.careForm === ''
+            ? ''
+            : current.careForm,
+    }));
   };
 
-  const updateRow = (index: number, field: keyof RequestRow, value: string) => {
+  const updateRow = (index: number, changes: Record<string, string>) => {
     setDraft((current) => ({
       ...current,
       rows: current.rows.map((row, rowIndex) =>
-        rowIndex === index ? { ...row, [field]: value } : row,
+        rowIndex === index ? { ...row, ...changes } : row,
       ),
     }));
   };
@@ -110,6 +233,13 @@ export const ComponentRequest = () => {
     const next = initialDraft();
     setDraft(next);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  };
+
+  const detailValues: Record<string, string> = {
+    department: draft.department,
+    requestDateTime: draft.requestDateTime,
+    plannedDateTime: draft.plannedDateTime,
+    careForm: draft.careForm,
   };
 
   return (
@@ -165,70 +295,35 @@ export const ComponentRequest = () => {
             для клинического использования
           </h1>
 
-          <table className={styles.topTable}>
+          <table
+            className={`${styles.topTable} ${styles.fillSection}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => setEditor({ kind: 'details' })}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor({ kind: 'details' }))
+            }
+          >
             <tbody>
               <tr>
                 <td>
                   Наименование и контактный телефон подразделения медицинской организации,
                   осуществляющего клиническое использование донорской крови и (или) ее компонентов
                 </td>
-                <td>
-                  <input
-                    className={styles.topTableInput}
-                    value={draft.department}
-                    onChange={(event) => updateField('department', event.target.value)}
-                  />
-                </td>
+                <td>{displayValue(draft.department)}</td>
               </tr>
               <tr>
                 <td>Дата и время подачи заявки</td>
-                <td>
-                  <input
-                    type="datetime-local"
-                    className={styles.topTableInput}
-                    value={draft.requestDateTime}
-                    onChange={(event) => updateField('requestDateTime', event.target.value)}
-                  />
-                </td>
+                <td>{formatDateTime(draft.requestDateTime) || ' '}</td>
               </tr>
               <tr>
                 <td>Предполагаемые дата и время трансфузии</td>
-                <td>
-                  <input
-                    type="datetime-local"
-                    className={styles.topTableInput}
-                    value={draft.plannedDateTime}
-                    onChange={(event) => updateField('plannedDateTime', event.target.value)}
-                  />
-                </td>
+                <td>{formatDateTime(draft.plannedDateTime) || ' '}</td>
               </tr>
               <tr>
                 <td>Форма оказания медицинской помощи (нужное подчеркнуть)</td>
-                <td>
-                  <div className={styles.radioCell}>
-                    <label>
-                      <input
-                        type="radio"
-                        name="careForm"
-                        checked={draft.careForm === 'urgent'}
-                        onChange={() =>
-                          setDraft((current) => ({ ...current, careForm: 'urgent' }))
-                        }
-                      />
-                      <span>экстренная или неотложная</span>
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="careForm"
-                        checked={draft.careForm === 'planned'}
-                        onChange={() =>
-                          setDraft((current) => ({ ...current, careForm: 'planned' }))
-                        }
-                      />
-                      <span>плановая трансфузия</span>
-                    </label>
-                  </div>
+                <td className={styles.careFormValue}>
+                  {displayValue(careFormText(draft.careForm))}
                 </td>
               </tr>
               <tr className={styles.sectionHeaderRow}>
@@ -274,44 +369,46 @@ export const ComponentRequest = () => {
             </thead>
             <tbody>
               {draft.rows.map((row, index) => (
-                <tr key={index} className={styles.dataRow}>
-                  {(
-                    [
-                      'recipientIdentity',
-                      'medicalRecordNumber',
-                      'recipientAbo',
-                      'recipientRh',
-                      'recipientAntigens',
-                      'componentCode',
-                      'quantity',
-                      'indicationCode',
-                      'individualSelection',
-                      'individualSelectionCode',
-                      'donorAbo',
-                      'donorRhAntigens',
-                    ] as const
-                  ).map((field) => (
-                    <td key={field}>
-                      <textarea
-                        className={styles.cellTextarea}
-                        value={row[field]}
-                        onChange={(event) => updateRow(index, field, event.target.value)}
-                      />
-                    </td>
-                  ))}
+                <tr
+                  key={index}
+                  className={`${styles.dataRow} ${styles.fillRow}`}
+                  tabIndex={0}
+                  onClick={() => setEditor({ kind: 'row', index })}
+                  onKeyDown={(event) =>
+                    activateOnKeyboard(event, () => setEditor({ kind: 'row', index }))
+                  }
+                >
+                  <td>{displayValue(row.recipientIdentity)}</td>
+                  <td>{displayValue(row.medicalRecordNumber)}</td>
+                  <td>{displayValue(row.recipientAbo)}</td>
+                  <td>{displayValue(row.recipientRh)}</td>
+                  <td>{displayValue(row.recipientAntigens)}</td>
+                  <td>{displayValue(row.componentCode)}</td>
+                  <td>{displayValue(row.quantity)}</td>
+                  <td>{displayValue(row.indicationCode)}</td>
+                  <td>{displayValue(row.individualSelection)}</td>
+                  <td>{displayValue(row.individualSelectionCode)}</td>
+                  <td>{displayValue(row.donorAbo)}</td>
+                  <td>{displayValue(row.donorRhAntigens)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div className={styles.doctorSignature}>
+          <div
+            className={`${styles.doctorSignature} ${styles.fillSection}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => setEditor({ kind: 'doctor' })}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor({ kind: 'doctor' }))
+            }
+          >
             <span>Врач, проводящий трансфузию,</span>
             <div>
-              <input
-                className={styles.doctorNameInput}
-                value={draft.doctorName}
-                onChange={(event) => updateField('doctorName', event.target.value)}
-              />
+              <div className={styles.doctorNameValue}>
+                {displayValue(draft.doctorName)}
+              </div>
               <div className={styles.signatureCaption}>
                 фамилия, имя, отчество
                 <br />
@@ -325,6 +422,36 @@ export const ComponentRequest = () => {
           </div>
         </section>
       </div>
+
+      {editor?.kind === 'details' && (
+        <RequestEditorModal
+          title="Общие данные заявки"
+          fields={DETAIL_FIELDS}
+          values={detailValues}
+          onChange={updateFields}
+          onClose={() => setEditor(null)}
+        />
+      )}
+
+      {editor?.kind === 'row' && (
+        <RequestEditorModal
+          title={`Строка ${editor.index + 1} заявки`}
+          fields={ROW_FIELDS}
+          values={draft.rows[editor.index] ?? emptyRow()}
+          onChange={(changes) => updateRow(editor.index, changes)}
+          onClose={() => setEditor(null)}
+        />
+      )}
+
+      {editor?.kind === 'doctor' && (
+        <RequestEditorModal
+          title="Врач, проводящий трансфузию"
+          fields={DOCTOR_FIELDS}
+          values={{ doctorName: draft.doctorName }}
+          onChange={updateFields}
+          onClose={() => setEditor(null)}
+        />
+      )}
     </main>
   );
 };

@@ -190,15 +190,31 @@ export const ConsolidatedRequest = () => {
   }, [draft]);
 
   const updateFields = (changes: Record<string, string>) => {
-    setDraft((current) => ({ ...current, ...changes }));
+    setDraft((current) => ({
+      ...current,
+      organization: changes.organization ?? current.organization,
+      transfusionHeadPhone:
+        changes.transfusionHeadPhone ?? current.transfusionHeadPhone,
+      supplier: changes.supplier ?? current.supplier,
+      requestDate: changes.requestDate ?? current.requestDate,
+      transfusionHeadName:
+        changes.transfusionHeadName ?? current.transfusionHeadName,
+      organizationHeadName:
+        changes.organizationHeadName ?? current.organizationHeadName,
+    }));
   };
 
   const updateRow = (index: number, changes: Record<string, string>) => {
     setDraft((current) => ({
       ...current,
-      rows: current.rows.map((row, rowIndex) =>
-        rowIndex === index ? { ...row, ...changes } : row,
-      ),
+      rows: current.rows.map((row, rowIndex) => {
+        if (rowIndex !== index) return row;
+        const next = { ...row };
+        Object.entries(changes).forEach(([name, value]) => {
+          if (name in next) next[name as keyof RequestRow] = value;
+        });
+        return next;
+      }),
     }));
   };
 

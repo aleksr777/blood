@@ -13,13 +13,17 @@
 
 .sheetWrap {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 12mm;
 }
 
 .sheet {
   --form-line-width: 0.8px;
 
+  box-sizing: border-box;
   width: 210mm;
+  height: 297mm;
   min-height: 297mm;
   zoom: 1.25;
   padding: 12mm 17mm 14mm;
@@ -40,6 +44,15 @@
   font-weight: 700;
   line-height: 1.15;
   text-align: center;
+}
+
+.pageContent {
+  min-width: 0;
+}
+
+.pageTwo {
+  page-break-before: always;
+  break-before: page;
 }
 
 .fillSection {
@@ -200,7 +213,7 @@
   }
 
   .sheetWrap {
-    justify-content: flex-start;
+    align-items: flex-start;
     overflow-x: auto;
     padding-bottom: 8px;
   }
@@ -228,10 +241,30 @@
     --form-line-width: 1px;
 
     width: 210mm;
+    height: 297mm;
     min-height: 297mm;
     zoom: 1;
     margin: 0;
     box-shadow: none;
+  }
+
+  .sheetWrap {
+    display: block;
+    gap: 0;
+  }
+
+  .pageTwo {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  :global(body.print-individual-selection-page-2) .pageOne {
+    display: none !important;
+  }
+
+  :global(body.print-individual-selection-page-2) .pageTwo {
+    page-break-before: auto !important;
+    break-before: auto !important;
   }
 
   .fillSection,

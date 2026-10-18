@@ -587,15 +587,10 @@ export const IndividualSelectionDirection = () => {
               activateOnKeyboard(event, () => setEditor('recipient'))
             }
           >
-            <div className={styles.fieldBlock}>
-              <div className={styles.singleLine}>
-                <span>Ф.И.О. реципиента:</span>
-                <span className={styles.valueLine}>
-                  {displayValue(draft.recipientName)}
-                </span>
-              </div>
-              <div className={styles.extraLine} />
-            </div>
+            <AdaptiveRuledField
+              label="Ф.И.О. реципиента:"
+              value={draft.recipientName}
+            />
             <div className={styles.singleLine}>
               <span>Возраст:</span>
               <span className={styles.valueLine}>

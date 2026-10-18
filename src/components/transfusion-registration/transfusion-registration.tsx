@@ -18,12 +18,15 @@ import {
   type RecipientRecord,
   type RegistrationRecord,
 } from '../../storage/repositories/recipients';
-import Modal from '../modal/modal';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { RegistrationPatientDetailsModal } from './registration-patient-details-modal';
+import {
+  parseRegistrationTransfusionRows,
+} from './registration-transfusion-table';
+import { RegistrationTransfusionsModal } from './registration-transfusions-modal';
 
 const ROW_COUNT = 14;
 const PENDING_REGISTRATION_RECORD_KEY = 'blood:registration-open-record';
@@ -111,6 +114,7 @@ export const TransfusionRegistration = () => {
       : {};
   const birthDateParts = getBirthDateParts(values.recipientBirthDate);
   const recipientAge = formatRecipientAge(values.recipientBirthDate);
+  const registrationRows = parseRegistrationTransfusionRows(values);
 
   useEffect(() => {
     if (initialRecord) {
@@ -516,13 +520,23 @@ export const TransfusionRegistration = () => {
               </tr>
             </thead>
             <tbody>
-              {Array.from({ length: ROW_COUNT }, (_, index) => (
-                <tr key={index}>
-                  {Array.from({ length: 9 }, (_, cellIndex) => (
-                    <td key={cellIndex}>&nbsp;</td>
-                  ))}
-                </tr>
-              ))}
+              {Array.from({ length: ROW_COUNT }, (_, index) => {
+                const row = registrationRows[index];
+
+                return (
+                  <tr key={row?.protocolId ?? `empty-${index}`}>
+                    <td>{row?.componentName || ' '}</td>
+                    <td>{row?.amountLiters || ' '}</td>
+                    <td>{row?.units || ' '}</td>
+                    <td>{row?.transfusionDate || ' '}</td>
+                    <td>{row?.doctorName || ' '}</td>
+                    <td>&nbsp;</td>
+                    <td>{row?.workerName || ' '}</td>
+                    <td>&nbsp;</td>
+                    <td>{row?.complications || ' '}</td>
+                  </tr>
+                );
+              })}
             </tbody>
             </table>
           </div>
@@ -530,12 +544,14 @@ export const TransfusionRegistration = () => {
       </div>
 
       {tableEditorOpen && (
-        <Modal
-          title="Регистрация трансфузии"
+        <RegistrationTransfusionsModal
+          recipientId={currentRecipientAvailable ? currentRecipientId : null}
+          values={values}
+          onApply={(nextValues) =>
+            setValues((current) => ({ ...current, ...nextValues }))
+          }
           onClose={() => setTableEditorOpen(false)}
-        >
-          <div />
-        </Modal>
+        />
       )}
 
       {patientDetailsOpen && (

@@ -747,7 +747,10 @@ export const IndividualSelectionDirection = () => {
             }
           >
             <div className={styles.directionDate}>
-              Дата направления: {formatDirectionDate(draft.directionDate)}
+              <span>Дата направления:</span>{' '}
+              <span className={styles.enteredValue}>
+                {formatDirectionDate(draft.directionDate)}
+              </span>
             </div>
 
             <div className={`${styles.singleLine} ${styles.doctorLine}`}>

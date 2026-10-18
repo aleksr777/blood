@@ -343,7 +343,7 @@ type AdaptiveRuledFieldProps = {
 const AdaptiveRuledField = ({
   label,
   value,
-  minRows = 2,
+  minRows = 1,
 }: AdaptiveRuledFieldProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const inlineMeasureRef = useRef<HTMLDivElement>(null);

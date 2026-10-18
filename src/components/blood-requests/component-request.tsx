@@ -202,7 +202,10 @@ export const ComponentRequest = () => {
   const updateFields = (changes: Record<string, string>) => {
     setDraft((current) => ({
       ...current,
-      ...changes,
+      department: changes.department ?? current.department,
+      requestDateTime: changes.requestDateTime ?? current.requestDateTime,
+      plannedDateTime: changes.plannedDateTime ?? current.plannedDateTime,
+      doctorName: changes.doctorName ?? current.doctorName,
       careForm:
         changes.careForm === 'urgent' || changes.careForm === 'planned'
           ? changes.careForm
@@ -215,9 +218,14 @@ export const ComponentRequest = () => {
   const updateRow = (index: number, changes: Record<string, string>) => {
     setDraft((current) => ({
       ...current,
-      rows: current.rows.map((row, rowIndex) =>
-        rowIndex === index ? { ...row, ...changes } : row,
-      ),
+      rows: current.rows.map((row, rowIndex) => {
+        if (rowIndex !== index) return row;
+        const next = { ...row };
+        Object.entries(changes).forEach(([name, value]) => {
+          if (name in next) next[name as keyof RequestRow] = value;
+        });
+        return next;
+      }),
     }));
   };
 

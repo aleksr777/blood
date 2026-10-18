@@ -53,7 +53,7 @@ export const IndividualSelectionComponentModal = ({
 
   return (
     <Modal
-      title="Компонент крови и показания для индивидуального подбора"
+      title="Выбор компонента и показания"
       onClose={handleClose}
       className={styles.modal}
     >

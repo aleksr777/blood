@@ -308,17 +308,20 @@ const activateOnKeyboard = (
 
 const displayValue = (value?: string) => value?.trim() || ' ';
 
-type AdaptiveMultilineBlockProps = {
+type AdaptiveRuledFieldProps = {
   label: string;
   value: string;
+  minRows?: number;
 };
 
-const AdaptiveMultilineBlock = ({
+const AdaptiveRuledField = ({
   label,
   value,
-}: AdaptiveMultilineBlockProps) => {
+  minRows = 2,
+}: AdaptiveRuledFieldProps) => {
+  const rootRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
-  const [rowCount, setRowCount] = useState(2);
+  const [rowCount, setRowCount] = useState(minRows);
 
   const updateRowCount = useCallback(() => {
     const measure = measureRef.current;
@@ -327,39 +330,40 @@ const AdaptiveMultilineBlock = ({
     const lineHeight = Number.parseFloat(window.getComputedStyle(measure).lineHeight);
     if (!Number.isFinite(lineHeight) || lineHeight <= 0) return;
 
-    const measuredRows = Math.ceil((measure.scrollHeight - 0.5) / lineHeight);
-    const nextRowCount = Math.max(2, measuredRows);
+    const measuredHeight = measure.getBoundingClientRect().height;
+    const measuredRows = Math.ceil((measuredHeight - 0.5) / lineHeight);
+    const nextRowCount = Math.max(minRows, measuredRows);
     setRowCount((current) => (current === nextRowCount ? current : nextRowCount));
-  }, []);
+  }, [minRows]);
 
   useLayoutEffect(() => {
     updateRowCount();
 
-    const measure = measureRef.current;
-    if (!measure) return undefined;
+    const root = rootRef.current;
+    if (!root || typeof ResizeObserver === 'undefined') return undefined;
 
     const observer = new ResizeObserver(updateRowCount);
-    observer.observe(measure);
+    observer.observe(root);
 
     return () => observer.disconnect();
   }, [label, updateRowCount, value]);
 
   const content = (
     <>
-      <span className={styles.multilineLabel}>{label}</span>
-      {value && <span className={styles.multilineText}> {value}</span>}
+      <span className={styles.adaptiveLabel}>{label}</span>
+      {value && <span className={styles.adaptiveText}> {value}</span>}
     </>
   );
 
   return (
-    <div className={styles.multilineBlock}>
-      <span className={styles.multilineRules} aria-hidden="true">
+    <div ref={rootRef} className={styles.adaptiveField}>
+      <span className={styles.adaptiveRules} aria-hidden="true">
         {Array.from({ length: rowCount }, (_, index) => (
           <span key={index} />
         ))}
       </span>
-      <div className={styles.multilineContent}>{content}</div>
-      <div ref={measureRef} className={styles.multilineMeasure} aria-hidden="true">
+      <div className={styles.adaptiveContent}>{content}</div>
+      <div ref={measureRef} className={styles.adaptiveMeasure} aria-hidden="true">
         {content}
       </div>
     </div>
@@ -567,18 +571,11 @@ export const IndividualSelectionDirection = () => {
               activateOnKeyboard(event, () => setEditor('organization'))
             }
           >
-            <div className={styles.singleLine}>
-              <span>Наименование ЛПУ:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.medicalOrganization)}
-              </span>
-            </div>
-            <div className={styles.singleLine}>
-              <span>Отделение:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.department)}
-              </span>
-            </div>
+            <AdaptiveRuledField
+              label="Наименование ЛПУ:"
+              value={draft.medicalOrganization}
+            />
+            <AdaptiveRuledField label="Отделение:" value={draft.department} />
           </div>
 
           <div
@@ -611,7 +608,7 @@ export const IndividualSelectionDirection = () => {
                 {displayValue(draft.medicalRecordNumber)}
               </span>
             </div>
-            <AdaptiveMultilineBlock label="Диагноз:" value={draft.diagnosis} />
+            <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
           </div>
 
           <div
@@ -623,20 +620,15 @@ export const IndividualSelectionDirection = () => {
               activateOnKeyboard(event, () => setEditor('component'))
             }
           >
-            <div className={styles.fieldBlock}>
-              <div className={styles.singleLine}>
-                <span>Наименование требуемого компонента:</span>
-                <span className={styles.valueLine}>
-                  {displayValue(draft.requiredComponent)}
-                </span>
-              </div>
-              <div className={styles.extraLine} />
-            </div>
+            <AdaptiveRuledField
+              label="Наименование требуемого компонента:"
+              value={draft.requiredComponent}
+            />
             <div className={styles.singleLine}>
               <span>Количество:</span>
               <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
             </div>
-            <AdaptiveMultilineBlock
+            <AdaptiveRuledField
               label="Показания для индивидуального подбора:"
               value={draft.individualSelectionIndications}
             />
@@ -657,18 +649,14 @@ export const IndividualSelectionDirection = () => {
                 {displayValue(draft.recipientAboRh)}
               </span>
             </div>
-            <div className={styles.singleLine}>
-              <span>Фенотип реципиента:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.recipientPhenotype)}
-              </span>
-            </div>
-            <div className={styles.singleLine}>
-              <span>Аллоиммунные антитела:</span>
-              <span className={styles.valueLine}>
-                {displayValue(formatAlloimmuneAntibodies(examinationValues))}
-              </span>
-            </div>
+            <AdaptiveRuledField
+              label="Фенотип реципиента:"
+              value={draft.recipientPhenotype}
+            />
+            <AdaptiveRuledField
+              label="Аллоиммунные антитела:"
+              value={formatAlloimmuneAntibodies(examinationValues)}
+            />
           </div>
 
           <div
@@ -680,7 +668,7 @@ export const IndividualSelectionDirection = () => {
               activateOnKeyboard(event, () => setEditor('transfusion'))
             }
           >
-            <AdaptiveMultilineBlock
+            <AdaptiveRuledField
               label="Гемотрансфузионный анамнез:"
               value={draft.transfusionHistory}
             />
@@ -696,7 +684,7 @@ export const IndividualSelectionDirection = () => {
                 activateOnKeyboard(event, () => setEditor('obstetric'))
               }
             >
-              <AdaptiveMultilineBlock
+              <AdaptiveRuledField
                 label="Акушерский анамнез у женщин:"
                 value={draft.obstetricHistory}
               />

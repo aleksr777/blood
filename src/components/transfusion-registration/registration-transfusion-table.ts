@@ -1,5 +1,8 @@
 import type { ProtocolRecord } from '../../storage/repositories/recipients';
-import { COMPLICATIONS_STATUS, getComplicationsStatus } from '../transfusion-protocol/complications-model';
+import {
+  COMPLICATIONS_STATUS,
+  getComplicationsStatus,
+} from '../transfusion-protocol/complications-model';
 import { formatDate } from '../transfusion-protocol/protocol-types';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 
@@ -87,10 +90,15 @@ export const parseRegistrationTransfusionRows = (
     return parsed.flatMap((item) => {
       if (!item || typeof item !== 'object') return [];
       const row = item as Partial<RegistrationTransfusionRow>;
-      if (!Number.isFinite(row.protocolId)) return [];
+      if (
+        typeof row.protocolId !== 'number' ||
+        !Number.isFinite(row.protocolId)
+      ) {
+        return [];
+      }
 
       return [{
-        protocolId: Number(row.protocolId),
+        protocolId: row.protocolId,
         componentName: typeof row.componentName === 'string' ? row.componentName : '',
         amountLiters: typeof row.amountLiters === 'string' ? row.amountLiters : '',
         units: typeof row.units === 'string' ? row.units : '',

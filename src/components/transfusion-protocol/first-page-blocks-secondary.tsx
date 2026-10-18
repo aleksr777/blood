@@ -20,12 +20,31 @@ const formatRh = (value?: string) => {
   return value ?? '';
 };
 
+const formatObstetricHistory = (values: ProtocolPageProps['values']) => {
+  const items = [
+    ['Количество беременностей', values.recipientPregnanciesCount],
+    ['Количество родов', values.recipientBirthsCount],
+    ['Самопроизвольные аборты в анамнезе', values.recipientSpontaneousAbortionsCount],
+    [
+      'Гемолитическая болезнь новорождённого в анамнезе',
+      values.recipientHemolyticDiseaseNewbornHistory,
+    ],
+  ] as const;
+
+  return items
+    .filter(([, value]) => Boolean(value?.trim()))
+    .map(([label, value]) => `${label}: ${value?.trim()}`)
+    .join('; ');
+};
+
 export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   const previousTransfusionsHad =
     getHistoryStatus(
       values.previousTransfusionsStatus,
       values.previousTransfusions,
     ) === HISTORY_STATUS.had;
+  const obstetricHistory =
+    values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '';
 
   return (
     <tbody
@@ -35,6 +54,15 @@ export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
       onClick={() => onOpenBlock('history')}
     >
       <SectionTitle>Анамнез реципиента</SectionTitle>
+      {obstetricHistory && (
+        <tr className="row-history row-obstetric-history">
+          <LabeledCell
+            colSpan={6}
+            label="Акушерский анамнез"
+            value={obstetricHistory}
+          />
+        </tr>
+      )}
       <tr className="row-history">
         <LabeledCell
           colSpan={previousTransfusionsHad ? 2 : 6}

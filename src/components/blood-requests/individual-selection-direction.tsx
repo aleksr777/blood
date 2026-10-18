@@ -17,7 +17,6 @@ import {
   formatRecipientAntigens,
 } from '../transfusion-protocol/recipient-examination-model';
 import {
-  formatHistoryValue,
   HISTORY_STATUS,
   getHistoryStatus,
 } from '../transfusion-protocol/recipient-history-model';
@@ -192,12 +191,20 @@ const formatObstetricHistory = (values: ProtocolValues) => {
 const formatTransfusionHistory = (values: ProtocolValues) => {
   const parts: string[] = [];
 
-  const previous = formatHistoryValue(
-    values,
-    'previousTransfusionsStatus',
-    'previousTransfusions',
+  const previousStatus = getHistoryStatus(
+    values.previousTransfusionsStatus,
+    values.previousTransfusions,
   );
-  if (previous) parts.push(`Трансфузии: ${previous}`);
+  if (previousStatus === HISTORY_STATUS.none) {
+    parts.push('Трансфузий не было.');
+  } else if (previousStatus === HISTORY_STATUS.unknown) {
+    parts.push('Не известно.');
+  } else if (
+    previousStatus === HISTORY_STATUS.had &&
+    values.previousTransfusions?.trim()
+  ) {
+    parts.push(`Трансфузии: ${values.previousTransfusions.trim()}`);
+  }
 
   const reactionsStatus = getHistoryStatus(
     values.previousReactionsStatus,

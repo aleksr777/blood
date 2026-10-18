@@ -33,7 +33,7 @@ const items: NavigationItem[] = [
   {
     id: 'summary-request',
     href: '#/summary-request',
-    label: 'Сводная заявка',
+    label: 'Заявка на индивидуальный подбор',
   },
 ];
 

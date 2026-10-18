@@ -84,6 +84,18 @@
   font: inherit;
 }
 
+.lineValue {
+  min-height: 7mm;
+  border-bottom: 0.3mm solid #111;
+  padding: 1mm;
+  font-weight: 400;
+  white-space: pre-wrap;
+}
+
+.dateValue {
+  width: 55mm;
+}
+
 .lineInput:focus,
 .cellInput:focus,
 .cellTextarea:focus {
@@ -154,7 +166,11 @@
 
 .dataRow td {
   height: 15mm;
-  padding: 0;
+  padding: 1mm 0.8mm;
+  overflow: hidden;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .cellInput,
@@ -214,6 +230,15 @@
 .signatureCaption {
   margin-top: 1mm;
   font-size: 8.5pt;
+  text-align: center;
+}
+
+.signatureNameValue,
+.doctorNameValue {
+  min-height: 8mm;
+  border-bottom: 0.3mm solid #111;
+  padding: 1.5mm 1mm 0.5mm;
+  font-weight: 400;
   text-align: center;
 }
 
@@ -291,6 +316,47 @@
   height: 16mm;
 }
 
+.fillSection {
+  cursor: pointer;
+  transition:
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.fillSection:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+.fillRow {
+  cursor: pointer;
+}
+
+.fillRow:focus-visible {
+  outline: none;
+}
+
+.careFormValue {
+  font-weight: 400 !important;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fillSection:hover {
+    background: #eef6ff;
+    box-shadow: 0 0 0 1px #2563eb;
+  }
+
+  .topTable.fillSection:hover td,
+  .fillRow:hover td,
+  .fillRow:focus-visible td {
+    border-color: #2563eb;
+    background: #eef6ff;
+  }
+}
+
 .addRowBar {
   display: flex;
   justify-content: flex-end;
@@ -362,9 +428,31 @@
   }
 }
 
+@page blood-request-page {
+  size: A4 landscape;
+  margin: 0;
+}
+
 @media print {
   .addRowBar {
     display: none !important;
+  }
+
+  .fillSection,
+  .fillRow,
+  .fillSection:hover,
+  .fillRow:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .topTable.fillSection td,
+  .topTable.fillSection:hover td,
+  .fillRow td,
+  .fillRow:hover td {
+    border-color: #111 !important;
+    background: transparent !important;
   }
 
   .sheet {

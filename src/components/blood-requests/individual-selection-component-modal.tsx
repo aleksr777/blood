@@ -1,5 +1,7 @@
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
+import { IndicationsFields } from '../transfusion-protocol/indications-fields';
+import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import styles from './individual-selection-component-modal.module.css';
 
@@ -13,7 +15,9 @@ type Props = {
   requiredComponent: string;
   quantity: string;
   individualSelectionIndications: string;
+  indicationValues: ProtocolValues;
   onLocalChange: (values: Record<string, string>) => void;
+  onIndicationsChange: (values: ProtocolValues) => void;
   onClose: () => void;
 };
 
@@ -21,7 +25,9 @@ export const IndividualSelectionComponentModal = ({
   requiredComponent,
   quantity,
   individualSelectionIndications,
+  indicationValues,
   onLocalChange,
+  onIndicationsChange,
   onClose,
 }: Props) => {
   const handleClose = () => {
@@ -73,6 +79,21 @@ export const IndividualSelectionComponentModal = ({
             />
           </label>
 
+        </div>
+
+        <div className={styles.divider} />
+
+        <section className={styles.indicationsSection}>
+          <div className={styles.sectionTitle}>Показания к трансфузии</div>
+          <IndicationsFields
+            values={indicationValues}
+            onChange={onIndicationsChange}
+          />
+        </section>
+
+        <div className={styles.divider} />
+
+        <div className={styles.localGrid}>
           <label className={styles.wide}>
             <span>Показания для индивидуального подбора</span>
             <textarea

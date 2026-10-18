@@ -750,7 +750,7 @@ export const IndividualSelectionDirection = () => {
               Дата направления: {formatDirectionDate(draft.directionDate)}
             </div>
 
-            <div className={styles.singleLine}>
+            <div className={`${styles.singleLine} ${styles.doctorLine}`}>
               <span>Врач, назначивший трансфузию:</span>
               <span className={styles.valueLine}>
                 {displayValue(draft.doctorName)}

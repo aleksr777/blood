@@ -504,6 +504,47 @@ export const IndividualSelectionDirection = () => {
             className={styles.fillSection}
             role="button"
             tabIndex={0}
+            onClick={() => setEditor('recipient')}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor('recipient'))
+            }
+          >
+            <div className={styles.fieldBlock}>
+              <div className={styles.singleLine}>
+                <span>Ф.И.О. реципиента:</span>
+                <span className={styles.valueLine}>
+                  {displayValue(draft.recipientName)}
+                </span>
+              </div>
+              <div className={styles.extraLine} />
+            </div>
+            <div className={styles.singleLine}>
+              <span>Возраст:</span>
+              <span className={styles.valueLine}>
+                {displayValue(draft.recipientAge)}
+              </span>
+            </div>
+            <div className={styles.staticLine}>Организация: {ORGANIZATION}</div>
+            <div className={styles.singleLine}>
+              <span>Отделение:</span>
+              <span className={styles.valueLine}>{displayValue(draft.department)}</span>
+            </div>
+            <div className={styles.singleLine}>
+              <span>№ медицинской карты:</span>
+              <span className={styles.valueLine}>
+                {displayValue(draft.medicalRecordNumber)}
+              </span>
+            </div>
+            <div className={styles.multilineBlock}>
+              <span className={styles.multilineLabel}>Диагноз:</span>
+              <div className={styles.multilineValue}>{draft.diagnosis}</div>
+            </div>
+          </div>
+
+          <div
+            className={styles.fillSection}
+            role="button"
+            tabIndex={0}
             onClick={() => setEditor('component')}
             onKeyDown={(event) =>
               activateOnKeyboard(event, () => setEditor('component'))
@@ -539,47 +580,6 @@ export const IndividualSelectionDirection = () => {
               <span className={styles.valueLine}>
                 {displayValue(draft.recipientAlloimmuneAntibodies)}
               </span>
-            </div>
-          </div>
-
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
-            onClick={() => setEditor('recipient')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('recipient'))
-            }
-          >
-            <div className={styles.fieldBlock}>
-              <div className={styles.singleLine}>
-                <span>Ф.И.О. реципиента:</span>
-                <span className={styles.valueLine}>
-                  {displayValue(draft.recipientName)}
-                </span>
-              </div>
-              <div className={styles.extraLine} />
-            </div>
-            <div className={styles.singleLine}>
-              <span>Возраст:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.recipientAge)}
-              </span>
-            </div>
-            <div className={styles.staticLine}>Организация: {ORGANIZATION}</div>
-            <div className={styles.singleLine}>
-              <span>Отделение:</span>
-              <span className={styles.valueLine}>{displayValue(draft.department)}</span>
-            </div>
-            <div className={styles.singleLine}>
-              <span>№ медицинской карты:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.medicalRecordNumber)}
-              </span>
-            </div>
-            <div className={styles.multilineBlock}>
-              <span className={styles.multilineLabel}>Диагноз:</span>
-              <div className={styles.multilineValue}>{draft.diagnosis}</div>
             </div>
           </div>
 

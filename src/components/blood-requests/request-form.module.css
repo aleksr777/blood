@@ -1,0 +1,382 @@
+.shell {
+  min-width: fit-content;
+  padding: 0 20px 48px;
+}
+
+.header {
+  margin-right: -20px;
+  margin-left: -20px;
+}
+
+.toolbar {
+  width: 297mm;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.sheets {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+.sheet {
+  width: 297mm;
+  height: 210mm;
+  padding: 14mm 18mm 12mm;
+  overflow: hidden;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 8px 32px rgb(18 31 48 / 12%);
+  font-family: "Times New Roman", Times, serif;
+  font-size: 10.5pt;
+  line-height: 1.12;
+  page: blood-request-page;
+}
+
+.legal {
+  width: 92mm;
+  margin: 0 0 13mm auto;
+  font-size: 9.5pt;
+  line-height: 1.18;
+  text-align: center;
+}
+
+.title {
+  margin: 0 0 12mm;
+  font-size: 13pt;
+  font-weight: 700;
+  line-height: 1.08;
+  text-align: center;
+}
+
+.titleCompact {
+  margin-bottom: 6mm;
+}
+
+.formLines {
+  display: grid;
+  gap: 3.2mm;
+}
+
+.lineField {
+  display: grid;
+  gap: 1.2mm;
+}
+
+.label {
+  font-weight: 700;
+}
+
+.lineInput {
+  width: 100%;
+  height: 7mm;
+  border: 0;
+  border-bottom: 0.3mm solid #111;
+  padding: 0 1mm;
+  background: transparent;
+  color: #111;
+  font: inherit;
+}
+
+.lineInput:focus,
+.cellInput:focus,
+.cellTextarea:focus {
+  background: #eef6ff;
+  outline: 1px solid #2563eb;
+  outline-offset: -1px;
+}
+
+.dateRow {
+  display: grid;
+  grid-template-columns: minmax(50mm, 1fr) minmax(90mm, 1.25fr);
+  align-items: end;
+  gap: 5mm;
+  margin-top: 3mm;
+}
+
+.dateField {
+  display: grid;
+  gap: 1mm;
+}
+
+.dateInput {
+  width: 55mm;
+}
+
+.noteBox {
+  min-height: 10mm;
+  border: 0.3mm solid #111;
+  padding: 2.2mm;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pageNumber {
+  margin: -5mm 0 4mm;
+  text-align: center;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 8.1pt;
+  line-height: 1.05;
+}
+
+.table th,
+.table td {
+  border: 0.3mm solid #111;
+  padding: 1mm 0.8mm;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table th {
+  font-weight: 700;
+}
+
+.tableHeaderTall th {
+  height: 37mm;
+  vertical-align: top;
+}
+
+.tableNumberRow th {
+  height: 7mm;
+  padding: 0.8mm;
+}
+
+.dataRow td {
+  height: 15mm;
+  padding: 0;
+}
+
+.cellInput,
+.cellTextarea {
+  width: 100%;
+  border: 0;
+  padding: 1mm;
+  background: transparent;
+  color: #111;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 8pt;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.cellInput {
+  height: 14mm;
+}
+
+.cellTextarea {
+  height: 14mm !important;
+  min-height: 14mm !important;
+  max-height: none !important;
+  resize: none !important;
+}
+
+.signatureArea {
+  display: grid;
+  gap: 8mm;
+  margin-top: 8mm;
+  font-size: 10.5pt;
+}
+
+.signatureRow {
+  display: grid;
+  grid-template-columns: 1.55fr 0.5fr 1fr;
+  align-items: end;
+  gap: 6mm;
+}
+
+.signatureLine {
+  min-height: 8mm;
+  border-bottom: 0.3mm solid #111;
+}
+
+.signatureNameInput {
+  width: 100%;
+  height: 8mm;
+  border: 0;
+  border-bottom: 0.3mm solid #111;
+  background: transparent;
+  color: #111;
+  font: inherit;
+  text-align: center;
+}
+
+.signatureCaption {
+  margin-top: 1mm;
+  font-size: 8.5pt;
+  text-align: center;
+}
+
+.topTable {
+  width: 100%;
+  margin-top: 3mm;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 9.2pt;
+}
+
+.topTable td {
+  border: 0.3mm solid #111;
+  padding: 1.3mm 1.5mm;
+  vertical-align: middle;
+}
+
+.topTable td:first-child {
+  width: 55%;
+  font-weight: 700;
+}
+
+.topTableInput {
+  width: 100%;
+  min-height: 7mm;
+  border: 0;
+  padding: 0.6mm;
+  background: transparent;
+  color: #111;
+  font: inherit;
+}
+
+.topTableInput:focus {
+  background: #eef6ff;
+  outline: 1px solid #2563eb;
+  outline-offset: -1px;
+}
+
+.radioCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6mm;
+}
+
+.radioCell label {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.5mm;
+  white-space: nowrap;
+}
+
+.sectionHeaderRow td {
+  height: 23mm;
+  padding: 2mm;
+  font-weight: 700;
+  text-align: center;
+  vertical-align: top;
+}
+
+.sectionHeaderRow td:first-child {
+  width: 72%;
+}
+
+.requestTable {
+  margin-top: 0;
+  font-size: 7.7pt;
+}
+
+.requestTable .tableHeaderTall th {
+  height: 36mm;
+}
+
+.requestTable .dataRow td {
+  height: 16mm;
+}
+
+.addRowBar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 auto 8px;
+  width: 297mm;
+}
+
+.addRowButton {
+  min-height: 32px;
+  border: 1px solid #9fb2c7;
+  border-radius: 7px;
+  padding: 0 12px;
+  background: #f8fafc;
+  color: #36536f;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.addRowButton:hover {
+  border-color: #829bb5;
+  background: #fff;
+}
+
+.doctorSignature {
+  display: grid;
+  grid-template-columns: auto 55mm 45mm;
+  align-items: end;
+  gap: 5mm;
+  margin-top: 6mm;
+  font-size: 10.5pt;
+}
+
+.doctorNameInput {
+  width: 55mm;
+  height: 8mm;
+  border: 0;
+  border-bottom: 0.3mm solid #111;
+  background: transparent;
+  color: #111;
+  font: inherit;
+  text-align: center;
+}
+
+@media (max-width: 1250px) {
+  .shell {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .header {
+    margin-right: -10px;
+    margin-left: -10px;
+  }
+
+  .toolbar {
+    width: 100%;
+  }
+
+  .sheets {
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .addRowBar {
+    width: 100%;
+  }
+}
+
+@media print {
+  .addRowBar {
+    display: none !important;
+  }
+
+  .sheet {
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .lineInput:focus,
+  .cellInput:focus,
+  .cellTextarea:focus,
+  .topTableInput:focus {
+    background: transparent;
+    outline: none;
+  }
+}

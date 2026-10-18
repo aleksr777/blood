@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
 import {
   readCurrentRecipient,
   switchCurrentRecipient,
@@ -300,14 +308,63 @@ const activateOnKeyboard = (
 
 const displayValue = (value?: string) => value?.trim() || ' ';
 
-const MultilineRules = () => (
-  <span className={styles.multilineRules} aria-hidden="true">
-    <span />
-    <span />
-    <span />
-    <span />
-  </span>
-);
+type AdaptiveMultilineBlockProps = {
+  label: string;
+  value: string;
+};
+
+const AdaptiveMultilineBlock = ({
+  label,
+  value,
+}: AdaptiveMultilineBlockProps) => {
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [rowCount, setRowCount] = useState(2);
+
+  const updateRowCount = useCallback(() => {
+    const measure = measureRef.current;
+    if (!measure) return;
+
+    const lineHeight = Number.parseFloat(window.getComputedStyle(measure).lineHeight);
+    if (!Number.isFinite(lineHeight) || lineHeight <= 0) return;
+
+    const measuredRows = Math.ceil((measure.scrollHeight - 0.5) / lineHeight);
+    const nextRowCount = Math.max(2, measuredRows);
+    setRowCount((current) => (current === nextRowCount ? current : nextRowCount));
+  }, []);
+
+  useLayoutEffect(() => {
+    updateRowCount();
+
+    const measure = measureRef.current;
+    if (!measure) return undefined;
+
+    const observer = new ResizeObserver(updateRowCount);
+    observer.observe(measure);
+
+    return () => observer.disconnect();
+  }, [label, updateRowCount, value]);
+
+  const content = (
+    <>
+      <span className={styles.multilineLabel}>{label}</span>
+      {value && <span className={styles.multilineText}> {value}</span>}
+    </>
+  );
+
+  return (
+    <div className={styles.multilineBlock}>
+      <span className={styles.multilineRules} aria-hidden="true">
+        {Array.from({ length: rowCount }, (_, index) => (
+          <span key={index} />
+        ))}
+      </span>
+      <div className={styles.multilineContent}>{content}</div>
+      <div ref={measureRef} className={styles.multilineMeasure} aria-hidden="true">
+        {content}
+      </div>
+    </div>
+  );
+};
 
 const formatDirectionDate = (value: string) => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -554,11 +611,7 @@ export const IndividualSelectionDirection = () => {
                 {displayValue(draft.medicalRecordNumber)}
               </span>
             </div>
-            <div className={styles.multilineBlock}>
-              <MultilineRules />
-              <span className={styles.multilineLabel}>Диагноз:</span>
-              <div className={styles.multilineValue}>{draft.diagnosis}</div>
-            </div>
+            <AdaptiveMultilineBlock label="Диагноз:" value={draft.diagnosis} />
           </div>
 
           <div
@@ -583,15 +636,10 @@ export const IndividualSelectionDirection = () => {
               <span>Количество:</span>
               <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
             </div>
-            <div className={styles.multilineBlock}>
-              <MultilineRules />
-              <span className={styles.multilineLabel}>
-                Показания для индивидуального подбора:
-              </span>
-              <div className={styles.multilineValue}>
-                {draft.individualSelectionIndications}
-              </div>
-            </div>
+            <AdaptiveMultilineBlock
+              label="Показания для индивидуального подбора:"
+              value={draft.individualSelectionIndications}
+            />
           </div>
 
           <div
@@ -632,11 +680,10 @@ export const IndividualSelectionDirection = () => {
               activateOnKeyboard(event, () => setEditor('transfusion'))
             }
           >
-            <div className={styles.multilineBlock}>
-              <MultilineRules />
-              <span className={styles.multilineLabel}>Гемотрансфузионный анамнез:</span>
-              <div className={styles.multilineValue}>{draft.transfusionHistory}</div>
-            </div>
+            <AdaptiveMultilineBlock
+              label="Гемотрансфузионный анамнез:"
+              value={draft.transfusionHistory}
+            />
           </div>
 
           {draft.recipientSex === 'Женский' && (
@@ -649,13 +696,10 @@ export const IndividualSelectionDirection = () => {
                 activateOnKeyboard(event, () => setEditor('obstetric'))
               }
             >
-              <div className={styles.multilineBlock}>
-                <MultilineRules />
-                <span className={styles.multilineLabel}>
-                  Акушерский анамнез у женщин:
-                </span>
-                <div className={styles.multilineValue}>{draft.obstetricHistory}</div>
-              </div>
+              <AdaptiveMultilineBlock
+                label="Акушерский анамнез у женщин:"
+                value={draft.obstetricHistory}
+              />
             </div>
           )}
 

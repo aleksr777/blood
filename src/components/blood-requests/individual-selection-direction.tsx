@@ -57,6 +57,7 @@ type DirectionDraft = Record<AutoField, string> & {
 };
 
 type Editor =
+  | 'organization'
   | 'component'
   | 'recipient'
   | 'transfusion'
@@ -77,16 +78,19 @@ const AUTO_FIELDS: AutoField[] = [
   'recipientSex',
 ];
 
-const RECIPIENT_FIELDS: RequestEditorField[] = [
-  { name: 'recipientName', label: 'Ф.И.О. реципиента', wide: true },
-  { name: 'recipientAge', label: 'Возраст' },
+const ORGANIZATION_FIELDS: RequestEditorField[] = [
   {
     name: 'medicalOrganization',
     label: 'Наименование ЛПУ',
     savedOptionsCategory: 'medicalOrganization',
     wide: true,
   },
-  { name: 'department', label: 'Отделение' },
+  { name: 'department', label: 'Отделение', wide: true },
+];
+
+const RECIPIENT_FIELDS: RequestEditorField[] = [
+  { name: 'recipientName', label: 'Ф.И.О. реципиента', wide: true },
+  { name: 'recipientAge', label: 'Возраст' },
   { name: 'medicalRecordNumber', label: '№ медицинской карты' },
   { name: 'diagnosis', label: 'Диагноз', type: 'textarea', wide: true },
 ];
@@ -432,6 +436,12 @@ export const IndividualSelectionDirection = () => {
       );
 
     switch (editor) {
+      case 'organization':
+        return {
+          title: 'Медицинская организация',
+          fields: ORGANIZATION_FIELDS,
+          values: valuesFor(ORGANIZATION_FIELDS),
+        };
       case 'recipient':
         return {
           title: 'Данные реципиента',
@@ -509,6 +519,29 @@ export const IndividualSelectionDirection = () => {
             className={styles.fillSection}
             role="button"
             tabIndex={0}
+            onClick={() => setEditor('organization')}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor('organization'))
+            }
+          >
+            <div className={styles.singleLine}>
+              <span>Наименование ЛПУ:</span>
+              <span className={styles.valueLine}>
+                {displayValue(draft.medicalOrganization)}
+              </span>
+            </div>
+            <div className={styles.singleLine}>
+              <span>Отделение:</span>
+              <span className={styles.valueLine}>
+                {displayValue(draft.department)}
+              </span>
+            </div>
+          </div>
+
+          <div
+            className={styles.fillSection}
+            role="button"
+            tabIndex={0}
             onClick={() => setEditor('recipient')}
             onKeyDown={(event) =>
               activateOnKeyboard(event, () => setEditor('recipient'))
@@ -528,16 +561,6 @@ export const IndividualSelectionDirection = () => {
               <span className={styles.valueLine}>
                 {displayValue(draft.recipientAge)}
               </span>
-            </div>
-            <div className={styles.singleLine}>
-              <span>Наименование ЛПУ:</span>
-              <span className={styles.valueLine}>
-                {displayValue(draft.medicalOrganization)}
-              </span>
-            </div>
-            <div className={styles.singleLine}>
-              <span>Отделение:</span>
-              <span className={styles.valueLine}>{displayValue(draft.department)}</span>
             </div>
             <div className={styles.singleLine}>
               <span>№ медицинской карты:</span>

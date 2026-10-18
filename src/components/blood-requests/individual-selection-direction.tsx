@@ -22,6 +22,7 @@ import {
 } from '../transfusion-protocol/recipient-history-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
+import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { IndividualSelectionTransfusionHistoryModal } from './individual-selection-transfusion-history-modal';
 import {
@@ -88,15 +89,6 @@ const ORGANIZATION_FIELDS: RequestEditorField[] = [
     wide: true,
   },
   { name: 'department', label: 'Отделение', wide: true },
-];
-
-const OBSTETRIC_FIELDS: RequestEditorField[] = [
-  {
-    name: 'obstetricHistory',
-    label: 'Акушерский анамнез анамнез у женщин',
-    type: 'textarea',
-    wide: true,
-  },
 ];
 
 const ALLERGY_FIELDS: RequestEditorField[] = [
@@ -482,14 +474,6 @@ export const IndividualSelectionDirection = () => {
           fields: ORGANIZATION_FIELDS,
           values: valuesFor(ORGANIZATION_FIELDS),
         };
-      case 'obstetric':
-        return draft.recipientSex === 'Женский'
-          ? {
-              title: 'Акушерский анамнез',
-              fields: OBSTETRIC_FIELDS,
-              values: valuesFor(OBSTETRIC_FIELDS),
-            }
-          : null;
       case 'allergy':
         return {
           title: 'Аллергоанамнез',
@@ -739,6 +723,14 @@ export const IndividualSelectionDirection = () => {
             setRegistryOpen(true);
           }}
           onSelectRecipient={selectRecipient}
+          onClose={() => setEditor(null)}
+        />
+      )}
+
+      {editor === 'obstetric' && draft.recipientSex === 'Женский' && (
+        <IndividualSelectionObstetricHistoryModal
+          values={examinationValues}
+          onChange={updateExamination}
           onClose={() => setEditor(null)}
         />
       )}

@@ -32,11 +32,16 @@ const MEDICAL_RECORD_FIELD: ProtocolFieldConfig = {
   label: '№ медицинской карты',
 };
 
+const DIAGNOSIS_FIELD: ProtocolFieldConfig = {
+  name: 'diagnosis',
+  label: 'Диагноз',
+  type: 'textarea',
+  wide: true,
+};
+
 type Props = {
   values: ProtocolValues;
-  diagnosis: string;
   onRecipientChange: (values: ProtocolValues) => void | Promise<void>;
-  onDiagnosisChange: (value: string) => void;
   onOpenRecipients: () => void;
   onSelectRecipient: (recipient: RecipientRecord) => void | Promise<void>;
   onClose: () => void;
@@ -44,9 +49,7 @@ type Props = {
 
 export const IndividualSelectionRecipientModal = ({
   values,
-  diagnosis,
   onRecipientChange,
-  onDiagnosisChange,
   onOpenRecipients,
   onSelectRecipient,
   onClose,
@@ -91,13 +94,11 @@ export const IndividualSelectionRecipientModal = ({
           onChange={changeValue}
         />
 
-        <label className={styles.wide}>
-          <span>Диагноз</span>
-          <textarea
-            value={diagnosis}
-            onChange={(event) => onDiagnosisChange(event.target.value)}
-          />
-        </label>
+        <ProtocolFieldControl
+          field={DIAGNOSIS_FIELD}
+          value={values.diagnosis ?? ''}
+          onChange={changeValue}
+        />
       </div>
     </Modal>
   );

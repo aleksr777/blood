@@ -28,9 +28,11 @@ import {
   HISTORY_STATUS,
   getHistoryStatus,
 } from '../transfusion-protocol/recipient-history-model';
+import { formatIndications } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
+import { IndividualSelectionIndicationsModal } from './individual-selection-indications-modal';
 import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { IndividualSelectionTransfusionHistoryModal } from './individual-selection-transfusion-history-modal';
@@ -65,6 +67,7 @@ type DirectionDraft = Record<AutoField, string> & {
   directionDate: string;
   doctorName: string;
   doctorPhone: string;
+  indicationValues: ProtocolValues;
   autoValues: Partial<Record<AutoField, string>>;
 };
 
@@ -72,6 +75,7 @@ type Editor =
   | 'organization'
   | 'component'
   | 'examination'
+  | 'indications'
   | 'recipient'
   | 'transfusion'
   | 'obstetric'
@@ -136,6 +140,7 @@ const emptyDraft = (): DirectionDraft => ({
   directionDate: '',
   doctorName: '',
   doctorPhone: '',
+  indicationValues: {},
   autoValues: {},
 });
 
@@ -154,7 +159,7 @@ const loadDraft = (): DirectionDraft => {
     const blank = emptyDraft();
     const savedValues = Object.fromEntries(
       Object.keys(blank).flatMap((key) => {
-        if (key === 'autoValues') return [];
+        if (key === 'autoValues' || key === 'indicationValues') return [];
         const value = parsed[key as keyof DirectionDraft];
         return typeof value === 'string' ? [[key, value]] : [];
       }),
@@ -162,6 +167,16 @@ const loadDraft = (): DirectionDraft => {
     const next = {
       ...blank,
       ...savedValues,
+      indicationValues:
+        parsed.indicationValues &&
+        typeof parsed.indicationValues === 'object' &&
+        !Array.isArray(parsed.indicationValues)
+          ? Object.fromEntries(
+              Object.entries(parsed.indicationValues).filter(
+                (entry): entry is [string, string] => typeof entry[1] === 'string',
+              ),
+            )
+          : {},
       autoValues:
         parsed.autoValues &&
         typeof parsed.autoValues === 'object' &&
@@ -503,6 +518,16 @@ export const IndividualSelectionDirection = () => {
     });
   };
 
+  const updateIndications = (changes: ProtocolValues) => {
+    setDraft((current) => ({
+      ...current,
+      indicationValues: {
+        ...current.indicationValues,
+        ...changes,
+      },
+    }));
+  };
+
   const clear = async () => {
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
@@ -654,6 +679,22 @@ export const IndividualSelectionDirection = () => {
     </div>,
 
     <div
+      key="indications"
+      className={styles.fillSection}
+      role="button"
+      tabIndex={0}
+      onClick={() => setEditor('indications')}
+      onKeyDown={(event) =>
+        activateOnKeyboard(event, () => setEditor('indications'))
+      }
+    >
+      <AdaptiveRuledField
+        label="Показания к трансфузии:"
+        value={formatIndications(draft.indicationValues)}
+      />
+    </div>,
+
+    <div
       key="transfusion"
       className={styles.fillSection}
       role="button"
@@ -755,6 +796,7 @@ export const IndividualSelectionDirection = () => {
     draft.recipientAboRh,
     draft.recipientPhenotype,
     formatAlloimmuneAntibodies(examinationValues),
+    formatIndications(draft.indicationValues),
     draft.transfusionHistory,
     draft.recipientSex,
     draft.obstetricHistory,
@@ -892,6 +934,14 @@ export const IndividualSelectionDirection = () => {
         <IndividualSelectionObstetricHistoryModal
           values={examinationValues}
           onChange={updateExamination}
+          onClose={() => setEditor(null)}
+        />
+      )}
+
+      {editor === 'indications' && (
+        <IndividualSelectionIndicationsModal
+          values={draft.indicationValues}
+          onChange={updateIndications}
           onClose={() => setEditor(null)}
         />
       )}

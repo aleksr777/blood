@@ -639,30 +639,25 @@ export const IndividualSelectionDirection = () => {
             </div>
           </div>
 
-          <div
-            className={[
-              styles.fillSection,
-              draft.recipientSex === 'Женский' ? '' : styles.fillSectionInactive,
-            ].filter(Boolean).join(' ')}
-            role={draft.recipientSex === 'Женский' ? 'button' : undefined}
-            tabIndex={draft.recipientSex === 'Женский' ? 0 : -1}
-            onClick={() => {
-              if (draft.recipientSex === 'Женский') setEditor('obstetric');
-            }}
-            onKeyDown={(event) => {
-              if (draft.recipientSex === 'Женский') {
-                activateOnKeyboard(event, () => setEditor('obstetric'));
+          {draft.recipientSex === 'Женский' && (
+            <div
+              className={styles.fillSection}
+              role="button"
+              tabIndex={0}
+              onClick={() => setEditor('obstetric')}
+              onKeyDown={(event) =>
+                activateOnKeyboard(event, () => setEditor('obstetric'))
               }
-            }}
-          >
-            <div className={styles.multilineBlock}>
-              <MultilineRules />
-              <span className={styles.multilineLabel}>
-                Акушерский анамнез анамнез у женщин:
-              </span>
-              <div className={styles.multilineValue}>{draft.obstetricHistory}</div>
+            >
+              <div className={styles.multilineBlock}>
+                <MultilineRules />
+                <span className={styles.multilineLabel}>
+                  Акушерский анамнез у женщин:
+                </span>
+                <div className={styles.multilineValue}>{draft.obstetricHistory}</div>
+              </div>
             </div>
-          </div>
+          )}
 
           <div
             className={styles.fillSection}

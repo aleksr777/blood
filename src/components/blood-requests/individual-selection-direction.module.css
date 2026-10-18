@@ -1,0 +1,222 @@
+.shell {
+  padding: 0 20px 48px;
+}
+
+.header {
+  margin-right: -20px;
+  margin-left: -20px;
+}
+
+.toolbar {
+  width: 262.5mm;
+}
+
+.sheetWrap {
+  display: flex;
+  justify-content: center;
+}
+
+.sheet {
+  width: 210mm;
+  min-height: 297mm;
+  zoom: 1.25;
+  padding: 12mm 17mm 14mm;
+  overflow: hidden;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 8px 32px rgb(18 31 48 / 12%);
+  font-family: "Times New Roman", Times, serif;
+  font-size: 12pt;
+  line-height: 1.15;
+  page: individual-selection-direction-page;
+}
+
+.title {
+  margin: 0 0 7mm;
+  font-size: 16pt;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.fillSection {
+  position: relative;
+  margin: 0 -2mm;
+  border: 0.3mm solid transparent;
+  border-radius: 1mm;
+  padding: 1.3mm 2mm;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
+}
+
+.fillSection:focus-visible {
+  border-color: #2563eb;
+  background: #eef6ff;
+  outline: none;
+}
+
+.fillSectionInactive {
+  cursor: default;
+}
+
+.fieldBlock {
+  display: grid;
+}
+
+.singleLine {
+  display: flex;
+  align-items: baseline;
+  min-height: 7mm;
+  gap: 1mm;
+}
+
+.valueLine {
+  flex: 1 1 auto;
+  min-width: 20mm;
+  min-height: 6mm;
+  border-bottom: 0.3mm solid #111;
+  padding: 0 0.8mm 0.6mm;
+  overflow: hidden;
+  font-weight: 400;
+  white-space: pre-wrap;
+}
+
+.extraLine {
+  min-height: 6mm;
+  border-bottom: 0.3mm solid #111;
+}
+
+.staticLine {
+  min-height: 7mm;
+  padding-top: 0.5mm;
+}
+
+.multilineBlock {
+  position: relative;
+  min-height: 31mm;
+  padding-top: 0.4mm;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(7mm - 0.3mm),
+      #111 calc(7mm - 0.3mm),
+      #111 7mm
+    );
+}
+
+.multilineLabel {
+  position: relative;
+  z-index: 1;
+  display: inline;
+  padding-right: 1mm;
+  background: #fff;
+}
+
+.multilineValue {
+  position: relative;
+  z-index: 1;
+  min-height: 27mm;
+  padding: 0.8mm 0.8mm 0;
+  font-weight: 400;
+  line-height: 7mm;
+  white-space: pre-wrap;
+}
+
+.directionDate {
+  min-height: 13mm;
+  padding-top: 4mm;
+}
+
+.signatureLineRow {
+  display: flex;
+  align-items: baseline;
+  min-height: 7mm;
+  gap: 1mm;
+}
+
+.signatureBlank {
+  flex: 1 1 auto;
+  min-height: 6mm;
+  border-bottom: 0.3mm solid #111;
+}
+
+.transfusionHead {
+  min-height: 14mm;
+  padding-top: 5mm;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .fillSection:not(.fillSectionInactive):hover {
+    border-color: #2563eb;
+    background: #eef6ff;
+  }
+
+  .fillSection:not(.fillSectionInactive):hover .multilineLabel {
+    background: #eef6ff;
+  }
+}
+
+@media (max-width: 900px) {
+  .shell {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .header {
+    margin-right: -10px;
+    margin-left: -10px;
+  }
+
+  .toolbar {
+    width: 100%;
+  }
+
+  .sheetWrap {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .sheet {
+    flex: 0 0 210mm;
+    transform-origin: top left;
+  }
+}
+
+@page individual-selection-direction-page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+  .shell,
+  .sheetWrap {
+    width: 210mm;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sheet {
+    width: 210mm;
+    min-height: 297mm;
+    zoom: 1;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .fillSection,
+  .fillSection:hover,
+  .fillSection:focus-visible {
+    border-color: transparent !important;
+    background: transparent !important;
+    outline: none !important;
+  }
+
+  .fillSection .multilineLabel,
+  .fillSection:hover .multilineLabel {
+    background: #fff !important;
+  }
+}

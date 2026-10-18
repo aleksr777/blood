@@ -22,6 +22,7 @@ import {
 } from '../transfusion-protocol/recipient-history-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
+import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
 import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { IndividualSelectionTransfusionHistoryModal } from './individual-selection-transfusion-history-modal';
@@ -51,6 +52,7 @@ type DirectionDraft = Record<AutoField, string> & {
   sourceRecipientId: string;
   requiredComponent: string;
   quantity: string;
+  individualSelectionIndications: string;
   medicalOrganization: string;
   directionDate: string;
   doctorPhone: string;
@@ -60,6 +62,7 @@ type DirectionDraft = Record<AutoField, string> & {
 type Editor =
   | 'organization'
   | 'component'
+  | 'examination'
   | 'recipient'
   | 'transfusion'
   | 'obstetric'
@@ -98,6 +101,7 @@ const emptyDraft = (): DirectionDraft => ({
   sourceRecipientId: '',
   requiredComponent: '',
   quantity: '',
+  individualSelectionIndications: '',
   recipientAboRh: '',
   recipientPhenotype: '',
   recipientName: '',
@@ -579,6 +583,26 @@ export const IndividualSelectionDirection = () => {
               <span>Количество:</span>
               <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
             </div>
+            <div className={styles.multilineBlock}>
+              <MultilineRules />
+              <span className={styles.multilineLabel}>
+                Показания для индивидуального подбора:
+              </span>
+              <div className={styles.multilineValue}>
+                {draft.individualSelectionIndications}
+              </div>
+            </div>
+          </div>
+
+          <div
+            className={styles.fillSection}
+            role="button"
+            tabIndex={0}
+            onClick={() => setEditor('examination')}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor('examination'))
+            }
+          >
             <div className={styles.singleLine}>
               <span>Группа крови и резус-фактор реципиента:</span>
               <span className={styles.valueLine}>
@@ -701,9 +725,16 @@ export const IndividualSelectionDirection = () => {
         <IndividualSelectionComponentModal
           requiredComponent={draft.requiredComponent}
           quantity={draft.quantity}
-          examinationValues={examinationValues}
+          individualSelectionIndications={draft.individualSelectionIndications}
           onLocalChange={updateFields}
-          onExaminationChange={updateExamination}
+          onClose={() => setEditor(null)}
+        />
+      )}
+
+      {editor === 'examination' && (
+        <IndividualSelectionExaminationModal
+          values={examinationValues}
+          onChange={updateExamination}
           onClose={() => setEditor(null)}
         />
       )}

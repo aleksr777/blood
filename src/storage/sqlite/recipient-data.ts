@@ -13,6 +13,7 @@ export const RECIPIENT_PROFILE_FIELDS = [
   'recipientHemolyticDiseaseNewbornHistory',
   'department',
   'medicalRecordNumber',
+  'diagnosis',
   'roomNumber',
   'recipientAbo',
   'recipientRh',

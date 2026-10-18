@@ -225,6 +225,12 @@
   min-height: 2rem;
 }
 
+.historyFixedRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 2rem;
+}
+
 .historyValue {
   min-width: 0;
   min-height: 2rem;

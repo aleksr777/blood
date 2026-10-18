@@ -23,9 +23,7 @@ import { formatRecipientAge } from '../transfusion-protocol/recipient-demographi
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { RegistrationPatientDetailsModal } from './registration-patient-details-modal';
-import {
-  parseRegistrationTransfusionRows,
-} from './registration-transfusion-table';
+import { parseRegistrationTransfusionRows } from './registration-transfusion-table';
 import { RegistrationTransfusionsModal } from './registration-transfusions-modal';
 
 const ROW_COUNT = 14;
@@ -482,7 +480,7 @@ export const TransfusionRegistration = () => {
             }}
           >
             <table className="registration-table">
-            <colgroup>
+              <colgroup>
               <col className="registration-col-component" />
               <col className="registration-col-liters" />
               <col className="registration-col-units" />
@@ -492,8 +490,8 @@ export const TransfusionRegistration = () => {
               <col className="registration-col-worker" />
               <col className="registration-col-nurse-sign" />
               <col className="registration-col-complications" />
-            </colgroup>
-            <thead>
+              </colgroup>
+              <thead>
               <tr>
                 <th rowSpan={2}>Наименование компонента крови</th>
                 <th colSpan={2}>Количество</th>
@@ -518,8 +516,8 @@ export const TransfusionRegistration = () => {
                 <th>литр</th>
                 <th>единицы</th>
               </tr>
-            </thead>
-            <tbody>
+              </thead>
+              <tbody>
               {Array.from({ length: ROW_COUNT }, (_, index) => {
                 const row = registrationRows[index];
 
@@ -537,7 +535,7 @@ export const TransfusionRegistration = () => {
                   </tr>
                 );
               })}
-            </tbody>
+              </tbody>
             </table>
           </div>
         </section>

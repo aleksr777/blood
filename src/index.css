@@ -833,9 +833,8 @@ a.site-navigation__link:focus-visible::after {
 }
 
 .doctor-row td {
-  height: auto;
-  min-height: 13mm;
-  vertical-align: middle;
+  height: 22mm;
+  vertical-align: top;
 }
 
 .doctor-staff {

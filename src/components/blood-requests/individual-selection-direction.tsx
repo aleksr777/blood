@@ -661,29 +661,6 @@ export const IndividualSelectionDirection = () => {
             className={styles.fillSection}
             role="button"
             tabIndex={0}
-            onClick={() => setEditor('component')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('component'))
-            }
-          >
-            <AdaptiveRuledField
-              label="Наименование требуемого компонента:"
-              value={draft.requiredComponent}
-            />
-            <div className={styles.singleLine}>
-              <span>Количество:</span>
-              <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
-            </div>
-            <AdaptiveRuledField
-              label="Показания для индивидуального подбора:"
-              value={draft.individualSelectionIndications}
-            />
-          </div>
-
-          <div
-            className={styles.fillSection}
-            role="button"
-            tabIndex={0}
             onClick={() => setEditor('examination')}
             onKeyDown={(event) =>
               activateOnKeyboard(event, () => setEditor('examination'))
@@ -736,6 +713,29 @@ export const IndividualSelectionDirection = () => {
               />
             </div>
           )}
+
+          <div
+            className={styles.fillSection}
+            role="button"
+            tabIndex={0}
+            onClick={() => setEditor('component')}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor('component'))
+            }
+          >
+            <AdaptiveRuledField
+              label="Наименование требуемого компонента:"
+              value={draft.requiredComponent}
+            />
+            <div className={styles.singleLine}>
+              <span>Количество:</span>
+              <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
+            </div>
+            <AdaptiveRuledField
+              label="Показания для индивидуального подбора:"
+              value={draft.individualSelectionIndications}
+            />
+          </div>
 
           <div
             className={styles.fillSection}

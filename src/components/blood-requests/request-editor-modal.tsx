@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
+import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import styles from './request-editor-modal.module.css';
 
 export type RequestEditorField = {
@@ -7,6 +9,7 @@ export type RequestEditorField = {
   label: string;
   type?: 'text' | 'date' | 'datetime-local' | 'textarea' | 'select';
   options?: Array<{ value: string; label: string }>;
+  savedOptionsCategory?: string;
   wide?: boolean;
 };
 
@@ -38,8 +41,22 @@ export const RequestEditorModal = ({
     onChange({ [name]: value });
   };
 
+  const handleClose = () => {
+    fields.forEach((field) => {
+      if (!field.savedOptionsCategory) return;
+      const value = draft[field.name]?.trim();
+      if (!value) return;
+
+      void rememberSavedOption(field.savedOptionsCategory, value).catch((error: unknown) => {
+        console.error(`Не удалось сохранить вариант поля ${field.name}:`, error);
+      });
+    });
+
+    onClose();
+  };
+
   return (
-    <Modal title={title} onClose={onClose} className={styles.modal}>
+    <Modal title={title} onClose={handleClose} className={styles.modal}>
       <div className={styles.grid}>
         {fields.map((field) => (
           <label
@@ -47,7 +64,15 @@ export const RequestEditorModal = ({
             className={field.wide ? styles.wide : undefined}
           >
             <span>{field.label}</span>
-            {field.type === 'textarea' ? (
+            {field.savedOptionsCategory ? (
+              <SavedOptionsField
+                name={field.name}
+                label={field.label}
+                category={field.savedOptionsCategory}
+                value={draft[field.name] ?? ''}
+                onChange={(value) => changeValue(field.name, value)}
+              />
+            ) : field.type === 'textarea' ? (
               <textarea
                 value={draft[field.name] ?? ''}
                 onChange={(event) => changeValue(field.name, event.target.value)}

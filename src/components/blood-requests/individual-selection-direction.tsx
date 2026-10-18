@@ -80,14 +80,14 @@ const AUTO_FIELDS: AutoField[] = [
 const RECIPIENT_FIELDS: RequestEditorField[] = [
   { name: 'recipientName', label: 'Ф.И.О. реципиента', wide: true },
   { name: 'recipientAge', label: 'Возраст' },
-  { name: 'department', label: 'Отделение' },
-  { name: 'medicalRecordNumber', label: '№ медицинской карты' },
   {
     name: 'medicalOrganization',
     label: 'Наименование ЛПУ',
     savedOptionsCategory: 'medicalOrganization',
     wide: true,
   },
+  { name: 'department', label: 'Отделение' },
+  { name: 'medicalRecordNumber', label: '№ медицинской карты' },
   { name: 'diagnosis', label: 'Диагноз', type: 'textarea', wide: true },
 ];
 

@@ -17,6 +17,8 @@
 }
 
 .sheet {
+  --form-line-width: 1px;
+
   width: 210mm;
   min-height: 297mm;
   zoom: 1.25;
@@ -76,7 +78,7 @@
   flex: 1 1 auto;
   min-width: 20mm;
   min-height: 6mm;
-  border-bottom: 0.3mm solid #111;
+  border-bottom: var(--form-line-width) solid #111;
   padding: 0 0.8mm 0.6mm;
   overflow: hidden;
   font-weight: 400;
@@ -85,7 +87,7 @@
 
 .extraLine {
   min-height: 6mm;
-  border-bottom: 0.3mm solid #111;
+  border-bottom: var(--form-line-width) solid #111;
 }
 
 .staticLine {
@@ -97,14 +99,13 @@
   position: relative;
   min-height: 31mm;
   padding-top: 0.4mm;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0,
-      transparent calc(7mm - 0.3mm),
-      #111 calc(7mm - 0.3mm),
-      #111 7mm
-    );
+  background-image: linear-gradient(
+    to bottom,
+    transparent calc(100% - var(--form-line-width)),
+    #111 0
+  );
+  background-repeat: repeat-y;
+  background-size: 100% 7mm;
 }
 
 .multilineLabel {
@@ -140,7 +141,7 @@
 .signatureBlank {
   flex: 1 1 auto;
   min-height: 6mm;
-  border-bottom: 0.3mm solid #111;
+  border-bottom: var(--form-line-width) solid #111;
 }
 
 .transfusionHead {

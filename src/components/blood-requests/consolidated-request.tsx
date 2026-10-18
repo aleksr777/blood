@@ -1,5 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
+import { formatDate } from '../transfusion-protocol/protocol-types';
 import { SiteNavigation } from '../site-navigation/site-navigation';
+import {
+  RequestEditorModal,
+  type RequestEditorField,
+} from './request-editor-modal';
 import styles from './request-form.module.css';
 
 const STORAGE_KEY = 'blood:summary-request-draft';
@@ -28,6 +33,99 @@ type Draft = {
   organizationHeadName: string;
   rows: RequestRow[];
 };
+
+type Editor =
+  | { kind: 'details' }
+  | { kind: 'row'; index: number }
+  | { kind: 'signatures' }
+  | null;
+
+const DETAIL_FIELDS: RequestEditorField[] = [
+  {
+    name: 'organization',
+    label:
+      'Наименование и контактный телефон медицинской организации, осуществляющей клиническое использование донорской крови и (или) ее компонентов',
+    wide: true,
+  },
+  {
+    name: 'transfusionHeadPhone',
+    label:
+      'Контактный телефон заведующего кабинетом трансфузиологии (отделением переливания крови (отделением трансфузиологии))',
+    wide: true,
+  },
+  {
+    name: 'supplier',
+    label:
+      'Наименование и контактный телефон медицинской организации, осуществляющей заготовку донорской крови и (или) ее компонентов',
+    wide: true,
+  },
+  {
+    name: 'requestDate',
+    label: 'Дата подачи сводной заявки',
+    type: 'date',
+  },
+];
+
+const ROW_FIELDS: RequestEditorField[] = [
+  { name: 'donorAbo', label: 'Группа крови AB0', wide: false },
+  { name: 'donorRh', label: 'Резус-принадлежность' },
+  {
+    name: 'donorAntigens',
+    label: 'Антигены эритроцитов C, c, E, e, K, k, антигены других систем',
+    type: 'textarea',
+    wide: true,
+  },
+  {
+    name: 'componentName',
+    label: 'Наименование компонента донорской крови',
+    wide: true,
+  },
+  { name: 'quantity', label: 'Количество (ед/мл)' },
+  {
+    name: 'individualSelection',
+    label: 'Необходимость индивидуального подбора',
+    type: 'select',
+    options: [
+      { value: 'Да', label: 'Да' },
+      { value: 'Нет', label: 'Нет' },
+    ],
+  },
+  {
+    name: 'recipientIdentity',
+    label: 'ФИО, дата рождения и диагноз реципиента',
+    type: 'textarea',
+    wide: true,
+  },
+  { name: 'recipientAbo', label: 'Группа крови AB0 реципиента' },
+  { name: 'recipientRh', label: 'Резус-принадлежность реципиента' },
+  {
+    name: 'recipientAntigens',
+    label:
+      'Антигены эритроцитов C, c, E, e, K, k реципиента, антигены других систем',
+    type: 'textarea',
+    wide: true,
+  },
+  {
+    name: 'selectionIndications',
+    label: 'Показания для индивидуального подбора',
+    type: 'textarea',
+    wide: true,
+  },
+];
+
+const SIGNATURE_FIELDS: RequestEditorField[] = [
+  {
+    name: 'transfusionHeadName',
+    label:
+      'Заведующий кабинетом трансфузиологии (отделением переливания крови / отделением трансфузиологии)',
+    wide: true,
+  },
+  {
+    name: 'organizationHeadName',
+    label: 'Руководитель (заместитель руководителя) медицинской организации',
+    wide: true,
+  },
+];
 
 const emptyRow = (): RequestRow => ({
   donorAbo: '',
@@ -71,22 +169,35 @@ const loadDraft = (): Draft => {
   }
 };
 
+const activateOnKeyboard = (
+  event: KeyboardEvent<HTMLElement>,
+  action: () => void,
+) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    action();
+  }
+};
+
+const displayValue = (value?: string) => value?.trim() || ' ';
+
 export const ConsolidatedRequest = () => {
   const [draft, setDraft] = useState<Draft>(loadDraft);
+  const [editor, setEditor] = useState<Editor>(null);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
   }, [draft]);
 
-  const updateField = (name: keyof Omit<Draft, 'rows'>, value: string) => {
-    setDraft((current) => ({ ...current, [name]: value }));
+  const updateFields = (changes: Record<string, string>) => {
+    setDraft((current) => ({ ...current, ...changes }));
   };
 
-  const updateRow = (index: number, field: keyof RequestRow, value: string) => {
+  const updateRow = (index: number, changes: Record<string, string>) => {
     setDraft((current) => ({
       ...current,
       rows: current.rows.map((row, rowIndex) =>
-        rowIndex === index ? { ...row, [field]: value } : row,
+        rowIndex === index ? { ...row, ...changes } : row,
       ),
     }));
   };
@@ -103,6 +214,18 @@ export const ConsolidatedRequest = () => {
     const next = initialDraft();
     setDraft(next);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  };
+
+  const detailValues = {
+    organization: draft.organization,
+    transfusionHeadPhone: draft.transfusionHeadPhone,
+    supplier: draft.supplier,
+    requestDate: draft.requestDate,
+  };
+
+  const signatureValues = {
+    transfusionHeadName: draft.transfusionHeadName,
+    organizationHeadName: draft.organizationHeadName,
   };
 
   return (
@@ -154,56 +277,51 @@ export const ConsolidatedRequest = () => {
             на донорскую кровь и ее компоненты для клинического использования
           </h1>
 
-          <div className={styles.formLines}>
-            <label className={styles.lineField}>
-              <span className={styles.label}>
-                Наименование и контактный телефон медицинской организации, осуществляющей
-                клиническое использование донорской крови и (или) ее компонентов
-              </span>
-              <input
-                className={styles.lineInput}
-                value={draft.organization}
-                onChange={(event) => updateField('organization', event.target.value)}
-              />
-            </label>
+          <div
+            className={styles.fillSection}
+            role="button"
+            tabIndex={0}
+            onClick={() => setEditor({ kind: 'details' })}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor({ kind: 'details' }))
+            }
+          >
+            <div className={styles.formLines}>
+              <div className={styles.lineField}>
+                <span className={styles.label}>
+                  Наименование и контактный телефон медицинской организации, осуществляющей
+                  клиническое использование донорской крови и (или) ее компонентов
+                </span>
+                <div className={styles.lineValue}>{displayValue(draft.organization)}</div>
+              </div>
 
-            <label className={styles.lineField}>
-              <span className={styles.label}>
-                Контактный телефон заведующего кабинетом трансфузиологии (отделением переливания
-                крови (отделением трансфузиологии))
-              </span>
-              <input
-                className={styles.lineInput}
-                value={draft.transfusionHeadPhone}
-                onChange={(event) => updateField('transfusionHeadPhone', event.target.value)}
-              />
-            </label>
+              <div className={styles.lineField}>
+                <span className={styles.label}>
+                  Контактный телефон заведующего кабинетом трансфузиологии (отделением переливания
+                  крови (отделением трансфузиологии))
+                </span>
+                <div className={styles.lineValue}>{displayValue(draft.transfusionHeadPhone)}</div>
+              </div>
 
-            <label className={styles.lineField}>
-              <span className={styles.label}>
-                Наименование и контактный телефон медицинской организации, осуществляющей
-                заготовку донорской крови и (или) ее компонентов
-              </span>
-              <input
-                className={styles.lineInput}
-                value={draft.supplier}
-                onChange={(event) => updateField('supplier', event.target.value)}
-              />
-            </label>
-          </div>
+              <div className={styles.lineField}>
+                <span className={styles.label}>
+                  Наименование и контактный телефон медицинской организации, осуществляющей
+                  заготовку донорской крови и (или) ее компонентов
+                </span>
+                <div className={styles.lineValue}>{displayValue(draft.supplier)}</div>
+              </div>
+            </div>
 
-          <div className={styles.dateRow}>
-            <label className={styles.dateField}>
-              <span className={styles.label}>Дата подачи сводной заявки</span>
-              <input
-                type="date"
-                className={`${styles.lineInput} ${styles.dateInput}`}
-                value={draft.requestDate}
-                onChange={(event) => updateField('requestDate', event.target.value)}
-              />
-            </label>
-            <div className={styles.noteBox}>
-              Для проведения индивидуального подбора компонентов крови
+            <div className={styles.dateRow}>
+              <div className={styles.dateField}>
+                <span className={styles.label}>Дата подачи сводной заявки</span>
+                <div className={`${styles.lineValue} ${styles.dateValue}`}>
+                  {formatDate(draft.requestDate) || ' '}
+                </div>
+              </div>
+              <div className={styles.noteBox}>
+                Для проведения индивидуального подбора компонентов крови
+              </div>
             </div>
           </div>
         </section>
@@ -237,37 +355,41 @@ export const ConsolidatedRequest = () => {
             </thead>
             <tbody>
               {draft.rows.map((row, index) => (
-                <tr key={index} className={styles.dataRow}>
+                <tr
+                  key={index}
+                  className={`${styles.dataRow} ${styles.fillRow}`}
+                  tabIndex={0}
+                  onClick={() => setEditor({ kind: 'row', index })}
+                  onKeyDown={(event) =>
+                    activateOnKeyboard(event, () => setEditor({ kind: 'row', index }))
+                  }
+                >
                   <td>{index + 1}</td>
-                  {(
-                    [
-                      'donorAbo',
-                      'donorRh',
-                      'donorAntigens',
-                      'componentName',
-                      'quantity',
-                      'individualSelection',
-                      'recipientIdentity',
-                      'recipientAbo',
-                      'recipientRh',
-                      'recipientAntigens',
-                      'selectionIndications',
-                    ] as const
-                  ).map((field) => (
-                    <td key={field}>
-                      <textarea
-                        className={styles.cellTextarea}
-                        value={row[field]}
-                        onChange={(event) => updateRow(index, field, event.target.value)}
-                      />
-                    </td>
-                  ))}
+                  <td>{displayValue(row.donorAbo)}</td>
+                  <td>{displayValue(row.donorRh)}</td>
+                  <td>{displayValue(row.donorAntigens)}</td>
+                  <td>{displayValue(row.componentName)}</td>
+                  <td>{displayValue(row.quantity)}</td>
+                  <td>{displayValue(row.individualSelection)}</td>
+                  <td>{displayValue(row.recipientIdentity)}</td>
+                  <td>{displayValue(row.recipientAbo)}</td>
+                  <td>{displayValue(row.recipientRh)}</td>
+                  <td>{displayValue(row.recipientAntigens)}</td>
+                  <td>{displayValue(row.selectionIndications)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div className={styles.signatureArea}>
+          <div
+            className={`${styles.signatureArea} ${styles.fillSection}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => setEditor({ kind: 'signatures' })}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => setEditor({ kind: 'signatures' }))
+            }
+          >
             <div className={styles.signatureRow}>
               <div>
                 Заведующий кабинетом трансфузиологии
@@ -281,11 +403,9 @@ export const ConsolidatedRequest = () => {
                 <div className={styles.signatureCaption}>подпись</div>
               </div>
               <div>
-                <input
-                  className={styles.signatureNameInput}
-                  value={draft.transfusionHeadName}
-                  onChange={(event) => updateField('transfusionHeadName', event.target.value)}
-                />
+                <div className={styles.signatureNameValue}>
+                  {displayValue(draft.transfusionHeadName)}
+                </div>
                 <div className={styles.signatureCaption}>
                   фамилия, имя,
                   <br />
@@ -305,11 +425,9 @@ export const ConsolidatedRequest = () => {
                 <div className={styles.signatureCaption}>подпись</div>
               </div>
               <div>
-                <input
-                  className={styles.signatureNameInput}
-                  value={draft.organizationHeadName}
-                  onChange={(event) => updateField('organizationHeadName', event.target.value)}
-                />
+                <div className={styles.signatureNameValue}>
+                  {displayValue(draft.organizationHeadName)}
+                </div>
                 <div className={styles.signatureCaption}>
                   фамилия, имя,
                   <br />
@@ -320,6 +438,36 @@ export const ConsolidatedRequest = () => {
           </div>
         </section>
       </div>
+
+      {editor?.kind === 'details' && (
+        <RequestEditorModal
+          title="Общие данные сводной заявки"
+          fields={DETAIL_FIELDS}
+          values={detailValues}
+          onChange={updateFields}
+          onClose={() => setEditor(null)}
+        />
+      )}
+
+      {editor?.kind === 'row' && (
+        <RequestEditorModal
+          title={`Строка ${editor.index + 1} сводной заявки`}
+          fields={ROW_FIELDS}
+          values={draft.rows[editor.index] ?? emptyRow()}
+          onChange={(changes) => updateRow(editor.index, changes)}
+          onClose={() => setEditor(null)}
+        />
+      )}
+
+      {editor?.kind === 'signatures' && (
+        <RequestEditorModal
+          title="Ответственные лица"
+          fields={SIGNATURE_FIELDS}
+          values={signatureValues}
+          onChange={updateFields}
+          onClose={() => setEditor(null)}
+        />
+      )}
     </main>
   );
 };

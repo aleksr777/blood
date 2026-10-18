@@ -8,6 +8,7 @@ type Props = {
   values: ProtocolValues;
   previousTransfusionSuggestion?: string;
   showObstetricHistory?: boolean;
+  showTransfusionHistory?: boolean;
   onChange: (values: ProtocolValues) => void;
 };
 
@@ -66,6 +67,7 @@ export const RecipientHistoryFields = ({
   values,
   previousTransfusionSuggestion = '',
   showObstetricHistory = true,
+  showTransfusionHistory = true,
   onChange,
 }: Props) => {
   const suggestion = previousTransfusionSuggestion.trim();
@@ -82,7 +84,7 @@ export const RecipientHistoryFields = ({
     values.previousTransfusions === suggestion;
 
   useEffect(() => {
-    if (!dependentHistoryDisabled) return;
+    if (!showTransfusionHistory || !dependentHistoryDisabled) return;
 
     if (
       values.previousReactionsStatus ||
@@ -96,6 +98,7 @@ export const RecipientHistoryFields = ({
   }, [
     dependentHistoryDisabled,
     onChange,
+    showTransfusionHistory,
     values.individualSelectionHistoryStatus,
     values.previousReactionsStatus,
   ]);
@@ -144,7 +147,7 @@ export const RecipientHistoryFields = ({
         </fieldset>
       )}
 
-      {suggestion && (
+      {showTransfusionHistory && suggestion && (
         <div className={styles.suggestion}>
           <div className={styles.suggestionHeader}>
             <div>
@@ -171,7 +174,7 @@ export const RecipientHistoryFields = ({
         </div>
       )}
 
-      {HISTORY_FIELDS.map(({ statusName, textName, label }, index) => {
+      {showTransfusionHistory && HISTORY_FIELDS.map(({ statusName, textName, label }, index) => {
         const status = getHistoryStatus(values[statusName], values[textName]);
         const disabled = index > 0 && dependentHistoryDisabled;
 

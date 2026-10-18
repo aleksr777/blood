@@ -568,7 +568,7 @@ export const IndividualSelectionDirection = () => {
         };
       case 'footer':
         return {
-          title: 'Оформление направления',
+          title: 'Дата и подпись',
           fields: FOOTER_FIELDS,
           values: valuesFor(FOOTER_FIELDS),
         };

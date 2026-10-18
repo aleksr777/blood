@@ -309,24 +309,7 @@ const formatDirectionDate = (value: string) => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return '';
 
-  const months = [
-    'января',
-    'февраля',
-    'марта',
-    'апреля',
-    'мая',
-    'июня',
-    'июля',
-    'августа',
-    'сентября',
-    'октября',
-    'ноября',
-    'декабря',
-  ];
-  const month = months[Number(match[2]) - 1];
-  if (!month) return '';
-
-  return `"${String(Number(match[3])).padStart(2, '0')}" ${month} ${match[1]} г`;
+  return `${match[3]}.${match[2]}.${match[1]}`;
 };
 
 export const IndividualSelectionDirection = () => {

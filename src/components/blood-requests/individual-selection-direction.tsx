@@ -30,7 +30,8 @@ import {
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:individual-selection-direction-draft';
-const ORGANIZATION = 'ФБУЗ "Медико-санитарная часть №32" ФМБА России, г. Заречный.';
+const DEFAULT_MEDICAL_ORGANIZATION =
+  'ФБУЗ "Медико-санитарная часть №32" ФМБА России, г. Заречный.';
 
 type AutoField =
   | 'recipientAboRh'
@@ -47,6 +48,7 @@ type DirectionDraft = Record<AutoField, string> & {
   sourceRecipientId: string;
   requiredComponent: string;
   quantity: string;
+  medicalOrganization: string;
   diagnosis: string;
   allergyHistory: string;
   directionDate: string;
@@ -80,6 +82,12 @@ const RECIPIENT_FIELDS: RequestEditorField[] = [
   { name: 'recipientAge', label: 'Возраст' },
   { name: 'department', label: 'Отделение' },
   { name: 'medicalRecordNumber', label: '№ медицинской карты' },
+  {
+    name: 'medicalOrganization',
+    label: 'Наименование ЛПУ',
+    savedOptionsCategory: 'medicalOrganization',
+    wide: true,
+  },
   { name: 'diagnosis', label: 'Диагноз', type: 'textarea', wide: true },
 ];
 
@@ -125,6 +133,7 @@ const emptyDraft = (): DirectionDraft => ({
   recipientAge: '',
   department: '',
   medicalRecordNumber: '',
+  medicalOrganization: DEFAULT_MEDICAL_ORGANIZATION,
   transfusionHistory: '',
   obstetricHistory: '',
   recipientSex: '',
@@ -520,7 +529,12 @@ export const IndividualSelectionDirection = () => {
                 {displayValue(draft.recipientAge)}
               </span>
             </div>
-            <div className={styles.staticLine}>Организация: {ORGANIZATION}</div>
+            <div className={styles.singleLine}>
+              <span>Наименование ЛПУ:</span>
+              <span className={styles.valueLine}>
+                {displayValue(draft.medicalOrganization)}
+              </span>
+            </div>
             <div className={styles.singleLine}>
               <span>Отделение:</span>
               <span className={styles.valueLine}>{displayValue(draft.department)}</span>

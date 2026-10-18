@@ -32,7 +32,6 @@ import { formatIndications } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
-import { IndividualSelectionIndicationsModal } from './individual-selection-indications-modal';
 import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { IndividualSelectionTransfusionHistoryModal } from './individual-selection-transfusion-history-modal';
@@ -75,7 +74,6 @@ type Editor =
   | 'organization'
   | 'component'
   | 'examination'
-  | 'indications'
   | 'recipient'
   | 'transfusion'
   | 'obstetric'
@@ -679,22 +677,6 @@ export const IndividualSelectionDirection = () => {
     </div>,
 
     <div
-      key="indications"
-      className={styles.fillSection}
-      role="button"
-      tabIndex={0}
-      onClick={() => setEditor('indications')}
-      onKeyDown={(event) =>
-        activateOnKeyboard(event, () => setEditor('indications'))
-      }
-    >
-      <AdaptiveRuledField
-        label="Показания к трансфузии:"
-        value={formatIndications(draft.indicationValues)}
-      />
-    </div>,
-
-    <div
       key="transfusion"
       className={styles.fillSection}
       role="button"
@@ -748,6 +730,10 @@ export const IndividualSelectionDirection = () => {
         <span>Количество:</span>
         <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
       </div>
+      <AdaptiveRuledField
+        label="Показания к трансфузии:"
+        value={formatIndications(draft.indicationValues)}
+      />
       <AdaptiveRuledField
         label="Показания для индивидуального подбора:"
         value={draft.individualSelectionIndications}
@@ -938,14 +924,6 @@ export const IndividualSelectionDirection = () => {
         />
       )}
 
-      {editor === 'indications' && (
-        <IndividualSelectionIndicationsModal
-          values={draft.indicationValues}
-          onChange={updateIndications}
-          onClose={() => setEditor(null)}
-        />
-      )}
-
       {editor === 'transfusion' && (
         <IndividualSelectionTransfusionHistoryModal
           values={examinationValues}
@@ -959,7 +937,9 @@ export const IndividualSelectionDirection = () => {
           requiredComponent={draft.requiredComponent}
           quantity={draft.quantity}
           individualSelectionIndications={draft.individualSelectionIndications}
+          indicationValues={draft.indicationValues}
           onLocalChange={updateFields}
+          onIndicationsChange={updateIndications}
           onClose={() => setEditor(null)}
         />
       )}

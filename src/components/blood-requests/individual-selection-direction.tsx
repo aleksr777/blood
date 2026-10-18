@@ -320,35 +320,66 @@ const AdaptiveRuledField = ({
   minRows = 2,
 }: AdaptiveRuledFieldProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
+  const inlineMeasureRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
+  const [breakBeforeValue, setBreakBeforeValue] = useState(false);
   const [rowCount, setRowCount] = useState(minRows);
 
-  const updateRowCount = useCallback(() => {
+  const updateLayout = useCallback(() => {
+    const inlineMeasure = inlineMeasureRef.current;
     const measure = measureRef.current;
-    if (!measure) return;
+    if (!inlineMeasure || !measure) return;
 
-    const lineHeight = Number.parseFloat(window.getComputedStyle(measure).lineHeight);
+    const lineHeight = Number.parseFloat(
+      window.getComputedStyle(inlineMeasure).lineHeight,
+    );
     if (!Number.isFinite(lineHeight) || lineHeight <= 0) return;
+
+    const inlineHeight = inlineMeasure.getBoundingClientRect().height;
+    const shouldBreakBeforeValue =
+      Boolean(value) && inlineHeight > lineHeight + 0.5;
+
+    setBreakBeforeValue((current) =>
+      current === shouldBreakBeforeValue ? current : shouldBreakBeforeValue,
+    );
 
     const measuredHeight = measure.getBoundingClientRect().height;
     const measuredRows = Math.ceil((measuredHeight - 0.5) / lineHeight);
     const nextRowCount = Math.max(minRows, measuredRows);
     setRowCount((current) => (current === nextRowCount ? current : nextRowCount));
-  }, [minRows]);
+  }, [minRows, value]);
 
   useLayoutEffect(() => {
-    updateRowCount();
+    updateLayout();
 
     const root = rootRef.current;
     if (!root || typeof ResizeObserver === 'undefined') return undefined;
 
-    const observer = new ResizeObserver(updateRowCount);
+    const observer = new ResizeObserver(updateLayout);
     observer.observe(root);
 
     return () => observer.disconnect();
-  }, [label, updateRowCount, value]);
+  }, [breakBeforeValue, label, updateLayout, value]);
 
   const content = (
+    <>
+      <span className={styles.adaptiveLabel}>{label}</span>
+      {value && (
+        <span
+          className={[
+            styles.adaptiveText,
+            breakBeforeValue ? styles.adaptiveTextNewLine : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {breakBeforeValue ? value : ` ${value}`}
+        </span>
+      )}
+    </>
+  );
+
+  const inlineContent = (
     <>
       <span className={styles.adaptiveLabel}>{label}</span>
       {value && <span className={styles.adaptiveText}> {value}</span>}
@@ -365,6 +396,13 @@ const AdaptiveRuledField = ({
       <div className={styles.adaptiveContent}>{content}</div>
       <div ref={measureRef} className={styles.adaptiveMeasure} aria-hidden="true">
         {content}
+      </div>
+      <div
+        ref={inlineMeasureRef}
+        className={styles.adaptiveInlineMeasure}
+        aria-hidden="true"
+      >
+        {inlineContent}
       </div>
     </div>
   );

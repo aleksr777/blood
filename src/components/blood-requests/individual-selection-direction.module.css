@@ -114,7 +114,8 @@
 }
 
 .adaptiveContent,
-.adaptiveMeasure {
+.adaptiveMeasure,
+.adaptiveInlineMeasure {
   box-sizing: border-box;
   width: 100%;
   padding: 0 0.8mm;
@@ -130,7 +131,8 @@
   inset: 0;
 }
 
-.adaptiveMeasure {
+.adaptiveMeasure,
+.adaptiveInlineMeasure {
   position: absolute;
   z-index: -1;
   top: 0;
@@ -148,6 +150,10 @@
 
 .adaptiveText {
   font-weight: 400;
+}
+
+.adaptiveTextNewLine {
+  display: block;
 }
 
 .directionDate {

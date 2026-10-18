@@ -361,7 +361,7 @@ const AdaptiveRuledField = ({
     );
     if (!Number.isFinite(lineHeight) || lineHeight <= 0) return;
 
-    const inlineHeight = inlineMeasure.getBoundingClientRect().height;
+    const inlineHeight = inlineMeasure.scrollHeight;
     const shouldBreakBeforeValue =
       Boolean(value) && inlineHeight > lineHeight + 0.5;
 
@@ -369,7 +369,7 @@ const AdaptiveRuledField = ({
       current === shouldBreakBeforeValue ? current : shouldBreakBeforeValue,
     );
 
-    const measuredHeight = measure.getBoundingClientRect().height;
+    const measuredHeight = measure.scrollHeight;
     const measuredRows = Math.ceil((measuredHeight - 0.5) / lineHeight);
     const nextRowCount = Math.max(minRows, measuredRows);
     setRowCount((current) => (current === nextRowCount ? current : nextRowCount));

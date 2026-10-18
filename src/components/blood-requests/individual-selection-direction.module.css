@@ -114,6 +114,29 @@
   min-width: 0;
 }
 
+.adaptiveSingleLine {
+  display: flex;
+  min-height: 7mm;
+  align-items: baseline;
+  gap: 1mm;
+}
+
+.adaptiveSingleLabel {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.adaptiveSingleValue {
+  flex: 1 1 auto;
+  min-width: 20mm;
+  min-height: 6mm;
+  border-bottom: var(--form-line-width) solid #111;
+  padding: 0 0.8mm 0.6mm;
+  overflow: hidden;
+  font-weight: 400;
+  white-space: pre-wrap;
+}
+
 .adaptiveRules {
   position: relative;
   z-index: 0;

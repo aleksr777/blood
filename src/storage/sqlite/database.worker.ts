@@ -158,12 +158,7 @@ const handleRequest = async (request: DatabaseRequest) => {
         kind: 'individual-selection-direction' | 'component-request';
         values: Record<string, unknown>;
       };
-      return saveBloodRequestRecord(
-        payload.recordId,
-        payload.recipientId,
-        payload.kind,
-        payload.values,
-      );
+      return saveBloodRequestRecord(payload);
     }
     case 'blood-request-records:remove':
       return removeBloodRequestRecord((request.payload as { id: number }).id);

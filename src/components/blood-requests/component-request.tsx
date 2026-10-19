@@ -20,7 +20,10 @@ import {
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
-import { formatRecipientAntigens } from '../transfusion-protocol/recipient-examination-model';
+import {
+  formatAlloimmuneAntibodies,
+  formatRecipientAntigens,
+} from '../transfusion-protocol/recipient-examination-model';
 import {
   formatIndications,
   getIndicationComponent,
@@ -658,6 +661,10 @@ export const ComponentRequest = () => {
         label="Фенотип реципиента:"
         value={draft.recipientPhenotype}
       />
+      <AdaptiveRuledField
+        label="Аллоиммунные антитела:"
+        value={formatAlloimmuneAntibodies(examinationValues)}
+      />
     </div>,
 
     ...(draft.recipientSex === 'Женский'
@@ -762,6 +769,7 @@ export const ComponentRequest = () => {
     draft.diagnosis,
     draft.recipientAboRh,
     draft.recipientPhenotype,
+    formatAlloimmuneAntibodies(examinationValues),
     formatIndications(draft.indicationValues),
     draft.recipientSex,
     draft.obstetricHistory,
@@ -951,7 +959,6 @@ export const ComponentRequest = () => {
       {editor === 'examination' && (
         <IndividualSelectionExaminationModal
           values={examinationValues}
-          showAlloimmuneAntibodies={false}
           onChange={updateExamination}
           onClose={() => setEditor(null)}
         />

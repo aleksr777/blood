@@ -140,7 +140,7 @@ const emptyDraft = (): DirectionDraft => ({
   directionDate: '',
   doctorName: '',
   doctorPhone: '',
-  indicationValues: {},
+  indicationValues: { indicationComponent: 'erythrocytes' },
   autoValues: {},
 });
 
@@ -191,6 +191,10 @@ const loadDraft = (): DirectionDraft => {
 
     if (!next.directionDate) next.directionDate = todayKey();
     next.quantity = sanitizeDoseQuantity(next.quantity);
+    next.indicationValues = {
+      ...next.indicationValues,
+      indicationComponent: 'erythrocytes',
+    };
     return next;
   } catch {
     return { ...emptyDraft(), directionDate: todayKey() };
@@ -521,6 +525,7 @@ export const IndividualSelectionDirection = () => {
       indicationValues: {
         ...current.indicationValues,
         ...changes,
+        indicationComponent: 'erythrocytes',
       },
     }));
   };
@@ -986,6 +991,7 @@ export const IndividualSelectionDirection = () => {
           quantity={draft.quantity}
           individualSelectionIndications={draft.individualSelectionIndications}
           indicationValues={draft.indicationValues}
+          fixedIndicationComponent="erythrocytes"
           onLocalChange={updateFields}
           onIndicationsChange={updateIndications}
           onClose={() => setEditor(null)}

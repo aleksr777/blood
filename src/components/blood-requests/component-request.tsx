@@ -20,21 +20,13 @@ import {
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
-import {
-  formatAlloimmuneAntibodies,
-  formatRecipientAntigens,
-} from '../transfusion-protocol/recipient-examination-model';
-import {
-  HISTORY_STATUS,
-  getHistoryStatus,
-} from '../transfusion-protocol/recipient-history-model';
+import { formatRecipientAntigens } from '../transfusion-protocol/recipient-examination-model';
 import { formatIndications } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
 import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
-import { IndividualSelectionTransfusionHistoryModal } from './individual-selection-transfusion-history-modal';
 import {
   RequestEditorModal,
   type RequestEditorField,
@@ -53,7 +45,6 @@ type AutoField =
   | 'department'
   | 'medicalRecordNumber'
   | 'diagnosis'
-  | 'transfusionHistory'
   | 'obstetricHistory'
   | 'recipientSex';
 
@@ -75,7 +66,6 @@ type Editor =
   | 'component'
   | 'examination'
   | 'recipient'
-  | 'transfusion'
   | 'obstetric'
   | 'footer'
   | null;
@@ -88,7 +78,6 @@ const AUTO_FIELDS: AutoField[] = [
   'department',
   'medicalRecordNumber',
   'diagnosis',
-  'transfusionHistory',
   'obstetricHistory',
   'recipientSex',
 ];
@@ -132,7 +121,6 @@ const emptyDraft = (): DirectionDraft => ({
   medicalRecordNumber: '',
   medicalOrganization: DEFAULT_MEDICAL_ORGANIZATION,
   diagnosis: '',
-  transfusionHistory: '',
   obstetricHistory: '',
   recipientSex: '',
   directionDate: '',
@@ -211,54 +199,6 @@ const formatObstetricHistory = (values: ProtocolValues) => {
     .join('; ');
 };
 
-const formatTransfusionHistory = (values: ProtocolValues) => {
-  const parts: string[] = [];
-
-  const previousStatus = getHistoryStatus(
-    values.previousTransfusionsStatus,
-    values.previousTransfusions,
-  );
-  if (previousStatus === HISTORY_STATUS.none) {
-    parts.push('Трансфузий не было.');
-  } else if (previousStatus === HISTORY_STATUS.unknown) {
-    parts.push('Не известно.');
-  } else if (
-    previousStatus === HISTORY_STATUS.had &&
-    values.previousTransfusions?.trim()
-  ) {
-    parts.push(`Трансфузии: ${values.previousTransfusions.trim()}`);
-  }
-
-  const reactionsStatus = getHistoryStatus(
-    values.previousReactionsStatus,
-    values.previousReactions,
-  );
-  if (reactionsStatus === HISTORY_STATUS.none) {
-    parts.push('Реакции и осложнения: не было');
-  } else if (reactionsStatus === HISTORY_STATUS.unknown) {
-    parts.push('Реакции и осложнения: не известно');
-  } else if (reactionsStatus === HISTORY_STATUS.had && values.previousReactions?.trim()) {
-    parts.push(`Реакции и осложнения: ${values.previousReactions.trim()}`);
-  }
-
-  const selectionStatus = getHistoryStatus(
-    values.individualSelectionHistoryStatus,
-    values.individualSelectionHistory,
-  );
-  if (selectionStatus === HISTORY_STATUS.none) {
-    parts.push('Индивидуальный подбор: не проводился');
-  } else if (selectionStatus === HISTORY_STATUS.unknown) {
-    parts.push('Индивидуальный подбор: не известно');
-  } else if (
-    selectionStatus === HISTORY_STATUS.had &&
-    values.individualSelectionHistory?.trim()
-  ) {
-    parts.push(`Индивидуальный подбор: ${values.individualSelectionHistory.trim()}`);
-  }
-
-  return parts.join('; ');
-};
-
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
 ): Promise<Partial<Record<AutoField, string>>> => {
@@ -289,7 +229,6 @@ const currentAutoValues = async (
     department: values.department?.trim() ?? '',
     medicalRecordNumber: values.medicalRecordNumber?.trim() ?? '',
     diagnosis: values.diagnosis?.trim() ?? '',
-    transfusionHistory: formatTransfusionHistory(values),
     obstetricHistory:
       values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '',
     recipientSex: values.recipientSex?.trim() ?? '',
@@ -692,26 +631,6 @@ export const ComponentRequest = () => {
         label="Фенотип реципиента:"
         value={draft.recipientPhenotype}
       />
-      <AdaptiveRuledField
-        label="Аллоиммунные антитела:"
-        value={formatAlloimmuneAntibodies(examinationValues)}
-      />
-    </div>,
-
-    <div
-      key="transfusion"
-      className={styles.fillSection}
-      role="button"
-      tabIndex={0}
-      onClick={() => setEditor('transfusion')}
-      onKeyDown={(event) =>
-        activateOnKeyboard(event, () => setEditor('transfusion'))
-      }
-    >
-      <AdaptiveRuledField
-        label="Гемотрансфузионный анамнез:"
-        value={draft.transfusionHistory}
-      />
     </div>,
 
     ...(draft.recipientSex === 'Женский'
@@ -803,9 +722,7 @@ export const ComponentRequest = () => {
     draft.diagnosis,
     draft.recipientAboRh,
     draft.recipientPhenotype,
-    formatAlloimmuneAntibodies(examinationValues),
     formatIndications(draft.indicationValues),
-    draft.transfusionHistory,
     draft.recipientSex,
     draft.obstetricHistory,
     draft.requiredComponent,
@@ -973,14 +890,6 @@ export const ComponentRequest = () => {
         />
       )}
 
-      {editor === 'transfusion' && (
-        <IndividualSelectionTransfusionHistoryModal
-          values={examinationValues}
-          onChange={updateExamination}
-          onClose={() => setEditor(null)}
-        />
-      )}
-
       {editor === 'component' && (
         <IndividualSelectionComponentModal
           requiredComponent={draft.requiredComponent}
@@ -996,6 +905,7 @@ export const ComponentRequest = () => {
       {editor === 'examination' && (
         <IndividualSelectionExaminationModal
           values={examinationValues}
+          showAlloimmuneAntibodies={false}
           onChange={updateExamination}
           onClose={() => setEditor(null)}
         />

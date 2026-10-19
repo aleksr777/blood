@@ -24,7 +24,9 @@ import {
 } from '../../storage/repositories/current-indications';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
+  saveBloodRequestRecord,
   updateRecipient,
+  type BloodRequestRecord,
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
@@ -213,6 +215,52 @@ const loadDraft = (): DirectionDraft => {
   } catch {
     return { ...emptyDraft(), directionDate: todayKey() };
   }
+};
+
+const draftFromRecord = (
+  values: Record<string, unknown>,
+): DirectionDraft => {
+  const blank = emptyDraft();
+  const savedValues = Object.fromEntries(
+    Object.keys(blank).flatMap((key) => {
+      if (key === 'autoValues' || key === 'indicationValues') return [];
+      const value = values[key];
+      return typeof value === 'string' ? [[key, value]] : [];
+    }),
+  );
+
+  const indicationValues =
+    values.indicationValues &&
+    typeof values.indicationValues === 'object' &&
+    !Array.isArray(values.indicationValues)
+      ? Object.fromEntries(
+          Object.entries(values.indicationValues).filter(
+            (entry): entry is [string, string] => typeof entry[1] === 'string',
+          ),
+        )
+      : {};
+
+  const autoValues =
+    values.autoValues &&
+    typeof values.autoValues === 'object' &&
+    !Array.isArray(values.autoValues)
+      ? Object.fromEntries(
+          Object.entries(values.autoValues).filter(
+            (entry): entry is [string, string] => typeof entry[1] === 'string',
+          ),
+        )
+      : {};
+
+  const next = {
+    ...blank,
+    ...savedValues,
+    indicationValues,
+    autoValues,
+  } as DirectionDraft;
+
+  if (!next.directionDate) next.directionDate = todayKey();
+  next.quantity = sanitizeDoseQuantity(next.quantity);
+  return next;
 };
 
 const formatObstetricHistory = (values: ProtocolValues) => {
@@ -413,6 +461,7 @@ export const ComponentRequest = () => {
   const [editor, setEditor] = useState<Editor>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
+  const [savedRecordId, setSavedRecordId] = useState<number | null>(null);
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
@@ -616,6 +665,7 @@ export const ComponentRequest = () => {
       recipient,
       autoValues,
     );
+    setSavedRecordId(null);
     setDraft({
       ...next,
       individualSelectionIndications:
@@ -635,6 +685,7 @@ export const ComponentRequest = () => {
       recipient,
       autoValues,
     );
+    setSavedRecordId(null);
     setDraft({
       ...next,
       individualSelectionIndications:
@@ -650,23 +701,66 @@ export const ComponentRequest = () => {
     );
   };
 
-  const save = (afterPrint = false) => {
+  const save = async (afterPrint = false) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-    setStatus(
-      afterPrint
-        ? 'Направление сохранено после печати.'
-        : 'Направление сохранено.',
-    );
+
+    if (!currentRecipient) {
+      setStatus('Выберите реципиента перед сохранением заявки.');
+      return false;
+    }
+
+    try {
+      const record = await saveBloodRequestRecord(
+        savedRecordId,
+        currentRecipient.id,
+        'component-request',
+        { ...draft },
+      );
+      setSavedRecordId(record.id);
+      setStatus(
+        afterPrint
+          ? 'Заявка сохранена после печати.'
+          : 'Заявка сохранена.',
+      );
+      return true;
+    } catch (error) {
+      console.error('Не удалось сохранить заявку:', error);
+      setStatus(
+        error instanceof Error ? error.message : 'Не удалось сохранить заявку.',
+      );
+      return false;
+    }
   };
 
   const selectRecipient = async (recipient: RecipientRecord) => {
     try {
+      const previousRecipientId = currentRecipient?.id ?? null;
       await switchCurrentRecipient(recipient);
+      if (previousRecipientId !== recipient.id) {
+        setSavedRecordId(null);
+      }
       await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
       console.error('Не удалось выбрать реципиента для направления:', error);
       return false;
+    }
+  };
+
+  const openSavedRequest = async (
+    record: BloodRequestRecord,
+    recipient: RecipientRecord,
+  ) => {
+    try {
+      await switchCurrentRecipient(recipient);
+      setCurrentRecipient(readCurrentRecipient());
+      setDraft(draftFromRecord(record.values));
+      setSavedRecordId(record.id);
+      setRegistryOpen(false);
+      setStatus('Сохранённая заявка открыта.');
+    } catch (error) {
+      console.error('Не удалось открыть сохранённую заявку:', error);
+      setStatus('Не удалось открыть сохранённую заявку.');
     }
   };
 
@@ -904,7 +998,7 @@ export const ComponentRequest = () => {
       window.print();
     } finally {
       document.body.classList.remove(className);
-      save(true);
+      void save(true);
     }
   };
 
@@ -934,7 +1028,7 @@ export const ComponentRequest = () => {
             >
               Реципиенты
             </button>
-            <button type="button" className="save-button" onClick={() => save()}>
+            <button type="button" className="save-button" onClick={() => void save()}>
               Сохранить
             </button>
             <button
@@ -1104,6 +1198,9 @@ export const ComponentRequest = () => {
           initialRecipientId={currentRecipient?.id ?? null}
           initialRecipientName={currentRecipient?.fullName ?? ''}
           onUseRecipient={selectRecipient}
+          onOpenComponentRequestRecord={(record, recipient) => {
+            void openSavedRequest(record, recipient);
+          }}
           onClose={() => setRegistryOpen(false)}
         />
       )}

@@ -5,10 +5,16 @@ import {
   recipientProfileValuesForForms,
 } from '../../storage/repositories/current-recipient';
 import {
+  hasStoredCurrentIndications,
+  readCurrentIndications,
+  writeCurrentIndications,
+} from '../../storage/repositories/current-indications';
+import {
   clearProtocolDraft,
   loadProtocolDraft,
   saveProtocolDraft,
 } from '../../storage/repositories/protocol-draft';
+import { getIndicationComponent } from './indications-model';
 import { reagentDefaultsForNewBlank } from './reagent-defaults';
 import type { ProtocolValues } from './protocol-types';
 
@@ -76,11 +82,29 @@ export const useProtocolDraft = ({
             adoptCurrentRecipientFromValues(draftValues);
             setValues(draftValues);
           } else if (Number(draftValues.recipientId) === currentRecipient.id) {
-            setValues({
+            const mergedValues = {
               ...draftValues,
               ...recipientProfileValuesForForms(currentRecipient),
               ...generatedHistoryValues(draftValues),
-            });
+            };
+            const component = getIndicationComponent(mergedValues);
+
+            if (component) {
+              if (hasStoredCurrentIndications(currentRecipient.id, component)) {
+                Object.assign(
+                  mergedValues,
+                  readCurrentIndications(currentRecipient.id, component),
+                );
+              } else {
+                writeCurrentIndications(
+                  currentRecipient.id,
+                  component,
+                  mergedValues,
+                );
+              }
+            }
+
+            setValues(mergedValues);
           } else {
             setValues(draftValues);
           }

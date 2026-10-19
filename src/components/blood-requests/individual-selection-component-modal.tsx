@@ -7,6 +7,7 @@ import {
 } from '../transfusion-protocol/indications-fields';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
+import { sanitizeDoseQuantity } from './dose-quantity';
 import styles from './individual-selection-component-modal.module.css';
 
 const REQUIRED_COMPONENT_CATEGORY = 'individualSelectionRequiredComponent';
@@ -147,10 +148,17 @@ export const IndividualSelectionComponentModal = ({
           </label>
 
           <label className={styles.wide}>
-            <span>Количество</span>
+            <span>Количество доз</span>
             <input
-              value={quantity}
-              onChange={(event) => onLocalChange({ quantity: event.target.value })}
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={sanitizeDoseQuantity(quantity)}
+              onChange={(event) =>
+                onLocalChange({
+                  quantity: sanitizeDoseQuantity(event.target.value),
+                })
+              }
             />
           </label>
         </div>

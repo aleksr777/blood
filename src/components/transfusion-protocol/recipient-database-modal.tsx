@@ -3,13 +3,16 @@ import { readCurrentRecipient } from '../../storage/repositories/current-recipie
 import {
   createRecipient,
   getRecipientById,
+  listBloodRequestRecords,
   listProtocolRecords,
   listRegistrationRecords,
+  removeBloodRequestRecord,
   removeProtocolRecord,
   removeRecipient,
   removeRegistrationRecord,
   searchRecipients,
   updateRecipient,
+  type BloodRequestRecord,
   type ProtocolRecord,
   type RecipientRecord,
   type RegistrationRecord,
@@ -28,6 +31,14 @@ type Props = {
     record: RegistrationRecord,
     recipient: RecipientRecord,
   ) => void;
+  onOpenIndividualSelectionDirectionRecord?: (
+    record: BloodRequestRecord,
+    recipient: RecipientRecord,
+  ) => void;
+  onOpenComponentRequestRecord?: (
+    record: BloodRequestRecord,
+    recipient: RecipientRecord,
+  ) => void;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   initialRecipientId?: number | null;
   initialRecipientName?: string;
@@ -37,6 +48,8 @@ export const RecipientDatabaseModal = ({
   onClose,
   onOpenRecord,
   onOpenRegistrationRecord,
+  onOpenIndividualSelectionDirectionRecord,
+  onOpenComponentRequestRecord,
   onUseRecipient,
   initialRecipientId = null,
   initialRecipientName = '',
@@ -47,12 +60,18 @@ export const RecipientDatabaseModal = ({
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
   const [registrationRecords, setRegistrationRecords] = useState<RegistrationRecord[]>([]);
+  const [individualSelectionDirectionRecords, setIndividualSelectionDirectionRecords] =
+    useState<BloodRequestRecord[]>([]);
+  const [componentRequestRecords, setComponentRequestRecords] =
+    useState<BloodRequestRecord[]>([]);
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<RecipientRecord | null>(null);
   const [deleting, setDeleting] = useState<RecipientRecord | null>(null);
   const [deletingRecord, setDeletingRecord] = useState<ProtocolRecord | null>(null);
   const [deletingRegistrationRecord, setDeletingRegistrationRecord] =
     useState<RegistrationRecord | null>(null);
+  const [deletingBloodRequestRecord, setDeletingBloodRequestRecord] =
+    useState<BloodRequestRecord | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -111,16 +130,27 @@ export const RecipientDatabaseModal = ({
     if (!selected) {
       setRecords([]);
       setRegistrationRecords([]);
+      setIndividualSelectionDirectionRecords([]);
+      setComponentRequestRecords([]);
       return;
     }
 
     void Promise.all([
       listProtocolRecords(selected.id),
       listRegistrationRecords(selected.id),
+      listBloodRequestRecords(selected.id, 'individual-selection-direction'),
+      listBloodRequestRecords(selected.id, 'component-request'),
     ])
-      .then(([protocolItems, registrationItems]) => {
+      .then(([
+        protocolItems,
+        registrationItems,
+        directionItems,
+        componentRequestItems,
+      ]) => {
         setRecords(protocolItems);
         setRegistrationRecords(registrationItems);
+        setIndividualSelectionDirectionRecords(directionItems);
+        setComponentRequestRecords(componentRequestItems);
       })
       .catch((error: unknown) => console.error('Не удалось загрузить бланки:', error));
   }, [selected]);
@@ -154,6 +184,8 @@ export const RecipientDatabaseModal = ({
     setSelected(null);
     setRecords([]);
     setRegistrationRecords([]);
+    setIndividualSelectionDirectionRecords([]);
+    setComponentRequestRecords([]);
   };
 
   const deleteRecord = async (record: ProtocolRecord) => {
@@ -190,6 +222,44 @@ export const RecipientDatabaseModal = ({
     );
   };
 
+  const deleteBloodRequestRecord = async (record: BloodRequestRecord) => {
+    await removeBloodRequestRecord(record.id);
+
+    if (record.kind === 'individual-selection-direction') {
+      setIndividualSelectionDirectionRecords((current) =>
+        current.filter(({ id }) => id !== record.id),
+      );
+    } else {
+      setComponentRequestRecords((current) =>
+        current.filter(({ id }) => id !== record.id),
+      );
+    }
+
+    const countField =
+      record.kind === 'individual-selection-direction'
+        ? 'individualSelectionDirectionCount'
+        : 'componentRequestCount';
+
+    setRecipients((current) =>
+      current.map((recipient) =>
+        recipient.id === record.recipientId
+          ? {
+              ...recipient,
+              [countField]: Math.max(0, recipient[countField] - 1),
+            }
+          : recipient,
+      ),
+    );
+    setSelected((current) =>
+      current?.id === record.recipientId
+        ? {
+            ...current,
+            [countField]: Math.max(0, current[countField] - 1),
+          }
+        : current,
+    );
+  };
+
   return (
     <Modal title="База реципиентов" onClose={onClose} className={styles.modal}>
       <div className={styles.body}>
@@ -206,8 +276,14 @@ export const RecipientDatabaseModal = ({
           recipient={selected}
           records={records}
           registrationRecords={registrationRecords}
+          individualSelectionDirectionRecords={individualSelectionDirectionRecords}
+          componentRequestRecords={componentRequestRecords}
           onOpenRecord={onOpenRecord}
           onOpenRegistrationRecord={onOpenRegistrationRecord}
+          onOpenIndividualSelectionDirectionRecord={
+            onOpenIndividualSelectionDirectionRecord
+          }
+          onOpenComponentRequestRecord={onOpenComponentRequestRecord}
           onUseRecipient={
             onUseRecipient
               ? async (recipient) => {
@@ -221,6 +297,7 @@ export const RecipientDatabaseModal = ({
           onDelete={setDeleting}
           onDeleteRecord={setDeletingRecord}
           onDeleteRegistrationRecord={setDeletingRegistrationRecord}
+          onDeleteBloodRequestRecord={setDeletingBloodRequestRecord}
         />
       </div>
       <RecipientDatabaseDialogs
@@ -229,18 +306,21 @@ export const RecipientDatabaseModal = ({
         deleting={deleting}
         deletingRecord={deletingRecord}
         deletingRegistrationRecord={deletingRegistrationRecord}
+        deletingBloodRequestRecord={deletingBloodRequestRecord}
         selectedRecipient={selected}
         onCloseCreate={() => setCreating(false)}
         onCloseEdit={() => setEditing(null)}
         onCloseDelete={() => setDeleting(null)}
         onCloseRecordDelete={() => setDeletingRecord(null)}
         onCloseRegistrationRecordDelete={() => setDeletingRegistrationRecord(null)}
+        onCloseBloodRequestRecordDelete={() => setDeletingBloodRequestRecord(null)}
         onCreate={addRecipient}
         onExisting={openExistingRecipient}
         onSave={saveRecipient}
         onDelete={deleteRecipient}
         onDeleteRecord={deleteRecord}
         onDeleteRegistrationRecord={deleteRegistrationRecord}
+        onDeleteBloodRequestRecord={deleteBloodRequestRecord}
       />
     </Modal>
   );

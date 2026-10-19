@@ -36,6 +36,11 @@ import {
   saveRegistrationRecord,
 } from './registration-record-store';
 import {
+  listBloodRequestRecords,
+  removeBloodRequestRecord,
+  saveBloodRequestRecord,
+} from './blood-request-record-store';
+import {
   findRecipientsByName,
   getRecipientById,
   removeRecipient,
@@ -139,6 +144,29 @@ const handleRequest = async (request: DatabaseRequest) => {
     }
     case 'registration-records:remove':
       return removeRegistrationRecord((request.payload as { id: number }).id);
+    case 'blood-request-records:list': {
+      const payload = request.payload as {
+        recipientId: number;
+        kind: 'individual-selection-direction' | 'component-request';
+      };
+      return listBloodRequestRecords(payload.recipientId, payload.kind);
+    }
+    case 'blood-request-records:save': {
+      const payload = request.payload as {
+        recordId: number | null;
+        recipientId: number;
+        kind: 'individual-selection-direction' | 'component-request';
+        values: Record<string, unknown>;
+      };
+      return saveBloodRequestRecord(
+        payload.recordId,
+        payload.recipientId,
+        payload.kind,
+        payload.values,
+      );
+    }
+    case 'blood-request-records:remove':
+      return removeBloodRequestRecord((request.payload as { id: number }).id);
   }
 };
 

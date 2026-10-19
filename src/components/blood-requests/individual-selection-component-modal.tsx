@@ -185,7 +185,9 @@ export const IndividualSelectionComponentModal = ({
           </>
         )}
 
-        <div className={styles.divider} />
+        {(!fixedIndicationComponent || showRequestOptions) && (
+          <div className={styles.divider} />
+        )}
 
         <div className={styles.localGrid}>
           <label className={styles.wide}>

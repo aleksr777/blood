@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type {
+  BloodRequestRecord,
   ProtocolRecord,
   RecipientRecord,
   RegistrationRecord,
@@ -12,9 +13,19 @@ type Props = {
   recipient: RecipientRecord | null;
   records: ProtocolRecord[];
   registrationRecords: RegistrationRecord[];
+  individualSelectionDirectionRecords: BloodRequestRecord[];
+  componentRequestRecords: BloodRequestRecord[];
   onOpenRecord?: (record: ProtocolRecord, recipient: RecipientRecord) => void;
   onOpenRegistrationRecord?: (
     record: RegistrationRecord,
+    recipient: RecipientRecord,
+  ) => void;
+  onOpenIndividualSelectionDirectionRecord?: (
+    record: BloodRequestRecord,
+    recipient: RecipientRecord,
+  ) => void;
+  onOpenComponentRequestRecord?: (
+    record: BloodRequestRecord,
     recipient: RecipientRecord,
   ) => void;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
@@ -22,9 +33,14 @@ type Props = {
   onDelete: (recipient: RecipientRecord) => void;
   onDeleteRecord: (record: ProtocolRecord) => void;
   onDeleteRegistrationRecord: (record: RegistrationRecord) => void;
+  onDeleteBloodRequestRecord: (record: BloodRequestRecord) => void;
 };
 
-type RecordCategory = 'protocols' | 'registrations';
+type RecordCategory =
+  | 'protocols'
+  | 'registrations'
+  | 'individual-selection-directions'
+  | 'component-requests';
 
 const formatUpdated = (value: number) =>
   new Intl.DateTimeFormat('ru-RU', {
@@ -32,17 +48,34 @@ const formatUpdated = (value: number) =>
     timeStyle: 'short',
   }).format(new Date(value));
 
+const stringValue = (record: BloodRequestRecord, name: string) => {
+  const value = record.values[name];
+  return typeof value === 'string' ? value : '';
+};
+
+const requestRecordTitle = (record: BloodRequestRecord) => {
+  const date = formatDate(stringValue(record, 'directionDate'));
+  const component = stringValue(record, 'requiredComponent').trim();
+
+  return [date || 'дата не указана', component].filter(Boolean).join(' · ');
+};
+
 export const RecipientHistoryPanel = ({
   recipient,
   records,
   registrationRecords,
+  individualSelectionDirectionRecords,
+  componentRequestRecords,
   onOpenRecord,
   onOpenRegistrationRecord,
+  onOpenIndividualSelectionDirectionRecord,
+  onOpenComponentRequestRecord,
   onUseRecipient,
   onEdit,
   onDelete,
   onDeleteRecord,
   onDeleteRegistrationRecord,
+  onDeleteBloodRequestRecord,
 }: Props) => {
   const [category, setCategory] = useState<RecordCategory | null>(null);
   const demographics = recipient
@@ -64,6 +97,24 @@ export const RecipientHistoryPanel = ({
   useEffect(() => {
     setCategory(null);
   }, [recipient?.id]);
+
+  const requestRecords =
+    category === 'individual-selection-directions'
+      ? individualSelectionDirectionRecords
+      : componentRequestRecords;
+  const requestOpen =
+    category === 'individual-selection-directions'
+      ? onOpenIndividualSelectionDirectionRecord
+      : onOpenComponentRequestRecord;
+
+  const categoryHeading =
+    category === 'protocols'
+      ? 'Протоколы трансфузии'
+      : category === 'registrations'
+        ? 'Листы регистрации трансфузий'
+        : category === 'individual-selection-directions'
+          ? 'Направления на индивидуальный подбор'
+          : 'Заявки в трансфузиологический кабинет';
 
   return (
     <section className={styles.panel}>
@@ -122,9 +173,37 @@ export const RecipientHistoryPanel = ({
                 className={styles.categoryButton}
                 onClick={() => setCategory('registrations')}
               >
-                <span className={styles.categoryTitle}>Листы регистрации трансфузий</span>
+                <span className={styles.categoryTitle}>
+                  Листы регистрации трансфузий
+                </span>
                 <span className={styles.categoryMeta}>
                   Сохранено: {recipient.registrationCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.categoryButton}
+                onClick={() => setCategory('individual-selection-directions')}
+              >
+                <span className={styles.categoryTitle}>
+                  Направления на индивидуальный подбор
+                </span>
+                <span className={styles.categoryMeta}>
+                  Сохранено: {recipient.individualSelectionDirectionCount}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.categoryButton}
+                onClick={() => setCategory('component-requests')}
+              >
+                <span className={styles.categoryTitle}>
+                  Заявки в трансфузиологический кабинет
+                </span>
+                <span className={styles.categoryMeta}>
+                  Сохранено: {recipient.componentRequestCount}
                 </span>
               </button>
             </div>
@@ -138,25 +217,27 @@ export const RecipientHistoryPanel = ({
                 >
                   ← К категориям
                 </button>
-                <div className={styles.categoryHeading}>
-                  {category === 'protocols'
-                    ? 'Протоколы трансфузии'
-                    : 'Листы регистрации трансфузий'}
-                </div>
+                <div className={styles.categoryHeading}>{categoryHeading}</div>
               </div>
 
               {category === 'protocols' ? (
                 <div className={styles.records}>
                   {records.length === 0 && (
-                    <div className={styles.empty}>Сохранённых протоколов пока нет.</div>
+                    <div className={styles.empty}>
+                      Сохранённых протоколов пока нет.
+                    </div>
                   )}
                   {records.map((record) => (
                     <div key={record.id} className={styles.record}>
                       <div>
                         <div className={styles.recordTitle}>
-                          Трансфузия: {formatDate(record.values.transfusionDate) || 'дата не указана'}
+                          Трансфузия:{' '}
+                          {formatDate(record.values.transfusionDate) ||
+                            'дата не указана'}
                         </div>
-                        <div className={styles.meta}>Изменён: {formatUpdated(record.updatedAt)}</div>
+                        <div className={styles.meta}>
+                          Изменён: {formatUpdated(record.updatedAt)}
+                        </div>
                       </div>
                       <div className={styles.recordActions}>
                         {onOpenRecord && (
@@ -179,7 +260,7 @@ export const RecipientHistoryPanel = ({
                     </div>
                   ))}
                 </div>
-              ) : (
+              ) : category === 'registrations' ? (
                 <div className={styles.records}>
                   {registrationRecords.length === 0 && (
                     <div className={styles.empty}>
@@ -201,7 +282,9 @@ export const RecipientHistoryPanel = ({
                           <button
                             type="button"
                             className={styles.open}
-                            onClick={() => onOpenRegistrationRecord(record, recipient)}
+                            onClick={() =>
+                              onOpenRegistrationRecord(record, recipient)
+                            }
                           >
                             Открыть
                           </button>
@@ -210,6 +293,44 @@ export const RecipientHistoryPanel = ({
                           type="button"
                           className={styles.recordDelete}
                           onClick={() => onDeleteRegistrationRecord(record)}
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.records}>
+                  {requestRecords.length === 0 && (
+                    <div className={styles.empty}>
+                      Сохранённых бланков пока нет.
+                    </div>
+                  )}
+                  {requestRecords.map((record) => (
+                    <div key={record.id} className={styles.record}>
+                      <div>
+                        <div className={styles.recordTitle}>
+                          {requestRecordTitle(record)}
+                        </div>
+                        <div className={styles.meta}>
+                          Изменён: {formatUpdated(record.updatedAt)}
+                        </div>
+                      </div>
+                      <div className={styles.recordActions}>
+                        {requestOpen && (
+                          <button
+                            type="button"
+                            className={styles.open}
+                            onClick={() => requestOpen(record, recipient)}
+                          >
+                            Открыть
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className={styles.recordDelete}
+                          onClick={() => onDeleteBloodRequestRecord(record)}
                         >
                           Удалить
                         </button>

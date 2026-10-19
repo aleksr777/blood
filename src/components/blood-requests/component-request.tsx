@@ -16,8 +16,11 @@ import {
 import {
   currentIndicationsForComponent,
   hasStoredCurrentIndications,
+  hasStoredCurrentIndividualSelectionIndications,
   readCurrentIndications,
+  readCurrentIndividualSelectionIndications,
   writeCurrentIndications,
+  writeCurrentIndividualSelectionIndications,
 } from '../../storage/repositories/current-indications';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
@@ -434,8 +437,26 @@ export const ComponentRequest = () => {
           current.sourceRecipientId &&
           current.sourceRecipientId !== String(recipient.id),
       );
-      const next = mergeAutoValues(current, recipient, autoValues);
+      let next = mergeAutoValues(current, recipient, autoValues);
       if (!recipient) return next;
+
+      if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
+        next = {
+          ...next,
+          individualSelectionIndications:
+            readCurrentIndividualSelectionIndications(recipient.id),
+        };
+      } else if (recipientChanged) {
+        next = {
+          ...next,
+          individualSelectionIndications: '',
+        };
+      } else if (next.individualSelectionIndications.trim()) {
+        writeCurrentIndividualSelectionIndications(
+          recipient.id,
+          next.individualSelectionIndications,
+        );
+      }
 
       const component = getIndicationComponent(next.indicationValues);
       if (!component) return next;
@@ -535,6 +556,16 @@ export const ComponentRequest = () => {
   ]);
 
   const updateFields = (changes: Record<string, string>) => {
+    if (
+      currentRecipient &&
+      changes.individualSelectionIndications !== undefined
+    ) {
+      writeCurrentIndividualSelectionIndications(
+        currentRecipient.id,
+        changes.individualSelectionIndications,
+      );
+    }
+
     setDraft((current) => {
       const next = { ...current };
 
@@ -588,7 +619,14 @@ export const ComponentRequest = () => {
       recipient,
       autoValues,
     );
-    setDraft(next);
+    setDraft({
+      ...next,
+      individualSelectionIndications:
+        recipient &&
+        hasStoredCurrentIndividualSelectionIndications(recipient.id)
+          ? readCurrentIndividualSelectionIndications(recipient.id)
+          : '',
+    });
     setStatus('');
   };
 
@@ -600,7 +638,14 @@ export const ComponentRequest = () => {
       recipient,
       autoValues,
     );
-    setDraft(next);
+    setDraft({
+      ...next,
+      individualSelectionIndications:
+        recipient &&
+        hasStoredCurrentIndividualSelectionIndications(recipient.id)
+          ? readCurrentIndividualSelectionIndications(recipient.id)
+          : '',
+    });
     setStatus(
       recipient
         ? 'Создан новый бланк для текущего реципиента.'

@@ -13,6 +13,11 @@ import {
   updateCurrentRecipientProfile,
   type CurrentRecipient,
 } from '../../storage/repositories/current-recipient';
+import {
+  hasStoredCurrentIndications,
+  readCurrentIndications,
+  writeCurrentIndications,
+} from '../../storage/repositories/current-indications';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   updateRecipient,
@@ -414,7 +419,42 @@ export const ComponentRequest = () => {
   const refreshCurrentData = useCallback(async (recipient = readCurrentRecipient()) => {
     setCurrentRecipient(recipient);
     const autoValues = await currentAutoValues(recipient);
-    setDraft((current) => mergeAutoValues(current, recipient, autoValues));
+    setDraft((current) => {
+      const recipientChanged = Boolean(
+        recipient &&
+          current.sourceRecipientId &&
+          current.sourceRecipientId !== String(recipient.id),
+      );
+      const next = mergeAutoValues(current, recipient, autoValues);
+      if (!recipient) return next;
+
+      const component = getIndicationComponent(next.indicationValues);
+      if (!component) return next;
+
+      if (hasStoredCurrentIndications(recipient.id, component)) {
+        return {
+          ...next,
+          indicationValues: {
+            ...(recipientChanged ? {} : next.indicationValues),
+            ...readCurrentIndications(recipient.id, component),
+          },
+        };
+      }
+
+      if (!recipientChanged) {
+        writeCurrentIndications(
+          recipient.id,
+          component,
+          next.indicationValues,
+        );
+        return next;
+      }
+
+      return {
+        ...next,
+        indicationValues: { indicationComponent: component },
+      };
+    });
   }, []);
 
   useEffect(() => {
@@ -476,13 +516,35 @@ export const ComponentRequest = () => {
   };
 
   const updateIndications = (changes: ProtocolValues) => {
-    setDraft((current) => ({
-      ...current,
-      indicationValues: {
+    setDraft((current) => {
+      const currentComponent = getIndicationComponent(current.indicationValues);
+      const component = changes.indicationComponent || currentComponent;
+      const componentChanged =
+        Boolean(changes.indicationComponent) &&
+        changes.indicationComponent !== currentComponent;
+      const sharedIndications =
+        currentRecipient && componentChanged && component
+          ? readCurrentIndications(currentRecipient.id, component)
+          : {};
+      const indicationValues = {
         ...current.indicationValues,
+        ...sharedIndications,
         ...changes,
-      },
-    }));
+      };
+
+      if (currentRecipient && component) {
+        writeCurrentIndications(
+          currentRecipient.id,
+          component,
+          indicationValues,
+        );
+      }
+
+      return {
+        ...current,
+        indicationValues,
+      };
+    });
   };
 
   const clear = async () => {

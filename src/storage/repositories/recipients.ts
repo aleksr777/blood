@@ -45,7 +45,25 @@ export const saveRegistrationRecord = (
 export const removeRegistrationRecord = (id: number) =>
   database.removeRegistrationRecord(id);
 
+export const listBloodRequestRecords = (
+  recipientId: number,
+  kind: import('../sqlite/database-types').BloodRequestRecordKind,
+) => database.listBloodRequestRecords(recipientId, kind);
+
+export const saveBloodRequestRecord = (
+  recordId: number | null,
+  recipientId: number,
+  kind: import('../sqlite/database-types').BloodRequestRecordKind,
+  values: import('../sqlite/database-types').BloodRequestRecordValues,
+) => database.saveBloodRequestRecord(recordId, recipientId, kind, values);
+
+export const removeBloodRequestRecord = (id: number) =>
+  database.removeBloodRequestRecord(id);
+
 export type {
+  BloodRequestRecord,
+  BloodRequestRecordKind,
+  BloodRequestRecordValues,
   ComponentUnitNumberMatch,
   ProtocolRecord,
   RecipientRecord,

@@ -16,6 +16,27 @@ const REQUIRED_COMPONENT_FIXED_OPTIONS = [
   'отмытые эритроциты',
 ];
 
+const REQUEST_REQUIRED_COMPONENT_CONFIG: Record<
+  string,
+  { category: string; fixedOptions: string[] }
+> = {
+  erythrocytes: {
+    category: 'componentRequestRequiredComponent:erythrocytes',
+    fixedOptions: ['эритроцитная взвесь', 'отмытые эритроциты'],
+  },
+  'plasma-cryo': {
+    category: 'componentRequestRequiredComponent:plasma',
+    fixedOptions: ['свежезамороженная плазма'],
+  },
+  platelets: {
+    category: 'componentRequestRequiredComponent:platelets',
+    fixedOptions: ['тромбоциты', 'концентрат тромбоцитов'],
+  },
+};
+
+const UNSELECTED_REQUEST_COMPONENT_CATEGORY =
+  'componentRequestRequiredComponent:unselected';
+
 type Props = {
   requiredComponent: string;
   quantity: string;
@@ -46,19 +67,37 @@ export const IndividualSelectionComponentModal = ({
   const isErythrocytes = component === 'erythrocytes';
   const requiresIndividualSelection =
     isErythrocytes && componentSelectionRequirement === 'individual';
+  const requestComponentConfig = showRequestOptions
+    ? REQUEST_REQUIRED_COMPONENT_CONFIG[component]
+    : undefined;
+  const requiredComponentCategory =
+    requestComponentConfig?.category ??
+    (showRequestOptions
+      ? UNSELECTED_REQUEST_COMPONENT_CATEGORY
+      : REQUIRED_COMPONENT_CATEGORY);
+  const requiredComponentFixedOptions =
+    requestComponentConfig?.fixedOptions ??
+    (showRequestOptions ? [] : REQUIRED_COMPONENT_FIXED_OPTIONS);
 
   const handleIndicationsChange = (changes: ProtocolValues) => {
     onIndicationsChange(changes);
 
-    if (
-      showRequestOptions &&
-      changes.indicationComponent &&
-      changes.indicationComponent !== 'erythrocytes'
-    ) {
-      onLocalChange({
-        componentSelectionRequirement: '',
-        individualSelectionIndications: '',
-      });
+    if (!showRequestOptions || !changes.indicationComponent) return;
+
+    const componentChanged = changes.indicationComponent !== component;
+    const nextChanges: Record<string, string> = {};
+
+    if (componentChanged) {
+      nextChanges.requiredComponent = '';
+    }
+
+    if (changes.indicationComponent !== 'erythrocytes') {
+      nextChanges.componentSelectionRequirement = '';
+      nextChanges.individualSelectionIndications = '';
+    }
+
+    if (Object.keys(nextChanges).length > 0) {
+      onLocalChange(nextChanges);
     }
   };
 
@@ -73,13 +112,15 @@ export const IndividualSelectionComponentModal = ({
 
   const handleClose = () => {
     const value = requiredComponent.trim();
-    const isFixedOption = REQUIRED_COMPONENT_FIXED_OPTIONS.some(
+    const isFixedOption = requiredComponentFixedOptions.some(
       (option) =>
         option.toLocaleLowerCase('ru-RU') === value.toLocaleLowerCase('ru-RU'),
     );
+    const canRememberValue =
+      !showRequestOptions || Boolean(requestComponentConfig);
 
-    if (value && !isFixedOption) {
-      void rememberSavedOption(REQUIRED_COMPONENT_CATEGORY, value).catch(
+    if (value && !isFixedOption && canRememberValue) {
+      void rememberSavedOption(requiredComponentCategory, value).catch(
         (error: unknown) => {
           console.error(
             'Не удалось сохранить вариант наименования требуемого компонента:',
@@ -140,9 +181,9 @@ export const IndividualSelectionComponentModal = ({
             <SavedOptionsField
               name="requiredComponent"
               label="Наименование требуемого компонента"
-              category={REQUIRED_COMPONENT_CATEGORY}
+              category={requiredComponentCategory}
               value={requiredComponent}
-              fixedOptions={REQUIRED_COMPONENT_FIXED_OPTIONS}
+              fixedOptions={requiredComponentFixedOptions}
               onChange={(value) => onLocalChange({ requiredComponent: value })}
             />
           </label>

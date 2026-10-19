@@ -16,6 +16,8 @@ export type RecipientRecord = {
   profile: ProtocolValuesRecord;
   protocolCount: number;
   registrationCount: number;
+  individualSelectionDirectionCount: number;
+  componentRequestCount: number;
 };
 
 export type ProtocolRecord = {
@@ -30,6 +32,21 @@ export type RegistrationRecord = {
   id: number;
   recipientId: number;
   values: ProtocolValuesRecord;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type BloodRequestRecordKind =
+  | 'individual-selection-direction'
+  | 'component-request';
+
+export type BloodRequestRecordValues = Record<string, unknown>;
+
+export type BloodRequestRecord = {
+  id: number;
+  recipientId: number;
+  kind: BloodRequestRecordKind;
+  values: BloodRequestRecordValues;
   createdAt: number;
   updatedAt: number;
 };
@@ -82,7 +99,10 @@ export type DatabaseAction =
   | 'protocol-records:remove'
   | 'registration-records:list'
   | 'registration-records:save'
-  | 'registration-records:remove';
+  | 'registration-records:remove'
+  | 'blood-request-records:list'
+  | 'blood-request-records:save'
+  | 'blood-request-records:remove';
 
 export type DatabaseRequest = {
   id: number;

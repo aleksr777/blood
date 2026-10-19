@@ -1,4 +1,5 @@
-import { useEffect, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import { formatDateTime } from '../transfusion-protocol/protocol-types';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import {
@@ -194,6 +195,9 @@ const careFormText = (value: Draft['careForm']) => {
 export const ComponentRequest = () => {
   const [draft, setDraft] = useState<Draft>(loadDraft);
   const [editor, setEditor] = useState<Editor>(null);
+  const [registryOpen, setRegistryOpen] = useState(false);
+  const [status, setStatus] = useState('');
+  const sheetsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
@@ -241,6 +245,38 @@ export const ComponentRequest = () => {
     const next = initialDraft();
     setDraft(next);
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setStatus('');
+  };
+
+  const newBlank = () => {
+    const next = initialDraft();
+    setDraft(next);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    setStatus('Создан новый бланк.');
+  };
+
+  const save = (afterPrint = false) => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    setStatus(afterPrint ? 'Заявка сохранена после печати.' : 'Заявка сохранена.');
+  };
+
+  const printPage = (pageIndex: number) => {
+    const sheets = Array.from(
+      sheetsRef.current?.querySelectorAll<HTMLElement>(`.${styles.sheet}`) ?? [],
+    );
+
+    sheets.forEach((sheet, index) => {
+      if (index !== pageIndex) sheet.dataset.printHidden = 'true';
+    });
+
+    const afterPrint = () => {
+      sheets.forEach((sheet) => delete sheet.dataset.printHidden);
+      window.removeEventListener('afterprint', afterPrint);
+      save(true);
+    };
+
+    window.addEventListener('afterprint', afterPrint);
+    window.print();
   };
 
   const detailValues: Record<string, string> = {
@@ -255,14 +291,43 @@ export const ComponentRequest = () => {
       <header className={`app-header ${styles.header}`}>
         <div className={`toolbar-wrap ${styles.toolbar}`}>
           <SiteNavigation current="component-request" showRecipient={false} />
-          <div className="print-actions">
+          <div className="print-actions" aria-label="Панель действий">
             <button type="button" className="clear-button" onClick={clear}>
               Очистить бланк
             </button>
-            <button type="button" className="print-button" onClick={() => window.print()}>
-              Печать
+            <button type="button" className="new-button" onClick={newBlank}>
+              Новый бланк
+            </button>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => setRegistryOpen(true)}
+            >
+              Реципиенты
+            </button>
+            <button type="button" className="save-button" onClick={() => save()}>
+              Сохранить
+            </button>
+            <button
+              type="button"
+              className="print-button"
+              onClick={() => printPage(0)}
+            >
+              Печать страницы 1
+            </button>
+            <button
+              type="button"
+              className="print-button"
+              onClick={() => printPage(1)}
+            >
+              Печать страницы 2
             </button>
           </div>
+          {status && (
+            <div className="toolbar-status" role="status">
+              {status}
+            </div>
+          )}
         </div>
       </header>
 
@@ -277,7 +342,7 @@ export const ComponentRequest = () => {
         </button>
       </div>
 
-      <div className={styles.sheets}>
+      <div ref={sheetsRef} className={styles.sheets}>
         <section className={styles.sheet} aria-label="Заявка на компоненты, страница 1">
           <div className={styles.legal}>
             <div>Приложение № 17</div>
@@ -459,6 +524,10 @@ export const ComponentRequest = () => {
           onChange={updateFields}
           onClose={() => setEditor(null)}
         />
+      )}
+
+      {registryOpen && (
+        <RecipientDatabaseModal onClose={() => setRegistryOpen(false)} />
       )}
     </main>
   );

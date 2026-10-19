@@ -438,6 +438,10 @@
     display: none !important;
   }
 
+  .sheet[data-print-hidden='true'] {
+    display: none !important;
+  }
+
   .fillSection,
   .fillRow,
   .fillSection:hover,

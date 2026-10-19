@@ -1,6 +1,9 @@
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
-import { IndicationsFields } from '../transfusion-protocol/indications-fields';
+import {
+  IndicationComponentSelector,
+  IndicationsFields,
+} from '../transfusion-protocol/indications-fields';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import styles from './individual-selection-component-modal.module.css';
@@ -58,6 +61,13 @@ export const IndividualSelectionComponentModal = ({
       className={styles.modal}
     >
       <div className={styles.root}>
+        <IndicationComponentSelector
+          values={indicationValues}
+          onChange={onIndicationsChange}
+        />
+
+        <div className={styles.divider} />
+
         <div className={styles.localGrid}>
           <label className={styles.wide}>
             <span>Наименование требуемого компонента</span>
@@ -87,6 +97,7 @@ export const IndividualSelectionComponentModal = ({
           <div className={styles.sectionTitle}>Показания к трансфузии</div>
           <IndicationsFields
             values={indicationValues}
+            showComponentSelector={false}
             onChange={onIndicationsChange}
           />
         </section>

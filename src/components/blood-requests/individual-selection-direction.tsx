@@ -24,7 +24,9 @@ import {
 } from '../../storage/repositories/current-indications';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
+  saveBloodRequestRecord,
   updateRecipient,
+  type BloodRequestRecord,
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
@@ -208,6 +210,55 @@ const loadDraft = (): DirectionDraft => {
   } catch {
     return { ...emptyDraft(), directionDate: todayKey() };
   }
+};
+
+const draftFromRecord = (
+  values: Record<string, unknown>,
+): DirectionDraft => {
+  const blank = emptyDraft();
+  const savedValues = Object.fromEntries(
+    Object.keys(blank).flatMap((key) => {
+      if (key === 'autoValues' || key === 'indicationValues') return [];
+      const value = values[key];
+      return typeof value === 'string' ? [[key, value]] : [];
+    }),
+  );
+
+  const indicationValues =
+    values.indicationValues &&
+    typeof values.indicationValues === 'object' &&
+    !Array.isArray(values.indicationValues)
+      ? Object.fromEntries(
+          Object.entries(values.indicationValues).filter(
+            (entry): entry is [string, string] => typeof entry[1] === 'string',
+          ),
+        )
+      : {};
+
+  const autoValues =
+    values.autoValues &&
+    typeof values.autoValues === 'object' &&
+    !Array.isArray(values.autoValues)
+      ? Object.fromEntries(
+          Object.entries(values.autoValues).filter(
+            (entry): entry is [string, string] => typeof entry[1] === 'string',
+          ),
+        )
+      : {};
+
+  const next = {
+    ...blank,
+    ...savedValues,
+    indicationValues: {
+      ...indicationValues,
+      indicationComponent: 'erythrocytes',
+    },
+    autoValues,
+  } as DirectionDraft;
+
+  if (!next.directionDate) next.directionDate = todayKey();
+  next.quantity = sanitizeDoseQuantity(next.quantity);
+  return next;
 };
 
 const formatObstetricHistory = (values: ProtocolValues) => {
@@ -457,6 +508,7 @@ export const IndividualSelectionDirection = () => {
   const [editor, setEditor] = useState<Editor>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
+  const [savedRecordId, setSavedRecordId] = useState<number | null>(null);
   const [page2StartIndex, setPage2StartIndex] = useState(7);
   const page1Ref = useRef<HTMLElement>(null);
   const page1ContentRef = useRef<HTMLDivElement>(null);
@@ -659,6 +711,7 @@ export const IndividualSelectionDirection = () => {
         ? readCurrentIndividualSelectionIndications(recipient.id)
         : '';
 
+    setSavedRecordId(null);
     setDraft({
       ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
         ? {
@@ -688,6 +741,7 @@ export const IndividualSelectionDirection = () => {
         ? readCurrentIndividualSelectionIndications(recipient.id)
         : '';
 
+    setSavedRecordId(null);
     setDraft({
       ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
         ? {
@@ -707,23 +761,68 @@ export const IndividualSelectionDirection = () => {
     );
   };
 
-  const save = (afterPrint = false) => {
+  const save = async (afterPrint = false) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-    setStatus(
-      afterPrint
-        ? 'Направление сохранено после печати.'
-        : 'Направление сохранено.',
-    );
+
+    if (!currentRecipient) {
+      setStatus('Выберите реципиента перед сохранением направления.');
+      return false;
+    }
+
+    try {
+      const record = await saveBloodRequestRecord(
+        savedRecordId,
+        currentRecipient.id,
+        'individual-selection-direction',
+        { ...draft },
+      );
+      setSavedRecordId(record.id);
+      setStatus(
+        afterPrint
+          ? 'Направление сохранено после печати.'
+          : 'Направление сохранено.',
+      );
+      return true;
+    } catch (error) {
+      console.error('Не удалось сохранить направление:', error);
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : 'Не удалось сохранить направление.',
+      );
+      return false;
+    }
   };
 
   const selectRecipient = async (recipient: RecipientRecord) => {
     try {
+      const previousRecipientId = currentRecipient?.id ?? null;
       await switchCurrentRecipient(recipient);
+      if (previousRecipientId !== recipient.id) {
+        setSavedRecordId(null);
+      }
       await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
       console.error('Не удалось выбрать реципиента для направления:', error);
       return false;
+    }
+  };
+
+  const openSavedDirection = async (
+    record: BloodRequestRecord,
+    recipient: RecipientRecord,
+  ) => {
+    try {
+      await switchCurrentRecipient(recipient);
+      setCurrentRecipient(readCurrentRecipient());
+      setDraft(draftFromRecord(record.values));
+      setSavedRecordId(record.id);
+      setRegistryOpen(false);
+      setStatus('Сохранённое направление открыто.');
+    } catch (error) {
+      console.error('Не удалось открыть сохранённое направление:', error);
+      setStatus('Не удалось открыть сохранённое направление.');
     }
   };
 
@@ -1010,7 +1109,7 @@ export const IndividualSelectionDirection = () => {
       window.print();
     } finally {
       document.body.classList.remove(className);
-      save(true);
+      void save(true);
     }
   };
 
@@ -1040,7 +1139,7 @@ export const IndividualSelectionDirection = () => {
             >
               Реципиенты
             </button>
-            <button type="button" className="save-button" onClick={() => save()}>
+            <button type="button" className="save-button" onClick={() => void save()}>
               Сохранить
             </button>
             {hasSecondPage ? (
@@ -1170,6 +1269,9 @@ export const IndividualSelectionDirection = () => {
           initialRecipientId={currentRecipient?.id ?? null}
           initialRecipientName={currentRecipient?.fullName ?? ''}
           onUseRecipient={selectRecipient}
+          onOpenIndividualSelectionDirectionRecord={(record, recipient) => {
+            void openSavedDirection(record, recipient);
+          }}
           onClose={() => setRegistryOpen(false)}
         />
       )}

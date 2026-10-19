@@ -51,11 +51,8 @@ export const listBloodRequestRecords = (
 ) => database.listBloodRequestRecords(recipientId, kind);
 
 export const saveBloodRequestRecord = (
-  recordId: number | null,
-  recipientId: number,
-  kind: import('../sqlite/database-types').BloodRequestRecordKind,
-  values: import('../sqlite/database-types').BloodRequestRecordValues,
-) => database.saveBloodRequestRecord(recordId, recipientId, kind, values);
+  input: import('../sqlite/database-types').SaveBloodRequestRecordInput,
+) => database.saveBloodRequestRecord(input);
 
 export const removeBloodRequestRecord = (id: number) =>
   database.removeBloodRequestRecord(id);
@@ -68,4 +65,5 @@ export type {
   ProtocolRecord,
   RecipientRecord,
   RegistrationRecord,
+  SaveBloodRequestRecordInput,
 } from '../sqlite/database-types';

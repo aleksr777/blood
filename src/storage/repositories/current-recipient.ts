@@ -13,6 +13,7 @@ import {
   type RecipientRecord,
 } from './recipients';
 import {
+  mergeProfileValues,
   profileFromValues,
   RECIPIENT_PROFILE_FIELDS,
 } from '../sqlite/recipient-data';
@@ -145,7 +146,7 @@ export const readCurrentRecipient = (): CurrentRecipient | null => {
   }
 };
 
-const writeCurrentRecipient = (recipient: RecipientRecord) => {
+const writeCurrentRecipientSnapshot = (recipient: CurrentRecipient) => {
   try {
     window.localStorage.setItem(
       CURRENT_RECIPIENT_STORAGE_KEY,
@@ -158,6 +159,10 @@ const writeCurrentRecipient = (recipient: RecipientRecord) => {
   } catch (error) {
     console.error('Не удалось сохранить текущего реципиента:', error);
   }
+};
+
+const writeCurrentRecipient = (recipient: RecipientRecord) => {
+  writeCurrentRecipientSnapshot(recipient);
 };
 
 export const adoptCurrentRecipientFromValues = (values: ProtocolValuesRecord) => {
@@ -264,6 +269,24 @@ export const syncCurrentRecipientProfile = async (
 
   if (Object.keys(profilePatch).length === 0) return null;
 
+  const activeValues = activeDraft.values;
+  const recipientId = getRecipientId(activeValues);
+  const fullName = activeValues.recipientName?.trim();
+  if (!recipientId || !fullName) return null;
+
+  const storedRecipient = readCurrentRecipient();
+  if (storedRecipient && storedRecipient.id !== recipientId) return null;
+
+  const optimisticProfile = mergeProfileValues(
+    storedRecipient?.profile ?? profileFromValues(activeValues),
+    profilePatch,
+  );
+  writeCurrentRecipientSnapshot({
+    id: recipientId,
+    fullName,
+    profile: optimisticProfile,
+  });
+
   let [protocolDraft, registrationDraft] = await Promise.all([
     loadProtocolDraft(),
     loadRegistrationDraft(),
@@ -283,17 +306,7 @@ export const syncCurrentRecipientProfile = async (
     };
   }
 
-  const activeValues = activeDraft.values;
-  const recipientId = getRecipientId(activeValues);
-  const fullName = activeValues.recipientName?.trim();
-  if (!recipientId || !fullName) return null;
-
-  const storedRecipient = readCurrentRecipient();
-  if (storedRecipient && storedRecipient.id !== recipientId) return null;
-
   const recipient = await updateRecipient(recipientId, {
-    ...(storedRecipient?.profile ?? {}),
-    ...profileFromValues(activeValues),
     ...profilePatch,
     recipientId: String(recipientId),
     recipientName: fullName,
@@ -468,8 +481,22 @@ export const updateCurrentRecipientProfile = async (
   recipient: CurrentRecipient,
   changes: ProtocolValuesRecord,
 ): Promise<RecipientRecord> => {
+  const storedRecipient = readCurrentRecipient();
+  if (storedRecipient && storedRecipient.id !== recipient.id) {
+    throw new Error('Текущий реципиент изменён. Повторите ввод данных.');
+  }
+
+  const optimisticProfile = mergeProfileValues(
+    storedRecipient?.profile ?? recipient.profile,
+    changes,
+  );
+  writeCurrentRecipientSnapshot({
+    id: recipient.id,
+    fullName: recipient.fullName,
+    profile: optimisticProfile,
+  });
+
   const updatedRecipient = await updateRecipient(recipient.id, {
-    ...recipient.profile,
     ...changes,
     recipientId: String(recipient.id),
     recipientName: recipient.fullName,

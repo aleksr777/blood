@@ -45,6 +45,7 @@ type Props = {
   transfusionOrder?: string;
   componentSelectionRequirement?: string;
   showRequestOptions?: boolean;
+  fixedIndicationComponent?: string;
   onLocalChange: (values: Record<string, string>) => void;
   onIndicationsChange: (values: ProtocolValues) => void;
   onClose: () => void;
@@ -58,12 +59,21 @@ export const IndividualSelectionComponentModal = ({
   transfusionOrder = '',
   componentSelectionRequirement = '',
   showRequestOptions = false,
+  fixedIndicationComponent,
   onLocalChange,
   onIndicationsChange,
   onClose,
 }: Props) => {
   const component =
-    indicationValues.componentGroup || indicationValues.indicationComponent;
+    fixedIndicationComponent ||
+    indicationValues.componentGroup ||
+    indicationValues.indicationComponent;
+  const effectiveIndicationValues = fixedIndicationComponent
+    ? {
+        ...indicationValues,
+        indicationComponent: fixedIndicationComponent,
+      }
+    : indicationValues;
   const isErythrocytes = component === 'erythrocytes';
   const requiresIndividualSelection =
     isErythrocytes && componentSelectionRequirement === 'individual';
@@ -140,10 +150,12 @@ export const IndividualSelectionComponentModal = ({
       className={styles.modal}
     >
       <div className={styles.root}>
-        <IndicationComponentSelector
-          values={indicationValues}
-          onChange={handleIndicationsChange}
-        />
+        {!fixedIndicationComponent && (
+          <IndicationComponentSelector
+            values={indicationValues}
+            onChange={handleIndicationsChange}
+          />
+        )}
 
         {showRequestOptions && (
           <>
@@ -209,7 +221,7 @@ export const IndividualSelectionComponentModal = ({
         <section className={styles.indicationsSection}>
           <div className={styles.sectionTitle}>Показания к трансфузии</div>
           <IndicationsFields
-            values={indicationValues}
+            values={effectiveIndicationValues}
             showComponentSelector={false}
             onChange={handleIndicationsChange}
           />

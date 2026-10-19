@@ -802,12 +802,23 @@ export const ComponentRequest = () => {
         savedRecordId !== null
           ? historicalRecipientId
           : currentRecipient!.id;
+      const protocolDraft =
+        savedRecordId === null ? await loadProtocolDraft() : null;
+      const currentProtocolValues =
+        savedRecordId === null &&
+        currentRecipient &&
+        protocolDraft &&
+        protocolDraft.protocolRecordId === null &&
+        Number(protocolDraft.values.recipientId) === currentRecipient.id
+          ? protocolDraft.values
+          : {};
       const draftToSave =
         savedRecordId === null
           ? {
               ...draft,
               recipientProfileSnapshot: {
                 ...currentRecipient!.profile,
+                ...currentProtocolValues,
                 recipientId: String(currentRecipient!.id),
                 recipientName: currentRecipient!.fullName,
               },

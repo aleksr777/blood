@@ -28,7 +28,7 @@ const items: NavigationItem[] = [
   {
     id: 'component-request',
     href: '#/component-request',
-    label: 'Заявка на компоненты крови в трансфузиологический кабинет',
+    label: 'Заявка в трансфузиологический кабинет',
   },
   {
     id: 'summary-request',

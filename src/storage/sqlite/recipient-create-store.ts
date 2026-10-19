@@ -34,5 +34,7 @@ export const createRecipient = async (fullNameValue: string): Promise<RecipientR
     profile: { recipientName: fullName },
     protocolCount: 0,
     registrationCount: 0,
+    individualSelectionDirectionCount: 0,
+    componentRequestCount: 0,
   };
 };

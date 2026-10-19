@@ -1,4 +1,7 @@
 import type {
+  BloodRequestRecord,
+  BloodRequestRecordKind,
+  BloodRequestRecordValues,
   ComponentUnitNumberMatch,
   DatabaseAction,
   DatabaseRequest,
@@ -130,4 +133,26 @@ export const database = {
     withDatabase<RegistrationRecord>('registration-records:save', { recordId, values }),
   removeRegistrationRecord: (id: number) =>
     withDatabase<void>('registration-records:remove', { id }),
+  listBloodRequestRecords: (
+    recipientId: number,
+    kind: BloodRequestRecordKind,
+  ) =>
+    withDatabase<BloodRequestRecord[]>('blood-request-records:list', {
+      recipientId,
+      kind,
+    }),
+  saveBloodRequestRecord: (
+    recordId: number | null,
+    recipientId: number,
+    kind: BloodRequestRecordKind,
+    values: BloodRequestRecordValues,
+  ) =>
+    withDatabase<BloodRequestRecord>('blood-request-records:save', {
+      recordId,
+      recipientId,
+      kind,
+      values,
+    }),
+  removeBloodRequestRecord: (id: number) =>
+    withDatabase<void>('blood-request-records:remove', { id }),
 };

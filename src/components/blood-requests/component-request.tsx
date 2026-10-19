@@ -710,12 +710,12 @@ export const ComponentRequest = () => {
     }
 
     try {
-      const record = await saveBloodRequestRecord(
-        savedRecordId,
-        currentRecipient.id,
-        'component-request',
-        { ...draft },
-      );
+      const record = await saveBloodRequestRecord({
+        recordId: savedRecordId,
+        recipientId: currentRecipient.id,
+        kind: 'component-request',
+        values: { ...draft },
+      });
       setSavedRecordId(record.id);
       setStatus(
         afterPrint

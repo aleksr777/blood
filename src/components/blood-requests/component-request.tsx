@@ -10,6 +10,7 @@ import {
 import {
   readCurrentRecipient,
   switchCurrentRecipient,
+  updateCurrentRecipientProfile,
   type CurrentRecipient,
 } from '../../storage/repositories/current-recipient';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
@@ -543,16 +544,10 @@ export const ComponentRequest = () => {
     if (!currentRecipient) return;
 
     try {
-      const updatedRecipient = await updateRecipient(currentRecipient.id, {
-        ...currentRecipient.profile,
-        ...changes,
-        recipientId: String(currentRecipient.id),
-        recipientName: currentRecipient.fullName,
-      });
-      await switchCurrentRecipient(updatedRecipient);
+      await updateCurrentRecipientProfile(currentRecipient, changes);
       await refreshCurrentData(readCurrentRecipient());
     } catch (error) {
-      console.error('Не удалось обновить данные медицинского обследования реципиента:', error);
+      console.error('Не удалось обновить общие данные медицинского обследования реципиента:', error);
     }
   };
 

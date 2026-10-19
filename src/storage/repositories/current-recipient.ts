@@ -1,3 +1,4 @@
+import { resetCurrentIndications } from './current-indications';
 import {
   loadProtocolDraft,
   saveProtocolDraft,
@@ -392,6 +393,10 @@ export const switchCurrentRecipient = async (
   }
 
   const storedRecipient = readCurrentRecipient();
+  if (storedRecipient?.id !== recipient.id) {
+    resetCurrentIndications(recipient.id);
+  }
+
   const protocolRecipientId = getRecipientId(protocolDraft.values);
   const registrationRecipientId = getRecipientId(registrationDraft.values);
   const activeRecipientId =

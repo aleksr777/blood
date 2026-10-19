@@ -933,7 +933,7 @@ export const ComponentRequest = () => {
         >
           <div ref={page1ContentRef} className={styles.pageContent}>
             <h1 className={styles.title}>
-              Направление на индивидуальный подбор компонентов крови.
+              Заявка в трансфузиологический кабинет на компоненты крови.
             </h1>
 
             {formSections.slice(0, splitIndex)}

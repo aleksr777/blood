@@ -559,6 +559,8 @@ export const IndividualSelectionDirection = () => {
   const [savedRecordId, setSavedRecordId] = useState<number | null>(
     loadSavedRecordId,
   );
+  const savedRecordIdRef = useRef(savedRecordId);
+  savedRecordIdRef.current = savedRecordId;
   const [page2StartIndex, setPage2StartIndex] = useState(7);
   const page1Ref = useRef<HTMLElement>(null);
   const page1ContentRef = useRef<HTMLDivElement>(null);
@@ -571,7 +573,7 @@ export const IndividualSelectionDirection = () => {
     force = false,
   ) => {
     setCurrentRecipient(recipient);
-    if (savedRecordId !== null && !force) return;
+    if (savedRecordIdRef.current !== null && !force) return;
 
     const autoValues = await currentAutoValues(recipient);
     const protocolDraft = recipient ? await loadProtocolDraft() : null;
@@ -582,6 +584,8 @@ export const IndividualSelectionDirection = () => {
       Number(protocolDraft.values.recipientId) === recipient.id
         ? protocolDraft.values
         : {};
+    if (savedRecordIdRef.current !== null && !force) return;
+
     setDraft((current) => {
       const recipientChanged = Boolean(
         recipient &&
@@ -874,6 +878,7 @@ export const IndividualSelectionDirection = () => {
         values: { ...draftToSave },
       });
       setDraft(draftToSave);
+      savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
       setStatus(
         afterPrint
@@ -922,6 +927,7 @@ export const IndividualSelectionDirection = () => {
       await switchCurrentRecipient(recipient);
       setCurrentRecipient(readCurrentRecipient());
       setDraft(draftFromRecord(record.values));
+      savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
       setRegistryOpen(false);
       setStatus('Сохранённое направление открыто.');

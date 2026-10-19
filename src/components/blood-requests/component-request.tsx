@@ -706,11 +706,12 @@ export const ComponentRequest = () => {
         label="Показания к трансфузии:"
         value={formatIndications(draft.indicationValues)}
       />
-      {isErythrocytes && (
-        <AdaptiveRuledField
-          label="Подбор компонента:"
-          value={componentSelectionRequirementText}
-        />
+      {isErythrocytes && componentSelectionRequirementText && (
+        <div className={styles.singleLine}>
+          <span className={styles.valueLine}>
+            {componentSelectionRequirementText}
+          </span>
+        </div>
       )}
       {requiresIndividualSelection && (
         <AdaptiveRuledField

@@ -202,7 +202,7 @@ export const IndividualSelectionComponentModal = ({
             />
           </label>
 
-          <label className={styles.wide}>
+          <label className={styles.quantityField}>
             <span>Количество доз</span>
             <input
               type="text"

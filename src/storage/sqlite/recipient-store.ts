@@ -34,18 +34,6 @@ const getRecipient = (db: SqliteDatabase, id: number) => {
           AS individualSelectionDirectionCount,
         (SELECT COUNT(*) FROM blood_request_records br
           WHERE br.recipient_id = r.id AND br.kind = 'component-request')
-          AS componentRequestCount,
-        (SELECT COUNT(*) FROM blood_request_records br
-          WHERE br.recipient_id = r.id AND br.kind = 'individual-selection-direction')
-          AS individualSelectionDirectionCount,
-        (SELECT COUNT(*) FROM blood_request_records br
-          WHERE br.recipient_id = r.id AND br.kind = 'component-request')
-          AS componentRequestCount,
-        (SELECT COUNT(*) FROM blood_request_records br
-          WHERE br.recipient_id = r.id AND br.kind = 'individual-selection-direction')
-          AS individualSelectionDirectionCount,
-        (SELECT COUNT(*) FROM blood_request_records br
-          WHERE br.recipient_id = r.id AND br.kind = 'component-request')
           AS componentRequestCount
       FROM recipients r
       WHERE r.id = $id
@@ -70,7 +58,13 @@ export const searchRecipients = async (query: string) => {
       SELECT r.id, r.full_name AS fullName, r.profile_json AS profileJson,
         (SELECT COUNT(*) FROM protocol_records p WHERE p.recipient_id = r.id) AS protocolCount,
         (SELECT COUNT(*) FROM registration_records rr WHERE rr.recipient_id = r.id)
-          AS registrationCount
+          AS registrationCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'individual-selection-direction')
+          AS individualSelectionDirectionCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'component-request')
+          AS componentRequestCount
       FROM recipients r
       WHERE $query = '' OR r.normalized_name LIKE $like
       ORDER BY r.full_name
@@ -89,7 +83,13 @@ export const findRecipientsByName = async (fullName: string) => {
       SELECT r.id, r.full_name AS fullName, r.profile_json AS profileJson,
         (SELECT COUNT(*) FROM protocol_records p WHERE p.recipient_id = r.id) AS protocolCount,
         (SELECT COUNT(*) FROM registration_records rr WHERE rr.recipient_id = r.id)
-          AS registrationCount
+          AS registrationCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'individual-selection-direction')
+          AS individualSelectionDirectionCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'component-request')
+          AS componentRequestCount
       FROM recipients r
       WHERE r.normalized_name = $name
       ORDER BY r.updated_at DESC, r.id DESC

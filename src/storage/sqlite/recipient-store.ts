@@ -17,6 +17,10 @@ const mapRecipient = (row: Record<string, unknown>): RecipientRecord => ({
   profile: profileFromValues(parseValues(String(row.profileJson))),
   protocolCount: Number(row.protocolCount ?? 0),
   registrationCount: Number(row.registrationCount ?? 0),
+  individualSelectionDirectionCount: Number(
+    row.individualSelectionDirectionCount ?? 0,
+  ),
+  componentRequestCount: Number(row.componentRequestCount ?? 0),
 });
 const getRecipient = (db: SqliteDatabase, id: number) => {
   const rows = db.exec({
@@ -24,7 +28,25 @@ const getRecipient = (db: SqliteDatabase, id: number) => {
       SELECT r.id, r.full_name AS fullName, r.profile_json AS profileJson,
         (SELECT COUNT(*) FROM protocol_records p WHERE p.recipient_id = r.id) AS protocolCount,
         (SELECT COUNT(*) FROM registration_records rr WHERE rr.recipient_id = r.id)
-          AS registrationCount
+          AS registrationCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'individual-selection-direction')
+          AS individualSelectionDirectionCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'component-request')
+          AS componentRequestCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'individual-selection-direction')
+          AS individualSelectionDirectionCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'component-request')
+          AS componentRequestCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'individual-selection-direction')
+          AS individualSelectionDirectionCount,
+        (SELECT COUNT(*) FROM blood_request_records br
+          WHERE br.recipient_id = r.id AND br.kind = 'component-request')
+          AS componentRequestCount
       FROM recipients r
       WHERE r.id = $id
     `,
@@ -150,11 +172,33 @@ export const updateRecipient = async (
     });
   }
 
+  const bloodRequestRecords = db.exec({
+    sql: 'SELECT id, values_json AS valuesJson FROM blood_request_records WHERE recipient_id = $id',
+    bind: { $id: id },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ id: number; valuesJson: string }>;
+  for (const record of bloodRequestRecords) {
+    try {
+      const parsed: unknown = JSON.parse(record.valuesJson);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) continue;
+      const values = parsed as Record<string, unknown>;
+      values.recipientName = fullName;
+      db.exec({
+        sql: 'UPDATE blood_request_records SET values_json = $values, updated_at = $now WHERE id = $id',
+        bind: { $values: JSON.stringify(values), $now: now, $id: record.id },
+      });
+    } catch {
+      // Keep an unreadable historical record unchanged.
+    }
+  }
+
   return getRecipient(db, id);
 };
 export const removeRecipient = async (id: number) => {
   const db = await getDatabase();
   db.exec({ sql: 'DELETE FROM protocol_records WHERE recipient_id = $id', bind: { $id: id } });
   db.exec({ sql: 'DELETE FROM registration_records WHERE recipient_id = $id', bind: { $id: id } });
+  db.exec({ sql: 'DELETE FROM blood_request_records WHERE recipient_id = $id', bind: { $id: id } });
   db.exec({ sql: 'DELETE FROM recipients WHERE id = $id', bind: { $id: id } });
 };

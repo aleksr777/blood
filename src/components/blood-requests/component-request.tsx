@@ -1013,7 +1013,7 @@ export const ComponentRequest = () => {
                 </tr>
               </thead>
               <tbody>
-                {Array.from({ length: 8 }, (_, index) => (
+                {Array.from({ length: 6 }, (_, index) => (
                   <tr key={index}>
                     {Array.from({ length: 11 }, (_, cellIndex) => (
                       <td key={cellIndex}>&nbsp;</td>

@@ -463,3 +463,18 @@ export const switchCurrentRecipient = async (
     registrationValues,
   };
 };
+
+export const updateCurrentRecipientProfile = async (
+  recipient: CurrentRecipient,
+  changes: ProtocolValuesRecord,
+): Promise<RecipientRecord> => {
+  const updatedRecipient = await updateRecipient(recipient.id, {
+    ...recipient.profile,
+    ...changes,
+    recipientId: String(recipient.id),
+    recipientName: recipient.fullName,
+  });
+
+  await switchCurrentRecipient(updatedRecipient);
+  return updatedRecipient;
+};

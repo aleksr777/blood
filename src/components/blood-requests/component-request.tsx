@@ -512,6 +512,8 @@ export const ComponentRequest = () => {
   const [savedRecordId, setSavedRecordId] = useState<number | null>(
     loadSavedRecordId,
   );
+  const savedRecordIdRef = useRef(savedRecordId);
+  savedRecordIdRef.current = savedRecordId;
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
@@ -521,7 +523,7 @@ export const ComponentRequest = () => {
     force = false,
   ) => {
     setCurrentRecipient(recipient);
-    if (savedRecordId !== null && !force) return;
+    if (savedRecordIdRef.current !== null && !force) return;
 
     const autoValues = await currentAutoValues(recipient);
     const protocolDraft = recipient ? await loadProtocolDraft() : null;
@@ -532,6 +534,8 @@ export const ComponentRequest = () => {
       Number(protocolDraft.values.recipientId) === recipient.id
         ? protocolDraft.values
         : {};
+    if (savedRecordIdRef.current !== null && !force) return;
+
     setDraft((current) => {
       const recipientChanged = Boolean(
         recipient &&
@@ -817,6 +821,7 @@ export const ComponentRequest = () => {
         values: { ...draftToSave },
       });
       setDraft(draftToSave);
+      savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
       setStatus(
         afterPrint
@@ -863,6 +868,7 @@ export const ComponentRequest = () => {
       await switchCurrentRecipient(recipient);
       setCurrentRecipient(readCurrentRecipient());
       setDraft(draftFromRecord(record.values));
+      savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
       setRegistryOpen(false);
       setStatus('Сохранённая заявка открыта.');

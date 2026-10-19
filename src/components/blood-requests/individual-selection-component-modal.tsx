@@ -103,7 +103,6 @@ export const IndividualSelectionComponentModal = ({
 
     if (changes.indicationComponent !== 'erythrocytes') {
       nextChanges.componentSelectionRequirement = '';
-      nextChanges.individualSelectionIndications = '';
     }
 
     if (Object.keys(nextChanges).length > 0) {
@@ -114,9 +113,6 @@ export const IndividualSelectionComponentModal = ({
   const setComponentSelectionRequirement = (value: string) => {
     onLocalChange({
       componentSelectionRequirement: value,
-      ...(value === 'individual'
-        ? {}
-        : { individualSelectionIndications: '' }),
     });
   };
 

@@ -1,7 +1,6 @@
 import type {
   BloodRequestRecord,
   BloodRequestRecordKind,
-  BloodRequestRecordValues,
   ComponentUnitNumberMatch,
   DatabaseAction,
   DatabaseRequest,
@@ -14,6 +13,7 @@ import type {
   RegistrationDraftState,
   RegistrationRecord,
   SavedOptionRecord,
+  SaveBloodRequestRecordInput,
 } from './database-types';
 
 type PendingRequest = {
@@ -141,18 +141,8 @@ export const database = {
       recipientId,
       kind,
     }),
-  saveBloodRequestRecord: (
-    recordId: number | null,
-    recipientId: number,
-    kind: BloodRequestRecordKind,
-    values: BloodRequestRecordValues,
-  ) =>
-    withDatabase<BloodRequestRecord>('blood-request-records:save', {
-      recordId,
-      recipientId,
-      kind,
-      values,
-    }),
+  saveBloodRequestRecord: (input: SaveBloodRequestRecordInput) =>
+    withDatabase<BloodRequestRecord>('blood-request-records:save', input),
   removeBloodRequestRecord: (id: number) =>
     withDatabase<void>('blood-request-records:remove', { id }),
 };

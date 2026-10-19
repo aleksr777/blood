@@ -58,12 +58,9 @@ export const RecipientExaminationFields = ({
   const bloodGroupTone =
     recipientRh === 'Rh(-)' ? 'negative' : recipientRh === 'Rh(+)' ? 'positive' : undefined;
 
-  const setStatus = (status: string) => onChange({
-    alloimmuneAntibodyStatus: status,
-      alloimmuneAntibodies: '',
-      ...(status === ANTIBODY_STATUS.notFound
-        ? { alloimmuneAntibodyDescription: '' }
-        : {}),
+  const setStatus = (status: string) =>
+    onChange({
+      alloimmuneAntibodyStatus: status,
     });
   return (
     <div className={styles.root}>

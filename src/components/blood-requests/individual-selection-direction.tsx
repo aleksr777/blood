@@ -13,6 +13,11 @@ import {
   updateCurrentRecipientProfile,
   type CurrentRecipient,
 } from '../../storage/repositories/current-recipient';
+import {
+  hasStoredCurrentIndications,
+  readCurrentIndications,
+  writeCurrentIndications,
+} from '../../storage/repositories/current-indications';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   updateRecipient,
@@ -458,7 +463,40 @@ export const IndividualSelectionDirection = () => {
   const refreshCurrentData = useCallback(async (recipient = readCurrentRecipient()) => {
     setCurrentRecipient(recipient);
     const autoValues = await currentAutoValues(recipient);
-    setDraft((current) => mergeAutoValues(current, recipient, autoValues));
+    setDraft((current) => {
+      const recipientChanged = Boolean(
+        recipient &&
+          current.sourceRecipientId &&
+          current.sourceRecipientId !== String(recipient.id),
+      );
+      const next = mergeAutoValues(current, recipient, autoValues);
+      if (!recipient) return next;
+
+      if (hasStoredCurrentIndications(recipient.id, 'erythrocytes')) {
+        return {
+          ...next,
+          indicationValues: {
+            ...(recipientChanged ? {} : next.indicationValues),
+            ...readCurrentIndications(recipient.id, 'erythrocytes'),
+            indicationComponent: 'erythrocytes',
+          },
+        };
+      }
+
+      if (!recipientChanged) {
+        writeCurrentIndications(
+          recipient.id,
+          'erythrocytes',
+          next.indicationValues,
+        );
+        return next;
+      }
+
+      return {
+        ...next,
+        indicationValues: { indicationComponent: 'erythrocytes' },
+      };
+    });
   }, []);
 
   useEffect(() => {
@@ -520,14 +558,26 @@ export const IndividualSelectionDirection = () => {
   };
 
   const updateIndications = (changes: ProtocolValues) => {
-    setDraft((current) => ({
-      ...current,
-      indicationValues: {
+    setDraft((current) => {
+      const indicationValues = {
         ...current.indicationValues,
         ...changes,
         indicationComponent: 'erythrocytes',
-      },
-    }));
+      };
+
+      if (currentRecipient) {
+        writeCurrentIndications(
+          currentRecipient.id,
+          'erythrocytes',
+          indicationValues,
+        );
+      }
+
+      return {
+        ...current,
+        indicationValues,
+      };
+    });
   };
 
   const clear = async () => {
@@ -538,7 +588,17 @@ export const IndividualSelectionDirection = () => {
       recipient,
       autoValues,
     );
-    setDraft(next);
+    setDraft(
+      recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
+        ? {
+            ...next,
+            indicationValues: {
+              ...readCurrentIndications(recipient.id, 'erythrocytes'),
+              indicationComponent: 'erythrocytes',
+            },
+          }
+        : next,
+    );
     setStatus('');
   };
 
@@ -550,7 +610,17 @@ export const IndividualSelectionDirection = () => {
       recipient,
       autoValues,
     );
-    setDraft(next);
+    setDraft(
+      recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
+        ? {
+            ...next,
+            indicationValues: {
+              ...readCurrentIndications(recipient.id, 'erythrocytes'),
+              indicationComponent: 'erythrocytes',
+            },
+          }
+        : next,
+    );
     setStatus(
       recipient
         ? 'Создан новый бланк для текущего реципиента.'

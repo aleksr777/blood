@@ -51,6 +51,13 @@ export type BloodRequestRecord = {
   updatedAt: number;
 };
 
+export type SaveBloodRequestRecordInput = {
+  recordId: number | null;
+  recipientId: number;
+  kind: BloodRequestRecordKind;
+  values: BloodRequestRecordValues;
+};
+
 export type ComponentUnitNumberMatch = {
   id: number;
   recipientId: number;

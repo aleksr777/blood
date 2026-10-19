@@ -3,6 +3,7 @@ import type {
   BloodRequestRecord,
   BloodRequestRecordKind,
   BloodRequestRecordValues,
+  SaveBloodRequestRecordInput,
 } from './database-types';
 
 const parseValues = (value: string): BloodRequestRecordValues => {
@@ -66,13 +67,19 @@ export const listBloodRequestRecords = async (
   return rows.map(mapRecord);
 };
 
-const insertRecord = (
-  db: SqliteDatabase,
-  recipientId: number,
-  kind: BloodRequestRecordKind,
-  values: BloodRequestRecordValues,
-  now: number,
-) => {
+const insertRecord = ({
+  db,
+  recipientId,
+  kind,
+  values,
+  now,
+}: {
+  db: SqliteDatabase;
+  recipientId: number;
+  kind: BloodRequestRecordKind;
+  values: BloodRequestRecordValues;
+  now: number;
+}) => {
   db.exec({
     sql: `
       INSERT INTO blood_request_records
@@ -96,12 +103,12 @@ const insertRecord = (
   return Number(rows[0].id);
 };
 
-export const saveBloodRequestRecord = async (
-  recordId: number | null,
-  recipientId: number,
-  kind: BloodRequestRecordKind,
-  values: BloodRequestRecordValues,
-) => {
+export const saveBloodRequestRecord = async ({
+  recordId,
+  recipientId,
+  kind,
+  values,
+}: SaveBloodRequestRecordInput) => {
   if (!Number.isFinite(recipientId) || recipientId <= 0) {
     throw new Error('Выберите реципиента перед сохранением бланка.');
   }
@@ -120,7 +127,7 @@ export const saveBloodRequestRecord = async (
   const id =
     linked && recordId !== null
       ? recordId
-      : insertRecord(db, recipientId, kind, values, now);
+      : insertRecord({ db, recipientId, kind, values, now });
 
   if (linked) {
     db.exec({

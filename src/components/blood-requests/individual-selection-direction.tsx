@@ -40,6 +40,7 @@ import {
   RequestEditorModal,
   type RequestEditorField,
 } from './request-editor-modal';
+import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:individual-selection-direction-draft';
@@ -189,6 +190,7 @@ const loadDraft = (): DirectionDraft => {
     } as DirectionDraft;
 
     if (!next.directionDate) next.directionDate = todayKey();
+    next.quantity = sanitizeDoseQuantity(next.quantity);
     return next;
   } catch {
     return { ...emptyDraft(), directionDate: todayKey() };
@@ -745,7 +747,9 @@ export const IndividualSelectionDirection = () => {
       />
       <div className={styles.singleLine}>
         <span>Количество:</span>
-        <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
+        <span className={styles.valueLine}>
+          {displayValue(formatDoseQuantity(draft.quantity))}
+        </span>
       </div>
       <AdaptiveRuledField
         label="Показания к трансфузии:"

@@ -16,8 +16,11 @@ import {
 import {
   currentIndicationsForComponent,
   hasStoredCurrentIndications,
+  hasStoredCurrentIndividualSelectionIndications,
   readCurrentIndications,
+  readCurrentIndividualSelectionIndications,
   writeCurrentIndications,
+  writeCurrentIndividualSelectionIndications,
 } from '../../storage/repositories/current-indications';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
@@ -478,8 +481,26 @@ export const IndividualSelectionDirection = () => {
           current.sourceRecipientId &&
           current.sourceRecipientId !== String(recipient.id),
       );
-      const next = mergeAutoValues(current, recipient, autoValues);
+      let next = mergeAutoValues(current, recipient, autoValues);
       if (!recipient) return next;
+
+      if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
+        next = {
+          ...next,
+          individualSelectionIndications:
+            readCurrentIndividualSelectionIndications(recipient.id),
+        };
+      } else if (recipientChanged) {
+        next = {
+          ...next,
+          individualSelectionIndications: '',
+        };
+      } else if (next.individualSelectionIndications.trim()) {
+        writeCurrentIndividualSelectionIndications(
+          recipient.id,
+          next.individualSelectionIndications,
+        );
+      }
 
       if (hasStoredCurrentIndications(recipient.id, 'erythrocytes')) {
         return {
@@ -578,6 +599,16 @@ export const IndividualSelectionDirection = () => {
   ]);
 
   const updateFields = (changes: Record<string, string>) => {
+    if (
+      currentRecipient &&
+      changes.individualSelectionIndications !== undefined
+    ) {
+      writeCurrentIndividualSelectionIndications(
+        currentRecipient.id,
+        changes.individualSelectionIndications,
+      );
+    }
+
     setDraft((current) => {
       const next = { ...current };
 
@@ -622,8 +653,14 @@ export const IndividualSelectionDirection = () => {
       recipient,
       autoValues,
     );
-    setDraft(
-      recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
+    const sharedIndividualSelectionIndications =
+      recipient &&
+      hasStoredCurrentIndividualSelectionIndications(recipient.id)
+        ? readCurrentIndividualSelectionIndications(recipient.id)
+        : '';
+
+    setDraft({
+      ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
         ? {
             ...next,
             indicationValues: {
@@ -631,8 +668,9 @@ export const IndividualSelectionDirection = () => {
               indicationComponent: 'erythrocytes',
             },
           }
-        : next,
-    );
+        : next),
+      individualSelectionIndications: sharedIndividualSelectionIndications,
+    });
     setStatus('');
   };
 
@@ -644,8 +682,14 @@ export const IndividualSelectionDirection = () => {
       recipient,
       autoValues,
     );
-    setDraft(
-      recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
+    const sharedIndividualSelectionIndications =
+      recipient &&
+      hasStoredCurrentIndividualSelectionIndications(recipient.id)
+        ? readCurrentIndividualSelectionIndications(recipient.id)
+        : '';
+
+    setDraft({
+      ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
         ? {
             ...next,
             indicationValues: {
@@ -653,8 +697,9 @@ export const IndividualSelectionDirection = () => {
               indicationComponent: 'erythrocytes',
             },
           }
-        : next,
-    );
+        : next),
+      individualSelectionIndications: sharedIndividualSelectionIndications,
+    });
     setStatus(
       recipient
         ? 'Создан новый бланк для текущего реципиента.'

@@ -5,6 +5,7 @@ import styles from './recipient-examination-fields.module.css';
 type Props = {
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
+  showAlloimmuneAntibodies?: boolean;
 };
 const SelectField = ({
   name,
@@ -48,7 +49,11 @@ const normalizeRh = (value?: string) => {
   return '';
 };
 
-export const RecipientExaminationFields = ({ values, onChange }: Props) => {
+export const RecipientExaminationFields = ({
+  values,
+  onChange,
+  showAlloimmuneAntibodies = true,
+}: Props) => {
   const recipientRh = normalizeRh(values.recipientRh);
   const bloodGroupTone =
     recipientRh === 'Rh(-)' ? 'negative' : recipientRh === 'Rh(+)' ? 'positive' : undefined;
@@ -98,41 +103,43 @@ export const RecipientExaminationFields = ({ values, onChange }: Props) => {
         ))}
       </div>
 
-      <fieldset className={styles.antibodies}>
-        <legend>Аллоиммунные антитела</legend>
-        <div className={styles.radioGroup}>
-          <label className={styles.radio}>
-            <input
-              type="radio"
-              name="alloimmuneAntibodyStatus"
-              checked={values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.notFound}
-              onChange={() => setStatus(ANTIBODY_STATUS.notFound)}
-            />
-            <span>не найдены</span>
-          </label>
-          <label className={styles.radio}>
-            <input
-              type="radio"
-              name="alloimmuneAntibodyStatus"
-              checked={values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found}
-              onChange={() => setStatus(ANTIBODY_STATUS.found)}
-            />
-            <span>найдены</span>
-          </label>
-        </div>
-        {values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found && (
-          <label className={styles.description}>
-            <span>Описание найденных антител</span>
-            <textarea
-              rows={3}
-              value={values.alloimmuneAntibodyDescription ?? ''}
-              onChange={(event) =>
-                onChange({ alloimmuneAntibodyDescription: event.target.value })
-              }
-            />
-          </label>
-        )}
-      </fieldset>
+      {showAlloimmuneAntibodies && (
+        <fieldset className={styles.antibodies}>
+          <legend>Аллоиммунные антитела</legend>
+          <div className={styles.radioGroup}>
+            <label className={styles.radio}>
+              <input
+                type="radio"
+                name="alloimmuneAntibodyStatus"
+                checked={values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.notFound}
+                onChange={() => setStatus(ANTIBODY_STATUS.notFound)}
+              />
+              <span>не найдены</span>
+            </label>
+            <label className={styles.radio}>
+              <input
+                type="radio"
+                name="alloimmuneAntibodyStatus"
+                checked={values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found}
+                onChange={() => setStatus(ANTIBODY_STATUS.found)}
+              />
+              <span>найдены</span>
+            </label>
+          </div>
+          {values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found && (
+            <label className={styles.description}>
+              <span>Описание найденных антител</span>
+              <textarea
+                rows={3}
+                value={values.alloimmuneAntibodyDescription ?? ''}
+                onChange={(event) =>
+                  onChange({ alloimmuneAntibodyDescription: event.target.value })
+                }
+              />
+            </label>
+          )}
+        </fieldset>
+      )}
     </div>
   );
 };

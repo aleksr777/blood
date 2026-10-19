@@ -21,7 +21,10 @@ import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { formatRecipientAntigens } from '../transfusion-protocol/recipient-examination-model';
-import { formatIndications } from '../transfusion-protocol/indications-model';
+import {
+  formatIndications,
+  getIndicationComponent,
+} from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
@@ -36,6 +39,17 @@ import styles from './individual-selection-direction.module.css';
 const STORAGE_KEY = 'blood:component-request-direction-draft';
 const DEFAULT_MEDICAL_ORGANIZATION =
   'ФБУЗ "Медико-санитарная часть №32" ФМБА России, г. Заречный.';
+
+const TRANSFUSION_ORDER_TEXT: Record<string, string> = {
+  planned: 'плановая',
+  emergency: 'экстренная',
+};
+
+const COMPONENT_SELECTION_REQUIREMENT_TEXT: Record<string, string> = {
+  'not-required': 'индивидуальный подбор и подбор по фенотипу не требуется',
+  phenotype: 'требуется подбор по фенотипу',
+  individual: 'требуется индивидуальный подбор',
+};
 
 type AutoField =
   | 'recipientAboRh'
@@ -52,6 +66,8 @@ type DirectionDraft = Record<AutoField, string> & {
   sourceRecipientId: string;
   requiredComponent: string;
   quantity: string;
+  transfusionOrder: string;
+  componentSelectionRequirement: string;
   individualSelectionIndications: string;
   medicalOrganization: string;
   directionDate: string;
@@ -112,6 +128,8 @@ const emptyDraft = (): DirectionDraft => ({
   sourceRecipientId: '',
   requiredComponent: '',
   quantity: '',
+  transfusionOrder: '',
+  componentSelectionRequirement: '',
   individualSelectionIndications: '',
   recipientAboRh: '',
   recipientPhenotype: '',
@@ -564,6 +582,15 @@ export const ComponentRequest = () => {
     }
   }, [draft, editor]);
 
+  const selectedComponent = getIndicationComponent(draft.indicationValues);
+  const isErythrocytes = selectedComponent === 'erythrocytes';
+  const requiresIndividualSelection =
+    isErythrocytes && draft.componentSelectionRequirement === 'individual';
+  const transfusionOrderText =
+    TRANSFUSION_ORDER_TEXT[draft.transfusionOrder] ?? '';
+  const componentSelectionRequirementText =
+    COMPONENT_SELECTION_REQUIREMENT_TEXT[draft.componentSelectionRequirement] ?? '';
+
   const formSections = [
     <div
       key="organization"
@@ -672,13 +699,25 @@ export const ComponentRequest = () => {
         <span className={styles.valueLine}>{displayValue(draft.quantity)}</span>
       </div>
       <AdaptiveRuledField
+        label="Порядок трансфузии:"
+        value={transfusionOrderText}
+      />
+      <AdaptiveRuledField
         label="Показания к трансфузии:"
         value={formatIndications(draft.indicationValues)}
       />
-      <AdaptiveRuledField
-        label="Показания для индивидуального подбора:"
-        value={draft.individualSelectionIndications}
-      />
+      {isErythrocytes && (
+        <AdaptiveRuledField
+          label="Подбор компонента:"
+          value={componentSelectionRequirementText}
+        />
+      )}
+      {requiresIndividualSelection && (
+        <AdaptiveRuledField
+          label="Показания для индивидуального подбора:"
+          value={draft.individualSelectionIndications}
+        />
+      )}
     </div>,
 
     <div
@@ -727,7 +766,10 @@ export const ComponentRequest = () => {
     draft.obstetricHistory,
     draft.requiredComponent,
     draft.quantity,
-    draft.individualSelectionIndications,
+    draft.transfusionOrder,
+    selectedComponent,
+    isErythrocytes ? draft.componentSelectionRequirement : '',
+    requiresIndividualSelection ? draft.individualSelectionIndications : '',
     draft.directionDate,
     draft.doctorName,
     draft.doctorPhone,
@@ -894,8 +936,11 @@ export const ComponentRequest = () => {
         <IndividualSelectionComponentModal
           requiredComponent={draft.requiredComponent}
           quantity={draft.quantity}
+          transfusionOrder={draft.transfusionOrder}
+          componentSelectionRequirement={draft.componentSelectionRequirement}
           individualSelectionIndications={draft.individualSelectionIndications}
           indicationValues={draft.indicationValues}
+          showRequestOptions
           onLocalChange={updateFields}
           onIndicationsChange={updateIndications}
           onClose={() => setEditor(null)}

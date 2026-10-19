@@ -990,12 +990,12 @@ export const ComponentRequest = () => {
                 <col style={{ width: '6.3%' }} />
                 <col style={{ width: '6.1%' }} />
                 <col style={{ width: '12%' }} />
-                <col style={{ width: '3.5%' }} />
+                <col style={{ width: '5.5%' }} />
                 <col style={{ width: '7.3%' }} />
                 <col style={{ width: '7.3%' }} />
                 <col style={{ width: '7.3%' }} />
                 <col style={{ width: '7.3%' }} />
-                <col style={{ width: '18.4%' }} />
+                <col style={{ width: '16.4%' }} />
               </colgroup>
               <thead>
                 <tr>

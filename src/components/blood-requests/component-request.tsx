@@ -413,9 +413,6 @@ export const ComponentRequest = () => {
   const [editor, setEditor] = useState<Editor>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
-  const [page2StartIndex, setPage2StartIndex] = useState(7);
-  const page1Ref = useRef<HTMLElement>(null);
-  const page1ContentRef = useRef<HTMLDivElement>(null);
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
@@ -899,63 +896,6 @@ export const ComponentRequest = () => {
     </div>,
   ];
 
-  const paginationKey = [
-    draft.medicalOrganization,
-    draft.department,
-    draft.recipientName,
-    draft.recipientAge,
-    draft.medicalRecordNumber,
-    draft.diagnosis,
-    draft.recipientAboRh,
-    draft.recipientPhenotype,
-    formatAlloimmuneAntibodies(examinationValues),
-    formatIndications(draft.indicationValues),
-    draft.recipientSex,
-    draft.obstetricHistory,
-    draft.requiredComponent,
-    draft.quantity,
-    draft.transfusionOrder,
-    selectedComponent,
-    isErythrocytes ? draft.componentSelectionRequirement : '',
-    requiresIndividualSelection ? draft.individualSelectionIndications : '',
-    draft.directionDate,
-    draft.doctorName,
-    draft.doctorPhone,
-  ].join('\u0001');
-
-  const splitIndex = Math.min(page2StartIndex, formSections.length);
-  const hasSecondPage = splitIndex < formSections.length;
-
-  useLayoutEffect(() => {
-    setPage2StartIndex(formSections.length);
-  }, [formSections.length, paginationKey]);
-
-  useLayoutEffect(() => {
-    const page = page1Ref.current;
-    const content = page1ContentRef.current;
-    if (!page || !content) return undefined;
-
-    const fitPage = () => {
-      if (
-        page.scrollHeight > page.clientHeight + 1 &&
-        page2StartIndex > 0
-      ) {
-        setPage2StartIndex((current) =>
-          Math.max(0, Math.min(current, formSections.length) - 1),
-        );
-      }
-    };
-
-    fitPage();
-
-    if (typeof ResizeObserver === 'undefined') return undefined;
-
-    const observer = new ResizeObserver(fitPage);
-    observer.observe(content);
-
-    return () => observer.disconnect();
-  }, [formSections.length, page2StartIndex, paginationKey]);
-
   const printPage = (page: 1 | 2) => {
     const className = `print-individual-selection-page-${page}`;
     document.body.classList.add(className);
@@ -997,32 +937,20 @@ export const ComponentRequest = () => {
             <button type="button" className="save-button" onClick={() => save()}>
               Сохранить
             </button>
-            {hasSecondPage ? (
-              <>
-                <button
-                  type="button"
-                  className="print-button"
-                  onClick={() => printPage(1)}
-                >
-                  Печать страницы 1
-                </button>
-                <button
-                  type="button"
-                  className="print-button"
-                  onClick={() => printPage(2)}
-                >
-                  Печать страницы 2
-                </button>
-              </>
-            ) : (
-              <button
-                type="button"
-                className="print-button"
-                onClick={() => printPage(1)}
-              >
-                Печать страницы
-              </button>
-            )}
+            <button
+              type="button"
+              className="print-button"
+              onClick={() => printPage(1)}
+            >
+              Печать страницы 1
+            </button>
+            <button
+              type="button"
+              className="print-button"
+              onClick={() => printPage(2)}
+            >
+              Печать страницы 2
+            </button>
           </div>
           {status && (
             <div className="toolbar-status" role="status">
@@ -1034,29 +962,87 @@ export const ComponentRequest = () => {
 
       <div className={styles.sheetWrap}>
         <section
-          ref={page1Ref}
           className={`${styles.sheet} ${styles.pageOne}`}
-          aria-label="Направление на индивидуальный подбор, страница 1"
+          aria-label="Заявка в трансфузиологический кабинет, страница 1"
         >
-          <div ref={page1ContentRef} className={styles.pageContent}>
+          <div className={styles.pageContent}>
             <h1 className={styles.title}>
               Заявка в трансфузиологический кабинет на компоненты крови.
             </h1>
 
-            {formSections.slice(0, splitIndex)}
+            {formSections}
           </div>
         </section>
 
-        {hasSecondPage && (
-          <section
-            className={`${styles.sheet} ${styles.pageTwo}`}
-            aria-label="Направление на индивидуальный подбор, страница 2"
-          >
-            <div className={styles.pageContent}>
-              {formSections.slice(splitIndex)}
+        <section
+          className={`${styles.sheet} ${styles.pageTwo} ${styles.issuedPage}`}
+          aria-label="Выдано из трансфузиологического кабинета, страница 2"
+        >
+          <div className={styles.issuedContent}>
+            <h2 className={styles.issuedTitle}>
+              Выдано из трансфузиологического кабинета
+            </h2>
+
+            <table className={styles.issuedTable}>
+              <colgroup>
+                <col style={{ width: '2%' }} />
+                <col style={{ width: '22.5%' }} />
+                <col style={{ width: '6.3%' }} />
+                <col style={{ width: '6.1%' }} />
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '3.5%' }} />
+                <col style={{ width: '7.3%' }} />
+                <col style={{ width: '7.3%' }} />
+                <col style={{ width: '7.3%' }} />
+                <col style={{ width: '7.3%' }} />
+                <col style={{ width: '18.4%' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>№</th>
+                  <th>Наименование компонента донорской крови</th>
+                  <th>Группа крови донора</th>
+                  <th>Резус-принадлежность</th>
+                  <th>Фенотип донора</th>
+                  <th>Объем (мл)</th>
+                  <th>№ контейнера</th>
+                  <th>Код донора</th>
+                  <th>Дата заготовки</th>
+                  <th>Срок годности</th>
+                  <th>Изготовитель</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 8 }, (_, index) => (
+                  <tr key={index}>
+                    {Array.from({ length: 11 }, (_, cellIndex) => (
+                      <td key={cellIndex}>&nbsp;</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className={styles.issuedFooter}>
+              <div className={styles.issuedFooterRow}>
+                <span className={styles.issuedFooterLabel}>Дата:</span>
+                <span className={styles.issuedDateLine} />
+              </div>
+              <div className={styles.issuedFooterRow}>
+                <span className={styles.issuedFooterLabel}>
+                  Получил компоненты крови:
+                </span>
+                <span className={styles.issuedSignatureLine} />
+              </div>
+              <div className={styles.issuedFooterRow}>
+                <span className={styles.issuedFooterLabel}>
+                  Выдал компоненты крови:
+                </span>
+                <span className={styles.issuedSignatureLine} />
+              </div>
             </div>
-          </section>
-        )}
+          </div>
+        </section>
       </div>
 
       {editor === 'recipient' && (

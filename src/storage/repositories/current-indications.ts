@@ -5,6 +5,8 @@ const STORAGE_KEY = 'blood:current-indications';
 type StoredState = {
   recipientId: number;
   byComponent: Record<string, ProtocolValuesRecord>;
+  individualSelectionIndications: string;
+  individualSelectionIndicationsSet: boolean;
 };
 
 const componentPrefix = (component: string) => {
@@ -47,6 +49,12 @@ const readState = (): StoredState | null => {
     return {
       recipientId: parsed.recipientId,
       byComponent,
+      individualSelectionIndications:
+        typeof parsed.individualSelectionIndications === 'string'
+          ? parsed.individualSelectionIndications
+          : '',
+      individualSelectionIndicationsSet:
+        parsed.individualSelectionIndicationsSet === true,
     };
   } catch (error) {
     console.error('Не удалось прочитать общие показания к трансфузии:', error);
@@ -119,7 +127,12 @@ export const writeCurrentIndications = (
   const state: StoredState =
     current && current.recipientId === recipientId
       ? current
-      : { recipientId, byComponent: {} };
+      : {
+          recipientId,
+          byComponent: {},
+          individualSelectionIndications: '',
+          individualSelectionIndicationsSet: false,
+        };
 
   state.byComponent = {
     ...state.byComponent,
@@ -137,5 +150,57 @@ export const resetCurrentIndications = (recipientId: number) => {
   writeState({
     recipientId,
     byComponent: {},
+    individualSelectionIndications: '',
+    individualSelectionIndicationsSet: false,
+  });
+};
+
+export const hasStoredCurrentIndividualSelectionIndications = (
+  recipientId: number,
+) => {
+  const state = readState();
+  return Boolean(
+    state &&
+      state.recipientId === recipientId &&
+      state.individualSelectionIndicationsSet,
+  );
+};
+
+export const readCurrentIndividualSelectionIndications = (
+  recipientId: number,
+) => {
+  const state = readState();
+  if (
+    !state ||
+    state.recipientId !== recipientId ||
+    !state.individualSelectionIndicationsSet
+  ) {
+    return '';
+  }
+
+  return state.individualSelectionIndications;
+};
+
+export const writeCurrentIndividualSelectionIndications = (
+  recipientId: number,
+  value: string,
+) => {
+  if (!Number.isFinite(recipientId) || recipientId <= 0) return;
+
+  const current = readState();
+  const state: StoredState =
+    current && current.recipientId === recipientId
+      ? current
+      : {
+          recipientId,
+          byComponent: {},
+          individualSelectionIndications: '',
+          individualSelectionIndicationsSet: false,
+        };
+
+  writeState({
+    ...state,
+    individualSelectionIndications: value,
+    individualSelectionIndicationsSet: true,
   });
 };

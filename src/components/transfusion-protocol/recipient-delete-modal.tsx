@@ -30,7 +30,12 @@ export const RecipientDeleteModal = ({ recipient, onClose, onDelete }: Props) =>
     <Modal title="Удалить реципиента?" onClose={onClose} className={styles.modal}>
       <div className={styles.text}>
         Будут удалены данные <strong>{recipient.fullName}</strong> и все сохранённые бланки
-        этого реципиента ({recipient.protocolCount + recipient.registrationCount}).
+        этого реципиента ({
+          recipient.protocolCount +
+          recipient.registrationCount +
+          recipient.individualSelectionDirectionCount +
+          recipient.componentRequestCount
+        }).
       </div>
       <div className={styles.warning}>Отменить это действие после удаления будет нельзя.</div>
       {error && <div className={styles.error}>{error}</div>}

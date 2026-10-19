@@ -27,6 +27,11 @@
   grid-column: 1 / -1;
 }
 
+.quantityField {
+  width: 9rem;
+  max-width: 100%;
+}
+
 .localGrid input,
 .localGrid textarea {
   width: 100%;

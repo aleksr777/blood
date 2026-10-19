@@ -7,12 +7,14 @@ type Props = {
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void | Promise<void>;
   onClose: () => void;
+  showAlloimmuneAntibodies?: boolean;
 };
 
 export const IndividualSelectionExaminationModal = ({
   values,
   onChange,
   onClose,
+  showAlloimmuneAntibodies = true,
 }: Props) => (
   <Modal
     title="Данные медицинского обследования реципиента"
@@ -22,6 +24,7 @@ export const IndividualSelectionExaminationModal = ({
     <div className={styles.grid}>
       <RecipientExaminationFields
         values={values}
+        showAlloimmuneAntibodies={showAlloimmuneAntibodies}
         onChange={(nextValues) => {
           void onChange(nextValues);
         }}

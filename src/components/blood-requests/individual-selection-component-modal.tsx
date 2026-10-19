@@ -200,6 +200,15 @@ export const IndividualSelectionComponentModal = ({
                   требуется индивидуальный подбор
                 </Choice>
               </div>
+              {componentSelectionRequirement && (
+                <button
+                  type="button"
+                  className={styles.resetSelectionButton}
+                  onClick={() => setComponentSelectionRequirement('')}
+                >
+                  Сбросить выбор
+                </button>
+              )}
             </fieldset>
           </>
         )}

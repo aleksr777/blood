@@ -117,11 +117,12 @@ export const saveBloodRequestRecord = async (
   }
 
   const now = Date.now();
-  const id = linked
-    ? recordId
-    : insertRecord(db, recipientId, kind, values, now);
+  const id =
+    linked && recordId !== null
+      ? recordId
+      : insertRecord(db, recipientId, kind, values, now);
 
-  if (linked && id !== null) {
+  if (linked) {
     db.exec({
       sql: `
         UPDATE blood_request_records

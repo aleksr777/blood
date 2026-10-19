@@ -53,6 +53,20 @@ import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:component-request-direction-draft';
+const SAVED_RECORD_ID_STORAGE_KEY = `${STORAGE_KEY}:saved-record-id`;
+
+const loadSavedRecordId = () => {
+  try {
+    const raw = window.localStorage.getItem(SAVED_RECORD_ID_STORAGE_KEY);
+    if (!raw) return null;
+
+    const id = Number(raw);
+    return Number.isFinite(id) && id > 0 ? id : null;
+  } catch {
+    return null;
+  }
+};
+
 const DEFAULT_MEDICAL_ORGANIZATION =
   'ФБУЗ "Медико-санитарная часть №32" ФМБА России, г. Заречный.';
 
@@ -90,6 +104,7 @@ type DirectionDraft = Record<AutoField, string> & {
   doctorName: string;
   doctorPhone: string;
   indicationValues: ProtocolValues;
+  recipientProfileSnapshot: ProtocolValues;
   autoValues: Partial<Record<AutoField, string>>;
 };
 
@@ -161,6 +176,7 @@ const emptyDraft = (): DirectionDraft => ({
   doctorName: '',
   doctorPhone: '',
   indicationValues: {},
+  recipientProfileSnapshot: {},
   autoValues: {},
 });
 
@@ -179,7 +195,13 @@ const loadDraft = (): DirectionDraft => {
     const blank = emptyDraft();
     const savedValues = Object.fromEntries(
       Object.keys(blank).flatMap((key) => {
-        if (key === 'autoValues' || key === 'indicationValues') return [];
+        if (
+          key === 'autoValues' ||
+          key === 'indicationValues' ||
+          key === 'recipientProfileSnapshot'
+        ) {
+          return [];
+        }
         const value = parsed[key as keyof DirectionDraft];
         return typeof value === 'string' ? [[key, value]] : [];
       }),
@@ -193,6 +215,16 @@ const loadDraft = (): DirectionDraft => {
         !Array.isArray(parsed.indicationValues)
           ? Object.fromEntries(
               Object.entries(parsed.indicationValues).filter(
+                (entry): entry is [string, string] => typeof entry[1] === 'string',
+              ),
+            )
+          : {},
+      recipientProfileSnapshot:
+        parsed.recipientProfileSnapshot &&
+        typeof parsed.recipientProfileSnapshot === 'object' &&
+        !Array.isArray(parsed.recipientProfileSnapshot)
+          ? Object.fromEntries(
+              Object.entries(parsed.recipientProfileSnapshot).filter(
                 (entry): entry is [string, string] => typeof entry[1] === 'string',
               ),
             )
@@ -223,7 +255,13 @@ const draftFromRecord = (
   const blank = emptyDraft();
   const savedValues = Object.fromEntries(
     Object.keys(blank).flatMap((key) => {
-      if (key === 'autoValues' || key === 'indicationValues') return [];
+      if (
+          key === 'autoValues' ||
+          key === 'indicationValues' ||
+          key === 'recipientProfileSnapshot'
+        ) {
+          return [];
+        }
       const value = values[key];
       return typeof value === 'string' ? [[key, value]] : [];
     }),
@@ -255,6 +293,16 @@ const draftFromRecord = (
     ...blank,
     ...savedValues,
     indicationValues,
+    recipientProfileSnapshot:
+      values.recipientProfileSnapshot &&
+      typeof values.recipientProfileSnapshot === 'object' &&
+      !Array.isArray(values.recipientProfileSnapshot)
+        ? Object.fromEntries(
+            Object.entries(values.recipientProfileSnapshot).filter(
+              (entry): entry is [string, string] => typeof entry[1] === 'string',
+            ),
+          )
+        : {},
     autoValues,
   } as DirectionDraft;
 
@@ -461,13 +509,20 @@ export const ComponentRequest = () => {
   const [editor, setEditor] = useState<Editor>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
-  const [savedRecordId, setSavedRecordId] = useState<number | null>(null);
+  const [savedRecordId, setSavedRecordId] = useState<number | null>(
+    loadSavedRecordId,
+  );
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
 
-  const refreshCurrentData = useCallback(async (recipient = readCurrentRecipient()) => {
+  const refreshCurrentData = useCallback(async (
+    recipient = readCurrentRecipient(),
+    force = false,
+  ) => {
     setCurrentRecipient(recipient);
+    if (savedRecordId !== null && !force) return;
+
     const autoValues = await currentAutoValues(recipient);
     const protocolDraft = recipient ? await loadProtocolDraft() : null;
     const currentProtocolValues =
@@ -555,7 +610,7 @@ export const ComponentRequest = () => {
         indicationValues: { indicationComponent: component },
       };
     });
-  }, []);
+  }, [savedRecordId]);
 
   useEffect(() => {
     void refreshCurrentData();
@@ -566,6 +621,22 @@ export const ComponentRequest = () => {
   }, [draft]);
 
   useEffect(() => {
+    try {
+      if (savedRecordId === null) {
+        window.localStorage.removeItem(SAVED_RECORD_ID_STORAGE_KEY);
+      } else {
+        window.localStorage.setItem(
+          SAVED_RECORD_ID_STORAGE_KEY,
+          String(savedRecordId),
+        );
+      }
+    } catch (error) {
+      console.error('Не удалось сохранить идентификатор открытой заявки:', error);
+    }
+  }, [savedRecordId]);
+
+  useEffect(() => {
+    if (savedRecordId !== null) return;
     if (!currentRecipient) return;
     if (currentRecipient.profile.diagnosis?.trim()) return;
     if (draft.sourceRecipientId !== String(currentRecipient.id)) return;
@@ -596,6 +667,7 @@ export const ComponentRequest = () => {
     };
   }, [
     currentRecipient,
+    savedRecordId,
     draft.diagnosis,
     draft.sourceRecipientId,
     refreshCurrentData,
@@ -603,6 +675,7 @@ export const ComponentRequest = () => {
 
   const updateFields = (changes: Record<string, string>) => {
     if (
+      savedRecordId === null &&
       currentRecipient &&
       changes.individualSelectionIndications !== undefined
     ) {
@@ -633,7 +706,10 @@ export const ComponentRequest = () => {
         Boolean(changes.indicationComponent) &&
         changes.indicationComponent !== currentComponent;
       const sharedIndications =
-        currentRecipient && componentChanged && component
+        savedRecordId === null &&
+        currentRecipient &&
+        componentChanged &&
+        component
           ? readCurrentIndications(currentRecipient.id, component)
           : {};
       const indicationValues = {
@@ -642,7 +718,7 @@ export const ComponentRequest = () => {
         ...changes,
       };
 
-      if (currentRecipient && component) {
+      if (savedRecordId === null && currentRecipient && component) {
         writeCurrentIndications(
           currentRecipient.id,
           component,
@@ -710,12 +786,25 @@ export const ComponentRequest = () => {
     }
 
     try {
+      const draftToSave =
+        savedRecordId === null
+          ? {
+              ...draft,
+              recipientProfileSnapshot: {
+                ...currentRecipient.profile,
+                recipientId: String(currentRecipient.id),
+                recipientName: currentRecipient.fullName,
+              },
+            }
+          : draft;
+
       const record = await saveBloodRequestRecord({
         recordId: savedRecordId,
         recipientId: currentRecipient.id,
         kind: 'component-request',
-        values: { ...draft },
+        values: { ...draftToSave },
       });
+      setDraft(draftToSave);
       setSavedRecordId(record.id);
       setStatus(
         afterPrint
@@ -736,10 +825,11 @@ export const ComponentRequest = () => {
     try {
       const previousRecipientId = currentRecipient?.id ?? null;
       await switchCurrentRecipient(recipient);
-      if (previousRecipientId !== recipient.id) {
+      const recipientChanged = previousRecipientId !== recipient.id;
+      if (recipientChanged) {
         setSavedRecordId(null);
       }
-      await refreshCurrentData(readCurrentRecipient());
+      await refreshCurrentData(readCurrentRecipient(), recipientChanged);
       return true;
     } catch (error) {
       console.error('Не удалось выбрать реципиента для направления:', error);
@@ -764,16 +854,97 @@ export const ComponentRequest = () => {
     }
   };
 
-  const examinationValues = useMemo<ProtocolValues>(
-    () => ({
-      ...(currentRecipient?.profile ?? {}),
-      recipientId: currentRecipient ? String(currentRecipient.id) : '',
-      recipientName: currentRecipient?.fullName ?? '',
-    }),
-    [currentRecipient],
-  );
+  const examinationValues = useMemo<ProtocolValues>(() => {
+    if (savedRecordId === null) {
+      return {
+        ...(currentRecipient?.profile ?? {}),
+        recipientId: currentRecipient ? String(currentRecipient.id) : '',
+        recipientName: currentRecipient?.fullName ?? '',
+      };
+    }
+
+    return {
+      ...draft.recipientProfileSnapshot,
+      recipientId: draft.sourceRecipientId,
+      recipientName: draft.recipientName,
+      recipientSex: draft.recipientSex,
+      medicalRecordNumber: draft.medicalRecordNumber,
+      diagnosis: draft.diagnosis,
+      department: draft.department,
+    };
+  }, [currentRecipient, draft, savedRecordId]);
 
   const updateExamination = async (changes: ProtocolValues) => {
+    if (savedRecordId !== null) {
+      setDraft((current) => {
+        const snapshot: ProtocolValues = {
+          ...current.recipientProfileSnapshot,
+          recipientId: current.sourceRecipientId,
+          recipientName: current.recipientName,
+          recipientSex: current.recipientSex,
+          medicalRecordNumber: current.medicalRecordNumber,
+          diagnosis: current.diagnosis,
+          department: current.department,
+          ...changes,
+        };
+        const next = {
+          ...current,
+          recipientProfileSnapshot: snapshot,
+        };
+
+        if (changes.recipientName !== undefined) {
+          next.recipientName = changes.recipientName;
+        }
+        if (changes.recipientBirthDate !== undefined) {
+          next.recipientAge = formatRecipientAge(changes.recipientBirthDate);
+        }
+        if (changes.recipientSex !== undefined) {
+          next.recipientSex = changes.recipientSex;
+        }
+        if (changes.medicalRecordNumber !== undefined) {
+          next.medicalRecordNumber = changes.medicalRecordNumber;
+        }
+        if (changes.diagnosis !== undefined) {
+          next.diagnosis = changes.diagnosis;
+        }
+        if (
+          changes.recipientAbo !== undefined ||
+          changes.recipientRh !== undefined
+        ) {
+          next.recipientAboRh = [snapshot.recipientAbo, snapshot.recipientRh]
+            .filter(Boolean)
+            .join(' ');
+        }
+        if (
+          Object.keys(changes).some(
+            (key) =>
+              key === 'recipientAntigens' ||
+              key.startsWith('recipientAntigen'),
+          )
+        ) {
+          next.recipientPhenotype = formatRecipientAntigens(snapshot);
+        }
+        if (
+          Object.keys(changes).some((key) =>
+            [
+              'recipientPregnanciesCount',
+              'recipientBirthsCount',
+              'recipientSpontaneousAbortionsCount',
+              'recipientHemolyticDiseaseNewbornHistory',
+            ].includes(key),
+          )
+        ) {
+          next.obstetricHistory =
+            snapshot.recipientSex === 'Женский'
+              ? formatObstetricHistory(snapshot)
+              : '';
+        }
+
+        return next;
+      });
+      return;
+    }
+
     if (!currentRecipient) return;
 
     try {

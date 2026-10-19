@@ -770,12 +770,12 @@ export const IndividualSelectionDirection = () => {
     }
 
     try {
-      const record = await saveBloodRequestRecord(
-        savedRecordId,
-        currentRecipient.id,
-        'individual-selection-direction',
-        { ...draft },
-      );
+      const record = await saveBloodRequestRecord({
+        recordId: savedRecordId,
+        recipientId: currentRecipient.id,
+        kind: 'individual-selection-direction',
+        values: { ...draft },
+      });
       setSavedRecordId(record.id);
       setStatus(
         afterPrint

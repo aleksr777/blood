@@ -14,6 +14,7 @@ import {
   type CurrentRecipient,
 } from '../../storage/repositories/current-recipient';
 import {
+  currentIndicationsForComponent,
   hasStoredCurrentIndications,
   readCurrentIndications,
   writeCurrentIndications,
@@ -463,6 +464,14 @@ export const IndividualSelectionDirection = () => {
   const refreshCurrentData = useCallback(async (recipient = readCurrentRecipient()) => {
     setCurrentRecipient(recipient);
     const autoValues = await currentAutoValues(recipient);
+    const protocolDraft = recipient ? await loadProtocolDraft() : null;
+    const currentProtocolValues =
+      recipient &&
+      protocolDraft &&
+      protocolDraft.protocolRecordId === null &&
+      Number(protocolDraft.values.recipientId) === recipient.id
+        ? protocolDraft.values
+        : {};
     setDraft((current) => {
       const recipientChanged = Boolean(
         recipient &&
@@ -478,6 +487,31 @@ export const IndividualSelectionDirection = () => {
           indicationValues: {
             ...(recipientChanged ? {} : next.indicationValues),
             ...readCurrentIndications(recipient.id, 'erythrocytes'),
+            indicationComponent: 'erythrocytes',
+          },
+        };
+      }
+
+      const protocolIndications = currentIndicationsForComponent(
+        currentProtocolValues,
+        'erythrocytes',
+      );
+      const hasProtocolIndications = Object.entries(protocolIndications).some(
+        ([key, value]) =>
+          key !== 'indicationComponent' && value.trim() !== '',
+      );
+
+      if (hasProtocolIndications) {
+        writeCurrentIndications(
+          recipient.id,
+          'erythrocytes',
+          protocolIndications,
+        );
+        return {
+          ...next,
+          indicationValues: {
+            ...(recipientChanged ? {} : next.indicationValues),
+            ...protocolIndications,
             indicationComponent: 'erythrocytes',
           },
         };

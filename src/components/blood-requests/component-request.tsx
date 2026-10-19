@@ -196,12 +196,12 @@ const loadDraft = (): DirectionDraft => {
     const savedValues = Object.fromEntries(
       Object.keys(blank).flatMap((key) => {
         if (
-          key === 'autoValues' ||
-          key === 'indicationValues' ||
-          key === 'recipientProfileSnapshot'
-        ) {
-          return [];
-        }
+        key === 'autoValues' ||
+        key === 'indicationValues' ||
+        key === 'recipientProfileSnapshot'
+      ) {
+        return [];
+      }
         const value = parsed[key as keyof DirectionDraft];
         return typeof value === 'string' ? [[key, value]] : [];
       }),
@@ -256,12 +256,12 @@ const draftFromRecord = (
   const savedValues = Object.fromEntries(
     Object.keys(blank).flatMap((key) => {
       if (
-          key === 'autoValues' ||
-          key === 'indicationValues' ||
-          key === 'recipientProfileSnapshot'
-        ) {
-          return [];
-        }
+        key === 'autoValues' ||
+        key === 'indicationValues' ||
+        key === 'recipientProfileSnapshot'
+      ) {
+        return [];
+      }
       const value = values[key];
       return typeof value === 'string' ? [[key, value]] : [];
     }),
@@ -780,27 +780,39 @@ export const ComponentRequest = () => {
   const save = async (afterPrint = false) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
 
-    if (!currentRecipient) {
+    const historicalRecipientId = Number(draft.sourceRecipientId);
+    if (savedRecordId === null && !currentRecipient) {
       setStatus('Выберите реципиента перед сохранением заявки.');
+      return false;
+    }
+    if (
+      savedRecordId !== null &&
+      (!Number.isFinite(historicalRecipientId) || historicalRecipientId <= 0)
+    ) {
+      setStatus('Не удалось определить реципиента сохранённого бланка.');
       return false;
     }
 
     try {
+      const recipientId =
+        savedRecordId !== null
+          ? historicalRecipientId
+          : currentRecipient!.id;
       const draftToSave =
         savedRecordId === null
           ? {
               ...draft,
               recipientProfileSnapshot: {
-                ...currentRecipient.profile,
-                recipientId: String(currentRecipient.id),
-                recipientName: currentRecipient.fullName,
+                ...currentRecipient!.profile,
+                recipientId: String(currentRecipient!.id),
+                recipientName: currentRecipient!.fullName,
               },
             }
           : draft;
 
       const record = await saveBloodRequestRecord({
         recordId: savedRecordId,
-        recipientId: currentRecipient.id,
+        recipientId,
         kind: 'component-request',
         values: { ...draftToSave },
       });
@@ -823,7 +835,13 @@ export const ComponentRequest = () => {
 
   const selectRecipient = async (recipient: RecipientRecord) => {
     try {
-      const previousRecipientId = currentRecipient?.id ?? null;
+      const historicalRecipientId = Number(draft.sourceRecipientId);
+      const previousRecipientId =
+        savedRecordId !== null &&
+        Number.isFinite(historicalRecipientId) &&
+        historicalRecipientId > 0
+          ? historicalRecipientId
+          : currentRecipient?.id ?? null;
       await switchCurrentRecipient(recipient);
       const recipientChanged = previousRecipientId !== recipient.id;
       if (recipientChanged) {

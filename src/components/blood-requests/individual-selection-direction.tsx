@@ -440,6 +440,7 @@ export const IndividualSelectionDirection = () => {
   const [draft, setDraft] = useState<DirectionDraft>(loadDraft);
   const [editor, setEditor] = useState<Editor>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
+  const [status, setStatus] = useState('');
   const [page2StartIndex, setPage2StartIndex] = useState(7);
   const page1Ref = useRef<HTMLElement>(null);
   const page1ContentRef = useRef<HTMLDivElement>(null);
@@ -530,6 +531,32 @@ export const IndividualSelectionDirection = () => {
       autoValues,
     );
     setDraft(next);
+    setStatus('');
+  };
+
+  const newBlank = async () => {
+    const recipient = readCurrentRecipient();
+    const autoValues = await currentAutoValues(recipient);
+    const next = mergeAutoValues(
+      { ...emptyDraft(), directionDate: todayKey() },
+      recipient,
+      autoValues,
+    );
+    setDraft(next);
+    setStatus(
+      recipient
+        ? 'Создан новый бланк для текущего реципиента.'
+        : 'Создан новый бланк.',
+    );
+  };
+
+  const save = (afterPrint = false) => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    setStatus(
+      afterPrint
+        ? 'Направление сохранено после печати.'
+        : 'Направление сохранено.',
+    );
   };
 
   const selectRecipient = async (recipient: RecipientRecord) => {
@@ -830,6 +857,7 @@ export const IndividualSelectionDirection = () => {
       window.print();
     } finally {
       document.body.classList.remove(className);
+      save(true);
     }
   };
 
@@ -845,9 +873,12 @@ export const IndividualSelectionDirection = () => {
             currentRecipientAvailable={Boolean(currentRecipient)}
             onOpenCurrentRecipient={() => setRegistryOpen(true)}
           />
-          <div className="print-actions">
+          <div className="print-actions" aria-label="Панель действий">
             <button type="button" className="clear-button" onClick={() => void clear()}>
               Очистить бланк
+            </button>
+            <button type="button" className="new-button" onClick={() => void newBlank()}>
+              Новый бланк
             </button>
             <button
               type="button"
@@ -855,6 +886,9 @@ export const IndividualSelectionDirection = () => {
               onClick={() => setRegistryOpen(true)}
             >
               Реципиенты
+            </button>
+            <button type="button" className="save-button" onClick={() => save()}>
+              Сохранить
             </button>
             {hasSecondPage ? (
               <>
@@ -867,7 +901,7 @@ export const IndividualSelectionDirection = () => {
                 </button>
                 <button
                   type="button"
-                  className="secondary-button"
+                  className="print-button"
                   onClick={() => printPage(2)}
                 >
                   Печать страницы 2
@@ -877,12 +911,17 @@ export const IndividualSelectionDirection = () => {
               <button
                 type="button"
                 className="print-button"
-                onClick={() => window.print()}
+                onClick={() => printPage(1)}
               >
                 Печать страницы
               </button>
             )}
           </div>
+          {status && (
+            <div className="toolbar-status" role="status">
+              {status}
+            </div>
+          )}
         </div>
       </header>
 

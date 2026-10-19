@@ -5,6 +5,10 @@ import {
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
+import {
+  readCurrentIndications,
+  writeCurrentIndications,
+} from '../../storage/repositories/current-indications';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import {
   findProtocolRecordsByComponentUnitNumber,
@@ -266,14 +270,28 @@ export const useProtocolWorkspace = () => {
 
     const selectedComponent =
       nextValues.componentGroup || nextValues.indicationComponent || '';
+    const currentComponent = getIndicationComponent(values);
+    const currentRecipient = readCurrentRecipient();
+    const componentChanged =
+      recordId === null &&
+      Boolean(selectedComponent) &&
+      selectedComponent !== currentComponent;
+    const sharedIndications =
+      componentChanged &&
+      currentRecipient &&
+      Number(values.recipientId) === currentRecipient.id
+        ? readCurrentIndications(currentRecipient.id, selectedComponent)
+        : {};
     const carriedIndications = previousBlankIndicationsRef.current;
     const shouldCarryIndications =
       recordId === null &&
       Boolean(selectedComponent) &&
       carriedIndications?.component === selectedComponent;
-    const appliedValues = shouldCarryIndications
-      ? { ...carriedIndications.values, ...nextValues }
-      : nextValues;
+    const appliedValues = {
+      ...(shouldCarryIndications ? carriedIndications.values : {}),
+      ...sharedIndications,
+      ...nextValues,
+    };
 
     if (shouldCarryIndications) {
       previousBlankIndicationsRef.current = null;
@@ -284,6 +302,20 @@ export const useProtocolWorkspace = () => {
       saveReagentDefaults(merged);
     }
     setValues(merged);
+
+    const activeComponent = getIndicationComponent(merged);
+    if (
+      recordId === null &&
+      activeComponent &&
+      currentRecipient &&
+      Number(merged.recipientId) === currentRecipient.id
+    ) {
+      writeCurrentIndications(
+        currentRecipient.id,
+        activeComponent,
+        merged,
+      );
+    }
 
     void syncCurrentRecipientProfile(appliedValues, {
       kind: 'protocol',

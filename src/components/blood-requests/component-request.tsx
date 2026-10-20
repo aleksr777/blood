@@ -342,10 +342,7 @@ const currentAutoValues = async (
   const protocolDraft = await loadProtocolDraft();
   const sameRecipient =
     Number(protocolDraft.values.recipientId) === recipient.id;
-  const currentProtocolValues =
-    sameRecipient && protocolDraft.protocolRecordId === null
-      ? protocolDraft.values
-      : {};
+  const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
 
   const values: ProtocolValues = {
     ...recipient.profile,
@@ -377,20 +374,19 @@ const mergeAutoValues = (
 ): DirectionDraft => {
   if (!recipient) return current;
 
-  const recipientChanged = current.sourceRecipientId !== String(recipient.id);
   const next: DirectionDraft = {
     ...current,
     sourceRecipientId: String(recipient.id),
+    recipientProfileSnapshot: {
+      ...recipient.profile,
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    },
     autoValues: { ...autoValues },
   };
 
   AUTO_FIELDS.forEach((field) => {
-    const currentValue = current[field] ?? '';
-    const previousAuto = current.autoValues[field] ?? '';
-
-    if (recipientChanged || !currentValue || currentValue === previousAuto) {
-      next[field] = autoValues[field] ?? '';
-    }
+    next[field] = autoValues[field] ?? '';
   });
 
   return next;
@@ -527,21 +523,17 @@ export const ComponentRequest = () => {
 
   const refreshCurrentData = useCallback(async (
     recipient = readCurrentRecipient(),
-    force = false,
   ) => {
     setCurrentRecipient(recipient);
-    if (savedRecordIdRef.current !== null && !force) return;
 
     const autoValues = await currentAutoValues(recipient);
     const protocolDraft = recipient ? await loadProtocolDraft() : null;
     const currentProtocolValues =
       recipient &&
       protocolDraft &&
-      protocolDraft.protocolRecordId === null &&
       Number(protocolDraft.values.recipientId) === recipient.id
         ? protocolDraft.values
         : {};
-    if (savedRecordIdRef.current !== null && !force) return;
 
     setDraft((current) => {
       const recipientChanged = Boolean(
@@ -686,7 +678,6 @@ export const ComponentRequest = () => {
 
   const updateFields = (changes: Record<string, string>) => {
     if (
-      savedRecordId === null &&
       currentRecipient &&
       changes.individualSelectionIndications !== undefined
     ) {
@@ -717,7 +708,6 @@ export const ComponentRequest = () => {
         Boolean(changes.indicationComponent) &&
         changes.indicationComponent !== currentComponent;
       const sharedIndications =
-        savedRecordId === null &&
         currentRecipient &&
         componentChanged &&
         component
@@ -729,7 +719,7 @@ export const ComponentRequest = () => {
         ...changes,
       };
 
-      if (savedRecordId === null && currentRecipient && component) {
+      if (currentRecipient && component) {
         writeCurrentIndications(
           currentRecipient.id,
           component,
@@ -870,7 +860,7 @@ export const ComponentRequest = () => {
       if (recipientChanged) {
         setSavedRecordId(null);
       }
-      await refreshCurrentData(readCurrentRecipient(), recipientChanged);
+      await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
       console.error('Не удалось выбрать реципиента для направления:', error);

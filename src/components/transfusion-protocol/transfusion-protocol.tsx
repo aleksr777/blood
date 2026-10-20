@@ -315,6 +315,7 @@ export const TransfusionProtocol = () => {
             void openRegistrationRecord(record, recipient)
           }
           onUseRecipient={workspace.selectRecipient}
+          onRecipientDeleted={workspace.handleRecipientDeleted}
         />
       )}
     </main>

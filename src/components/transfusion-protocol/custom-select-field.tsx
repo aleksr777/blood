@@ -12,7 +12,7 @@ type Props = {
   emptyDisplayLabel?: string;
   compact?: boolean;
   allowEmpty?: boolean;
-  tone?: 'positive' | 'negative';
+  tone?: 'positive' | 'negative' | 'neutral';
 };
 
 export const CustomSelectField = ({
@@ -98,6 +98,14 @@ export const CustomSelectField = ({
                 : '',
               toneBloodGroupOptions && tone === 'negative'
                 ? styles.customSelectOptionToneNegative
+                : '',
+              toneBloodGroupOptions && tone === 'neutral'
+                ? styles.customSelectOptionToneNeutral
+                : '',
+              !option &&
+              tone === 'neutral' &&
+              name.toLocaleLowerCase().includes('rh')
+                ? styles.customSelectOptionNeutralEmpty
                 : '',
             ].filter(Boolean).join(' ')}
             role="option"

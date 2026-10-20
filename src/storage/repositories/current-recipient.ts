@@ -1,4 +1,5 @@
 import { resetCurrentIndications } from './current-indications';
+import { clearRecipientLinkedValues } from './recipient-linked-values';
 import {
   loadProtocolDraft,
   saveProtocolDraft,
@@ -467,8 +468,22 @@ export const switchCurrentRecipient = async (
     savePreviousRegistration(registrationDraft, recipient.id),
   ]);
 
-  const protocolValues = protocolValuesForRecipient(recipient);
-  const registrationValues = registrationValuesForRecipient(recipient);
+  const profileValues = recipientProfileValuesForForms(recipient);
+  const protocolValues = {
+    ...(protocolRecipientId !== null && protocolRecipientId !== recipient.id
+      ? clearRecipientLinkedValues(protocolDraft.values, protocolRecipientId)
+      : protocolDraft.values),
+    ...profileValues,
+  };
+  const registrationValues = {
+    ...(registrationRecipientId !== null && registrationRecipientId !== recipient.id
+      ? clearRecipientLinkedValues(
+          registrationDraft.values,
+          registrationRecipientId,
+        )
+      : registrationDraft.values),
+    ...profileValues,
+  };
   const now = Date.now();
 
   await Promise.all([

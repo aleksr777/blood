@@ -96,6 +96,8 @@ type AutoField =
 type DirectionDraft = Record<AutoField, string> & {
   sourceRecipientId: string;
   requiredComponent: string;
+  componentAbo: string;
+  componentRh: string;
   quantity: string;
   transfusionOrder: string;
   componentSelectionRequirement: string;
@@ -159,6 +161,8 @@ const FOOTER_FIELDS: RequestEditorField[] = [
 const emptyDraft = (): DirectionDraft => ({
   sourceRecipientId: '',
   requiredComponent: '',
+  componentAbo: '',
+  componentRh: '',
   quantity: '',
   transfusionOrder: '',
   componentSelectionRequirement: '',
@@ -1156,6 +1160,16 @@ export const ComponentRequest = () => {
         value={draft.requiredComponent}
       />
       <div className={styles.singleLine}>
+        <span>Группа крови и резус-фактор компонента:</span>
+        <span className={styles.valueLine}>
+          {displayValue(
+            [draft.componentAbo, draft.componentRh]
+              .filter(Boolean)
+              .join(' '),
+          )}
+        </span>
+      </div>
+      <div className={styles.singleLine}>
         <span>Количество:</span>
         <span className={styles.valueLine}>
           {displayValue(formatDoseQuantity(draft.quantity))}
@@ -1389,6 +1403,8 @@ export const ComponentRequest = () => {
       {editor === 'component' && (
         <IndividualSelectionComponentModal
           requiredComponent={draft.requiredComponent}
+          componentAbo={draft.componentAbo}
+          componentRh={draft.componentRh}
           quantity={draft.quantity}
           transfusionOrder={draft.transfusionOrder}
           componentSelectionRequirement={draft.componentSelectionRequirement}

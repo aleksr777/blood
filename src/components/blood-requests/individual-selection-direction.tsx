@@ -383,10 +383,7 @@ const currentAutoValues = async (
   const protocolDraft = await loadProtocolDraft();
   const sameRecipient =
     Number(protocolDraft.values.recipientId) === recipient.id;
-  const currentProtocolValues =
-    sameRecipient && protocolDraft.protocolRecordId === null
-      ? protocolDraft.values
-      : {};
+  const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
 
   const values: ProtocolValues = {
     ...recipient.profile,
@@ -419,20 +416,19 @@ const mergeAutoValues = (
 ): DirectionDraft => {
   if (!recipient) return current;
 
-  const recipientChanged = current.sourceRecipientId !== String(recipient.id);
   const next: DirectionDraft = {
     ...current,
     sourceRecipientId: String(recipient.id),
+    recipientProfileSnapshot: {
+      ...recipient.profile,
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    },
     autoValues: { ...autoValues },
   };
 
   AUTO_FIELDS.forEach((field) => {
-    const currentValue = current[field] ?? '';
-    const previousAuto = current.autoValues[field] ?? '';
-
-    if (recipientChanged || !currentValue || currentValue === previousAuto) {
-      next[field] = autoValues[field] ?? '';
-    }
+    next[field] = autoValues[field] ?? '';
   });
 
   return next;
@@ -571,21 +567,17 @@ export const IndividualSelectionDirection = () => {
 
   const refreshCurrentData = useCallback(async (
     recipient = readCurrentRecipient(),
-    force = false,
   ) => {
     setCurrentRecipient(recipient);
-    if (savedRecordIdRef.current !== null && !force) return;
 
     const autoValues = await currentAutoValues(recipient);
     const protocolDraft = recipient ? await loadProtocolDraft() : null;
     const currentProtocolValues =
       recipient &&
       protocolDraft &&
-      protocolDraft.protocolRecordId === null &&
       Number(protocolDraft.values.recipientId) === recipient.id
         ? protocolDraft.values
         : {};
-    if (savedRecordIdRef.current !== null && !force) return;
 
     setDraft((current) => {
       const recipientChanged = Boolean(
@@ -729,7 +721,6 @@ export const IndividualSelectionDirection = () => {
 
   const updateFields = (changes: Record<string, string>) => {
     if (
-      savedRecordId === null &&
       currentRecipient &&
       changes.individualSelectionIndications !== undefined
     ) {
@@ -760,7 +751,7 @@ export const IndividualSelectionDirection = () => {
         indicationComponent: 'erythrocytes',
       };
 
-      if (savedRecordId === null && currentRecipient) {
+      if (currentRecipient) {
         writeCurrentIndications(
           currentRecipient.id,
           'erythrocytes',
@@ -923,7 +914,7 @@ export const IndividualSelectionDirection = () => {
       if (recipientChanged) {
         setSavedRecordId(null);
       }
-      await refreshCurrentData(readCurrentRecipient(), recipientChanged);
+      await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
       console.error('Не удалось выбрать реципиента для направления:', error);

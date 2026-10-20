@@ -147,6 +147,19 @@ export const readCurrentRecipient = (): CurrentRecipient | null => {
   }
 };
 
+export const clearCurrentRecipientIfMatches = (recipientId: number) => {
+  const current = readCurrentRecipient();
+  if (!current || current.id !== recipientId) return false;
+
+  try {
+    window.localStorage.removeItem(CURRENT_RECIPIENT_STORAGE_KEY);
+  } catch (error) {
+    console.error('Не удалось очистить текущего реципиента:', error);
+  }
+
+  return true;
+};
+
 const writeCurrentRecipientSnapshot = (recipient: CurrentRecipient) => {
   try {
     window.localStorage.setItem(

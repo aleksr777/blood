@@ -70,7 +70,7 @@ export const RecipientDatabaseModal = ({
 
     return { id, name };
   });
-  const [query, setQuery] = useState(initialRecipient.name);
+  const [query, setQuery] = useState('');
   const [initializingRecipient, setInitializingRecipient] = useState(
     Boolean(initialRecipient.id || initialRecipient.name),
   );
@@ -119,11 +119,7 @@ export const RecipientDatabaseModal = ({
         if (!active) return;
         setRecipients(items);
         setSelected(recipient);
-        if (recipient) {
-          setQuery(recipient.fullName);
-        } else {
-          setQuery(initialRecipient.name);
-        }
+        setQuery('');
       })
       .catch((error: unknown) =>
         console.error('Не удалось открыть текущего реципиента:', error),
@@ -229,7 +225,7 @@ export const RecipientDatabaseModal = ({
     }
   };
   const openExistingRecipient = (recipient: RecipientRecord) => {
-    setQuery(recipient.fullName);
+    setQuery('');
     setSelected(recipient);
   };
   const saveRecipient = async (recipient: RecipientRecord, values: ProtocolValues) => {

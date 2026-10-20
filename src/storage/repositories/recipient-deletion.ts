@@ -2,66 +2,10 @@ import { clearCurrentIndicationsForRecipient } from './current-indications';
 import { clearCurrentRecipientIfMatches } from './current-recipient';
 import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft';
 import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft';
-import { RECIPIENT_PROFILE_FIELDS } from '../sqlite/recipient-data';
-import type { ProtocolValuesRecord } from '../sqlite/database-types';
+import { clearRecipientLinkedValues } from './recipient-linked-values';
 
 const COMPONENT_REQUEST_STORAGE_KEY = 'blood:component-request-direction-draft';
 const INDIVIDUAL_SELECTION_STORAGE_KEY = 'blood:individual-selection-direction-draft';
-
-const recipientValueFields = new Set<string>([
-  'recipientId',
-  'recipientName',
-  'recipientAge',
-  ...RECIPIENT_PROFILE_FIELDS,
-  'previousTransfusionsAutoText',
-  'indications',
-  'selectionStatus',
-  'selectionOrganization',
-  'selectionDate',
-  'responsiblePerson',
-  'compatibilityConclusion',
-  'confirmedRecipientAboResult',
-  'planeTestResult',
-  'biologicalTestResult',
-  'complicationsStatus',
-  'symptoms',
-  'severity',
-  'registrationTransfusionRows',
-]);
-
-const recipientMonitoringPrefixes = [
-  'beforeBp',
-  'beforePulse',
-  'beforeTemperature',
-  'beforeUrine',
-  'hour1Bp',
-  'hour1Pulse',
-  'hour1Temperature',
-  'hour1Urine',
-  'hour2Bp',
-  'hour2Pulse',
-  'hour2Temperature',
-  'hour2Urine',
-];
-
-const isRecipientLinkedProtocolField = (name: string) =>
-  recipientValueFields.has(name) ||
-  name.startsWith('recipient') ||
-  name.startsWith('indication') ||
-  recipientMonitoringPrefixes.includes(name);
-
-export const clearRecipientLinkedValues = (
-  values: ProtocolValuesRecord,
-  recipientId: number,
-): ProtocolValuesRecord => {
-  if (Number(values.recipientId) !== recipientId) return values;
-
-  return Object.fromEntries(
-    Object.entries(values).filter(
-      ([name]) => !isRecipientLinkedProtocolField(name),
-    ),
-  );
-};
 
 const requestRecipientFields = [
   'sourceRecipientId',

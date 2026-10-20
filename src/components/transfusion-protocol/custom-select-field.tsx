@@ -47,6 +47,7 @@ export const CustomSelectField = ({
           compact ? styles.customSelectControlCompact : '',
           tone === 'positive' ? styles.customSelectControlRhPositive : '',
           tone === 'negative' ? styles.customSelectControlRhNegative : '',
+          tone === 'neutral' ? styles.customSelectControlNeutral : '',
         ].filter(Boolean).join(' ')}
         aria-label={label}
         aria-haspopup="listbox"

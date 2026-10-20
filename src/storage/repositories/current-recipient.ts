@@ -356,8 +356,8 @@ export const syncCurrentRecipientProfile = async (
       ...protocolDraft,
       values: {
         ...protocolDraft.values,
-        ...sharedValues,
         ...generatedTransfusionHistoryValues(protocolDraft.values),
+        ...sharedValues,
       },
       protocolRecordId:
         profileChanged && protocolDraft.protocolRecordId !== null
@@ -454,8 +454,8 @@ export const switchCurrentRecipient = async (
     );
     const protocolValues = {
       ...protocolDraft.values,
-      ...profileValues,
       ...generatedTransfusionHistoryValues(protocolDraft.values),
+      ...profileValues,
     };
     const registrationValues = {
       ...registrationDraft.values,

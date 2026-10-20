@@ -569,6 +569,11 @@ export const TransfusionRegistration = () => {
       {registryOpen && (
         <RecipientDatabaseModal
           initialRecipientId={registryRecipientId}
+          initialRecipientName={
+            readCurrentRecipient()?.fullName ??
+            values.recipientName ??
+            ''
+          }
           onUseRecipient={selectRecipient}
           onOpenRecord={(record, recipient) =>
             void openProtocolRecord(record, recipient)

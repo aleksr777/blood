@@ -23,6 +23,7 @@ import {
   writeCurrentIndividualSelectionIndications,
 } from '../../storage/repositories/current-indications';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
+import { clearRecipientLinkedRequestDraft } from '../../storage/repositories/recipient-deletion';
 import {
   saveBloodRequestRecord,
   updateRecipient,
@@ -889,6 +890,25 @@ export const ComponentRequest = () => {
     }
   };
 
+  const handleRecipientDeleted = (recipientId: number) => {
+    if (currentRecipient?.id === recipientId) {
+      setCurrentRecipient(null);
+    }
+
+    if (Number(draft.sourceRecipientId) !== recipientId) return;
+
+    savedRecordIdRef.current = null;
+    setSavedRecordId(null);
+    setDraft((current) =>
+      clearRecipientLinkedRequestDraft(
+        current,
+        recipientId,
+        'component-request',
+      ),
+    );
+    setStatus('Реципиент удалён. Связанные с ним данные удалены из текущего заявки.');
+  };
+
   const examinationValues = useMemo<ProtocolValues>(() => {
     if (savedRecordId === null) {
       return {
@@ -1407,6 +1427,7 @@ export const ComponentRequest = () => {
           onOpenComponentRequestRecord={(record, recipient) => {
             void openSavedRequest(record, recipient);
           }}
+          onRecipientDeleted={handleRecipientDeleted}
           onClose={() => setRegistryOpen(false)}
         />
       )}

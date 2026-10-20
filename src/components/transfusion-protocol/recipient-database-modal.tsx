@@ -54,8 +54,25 @@ export const RecipientDatabaseModal = ({
   initialRecipientId = null,
   initialRecipientName = '',
 }: Props) => {
-  const [query, setQuery] = useState(initialRecipientName);
-  const [initializingRecipient, setInitializingRecipient] = useState(Boolean(initialRecipientId));
+  const [initialRecipient] = useState(() => {
+    const currentRecipient = readCurrentRecipient();
+    const requestedRecipientId =
+      typeof initialRecipientId === 'number' &&
+      Number.isFinite(initialRecipientId) &&
+      initialRecipientId > 0
+        ? initialRecipientId
+        : null;
+    const id = requestedRecipientId ?? currentRecipient?.id ?? null;
+    const name =
+      initialRecipientName.trim() ||
+      (currentRecipient?.id === id ? currentRecipient.fullName : '');
+
+    return { id, name };
+  });
+  const [query, setQuery] = useState(initialRecipient.name);
+  const [initializingRecipient, setInitializingRecipient] = useState(
+    Boolean(initialRecipient.id),
+  );
   const [recipients, setRecipients] = useState<RecipientRecord[]>([]);
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
@@ -75,7 +92,7 @@ export const RecipientDatabaseModal = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!initialRecipientId) {
+    if (!initialRecipient.id) {
       setInitializingRecipient(false);
       return undefined;
     }
@@ -83,7 +100,7 @@ export const RecipientDatabaseModal = ({
     let active = true;
     setLoading(true);
 
-    void getRecipientById(initialRecipientId)
+    void getRecipientById(initialRecipient.id)
       .then((recipient) => {
         if (!active) return;
         setSelected(recipient);
@@ -102,7 +119,7 @@ export const RecipientDatabaseModal = ({
     return () => {
       active = false;
     };
-  }, [initialRecipientId]);
+  }, [initialRecipient.id]);
 
   useEffect(() => {
     if (initializingRecipient) return undefined;

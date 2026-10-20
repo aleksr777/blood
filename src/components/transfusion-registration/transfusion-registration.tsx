@@ -12,6 +12,7 @@ import {
   saveRegistrationDraft,
 } from '../../storage/repositories/registration-draft';
 import { saveProtocolDraft } from '../../storage/repositories/protocol-draft';
+import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-deletion';
 import {
   saveRegistrationRecord,
   type ProtocolRecord,
@@ -353,6 +354,15 @@ export const TransfusionRegistration = () => {
     setRegistryOpen(true);
   };
 
+  const handleRecipientDeleted = (recipientId: number) => {
+    if (Number(values.recipientId) !== recipientId) return;
+
+    setRecordId(null);
+    setValues(clearRecipientLinkedValues(values, recipientId));
+    setRegistryRecipientId(null);
+    setStatus('Реципиент удалён. Связанные с ним данные удалены из текущего листа регистрации.');
+  };
+
   const print = () => {
     const root = document.documentElement;
 
@@ -581,6 +591,7 @@ export const TransfusionRegistration = () => {
           onOpenRegistrationRecord={(record, recipient) =>
             void openRegistrationRecord(record, recipient)
           }
+          onRecipientDeleted={handleRecipientDeleted}
           onClose={() => {
             setRegistryRecipientId(null);
             setRegistryOpen(false);

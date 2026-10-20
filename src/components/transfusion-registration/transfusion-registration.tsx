@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
+  hasRecipientProfileDifference,
   readCurrentRecipient,
   recipientProfileValuesForForms,
   switchCurrentRecipient,
@@ -87,15 +88,40 @@ const readPendingRegistrationRecord = (): RegistrationRecord | null => {
 
 export const TransfusionRegistration = () => {
   const [initialRecord] = useState<RegistrationRecord | null>(readPendingRegistrationRecord);
-  const [values, setValues] = useState<ProtocolValues>(() =>
-    initialRecord
-      ? {
-          ...initialRecord.values,
-          recipientId: String(initialRecord.recipientId),
-        }
-      : {},
-  );
-  const [recordId, setRecordId] = useState<number | null>(initialRecord?.id ?? null);
+  const [values, setValues] = useState<ProtocolValues>(() => {
+    if (!initialRecord) return {};
+
+    const currentRecipient = readCurrentRecipient();
+    const previousRecipientId = initialRecord.recipientId;
+    const recipientChanged =
+      currentRecipient !== null && currentRecipient.id !== previousRecipientId;
+    const baseValues =
+      recipientChanged
+        ? clearRecipientLinkedValues(initialRecord.values, previousRecipientId)
+        : initialRecord.values;
+
+    return {
+      ...baseValues,
+      ...(currentRecipient
+        ? recipientProfileValuesForForms(currentRecipient)
+        : {
+            recipientId: String(previousRecipientId),
+          }),
+    };
+  });
+  const [recordId, setRecordId] = useState<number | null>(() => {
+    if (!initialRecord) return null;
+
+    const currentRecipient = readCurrentRecipient();
+    if (!currentRecipient) return initialRecord.id;
+
+    const recipientChanged = currentRecipient.id !== initialRecord.recipientId;
+    const profileChanged =
+      recipientChanged ||
+      hasRecipientProfileDifference(initialRecord.values, currentRecipient);
+
+    return profileChanged ? null : initialRecord.id;
+  });
   const [draftLoaded, setDraftLoaded] = useState(Boolean(initialRecord));
   const [registryOpen, setRegistryOpen] = useState(false);
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
@@ -108,7 +134,7 @@ export const TransfusionRegistration = () => {
     Number.isFinite(currentRecipientId) && currentRecipientId > 0;
   const storedCurrentRecipient = readCurrentRecipient();
   const currentRecipientProfile =
-    recordId === null && storedCurrentRecipient?.id === currentRecipientId
+    storedCurrentRecipient?.id === currentRecipientId
       ? storedCurrentRecipient.profile
       : {};
   const birthDateParts = getBirthDateParts(values.recipientBirthDate);
@@ -116,19 +142,7 @@ export const TransfusionRegistration = () => {
   const registrationRows = parseRegistrationTransfusionRows(values);
 
   useEffect(() => {
-    if (initialRecord) {
-      void saveRegistrationDraft({
-        values: {
-          ...initialRecord.values,
-          recipientId: String(initialRecord.recipientId),
-        },
-        registrationRecordId: initialRecord.id,
-        updatedAt: Date.now(),
-      }).catch((error: unknown) =>
-        console.error('Не удалось сохранить открытый лист регистрации как текущий:', error),
-      );
-      return;
-    }
+    if (initialRecord) return;
 
     let active = true;
     void loadRegistrationDraft()
@@ -137,20 +151,38 @@ export const TransfusionRegistration = () => {
 
         if (Object.keys(draft.values).length > 0) {
           const currentRecipient = readCurrentRecipient();
-          if (draft.registrationRecordId !== null) {
+
+          if (!currentRecipient) {
+            if (draft.registrationRecordId === null) {
+              adoptCurrentRecipientFromValues(draft.values);
+            }
             setValues(draft.values);
-          } else if (!currentRecipient) {
-            adoptCurrentRecipientFromValues(draft.values);
-            setValues(draft.values);
-          } else if (Number(draft.values.recipientId) === currentRecipient.id) {
-            setValues({
-              ...draft.values,
-              ...recipientProfileValuesForForms(currentRecipient),
-            });
-          } else {
-            setValues(draft.values);
+            setRecordId(draft.registrationRecordId);
+            return;
           }
-          setRecordId(draft.registrationRecordId);
+
+          const previousRecipientId = Number(draft.values.recipientId);
+          const recipientChanged =
+            Number.isFinite(previousRecipientId) &&
+            previousRecipientId > 0 &&
+            previousRecipientId !== currentRecipient.id;
+          const baseValues =
+            recipientChanged
+              ? clearRecipientLinkedValues(draft.values, previousRecipientId)
+              : draft.values;
+          const profileChanged =
+            recipientChanged ||
+            hasRecipientProfileDifference(draft.values, currentRecipient);
+
+          setValues({
+            ...baseValues,
+            ...recipientProfileValuesForForms(currentRecipient),
+          });
+          setRecordId(
+            profileChanged && draft.registrationRecordId !== null
+              ? null
+              : draft.registrationRecordId,
+          );
           return;
         }
 
@@ -196,16 +228,16 @@ export const TransfusionRegistration = () => {
         recordId,
       });
 
+      setRecordId(result.registrationRecordId);
+      setValues(result.registrationValues);
+
       if (result.changed) {
-        setRecordId(null);
-        setValues(result.registrationValues);
         setStatus(
           result.protocolSaved || result.registrationSaved
             ? 'Бланки предыдущего реципиента автоматически сохранены. Выбран новый реципиент.'
             : `Выбран реципиент: ${recipient.fullName}.`,
         );
       } else {
-        setValues(result.registrationValues);
         setStatus(`Текущий реципиент: ${recipient.fullName}.`);
       }
 
@@ -228,14 +260,27 @@ export const TransfusionRegistration = () => {
     const switched = await selectRecipient(recipient);
     if (!switched) return;
 
-    setRecordId(record.id);
+    const currentRecipient = readCurrentRecipient();
+    const profileChanged = currentRecipient
+      ? hasRecipientProfileDifference(record.values, currentRecipient)
+      : false;
+
+    setRecordId(profileChanged ? null : record.id);
     setValues({
       ...record.values,
-      recipientId: String(record.recipientId),
+      ...(currentRecipient
+        ? recipientProfileValuesForForms(currentRecipient)
+        : {
+            recipientId: String(record.recipientId),
+          }),
     });
     setRegistryRecipientId(null);
     setRegistryOpen(false);
-    setStatus('Сохранённый лист регистрации открыт.');
+    setStatus(
+      profileChanged
+        ? 'Сохранённый лист регистрации открыт с актуальными данными текущего реципиента. При сохранении будет создан новый бланк.'
+        : 'Сохранённый лист регистрации открыт.',
+    );
   };
 
   const openProtocolRecord = async (
@@ -246,12 +291,21 @@ export const TransfusionRegistration = () => {
     if (!switched) return;
 
     try {
+      const currentRecipient = readCurrentRecipient();
+      const profileChanged = currentRecipient
+        ? hasRecipientProfileDifference(record.values, currentRecipient)
+        : false;
+
       await saveProtocolDraft({
         values: {
           ...record.values,
-          recipientId: String(record.recipientId),
+          ...(currentRecipient
+            ? recipientProfileValuesForForms(currentRecipient)
+            : {
+                recipientId: String(record.recipientId),
+              }),
         },
-        protocolRecordId: record.id,
+        protocolRecordId: profileChanged ? null : record.id,
         updatedAt: Date.now(),
       });
       setRegistryRecipientId(null);
@@ -273,18 +327,24 @@ export const TransfusionRegistration = () => {
       return false;
     }
 
+    if (recordId !== null) {
+      setStatus(
+        afterPrint
+          ? 'Сохранённый лист регистрации не изменён.'
+          : 'Сохранённый лист регистрации не изменён. Исходная запись оставлена без изменений.',
+      );
+      return true;
+    }
+
     try {
-      const wasSavedRecord = recordId !== null;
-      const record = await saveRegistrationRecord(recordId, values);
+      const record = await saveRegistrationRecord(null, values);
       setRecordId(record.id);
       const savedValues = {
         ...values,
         recipientId: String(record.recipientId),
       };
       setValues(savedValues);
-      if (!wasSavedRecord) {
-        adoptCurrentRecipientFromValues(savedValues);
-      }
+      adoptCurrentRecipientFromValues(savedValues);
       setStatus(
         afterPrint
           ? 'Лист регистрации сохранён после печати.'
@@ -331,13 +391,18 @@ export const TransfusionRegistration = () => {
   };
 
   const updatePatientDetails = (nextValues: ProtocolValues) => {
+    const editingSavedRecord = recordId !== null;
+    if (editingSavedRecord) {
+      setRecordId(null);
+    }
+
     const merged = { ...values, ...nextValues };
     setValues(merged);
 
     void syncCurrentRecipientProfile(nextValues, {
       kind: 'registration',
       values: merged,
-      recordId,
+      recordId: editingSavedRecord ? null : recordId,
     }).catch((error: unknown) =>
       console.error('Не удалось синхронизировать данные реципиента:', error),
     );
@@ -559,9 +624,12 @@ export const TransfusionRegistration = () => {
         <RegistrationTransfusionsModal
           recipientId={currentRecipientAvailable ? currentRecipientId : null}
           values={values}
-          onApply={(nextValues) =>
-            setValues((current) => ({ ...current, ...nextValues }))
-          }
+          onApply={(nextValues) => {
+            if (recordId !== null) {
+              setRecordId(null);
+            }
+            setValues((current) => ({ ...current, ...nextValues }));
+          }}
           onClose={() => setTableEditorOpen(false)}
         />
       )}

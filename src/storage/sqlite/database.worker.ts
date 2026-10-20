@@ -1,5 +1,5 @@
 import type { DatabaseRequest, DatabaseResponse } from './database-types';
-import { withDatabaseAccess } from './database';
+import { getDatabase } from './database';
 import {
   importDepartments,
   listDepartments,
@@ -51,6 +51,7 @@ import {
 const dispatchRequest = async (request: DatabaseRequest) => {
   switch (request.action) {
     case 'init':
+      await getDatabase();
       return true;
     case 'departments:list':
       return listDepartments();
@@ -164,8 +165,16 @@ const dispatchRequest = async (request: DatabaseRequest) => {
   }
 };
 
-const handleRequest = (request: DatabaseRequest) =>
-  withDatabaseAccess(() => dispatchRequest(request));
+let requestQueue: Promise<void> = Promise.resolve();
+
+const handleRequest = <T>(callback: () => Promise<T>) => {
+  const run = requestQueue.then(callback, callback);
+  requestQueue = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+};
 
 const send = (response: DatabaseResponse) => {
   const scope = globalThis as unknown as { postMessage: (message: DatabaseResponse) => void };
@@ -173,7 +182,7 @@ const send = (response: DatabaseResponse) => {
 };
 
 globalThis.addEventListener('message', (event: MessageEvent<DatabaseRequest>) => {
-  void handleRequest(event.data)
+  void handleRequest(() => dispatchRequest(event.data))
     .then((result) => send({ id: event.data.id, ok: true, result }))
     .catch((error: unknown) => {
       const message = error instanceof Error ? error.message : String(error);

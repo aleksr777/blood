@@ -131,9 +131,17 @@ export const RecipientDatabaseModal = ({
         .then((items) => {
           if (!active) return;
           setRecipients(items);
-          setSelected((current) =>
-            current && items.some(({ id }) => id === current.id) ? current : null,
-          );
+          setSelected((current) => {
+            const currentMatch = current
+              ? items.find(({ id }) => id === current.id)
+              : undefined;
+            if (currentMatch) return currentMatch;
+
+            const initialMatch = initialRecipient.id
+              ? items.find(({ id }) => id === initialRecipient.id)
+              : undefined;
+            return initialMatch ?? null;
+          });
         })
         .catch((error: unknown) => console.error('Не удалось найти реципиентов:', error))
         .finally(() => active && setLoading(false));
@@ -142,7 +150,7 @@ export const RecipientDatabaseModal = ({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [initializingRecipient, query]);
+  }, [initialRecipient.id, initializingRecipient, query]);
   useEffect(() => {
     if (!selected) {
       setRecords([]);

@@ -833,50 +833,26 @@ export const IndividualSelectionDirection = () => {
   const save = async (afterPrint = false) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
 
-    const historicalRecipientId = Number(draft.sourceRecipientId);
-    if (savedRecordId === null && !currentRecipient) {
+    const recipient = readCurrentRecipient();
+    if (!recipient) {
       setStatus('Выберите реципиента перед сохранением направления.');
-      return false;
-    }
-    if (
-      savedRecordId !== null &&
-      (!Number.isFinite(historicalRecipientId) || historicalRecipientId <= 0)
-    ) {
-      setStatus('Не удалось определить реципиента сохранённого бланка.');
       return false;
     }
 
     try {
-      const recipientId =
-        savedRecordId !== null
-          ? historicalRecipientId
-          : currentRecipient!.id;
-      const protocolDraft =
-        savedRecordId === null ? await loadProtocolDraft() : null;
-      const currentProtocolValues =
-        savedRecordId === null &&
-        currentRecipient &&
-        protocolDraft &&
-        protocolDraft.protocolRecordId === null &&
-        Number(protocolDraft.values.recipientId) === currentRecipient.id
-          ? protocolDraft.values
-          : {};
-      const draftToSave =
-        savedRecordId === null
-          ? {
-              ...draft,
-              recipientProfileSnapshot: {
-                ...currentRecipient!.profile,
-                ...currentProtocolValues,
-                recipientId: String(currentRecipient!.id),
-                recipientName: currentRecipient!.fullName,
-              },
-            }
-          : draft;
+      const draftToSave = {
+        ...draft,
+        sourceRecipientId: String(recipient.id),
+        recipientProfileSnapshot: {
+          ...recipient.profile,
+          recipientId: String(recipient.id),
+          recipientName: recipient.fullName,
+        },
+      };
 
       const record = await saveBloodRequestRecord({
         recordId: savedRecordId,
-        recipientId,
+        recipientId: recipient.id,
         kind: 'individual-selection-direction',
         values: { ...draftToSave },
       });
@@ -928,8 +904,16 @@ export const IndividualSelectionDirection = () => {
   ) => {
     try {
       await switchCurrentRecipient(recipient);
-      setCurrentRecipient(readCurrentRecipient());
-      setDraft(draftFromRecord(record.values));
+      const currentRecipient = readCurrentRecipient();
+      const autoValues = await currentAutoValues(currentRecipient);
+      setCurrentRecipient(currentRecipient);
+      setDraft(
+        mergeAutoValues(
+          draftFromRecord(record.values),
+          currentRecipient,
+          autoValues,
+        ),
+      );
       savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
       setRegistryOpen(false);
@@ -960,11 +944,11 @@ export const IndividualSelectionDirection = () => {
   };
 
   const examinationValues = useMemo<ProtocolValues>(() => {
-    if (savedRecordId === null) {
+    if (currentRecipient) {
       return {
-        ...(currentRecipient?.profile ?? {}),
-        recipientId: currentRecipient ? String(currentRecipient.id) : '',
-        recipientName: currentRecipient?.fullName ?? '',
+        ...currentRecipient.profile,
+        recipientId: String(currentRecipient.id),
+        recipientName: currentRecipient.fullName,
       };
     }
 
@@ -977,100 +961,20 @@ export const IndividualSelectionDirection = () => {
       diagnosis: draft.diagnosis,
       department: draft.department,
     };
-  }, [currentRecipient, draft, savedRecordId]);
+  }, [currentRecipient, draft]);
 
-  const updateExamination = async (changes: ProtocolValues) => {
-    if (savedRecordId !== null) {
-      setDraft((current) => {
-        const snapshot: ProtocolValues = {
-          ...current.recipientProfileSnapshot,
-          recipientId: current.sourceRecipientId,
-          recipientName: current.recipientName,
-          recipientSex: current.recipientSex,
-          medicalRecordNumber: current.medicalRecordNumber,
-          diagnosis: current.diagnosis,
-          department: current.department,
-          ...changes,
-        };
-        const next = {
-          ...current,
-          recipientProfileSnapshot: snapshot,
-        };
-
-        if (changes.recipientName !== undefined) {
-          next.recipientName = changes.recipientName;
-        }
-        if (changes.recipientBirthDate !== undefined) {
-          next.recipientAge = formatRecipientAge(changes.recipientBirthDate);
-        }
-        if (changes.recipientSex !== undefined) {
-          next.recipientSex = changes.recipientSex;
-        }
-        if (changes.medicalRecordNumber !== undefined) {
-          next.medicalRecordNumber = changes.medicalRecordNumber;
-        }
-        if (changes.diagnosis !== undefined) {
-          next.diagnosis = changes.diagnosis;
-        }
-        if (
-          changes.recipientAbo !== undefined ||
-          changes.recipientRh !== undefined
-        ) {
-          next.recipientAboRh = [snapshot.recipientAbo, snapshot.recipientRh]
-            .filter(Boolean)
-            .join(' ');
-        }
-        if (
-          Object.keys(changes).some(
-            (key) =>
-              key === 'recipientAntigens' ||
-              key.startsWith('recipientAntigen'),
-          )
-        ) {
-          next.recipientPhenotype = formatRecipientAntigens(snapshot);
-        }
-        if (
-          Object.keys(changes).some((key) =>
-            [
-              'recipientPregnanciesCount',
-              'recipientBirthsCount',
-              'recipientSpontaneousAbortionsCount',
-              'recipientHemolyticDiseaseNewbornHistory',
-            ].includes(key),
-          )
-        ) {
-          next.obstetricHistory =
-            snapshot.recipientSex === 'Женский'
-              ? formatObstetricHistory(snapshot)
-              : '';
-        }
-        if (
-          Object.keys(changes).some((key) =>
-            [
-              'previousTransfusionsStatus',
-              'previousTransfusions',
-              'previousReactionsStatus',
-              'previousReactions',
-              'individualSelectionHistoryStatus',
-              'individualSelectionHistory',
-            ].includes(key),
-          )
-        ) {
-          next.transfusionHistory = formatTransfusionHistory(snapshot);
-        }
-
-        return next;
-      });
-      return;
-    }
-
-    if (!currentRecipient) return;
+  const updateExamination = async (changes: ProtocolValues) =  const updateExamination = async (changes: ProtocolValues) => {
+    const recipient = readCurrentRecipient();
+    if (!recipient) return;
 
     try {
-      await updateCurrentRecipientProfile(currentRecipient, changes);
+      await updateCurrentRecipientProfile(recipient, changes);
       await refreshCurrentData(readCurrentRecipient());
     } catch (error) {
-      console.error('Не удалось обновить общие данные медицинского обследования реципиента:', error);
+      console.error(
+        'Не удалось обновить общие данные медицинского обследования реципиента:',
+        error,
+      );
     }
   };
 

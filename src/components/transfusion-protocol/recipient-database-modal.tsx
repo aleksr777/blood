@@ -334,6 +334,7 @@ export const RecipientDatabaseModal = ({
         />
         <RecipientHistoryPanel
           recipient={selected}
+          currentRecipientId={readCurrentRecipient()?.id ?? null}
           records={records}
           registrationRecords={registrationRecords}
           individualSelectionDirectionRecords={individualSelectionDirectionRecords}

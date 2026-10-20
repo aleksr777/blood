@@ -111,9 +111,7 @@ export const CustomSelectField = ({
               toneBloodGroupOptions && tone === 'neutral'
                 ? styles.customSelectOptionToneNeutral
                 : '',
-              !option &&
-              tone === 'neutral' &&
-              normalizedName.includes('rh')
+              !option && isBloodGroupField
                 ? styles.customSelectOptionNeutralEmpty
                 : '',
             ].filter(Boolean).join(' ')}

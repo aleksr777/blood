@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
+import { clearDeletedRecipientFromCurrentForms } from '../../storage/repositories/recipient-deletion';
 import {
   createRecipient,
   findRecipientsByName,
@@ -41,6 +42,7 @@ type Props = {
     recipient: RecipientRecord,
   ) => void;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
+  onRecipientDeleted?: (recipientId: number) => void | Promise<void>;
   initialRecipientId?: number | null;
   initialRecipientName?: string;
 };
@@ -52,6 +54,7 @@ export const RecipientDatabaseModal = ({
   onOpenIndividualSelectionDirectionRecord,
   onOpenComponentRequestRecord,
   onUseRecipient,
+  onRecipientDeleted,
   initialRecipientId = null,
   initialRecipientName = '',
 }: Props) => {
@@ -240,6 +243,9 @@ export const RecipientDatabaseModal = ({
 
   const deleteRecipient = async (recipient: RecipientRecord) => {
     await removeRecipient(recipient.id);
+    await clearDeletedRecipientFromCurrentForms(recipient.id);
+    await onRecipientDeleted?.(recipient.id);
+
     setRecipients((current) => current.filter(({ id }) => id !== recipient.id));
     setSelected(null);
     setRecords([]);

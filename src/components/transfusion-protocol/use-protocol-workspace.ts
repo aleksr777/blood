@@ -10,7 +10,7 @@ import {
   writeCurrentIndications,
 } from '../../storage/repositories/current-indications';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
-import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-deletion';
+import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import {
   findProtocolRecordsByComponentUnitNumber,
   listProtocolRecords,

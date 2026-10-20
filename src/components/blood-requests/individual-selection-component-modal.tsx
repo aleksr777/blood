@@ -15,6 +15,7 @@ import {
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import { sanitizeDoseQuantity } from './dose-quantity';
+import editorStyles from '../transfusion-protocol/protocol-editor.module.css';
 import styles from './individual-selection-component-modal.module.css';
 
 const REQUIRED_COMPONENT_CATEGORY = 'individualSelectionRequiredComponent';
@@ -55,6 +56,8 @@ type Props = {
   componentSelectionRequirement?: string;
   showRequestOptions?: boolean;
   fixedIndicationComponent?: string;
+  bloodGroupWarning?: string;
+  onDismissBloodGroupWarning?: () => void;
   onLocalChange: (values: Record<string, string>) => void;
   onIndicationsChange: (values: ProtocolValues) => void;
   onClose: () => void;
@@ -71,6 +74,8 @@ export const IndividualSelectionComponentModal = ({
   componentSelectionRequirement = '',
   showRequestOptions = false,
   fixedIndicationComponent,
+  bloodGroupWarning = '',
+  onDismissBloodGroupWarning,
   onLocalChange,
   onIndicationsChange,
   onClose,
@@ -159,6 +164,20 @@ export const IndividualSelectionComponentModal = ({
       className={styles.modal}
     >
       <div className={styles.root}>
+        {bloodGroupWarning && showRequestOptions && (
+          <div className={editorStyles.bloodGroupWarning} role="alert">
+            <span>{bloodGroupWarning}</span>
+            <button
+              type="button"
+              className={editorStyles.bloodGroupWarningDismiss}
+              aria-label="Закрыть предупреждение"
+              onClick={onDismissBloodGroupWarning}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {!fixedIndicationComponent && (
           <IndicationComponentSelector
             values={indicationValues}

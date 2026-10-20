@@ -180,6 +180,10 @@ export const RecipientDatabaseModal = ({
     );
     setSelected(created);
     setQuery(created.fullName);
+
+    if (onUseRecipient) {
+      await onUseRecipient(created);
+    }
   };
   const openExistingRecipient = (recipient: RecipientRecord) => {
     setQuery(recipient.fullName);

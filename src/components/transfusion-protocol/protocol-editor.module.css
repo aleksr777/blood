@@ -360,22 +360,6 @@
   border-left-color: rgb(255 255 255 / 45%);
 }
 
-.customSelectControlNeutral {
-  border-color: #b8c4d6;
-  background: #e2e8f0;
-  color: #111827;
-}
-
-.customSelectControlNeutral .customSelectValue,
-.customSelectControlNeutral .customSelectPlaceholder,
-.customSelectControlNeutral .customSelectArrow {
-  color: #111827;
-}
-
-.customSelectControlNeutral .customSelectArrow {
-  border-left-color: #b8c4d6;
-}
-
 .customSelectControl:focus-visible {
   border-color: #2563eb;
   outline: 2px solid rgb(37 99 235 / 16%);

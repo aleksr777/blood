@@ -155,6 +155,19 @@ export const resetCurrentIndications = (recipientId: number) => {
   });
 };
 
+export const clearCurrentIndicationsForRecipient = (recipientId: number) => {
+  const state = readState();
+  if (!state || state.recipientId !== recipientId) return false;
+
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.error('Не удалось очистить общие показания удалённого реципиента:', error);
+  }
+
+  return true;
+};
+
 export const hasStoredCurrentIndividualSelectionIndications = (
   recipientId: number,
 ) => {

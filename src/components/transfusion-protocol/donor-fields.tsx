@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { CustomSelectField } from './custom-select-field';
+import {
+  ABO_OPTIONS,
+  ANTIGEN_OPTIONS,
+  BloodGroupSelectField,
+  getBloodGroupTone,
+  normalizeBloodGroupRh,
+  RH_OPTIONS,
+} from './blood-group-select-field';
 import { DONOR_ANTIGENS } from './donor-model';
 import { INDICATION_COMPONENTS } from './indications-model';
 import {
@@ -31,240 +38,6 @@ const COMPONENT_NAME_OPTIONS: Record<string, string[]> = {
   platelets: [],
 };
 
-const SelectField = ({
-  name,
-  label,
-  options,
-  value,
-  onChange,
-  emptyLabel,
-  emptyDisplayLabel,
-  compact = false,
-  tone,
-}: {
-  name: string;
-  label: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-  emptyLabel?: string;
-  emptyDisplayLabel?: string;
-  compact?: boolean;
-  tone?: 'positive' | 'negative';
-}) => (
-  <div className={styles.selectField}>
-    <div className={styles.label}>{label}</div>
-    <CustomSelectField
-      name={name}
-      label={label}
-      options={options}
-      value={value}
-      emptyLabel={emptyLabel}
-      emptyDisplayLabel={emptyDisplayLabel}
-      compact={compact}
-      tone={tone}
-      onChange={onChange}
-    />
-  </div>
-);
-
-const inferLegacyComponentGroup = (name: string) => {
-  const normalized = name.trim().toLocaleLowerCase();
-
-  if (normalized.includes('эритроц') || normalized.includes('эритромас')) {
-    return 'erythrocytes';
-  }
-  if (normalized.includes('плазм') || normalized === 'сзп' || normalized.startsWith('сзп ')) {
-    return 'plasma-cryo';
-  }
-  if (normalized.includes('тромбоц')) {
-    return 'platelets';
-  }
-
-  return '';
-};
-
-const ComponentNameInput = ({
-  value,
-  fixedOptions,
-  componentGroup,
-  onChange,
-}: {
-  value: string;
-  fixedOptions: string[];
-  componentGroup: string;
-  onChange: (value: string) => void;
-}) => {
-  const [savedOptions, setSavedOptions] = useState<SavedOptionRecord[]>([]);
-  const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
-
-  useEffect(() => {
-    let active = true;
-    const category = getComponentNameOptionCategory(componentGroup);
-
-    setOpen(false);
-    setSavedOptions([]);
-    setStatus('loading');
-
-    if (!category) {
-      setStatus('ready');
-      return () => {
-        active = false;
-      };
-    }
-
-    void (async () => {
-      try {
-        const [scopedItems, legacyItems] = await Promise.all([
-          loadSavedOptions(category),
-          loadSavedOptions('componentName'),
-        ]);
-
-        const existingValues = new Set(
-          scopedItems.map(({ value: itemValue }) => itemValue.trim().toLocaleLowerCase()),
-        );
-
-        for (const item of legacyItems) {
-          if (inferLegacyComponentGroup(item.value) !== componentGroup) continue;
-
-          const normalized = item.value.trim().toLocaleLowerCase();
-          if (!existingValues.has(normalized)) {
-            await rememberSavedOption(category, item.value);
-            existingValues.add(normalized);
-          }
-          await removeSavedOption('componentName', item.id);
-        }
-
-        const nextItems = await loadSavedOptions(category);
-        if (!active) return;
-        setSavedOptions(nextItems);
-        setStatus('ready');
-      } catch (error) {
-        console.error('Не удалось загрузить сохранённые наименования компонентов:', error);
-        if (active) setStatus('error');
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [componentGroup]);
-
-  const fixedSet = new Set(fixedOptions.map((option) => option.trim().toLocaleLowerCase()));
-  const editableOptions = savedOptions.filter(
-    (item) => !fixedSet.has(item.value.trim().toLocaleLowerCase()),
-  );
-
-  const rename = async (item: SavedOptionRecord, nextValue: string) => {
-    try {
-      const trimmed = nextValue.trim();
-      const category = getComponentNameOptionCategory(componentGroup);
-      if (!category) return;
-      setSavedOptions(await renameSavedOption(category, item.id, trimmed));
-      if (value === item.value) onChange(trimmed);
-    } catch (error) {
-      console.error('Не удалось изменить наименование компонента:', error);
-    }
-  };
-
-  const remove = async (item: SavedOptionRecord) => {
-    const previous = savedOptions;
-    setSavedOptions((current) => current.filter(({ id }) => id !== item.id));
-    if (value === item.value) onChange('');
-
-    try {
-      const category = getComponentNameOptionCategory(componentGroup);
-      if (!category) return;
-      setSavedOptions(await removeSavedOption(category, item.id));
-    } catch (error) {
-      setSavedOptions(previous);
-      if (value === item.value) onChange(item.value);
-      console.error('Не удалось удалить наименование компонента:', error);
-    }
-  };
-
-  const emptyText =
-    status === 'loading'
-      ? 'Загрузка...'
-      : status === 'error'
-        ? 'Не удалось загрузить список'
-        : 'Сохранённых вариантов нет';
-
-  return (
-    <div ref={rootRef} className={editorStyles.departmentField}>
-      <div className={editorStyles.departmentControl}>
-        <input
-          name="componentName"
-          type="text"
-          autoComplete="off"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-        />
-        <button
-          type="button"
-          className={editorStyles.historyToggle}
-          aria-label="Показать варианты наименования компонента"
-          aria-expanded={open}
-          onClick={() => setOpen((current) => !current)}
-        >
-          ▾
-        </button>
-      </div>
-
-      <div
-        className={editorStyles.historyDropdown}
-        data-state={dropdownState}
-        role="listbox"
-        aria-label="Варианты наименования компонента"
-        aria-hidden={dropdownState !== 'open'}
-      >
-        {fixedOptions.map((option) => (
-          <button
-            key={`fixed:${option}`}
-            type="button"
-            className={editorStyles.customSelectOption}
-            role="option"
-            aria-selected={value === option}
-            onClick={() => {
-              onChange(option);
-              setOpen(false);
-            }}
-          >
-            <span>{option}</span>
-            {value === option && <span aria-hidden="true">✓</span>}
-          </button>
-        ))}
-
-        {editableOptions.length > 0 ? (
-          editableOptions.map((item) => (
-            <SavedOptionItem
-              key={item.id}
-              item={item}
-              label="наименование компонента"
-              onSelect={(selected) => {
-                onChange(selected.value);
-                setOpen(false);
-              }}
-              onRename={rename}
-              onRemove={remove}
-            />
-          ))
-        ) : fixedOptions.length === 0 ? (
-          <div className={editorStyles.historyEmpty}>{emptyText}</div>
-        ) : null}
-      </div>
-    </div>
-  );
-};
-
-const normalizeRh = (value?: string) => {
-  if (value === 'Rh(D)+' || value === 'Rh(+)') return 'Rh(+)';
-  if (value === 'Rh(D)-' || value === 'Rh(-)') return 'Rh(-)';
-  return '';
-};
-
 export const DonorFields = ({ values, onChange }: Props) => {
   const legacyComponent = INDICATION_COMPONENTS.find(
     ({ label }) => label === values.componentName,
@@ -275,9 +48,8 @@ export const DonorFields = ({ values, onChange }: Props) => {
       ? ''
       : values.componentName ?? '';
   const componentNameOptions = COMPONENT_NAME_OPTIONS[selectedComponent] ?? [];
-  const donorRh = normalizeRh(values.donorRh);
-  const bloodGroupTone =
-    donorRh === 'Rh(-)' ? 'negative' : donorRh === 'Rh(+)' ? 'positive' : undefined;
+  const donorRh = normalizeBloodGroupRh(values.donorRh);
+  const bloodGroupTone = getBloodGroupTone(donorRh);
 
   return (
     <div className={styles.root}>
@@ -326,18 +98,18 @@ export const DonorFields = ({ values, onChange }: Props) => {
       </fieldset>
 
       <div className={styles.topGrid}>
-        <SelectField
+        <BloodGroupSelectField
           name="donorAbo"
           label="Группа крови AB0"
-          options={['O(I)', 'A(II)', 'B(III)', 'AB(IV)']}
+          options={ABO_OPTIONS}
           value={values.donorAbo ?? ''}
           tone={bloodGroupTone}
           onChange={(value) => onChange({ donorAbo: value })}
         />
-        <SelectField
+        <BloodGroupSelectField
           name="donorRh"
           label="Резус-принадлежность"
-          options={['Rh(+)', 'Rh(-)']}
+          options={RH_OPTIONS}
           value={donorRh}
           tone={bloodGroupTone}
           onChange={(value) => onChange({ donorRh: value })}
@@ -347,15 +119,16 @@ export const DonorFields = ({ values, onChange }: Props) => {
       <div className={styles.groupTitle}>Антигены:</div>
       <div className={styles.antigenGrid}>
         {DONOR_ANTIGENS.map(({ name, label }) => (
-          <SelectField
+          <BloodGroupSelectField
             key={name}
             name={name}
             label={label}
-            options={['+', '-']}
+            options={ANTIGEN_OPTIONS}
             value={values[name] ?? ''}
             emptyLabel=""
             emptyDisplayLabel=""
             compact
+            antigen
             onChange={(value) => onChange({ [name]: value, donorAntigens: '' })}
           />
         ))}

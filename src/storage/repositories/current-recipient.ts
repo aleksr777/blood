@@ -102,6 +102,8 @@ export type RecipientSwitchResult = {
   registrationSaved: boolean;
   protocolValues: ProtocolValuesRecord;
   registrationValues: ProtocolValuesRecord;
+  protocolRecordId: number | null;
+  registrationRecordId: number | null;
 };
 
 export type RecipientProfileSyncResult = {
@@ -488,6 +490,15 @@ export const switchCurrentRecipient = async (
       registrationSaved: false,
       protocolValues,
       registrationValues,
+      protocolRecordId:
+        protocolProfileChanged && protocolDraft.protocolRecordId !== null
+          ? null
+          : protocolDraft.protocolRecordId,
+      registrationRecordId:
+        registrationProfileChanged &&
+        registrationDraft.registrationRecordId !== null
+          ? null
+          : registrationDraft.registrationRecordId,
     };
   }
 
@@ -535,6 +546,8 @@ export const switchCurrentRecipient = async (
     registrationSaved,
     protocolValues,
     registrationValues,
+    protocolRecordId: null,
+    registrationRecordId: null,
   };
 };
 

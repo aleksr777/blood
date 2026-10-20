@@ -734,7 +734,11 @@ export const ComponentRequest = () => {
       });
 
       draftRef.current = next;
-      re  const updateIndications = (changes: ProtocolValues) => {
+      return next;
+    });
+  };
+
+  const updateIndications = (changes: ProtocolValues) => {
     detachSavedRecord();
 
     setDraft((current) => {
@@ -781,7 +785,6 @@ export const ComponentRequest = () => {
       autoValues,
     );
     savedRecordIdRef.current = null;
-    savedRecordIdRef.current = null;
     setSavedRecordId(null);
     setDraft({
       ...next,
@@ -802,6 +805,7 @@ export const ComponentRequest = () => {
       recipient,
       autoValues,
     );
+    savedRecordIdRef.current = null;
     setSavedRecordId(null);
     setDraft({
       ...next,

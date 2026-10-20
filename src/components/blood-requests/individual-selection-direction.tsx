@@ -777,7 +777,11 @@ export const IndividualSelectionDirection = () => {
       });
 
       draftRef.current = next;
-      re  const updateIndications = (changes: ProtocolValues) => {
+      return next;
+    });
+  };
+
+  const updateIndications = (changes: ProtocolValues) => {
     detachSavedRecord();
 
     setDraft((current) => {
@@ -819,7 +823,6 @@ export const IndividualSelectionDirection = () => {
         : '';
 
     savedRecordIdRef.current = null;
-    savedRecordIdRef.current = null;
     setSavedRecordId(null);
     setDraft({
       ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
@@ -850,6 +853,7 @@ export const IndividualSelectionDirection = () => {
         ? readCurrentIndividualSelectionIndications(recipient.id)
         : '';
 
+    savedRecordIdRef.current = null;
     setSavedRecordId(null);
     setDraft({
       ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
@@ -1017,7 +1021,7 @@ export const IndividualSelectionDirection = () => {
     };
   }, [currentRecipient, draft]);
 
-  const updateExamination = async (changes: ProtocolValues) =  const updateExamination = async (changes: ProtocolValues) => {
+  const updateExamination = async (changes: ProtocolValues) => {
     detachSavedRecord();
 
     const recipient = readCurrentRecipient();

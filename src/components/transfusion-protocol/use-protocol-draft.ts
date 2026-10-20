@@ -98,8 +98,8 @@ export const useProtocolDraft = ({
               hasRecipientProfileDifference(draftValues, currentRecipient);
             const mergedValues = {
               ...baseValues,
-              ...recipientProfileValuesForForms(currentRecipient),
               ...generatedHistoryValues(baseValues),
+              ...recipientProfileValuesForForms(currentRecipient),
             };
             const component = getIndicationComponent(mergedValues);
 

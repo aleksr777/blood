@@ -490,6 +490,18 @@
   color: #fff;
 }
 
+.customSelectOptionToneNeutral,
+.customSelectOptionNeutralEmpty {
+  background: #e2e8f0;
+  color: #111827;
+}
+
+.customSelectOptionToneNeutral:focus-visible,
+.customSelectOptionNeutralEmpty:focus-visible {
+  background: #cbd5e1;
+  color: #111827;
+}
+
 .bloodGroupWarning {
   grid-column: 1 / -1;
   display: flex;

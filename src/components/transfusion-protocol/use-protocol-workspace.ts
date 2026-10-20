@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
+  hasRecipientProfileDifference,
   readCurrentRecipient,
+  recipientProfileValuesForForms,
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
@@ -265,7 +267,9 @@ export const useProtocolWorkspace = () => {
 
   const saveValues = (nextValues: ProtocolValues) => {
     draft.touch();
-    if ('recipientId' in nextValues && nextValues.recipientId !== values.recipientId) {
+
+    const editingSavedRecord = recordId !== null;
+    if (editingSavedRecord) {
       setRecordId(null);
     }
 
@@ -274,9 +278,7 @@ export const useProtocolWorkspace = () => {
     const currentComponent = getIndicationComponent(values);
     const currentRecipient = readCurrentRecipient();
     const componentChanged =
-      recordId === null &&
-      Boolean(selectedComponent) &&
-      selectedComponent !== currentComponent;
+      Boolean(selectedComponent) && selectedComponent !== currentComponent;
     const sharedIndications =
       componentChanged &&
       currentRecipient &&
@@ -285,7 +287,6 @@ export const useProtocolWorkspace = () => {
         : {};
     const carriedIndications = previousBlankIndicationsRef.current;
     const shouldCarryIndications =
-      recordId === null &&
       Boolean(selectedComponent) &&
       carriedIndications?.component === selectedComponent;
     const appliedValues = {
@@ -299,14 +300,13 @@ export const useProtocolWorkspace = () => {
     }
 
     const merged = { ...values, ...appliedValues };
-    if (recordId === null && hasReagentDefaultUpdate(appliedValues)) {
+    if (hasReagentDefaultUpdate(appliedValues)) {
       saveReagentDefaults(merged);
     }
     setValues(merged);
 
     const activeComponent = getIndicationComponent(merged);
     if (
-      recordId === null &&
       activeComponent &&
       currentRecipient &&
       Number(merged.recipientId) === currentRecipient.id
@@ -321,7 +321,7 @@ export const useProtocolWorkspace = () => {
     void syncCurrentRecipientProfile(appliedValues, {
       kind: 'protocol',
       values: merged,
-      recordId,
+      recordId: editingSavedRecord ? null : recordId,
     }).catch((error: unknown) =>
       console.error('Не удалось синхронизировать данные реципиента:', error),
     );
@@ -340,8 +340,9 @@ export const useProtocolWorkspace = () => {
       setComponentUnitNumberChecked(false);
       setDismissedComponentUnitWarningKey('');
 
+      setRecordId(result.protocolRecordId);
+
       if (result.changed) {
-        setRecordId(null);
         setValues({
           ...result.protocolValues,
           ...reagentDefaultsForNewBlank(values),
@@ -353,7 +354,7 @@ export const useProtocolWorkspace = () => {
         );
       } else {
         setValues(
-          recordId === null
+          result.protocolRecordId === null
             ? {
                 ...result.protocolValues,
                 ...reagentDefaultsForNewBlank(result.protocolValues),
@@ -382,15 +383,21 @@ export const useProtocolWorkspace = () => {
       return false;
     }
 
+    if (recordId !== null) {
+      setStatus(
+        afterPrint
+          ? 'Сохранённый бланк не изменён.'
+          : 'Сохранённый бланк не изменён. Исходная запись оставлена без изменений.',
+      );
+      return true;
+    }
+
     try {
-      const wasSavedRecord = recordId !== null;
-      const record = await saveProtocolRecord(recordId, values);
+      const record = await saveProtocolRecord(null, values);
       setRecordId(record.id);
       const savedValues = { ...values, recipientId: String(record.recipientId) };
       setValues(savedValues);
-      if (!wasSavedRecord) {
-        adoptCurrentRecipientFromValues(savedValues);
-      }
+      adoptCurrentRecipientFromValues(savedValues);
       setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
       return true;
     } catch (error) {
@@ -405,7 +412,7 @@ export const useProtocolWorkspace = () => {
     let sourceValues = values;
     let previousBlankSaved = false;
 
-    if (hasHemaconData(values)) {
+    if (hasHemaconData(values) && !openedFromDatabase) {
       if (!values.recipientName?.trim()) {
         setStatus(
           'Новый бланк не создан: для сохранения предыдущего бланка укажите ФИО реципиента.',
@@ -415,7 +422,7 @@ export const useProtocolWorkspace = () => {
       }
 
       try {
-        const record = await saveProtocolRecord(recordId, values);
+        const record = await saveProtocolRecord(null, values);
         sourceValues = {
           ...values,
           recipientId: String(record.recipientId),
@@ -522,22 +529,37 @@ export const useProtocolWorkspace = () => {
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
     setActiveBlock(null);
+
+    const currentRecipient = readCurrentRecipient();
+    const profileChanged = currentRecipient
+      ? hasRecipientProfileDifference(record.values, currentRecipient)
+      : false;
     const generatedHistory = record.values.previousTransfusionsAutoText?.trim()
       ? {
-          previousTransfusionsStatus: record.values.previousTransfusionsStatus ?? '',
+          previousTransfusionsStatus:
+            record.values.previousTransfusionsStatus ?? '',
           previousTransfusions: record.values.previousTransfusions ?? '',
-          previousTransfusionsAutoText: record.values.previousTransfusionsAutoText,
+          previousTransfusionsAutoText:
+            record.values.previousTransfusionsAutoText,
         }
       : {};
 
-    setRecordId(record.id);
+    setRecordId(profileChanged ? null : record.id);
     setValues({
       ...record.values,
-      recipientId: String(record.recipientId),
       ...generatedHistory,
+      ...(currentRecipient
+        ? recipientProfileValuesForForms(currentRecipient)
+        : {
+            recipientId: String(record.recipientId),
+          }),
     });
     setRegistryOpen(false);
-    setStatus('Сохранённый бланк открыт для просмотра и редактирования.');
+    setStatus(
+      profileChanged
+        ? 'Сохранённый бланк открыт с актуальными данными текущего реципиента. При сохранении будет создан новый бланк.'
+        : 'Сохранённый бланк открыт для просмотра и редактирования.',
+    );
   };
 
   const bloodGroupMismatch = getBloodGroupMismatch(values);

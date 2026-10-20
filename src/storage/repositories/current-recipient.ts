@@ -343,7 +343,10 @@ export const syncCurrentRecipientProfile = async (
   if (protocolRecipientId !== null && protocolRecipientId !== recipient.id) {
     await savePreviousProtocol(protocolDraft, recipient.id);
     protocolDraft = {
-      values: sharedValues,
+      values: {
+        ...clearRecipientLinkedValues(protocolDraft.values, protocolRecipientId),
+        ...sharedValues,
+      },
       protocolRecordId: null,
       updatedAt: Date.now(),
     };
@@ -370,7 +373,13 @@ export const syncCurrentRecipientProfile = async (
   if (registrationRecipientId !== null && registrationRecipientId !== recipient.id) {
     await savePreviousRegistration(registrationDraft, recipient.id);
     registrationDraft = {
-      values: sharedValues,
+      values: {
+        ...clearRecipientLinkedValues(
+          registrationDraft.values,
+          registrationRecipientId,
+        ),
+        ...sharedValues,
+      },
       registrationRecordId: null,
       updatedAt: Date.now(),
     };

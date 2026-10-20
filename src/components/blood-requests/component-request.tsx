@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 import {
+  hasRecipientProfileDifference,
   readCurrentRecipient,
   switchCurrentRecipient,
   updateCurrentRecipientProfile,
@@ -342,10 +343,7 @@ const currentAutoValues = async (
   const protocolDraft = await loadProtocolDraft();
   const sameRecipient =
     Number(protocolDraft.values.recipientId) === recipient.id;
-  const currentProtocolValues =
-    sameRecipient && protocolDraft.protocolRecordId === null
-      ? protocolDraft.values
-      : {};
+  const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
 
   const values: ProtocolValues = {
     ...recipient.profile,
@@ -377,20 +375,19 @@ const mergeAutoValues = (
 ): DirectionDraft => {
   if (!recipient) return current;
 
-  const recipientChanged = current.sourceRecipientId !== String(recipient.id);
   const next: DirectionDraft = {
     ...current,
     sourceRecipientId: String(recipient.id),
+    recipientProfileSnapshot: {
+      ...recipient.profile,
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    },
     autoValues: { ...autoValues },
   };
 
   AUTO_FIELDS.forEach((field) => {
-    const currentValue = current[field] ?? '';
-    const previousAuto = current.autoValues[field] ?? '';
-
-    if (recipientChanged || !currentValue || currentValue === previousAuto) {
-      next[field] = autoValues[field] ?? '';
-    }
+    next[field] = autoValues[field] ?? '';
   });
 
   return next;
@@ -521,37 +518,42 @@ export const ComponentRequest = () => {
   );
   const savedRecordIdRef = useRef(savedRecordId);
   savedRecordIdRef.current = savedRecordId;
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
 
+  const detachSavedRecord = () => {
+    if (savedRecordIdRef.current === null) return;
+    savedRecordIdRef.current = null;
+    setSavedRecordId(null);
+  };
+
   const refreshCurrentData = useCallback(async (
     recipient = readCurrentRecipient(),
-    force = false,
+    baseDraft?: DirectionDraft,
   ) => {
     setCurrentRecipient(recipient);
-    if (savedRecordIdRef.current !== null && !force) return;
 
     const autoValues = await currentAutoValues(recipient);
     const protocolDraft = recipient ? await loadProtocolDraft() : null;
     const currentProtocolValues =
       recipient &&
       protocolDraft &&
-      protocolDraft.protocolRecordId === null &&
       Number(protocolDraft.values.recipientId) === recipient.id
         ? protocolDraft.values
         : {};
-    if (savedRecordIdRef.current !== null && !force) return;
 
-    setDraft((current) => {
-      const recipientChanged = Boolean(
-        recipient &&
-          current.sourceRecipientId &&
-          current.sourceRecipientId !== String(recipient.id),
-      );
-      let next = mergeAutoValues(current, recipient, autoValues);
-      if (!recipient) return next;
+    const current = baseDraft ?? draftRef.current;
+    const recipientChanged = Boolean(
+      recipient &&
+        current.sourceRecipientId &&
+        current.sourceRecipientId !== String(recipient.id),
+    );
 
+    let next = mergeAutoValues(current, recipient, autoValues);
+    if (recipient) {
       if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
         next = {
           ...next,
@@ -563,7 +565,10 @@ export const ComponentRequest = () => {
           ...next,
           individualSelectionIndications: '',
         };
-      } else if (next.individualSelectionIndications.trim()) {
+      } else if (
+        savedRecordIdRef.current === null &&
+        next.individualSelectionIndications.trim()
+      ) {
         writeCurrentIndividualSelectionIndications(
           recipient.id,
           next.individualSelectionIndications,
@@ -571,57 +576,79 @@ export const ComponentRequest = () => {
       }
 
       const component = getIndicationComponent(next.indicationValues);
-      if (!component) return next;
+      if (component) {
+        if (hasStoredCurrentIndications(recipient.id, component)) {
+          next = {
+            ...next,
+            indicationValues: {
+              ...(recipientChanged ? {} : next.indicationValues),
+              ...readCurrentIndications(recipient.id, component),
+            },
+          };
+        } else {
+          const protocolIndications = currentIndicationsForComponent(
+            currentProtocolValues,
+            component,
+          );
+          const hasProtocolIndications = Object.entries(protocolIndications).some(
+            ([key, value]) =>
+              key !== 'indicationComponent' && value.trim() !== '',
+          );
 
-      if (hasStoredCurrentIndications(recipient.id, component)) {
-        return {
-          ...next,
-          indicationValues: {
-            ...(recipientChanged ? {} : next.indicationValues),
-            ...readCurrentIndications(recipient.id, component),
-          },
-        };
+          if (hasProtocolIndications) {
+            writeCurrentIndications(
+              recipient.id,
+              component,
+              protocolIndications,
+            );
+            next = {
+              ...next,
+              indicationValues: {
+                ...(recipientChanged ? {} : next.indicationValues),
+                ...protocolIndications,
+              },
+            };
+          } else if (
+            savedRecordIdRef.current === null &&
+            !recipientChanged
+          ) {
+            writeCurrentIndications(
+              recipient.id,
+              component,
+              next.indicationValues,
+            );
+          } else if (recipientChanged) {
+            next = {
+              ...next,
+              indicationValues: { indicationComponent: component },
+            };
+          }
+        }
       }
 
-      const protocolIndications = currentIndicationsForComponent(
-        currentProtocolValues,
-        component,
-      );
-      const hasProtocolIndications = Object.entries(protocolIndications).some(
-        ([key, value]) =>
-          key !== 'indicationComponent' && value.trim() !== '',
-      );
+      const recipientDataChanged =
+        recipientChanged ||
+        hasRecipientProfileDifference(
+          current.recipientProfileSnapshot,
+          recipient,
+        ) ||
+        AUTO_FIELDS.some((field) => current[field] !== next[field]) ||
+        current.individualSelectionIndications !==
+          next.individualSelectionIndications ||
+        JSON.stringify(current.indicationValues) !==
+          JSON.stringify(next.indicationValues);
 
-      if (hasProtocolIndications) {
-        writeCurrentIndications(
-          recipient.id,
-          component,
-          protocolIndications,
-        );
-        return {
-          ...next,
-          indicationValues: {
-            ...(recipientChanged ? {} : next.indicationValues),
-            ...protocolIndications,
-          },
-        };
+      if (
+        savedRecordIdRef.current !== null &&
+        recipientDataChanged
+      ) {
+        detachSavedRecord();
       }
+    }
 
-      if (!recipientChanged) {
-        writeCurrentIndications(
-          recipient.id,
-          component,
-          next.indicationValues,
-        );
-        return next;
-      }
-
-      return {
-        ...next,
-        indicationValues: { indicationComponent: component },
-      };
-    });
-  }, [savedRecordId]);
+    draftRef.current = next;
+    setDraft(next);
+  }, []);
 
   useEffect(() => {
     void refreshCurrentData();
@@ -685,8 +712,9 @@ export const ComponentRequest = () => {
   ]);
 
   const updateFields = (changes: Record<string, string>) => {
+    detachSavedRecord();
+
     if (
-      savedRecordId === null &&
       currentRecipient &&
       changes.individualSelectionIndications !== undefined
     ) {
@@ -705,11 +733,10 @@ export const ComponentRequest = () => {
         }
       });
 
-      return next;
-    });
-  };
+      draftRef.current = next;
+      re  const updateIndications = (changes: ProtocolValues) => {
+    detachSavedRecord();
 
-  const updateIndications = (changes: ProtocolValues) => {
     setDraft((current) => {
       const currentComponent = getIndicationComponent(current.indicationValues);
       const component = changes.indicationComponent || currentComponent;
@@ -717,7 +744,6 @@ export const ComponentRequest = () => {
         Boolean(changes.indicationComponent) &&
         changes.indicationComponent !== currentComponent;
       const sharedIndications =
-        savedRecordId === null &&
         currentRecipient &&
         componentChanged &&
         component
@@ -729,7 +755,7 @@ export const ComponentRequest = () => {
         ...changes,
       };
 
-      if (savedRecordId === null && currentRecipient && component) {
+      if (currentRecipient && component) {
         writeCurrentIndications(
           currentRecipient.id,
           component,
@@ -737,10 +763,12 @@ export const ComponentRequest = () => {
         );
       }
 
-      return {
+      const next = {
         ...current,
         indicationValues,
       };
+      draftRef.current = next;
+      return next;
     });
   };
 
@@ -752,6 +780,8 @@ export const ComponentRequest = () => {
       recipient,
       autoValues,
     );
+    savedRecordIdRef.current = null;
+    savedRecordIdRef.current = null;
     setSavedRecordId(null);
     setDraft({
       ...next,
@@ -791,53 +821,40 @@ export const ComponentRequest = () => {
   const save = async (afterPrint = false) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
 
-    const historicalRecipientId = Number(draft.sourceRecipientId);
-    if (savedRecordId === null && !currentRecipient) {
+    const recipient = readCurrentRecipient();
+    if (!recipient) {
       setStatus('Выберите реципиента перед сохранением заявки.');
       return false;
     }
-    if (
-      savedRecordId !== null &&
-      (!Number.isFinite(historicalRecipientId) || historicalRecipientId <= 0)
-    ) {
-      setStatus('Не удалось определить реципиента сохранённого бланка.');
-      return false;
+
+    if (savedRecordId !== null) {
+      setStatus(
+        afterPrint
+          ? 'Сохранённая заявка не изменена.'
+          : 'Сохранённая заявка не изменена. Исходная запись оставлена без изменений.',
+      );
+      return true;
     }
 
     try {
-      const recipientId =
-        savedRecordId !== null
-          ? historicalRecipientId
-          : currentRecipient!.id;
-      const protocolDraft =
-        savedRecordId === null ? await loadProtocolDraft() : null;
-      const currentProtocolValues =
-        savedRecordId === null &&
-        currentRecipient &&
-        protocolDraft &&
-        protocolDraft.protocolRecordId === null &&
-        Number(protocolDraft.values.recipientId) === currentRecipient.id
-          ? protocolDraft.values
-          : {};
-      const draftToSave =
-        savedRecordId === null
-          ? {
-              ...draft,
-              recipientProfileSnapshot: {
-                ...currentRecipient!.profile,
-                ...currentProtocolValues,
-                recipientId: String(currentRecipient!.id),
-                recipientName: currentRecipient!.fullName,
-              },
-            }
-          : draft;
+      const draftToSave = {
+        ...draft,
+        sourceRecipientId: String(recipient.id),
+        recipientProfileSnapshot: {
+          ...recipient.profile,
+          recipientId: String(recipient.id),
+          recipientName: recipient.fullName,
+        },
+      };
 
       const record = await saveBloodRequestRecord({
-        recordId: savedRecordId,
-        recipientId,
+        recordId: null,
+        recipientId: recipient.id,
         kind: 'component-request',
         values: { ...draftToSave },
       });
+
+      draftRef.current = draftToSave;
       setDraft(draftToSave);
       savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
@@ -868,9 +885,9 @@ export const ComponentRequest = () => {
       await switchCurrentRecipient(recipient);
       const recipientChanged = previousRecipientId !== recipient.id;
       if (recipientChanged) {
-        setSavedRecordId(null);
+        detachSavedRecord();
       }
-      await refreshCurrentData(readCurrentRecipient(), recipientChanged);
+      await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
       console.error('Не удалось выбрать реципиента для направления:', error);
@@ -884,12 +901,23 @@ export const ComponentRequest = () => {
   ) => {
     try {
       await switchCurrentRecipient(recipient);
-      setCurrentRecipient(readCurrentRecipient());
-      setDraft(draftFromRecord(record.values));
+      const currentRecipient = readCurrentRecipient();
+      const sourceDraft = draftFromRecord(record.values);
+
       savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
+      draftRef.current = sourceDraft;
+      setDraft(sourceDraft);
+      setCurrentRecipient(currentRecipient);
+
+      await refreshCurrentData(currentRecipient, sourceDraft);
+
       setRegistryOpen(false);
-      setStatus('Сохранённая заявка открыта.');
+      setStatus(
+        savedRecordIdRef.current === null
+          ? 'Сохранённая заявка открыта с актуальными данными текущего реципиента. При сохранении будет создан новый бланк.'
+          : 'Сохранённая заявка открыта.',
+      );
     } catch (error) {
       console.error('Не удалось открыть сохранённую заявку:', error);
       setStatus('Не удалось открыть сохранённую заявку.');
@@ -916,11 +944,11 @@ export const ComponentRequest = () => {
   };
 
   const examinationValues = useMemo<ProtocolValues>(() => {
-    if (savedRecordId === null) {
+    if (currentRecipient) {
       return {
-        ...(currentRecipient?.profile ?? {}),
-        recipientId: currentRecipient ? String(currentRecipient.id) : '',
-        recipientName: currentRecipient?.fullName ?? '',
+        ...currentRecipient.profile,
+        recipientId: String(currentRecipient.id),
+        recipientName: currentRecipient.fullName,
       };
     }
 
@@ -933,7 +961,7 @@ export const ComponentRequest = () => {
       diagnosis: draft.diagnosis,
       department: draft.department,
     };
-  }, [currentRecipient, draft, savedRecordId]);
+  }, [currentRecipient, draft]);
 
   const bloodGroupMismatch = getBloodGroupMismatch({
     ...examinationValues,
@@ -960,83 +988,19 @@ export const ComponentRequest = () => {
   };
 
   const updateExamination = async (changes: ProtocolValues) => {
-    if (savedRecordId !== null) {
-      setDraft((current) => {
-        const snapshot: ProtocolValues = {
-          ...current.recipientProfileSnapshot,
-          recipientId: current.sourceRecipientId,
-          recipientName: current.recipientName,
-          recipientSex: current.recipientSex,
-          medicalRecordNumber: current.medicalRecordNumber,
-          diagnosis: current.diagnosis,
-          department: current.department,
-          ...changes,
-        };
-        const next = {
-          ...current,
-          recipientProfileSnapshot: snapshot,
-        };
+    detachSavedRecord();
 
-        if (changes.recipientName !== undefined) {
-          next.recipientName = changes.recipientName;
-        }
-        if (changes.recipientBirthDate !== undefined) {
-          next.recipientAge = formatRecipientAge(changes.recipientBirthDate);
-        }
-        if (changes.recipientSex !== undefined) {
-          next.recipientSex = changes.recipientSex;
-        }
-        if (changes.medicalRecordNumber !== undefined) {
-          next.medicalRecordNumber = changes.medicalRecordNumber;
-        }
-        if (changes.diagnosis !== undefined) {
-          next.diagnosis = changes.diagnosis;
-        }
-        if (
-          changes.recipientAbo !== undefined ||
-          changes.recipientRh !== undefined
-        ) {
-          next.recipientAboRh = [snapshot.recipientAbo, snapshot.recipientRh]
-            .filter(Boolean)
-            .join(' ');
-        }
-        if (
-          Object.keys(changes).some(
-            (key) =>
-              key === 'recipientAntigens' ||
-              key.startsWith('recipientAntigen'),
-          )
-        ) {
-          next.recipientPhenotype = formatRecipientAntigens(snapshot);
-        }
-        if (
-          Object.keys(changes).some((key) =>
-            [
-              'recipientPregnanciesCount',
-              'recipientBirthsCount',
-              'recipientSpontaneousAbortionsCount',
-              'recipientHemolyticDiseaseNewbornHistory',
-            ].includes(key),
-          )
-        ) {
-          next.obstetricHistory =
-            snapshot.recipientSex === 'Женский'
-              ? formatObstetricHistory(snapshot)
-              : '';
-        }
-
-        return next;
-      });
-      return;
-    }
-
-    if (!currentRecipient) return;
+    const recipient = readCurrentRecipient();
+    if (!recipient) return;
 
     try {
-      await updateCurrentRecipientProfile(currentRecipient, changes);
+      await updateCurrentRecipientProfile(recipient, changes);
       await refreshCurrentData(readCurrentRecipient());
     } catch (error) {
-      console.error('Не удалось обновить общие данные медицинского обследования реципиента:', error);
+      console.error(
+        'Не удалось обновить общие данные медицинского обследования реципиента:',
+        error,
+      );
     }
   };
 

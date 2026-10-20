@@ -1,6 +1,7 @@
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
 import { Choice } from '../transfusion-protocol/indication-controls';
+import { CustomSelectField } from '../transfusion-protocol/custom-select-field';
 import {
   IndicationComponentSelector,
   IndicationsFields,
@@ -39,6 +40,8 @@ const UNSELECTED_REQUEST_COMPONENT_CATEGORY =
 
 type Props = {
   requiredComponent: string;
+  componentAbo?: string;
+  componentRh?: string;
   quantity: string;
   individualSelectionIndications: string;
   indicationValues: ProtocolValues;
@@ -53,6 +56,8 @@ type Props = {
 
 export const IndividualSelectionComponentModal = ({
   requiredComponent,
+  componentAbo = '',
+  componentRh = '',
   quantity,
   individualSelectionIndications,
   indicationValues,
@@ -74,6 +79,18 @@ export const IndividualSelectionComponentModal = ({
         indicationComponent: fixedIndicationComponent,
       }
     : indicationValues;
+  const normalizedComponentRh =
+    componentRh === 'Rh(D)+' || componentRh === 'Rh(+)'
+      ? 'Rh(+)'
+      : componentRh === 'Rh(D)-' || componentRh === 'Rh(-)'
+        ? 'Rh(-)'
+        : '';
+  const componentBloodGroupTone =
+    normalizedComponentRh === 'Rh(-)'
+      ? 'negative'
+      : normalizedComponentRh === 'Rh(+)'
+        ? 'positive'
+        : undefined;
   const isErythrocytes = component === 'erythrocytes';
   const requiresIndividualSelection =
     isErythrocytes && componentSelectionRequirement === 'individual';
@@ -213,6 +230,35 @@ export const IndividualSelectionComponentModal = ({
             />
           </label>
         </div>
+
+        {showRequestOptions && (
+          <>
+            <div className={styles.bloodGroupGrid}>
+              <div className={styles.selectField}>
+                <div className={styles.selectLabel}>Группа крови AB0 компонента</div>
+                <CustomSelectField
+                  name="componentAbo"
+                  label="Группа крови AB0 компонента"
+                  options={['O(I)', 'A(II)', 'B(III)', 'AB(IV)']}
+                  value={componentAbo}
+                  tone={componentBloodGroupTone}
+                  onChange={(value) => onLocalChange({ componentAbo: value })}
+                />
+              </div>
+              <div className={styles.selectField}>
+                <div className={styles.selectLabel}>Резус-принадлежность компонента</div>
+                <CustomSelectField
+                  name="componentRh"
+                  label="Резус-принадлежность компонента"
+                  options={['Rh(+)', 'Rh(-)']}
+                  value={normalizedComponentRh}
+                  tone={componentBloodGroupTone}
+                  onChange={(value) => onLocalChange({ componentRh: value })}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
         <div className={styles.divider} />
 

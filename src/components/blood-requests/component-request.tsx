@@ -541,6 +541,12 @@ export const ComponentRequest = () => {
           current.sourceRecipientId &&
           current.sourceRecipientId !== String(recipient.id),
       );
+
+      if (recipientChanged && savedRecordIdRef.current !== null) {
+        savedRecordIdRef.current = null;
+        setSavedRecordId(null);
+      }
+
       let next = mergeAutoValues(current, recipient, autoValues);
       if (!recipient) return next;
 

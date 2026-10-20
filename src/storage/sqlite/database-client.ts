@@ -19,6 +19,7 @@ import type {
 type PendingRequest = {
   resolve: (value: unknown) => void;
   reject: (reason: Error) => void;
+  timeoutId: number;
 };
 
 const worker = new Worker(new URL('./database.worker.ts', import.meta.url), { type: 'module' });
@@ -26,7 +27,10 @@ const pending = new Map<number, PendingRequest>();
 let nextRequestId = 1;
 
 const rejectPending = (error: Error) => {
-  pending.forEach(({ reject }) => reject(error));
+  pending.forEach(({ reject, timeoutId }) => {
+    window.clearTimeout(timeoutId);
+    reject(error);
+  });
   pending.clear();
 };
 
@@ -39,6 +43,7 @@ worker.addEventListener('message', (event: MessageEvent<DatabaseResponse>) => {
   if (!request) return;
 
   pending.delete(event.data.id);
+  window.clearTimeout(request.timeoutId);
   if (event.data.ok) request.resolve(event.data.result);
   else request.reject(new Error(event.data.error ?? 'Ошибка SQLite.'));
 });
@@ -47,9 +52,20 @@ const request = <T>(action: DatabaseAction, payload?: unknown) => {
   const id = nextRequestId++;
 
   return new Promise<T>((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      if (!pending.delete(id)) return;
+      reject(
+        new Error(
+          'Операция с локальной базой данных не завершилась. ' +
+            'Закройте другие вкладки с приложением, обновите страницу и повторите действие.',
+        ),
+      );
+    }, 10000);
+
     pending.set(id, {
       resolve: (value) => resolve(value as T),
       reject,
+      timeoutId,
     });
 
     const message: DatabaseRequest = { id, action, payload };

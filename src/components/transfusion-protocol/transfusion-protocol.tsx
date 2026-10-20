@@ -213,7 +213,10 @@ export const TransfusionProtocol = () => {
         onClear={workspace.clearForm}
         onNew={() => void workspace.newBlank()}
         onOpenRegistry={() => {
-          setRegistryRecipientId(null);
+          const recipientId = Number(workspace.values.recipientId);
+          setRegistryRecipientId(
+            Number.isFinite(recipientId) && recipientId > 0 ? recipientId : null,
+          );
           workspace.setRegistryOpen(true);
         }}
         currentRecipientName={workspace.values.recipientName ?? ''}
@@ -268,7 +271,10 @@ export const TransfusionProtocol = () => {
           previousTransfusionSuggestion={workspace.previousTransfusionSuggestion}
           persistReusableOptions={workspace.recordId === null}
           onOpenRecipients={() => {
-            setRegistryRecipientId(null);
+            const recipientId = Number(workspace.values.recipientId);
+            setRegistryRecipientId(
+              Number.isFinite(recipientId) && recipientId > 0 ? recipientId : null,
+            );
             workspace.setActiveBlock(null);
             workspace.setRegistryOpen(true);
           }}

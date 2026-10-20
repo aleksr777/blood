@@ -222,7 +222,7 @@ export const RecipientDatabaseModal = ({
       ),
     );
     setSelected(created);
-    setQuery(created.fullName);
+    setQuery('');
 
     if (onUseRecipient) {
       await onUseRecipient(created);

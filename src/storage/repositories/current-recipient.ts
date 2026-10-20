@@ -215,20 +215,33 @@ export const recipientProfileValuesForForms = (recipient: {
   recipientName: recipient.fullName,
 });
 
+export const hasRecipientProfileDifference = (
+  values: ProtocolValuesRecord,
+  recipient: {
+    id: number;
+    fullName: string;
+    profile: ProtocolValuesRecord;
+  },
+) => {
+  const profileValues = recipientProfileValuesForForms(recipient);
+  return Object.entries(profileValues).some(
+    ([field, value]) => (values[field] ?? '') !== value,
+  );
+};
+
 const savePreviousProtocol = async (draft: ProtocolDraftState, nextRecipientId: number) => {
   const recipientId = getRecipientId(draft.values);
   if (!recipientId || recipientId === nextRecipientId || !draft.values.recipientName?.trim()) {
     return false;
   }
 
-  if (
-    draft.protocolRecordId === null &&
-    !hasDocumentData(draft.values, protocolRecipientOnlyFields)
-  ) {
+  if (draft.protocolRecordId !== null) return false;
+
+  if (!hasDocumentData(draft.values, protocolRecipientOnlyFields)) {
     return false;
   }
 
-  await saveProtocolRecord(draft.protocolRecordId, draft.values);
+  await saveProtocolRecord(null, draft.values);
   return true;
 };
 
@@ -241,14 +254,13 @@ const savePreviousRegistration = async (
     return false;
   }
 
-  if (
-    draft.registrationRecordId === null &&
-    !hasDocumentData(draft.values, registrationRecipientOnlyFields)
-  ) {
+  if (draft.registrationRecordId !== null) return false;
+
+  if (!hasDocumentData(draft.values, registrationRecipientOnlyFields)) {
     return false;
   }
 
-  await saveRegistrationRecord(draft.registrationRecordId, draft.values);
+  await saveRegistrationRecord(null, draft.values);
   return true;
 };
 
@@ -256,8 +268,6 @@ export const syncCurrentRecipientProfile = async (
   changes: ProtocolValuesRecord,
   activeDraft: ActiveDraftOverride,
 ): Promise<RecipientProfileSyncResult | null> => {
-  if (activeDraft.recordId !== null) return null;
-
   const hasGeneratedTransfusionHistory = Boolean(
     changes.previousTransfusionsAutoText?.trim() ||
       activeDraft.values.previousTransfusionsAutoText?.trim(),
@@ -303,13 +313,13 @@ export const syncCurrentRecipientProfile = async (
   if (activeDraft.kind === 'protocol') {
     protocolDraft = {
       values: activeDraft.values,
-      protocolRecordId: activeDraft.recordId,
+      protocolRecordId: null,
       updatedAt: Date.now(),
     };
   } else {
     registrationDraft = {
       values: activeDraft.values,
-      registrationRecordId: activeDraft.recordId,
+      registrationRecordId: null,
       updatedAt: Date.now(),
     };
   }
@@ -335,7 +345,11 @@ export const syncCurrentRecipientProfile = async (
       protocolRecordId: null,
       updatedAt: Date.now(),
     };
-  } else if (protocolDraft.protocolRecordId === null) {
+  } else {
+    const profileChanged = hasRecipientProfileDifference(
+      protocolDraft.values,
+      recipient,
+    );
     protocolDraft = {
       ...protocolDraft,
       values: {
@@ -343,6 +357,10 @@ export const syncCurrentRecipientProfile = async (
         ...sharedValues,
         ...generatedTransfusionHistoryValues(protocolDraft.values),
       },
+      protocolRecordId:
+        profileChanged && protocolDraft.protocolRecordId !== null
+          ? null
+          : protocolDraft.protocolRecordId,
       updatedAt: Date.now(),
     };
   }
@@ -354,10 +372,18 @@ export const syncCurrentRecipientProfile = async (
       registrationRecordId: null,
       updatedAt: Date.now(),
     };
-  } else if (registrationDraft.registrationRecordId === null) {
+  } else {
+    const profileChanged = hasRecipientProfileDifference(
+      registrationDraft.values,
+      recipient,
+    );
     registrationDraft = {
       ...registrationDraft,
       values: { ...registrationDraft.values, ...sharedValues },
+      registrationRecordId:
+        profileChanged && registrationDraft.registrationRecordId !== null
+          ? null
+          : registrationDraft.registrationRecordId,
       updatedAt: Date.now(),
     };
   }
@@ -416,32 +442,41 @@ export const switchCurrentRecipient = async (
 
   if (activeRecipientId === recipient.id && !hasConflictingDraft) {
     const profileValues = recipientProfileValuesForForms(recipient);
-    const protocolValues =
-      protocolDraft.protocolRecordId === null
-        ? {
-            ...protocolDraft.values,
-            ...profileValues,
-            ...generatedTransfusionHistoryValues(protocolDraft.values),
-          }
-        : protocolDraft.values;
-    const registrationValues =
-      registrationDraft.registrationRecordId === null
-        ? {
-            ...registrationDraft.values,
-            ...profileValues,
-          }
-        : registrationDraft.values;
+    const protocolProfileChanged = hasRecipientProfileDifference(
+      protocolDraft.values,
+      recipient,
+    );
+    const registrationProfileChanged = hasRecipientProfileDifference(
+      registrationDraft.values,
+      recipient,
+    );
+    const protocolValues = {
+      ...protocolDraft.values,
+      ...profileValues,
+      ...generatedTransfusionHistoryValues(protocolDraft.values),
+    };
+    const registrationValues = {
+      ...registrationDraft.values,
+      ...profileValues,
+    };
     const now = Date.now();
 
     await Promise.all([
       saveProtocolDraft({
         values: protocolValues,
-        protocolRecordId: protocolDraft.protocolRecordId,
+        protocolRecordId:
+          protocolProfileChanged && protocolDraft.protocolRecordId !== null
+            ? null
+            : protocolDraft.protocolRecordId,
         updatedAt: now,
       }),
       saveRegistrationDraft({
         values: registrationValues,
-        registrationRecordId: registrationDraft.registrationRecordId,
+        registrationRecordId:
+          registrationProfileChanged &&
+          registrationDraft.registrationRecordId !== null
+            ? null
+            : registrationDraft.registrationRecordId,
         updatedAt: now,
       }),
     ]);

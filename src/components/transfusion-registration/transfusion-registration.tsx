@@ -323,9 +323,8 @@ export const TransfusionRegistration = () => {
   const openRecipients = () => {
     const storedRecipient = readCurrentRecipient();
     setRegistryRecipientId(
-      currentRecipientAvailable
-        ? currentRecipientId
-        : storedRecipient?.id ?? null,
+      storedRecipient?.id ??
+        (currentRecipientAvailable ? currentRecipientId : null),
     );
     setRegistryOpen(true);
   };
@@ -570,9 +569,6 @@ export const TransfusionRegistration = () => {
       {registryOpen && (
         <RecipientDatabaseModal
           initialRecipientId={registryRecipientId}
-          initialRecipientName={
-            registryRecipientId ? (values.recipientName ?? '') : ''
-          }
           onUseRecipient={selectRecipient}
           onOpenRecord={(record, recipient) =>
             void openProtocolRecord(record, recipient)

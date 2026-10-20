@@ -341,26 +341,15 @@ export const useProtocolWorkspace = () => {
       setDismissedComponentUnitWarningKey('');
 
       setRecordId(result.protocolRecordId);
+      setValues(result.protocolValues);
 
       if (result.changed) {
-        setValues({
-          ...result.protocolValues,
-          ...reagentDefaultsForNewBlank(values),
-        });
         setStatus(
           result.protocolSaved || result.registrationSaved
             ? 'Бланки предыдущего реципиента автоматически сохранены. Выбран новый реципиент.'
             : 'Выбран новый реципиент.',
         );
       } else {
-        setValues(
-          result.protocolRecordId === null
-            ? {
-                ...result.protocolValues,
-                ...reagentDefaultsForNewBlank(result.protocolValues),
-              }
-            : result.protocolValues,
-        );
         setStatus(`Текущий реципиент: ${recipient.fullName}.`);
       }
 

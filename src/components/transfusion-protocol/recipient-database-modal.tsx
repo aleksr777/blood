@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
 import {
   createRecipient,
+  findRecipientsByName,
   getRecipientById,
   listBloodRequestRecords,
   listProtocolRecords,
@@ -71,7 +72,7 @@ export const RecipientDatabaseModal = ({
   });
   const [query, setQuery] = useState(initialRecipient.name);
   const [initializingRecipient, setInitializingRecipient] = useState(
-    Boolean(initialRecipient.id),
+    Boolean(initialRecipient.id || initialRecipient.name),
   );
   const [recipients, setRecipients] = useState<RecipientRecord[]>([]);
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
@@ -92,7 +93,7 @@ export const RecipientDatabaseModal = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!initialRecipient.id) {
+    if (!initialRecipient.id && !initialRecipient.name) {
       setInitializingRecipient(false);
       return undefined;
     }
@@ -100,12 +101,29 @@ export const RecipientDatabaseModal = ({
     let active = true;
     setLoading(true);
 
-    void getRecipientById(initialRecipient.id)
-      .then((recipient) => {
+    const loadInitialRecipient = async () => {
+      if (initialRecipient.id) {
+        const recipient = await getRecipientById(initialRecipient.id);
+        return { recipient, items: [recipient] };
+      }
+
+      const matches = await findRecipientsByName(initialRecipient.name);
+      return {
+        recipient: matches.length === 1 ? matches[0] : null,
+        items: matches,
+      };
+    };
+
+    void loadInitialRecipient()
+      .then(({ recipient, items }) => {
         if (!active) return;
+        setRecipients(items);
         setSelected(recipient);
-        setRecipients([recipient]);
-        setQuery(recipient.fullName);
+        if (recipient) {
+          setQuery(recipient.fullName);
+        } else {
+          setQuery(initialRecipient.name);
+        }
       })
       .catch((error: unknown) =>
         console.error('Не удалось открыть текущего реципиента:', error),
@@ -119,7 +137,7 @@ export const RecipientDatabaseModal = ({
     return () => {
       active = false;
     };
-  }, [initialRecipient.id]);
+  }, [initialRecipient.id, initialRecipient.name]);
 
   useEffect(() => {
     if (initializingRecipient) return undefined;
@@ -140,7 +158,24 @@ export const RecipientDatabaseModal = ({
             const initialMatch = initialRecipient.id
               ? items.find(({ id }) => id === initialRecipient.id)
               : undefined;
-            return initialMatch ?? null;
+            if (initialMatch) return initialMatch;
+
+            if (!initialRecipient.id && initialRecipient.name) {
+              const normalizedInitialName = initialRecipient.name
+                .trim()
+                .replace(/\s+/g, ' ')
+                .toLocaleLowerCase('ru-RU');
+              const exactMatches = items.filter(
+                ({ fullName }) =>
+                  fullName
+                    .trim()
+                    .replace(/\s+/g, ' ')
+                    .toLocaleLowerCase('ru-RU') === normalizedInitialName,
+              );
+              if (exactMatches.length === 1) return exactMatches[0];
+            }
+
+            return null;
           });
         })
         .catch((error: unknown) => console.error('Не удалось найти реципиентов:', error))
@@ -150,7 +185,7 @@ export const RecipientDatabaseModal = ({
       active = false;
       window.clearTimeout(timer);
     };
-  }, [initialRecipient.id, initializingRecipient, query]);
+  }, [initialRecipient.id, initialRecipient.name, initializingRecipient, query]);
   useEffect(() => {
     if (!selected) {
       setRecords([]);

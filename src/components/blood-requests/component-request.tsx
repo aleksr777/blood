@@ -32,6 +32,7 @@ import {
 } from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
+import { getBloodGroupMismatch } from '../transfusion-protocol/blood-group-validation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import {
   formatAlloimmuneAntibodies,
@@ -514,6 +515,7 @@ export const ComponentRequest = () => {
   const [editor, setEditor] = useState<Editor>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
+  const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
   const [savedRecordId, setSavedRecordId] = useState<number | null>(
     loadSavedRecordId,
   );
@@ -933,6 +935,30 @@ export const ComponentRequest = () => {
     };
   }, [currentRecipient, draft, savedRecordId]);
 
+  const bloodGroupMismatch = getBloodGroupMismatch({
+    ...examinationValues,
+    donorAbo: draft.componentAbo,
+    donorRh: draft.componentRh,
+  });
+
+  useEffect(() => {
+    if (!bloodGroupMismatch.key) {
+      setDismissedBloodGroupWarningKey('');
+    }
+  }, [bloodGroupMismatch.key]);
+
+  const bloodGroupWarning =
+    bloodGroupMismatch.key &&
+    bloodGroupMismatch.key !== dismissedBloodGroupWarningKey
+      ? bloodGroupMismatch.message
+      : '';
+
+  const dismissBloodGroupWarning = () => {
+    if (bloodGroupMismatch.key) {
+      setDismissedBloodGroupWarningKey(bloodGroupMismatch.key);
+    }
+  };
+
   const updateExamination = async (changes: ProtocolValues) => {
     if (savedRecordId !== null) {
       setDraft((current) => {
@@ -1291,6 +1317,19 @@ export const ComponentRequest = () => {
               {status}
             </div>
           )}
+          {bloodGroupWarning && (
+            <div className="toolbar-blood-group-warning" role="alert">
+              <span>{bloodGroupWarning}</span>
+              <button
+                type="button"
+                className="toolbar-warning-dismiss"
+                aria-label="Закрыть предупреждение"
+                onClick={dismissBloodGroupWarning}
+              >
+                ×
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
@@ -1411,6 +1450,8 @@ export const ComponentRequest = () => {
           individualSelectionIndications={draft.individualSelectionIndications}
           indicationValues={draft.indicationValues}
           showRequestOptions
+          bloodGroupWarning={bloodGroupWarning}
+          onDismissBloodGroupWarning={dismissBloodGroupWarning}
           onLocalChange={updateFields}
           onIndicationsChange={updateIndications}
           onClose={() => setEditor(null)}
@@ -1420,6 +1461,8 @@ export const ComponentRequest = () => {
       {editor === 'examination' && (
         <IndividualSelectionExaminationModal
           values={examinationValues}
+          bloodGroupWarning={bloodGroupWarning}
+          onDismissBloodGroupWarning={dismissBloodGroupWarning}
           onChange={updateExamination}
           onClose={() => setEditor(null)}
         />

@@ -12,7 +12,7 @@ import {
   saveRegistrationDraft,
 } from '../../storage/repositories/registration-draft';
 import { saveProtocolDraft } from '../../storage/repositories/protocol-draft';
-import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-deletion';
+import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import {
   saveRegistrationRecord,
   type ProtocolRecord,

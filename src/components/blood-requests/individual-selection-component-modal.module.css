@@ -38,17 +38,6 @@
   gap: 1rem 1.25rem;
 }
 
-.selectField {
-  min-width: 0;
-}
-
-.selectLabel {
-  margin-bottom: 0.4rem;
-  color: #263552;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
 .localGrid input,
 .localGrid textarea {
   width: 100%;

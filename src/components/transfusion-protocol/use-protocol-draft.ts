@@ -76,19 +76,16 @@ export const useProtocolDraft = ({
                 }
               : draft.values;
           const currentRecipient = readCurrentRecipient();
-          if (!currentRecipient) {
-            if (draft.protocolRecordId === null) {
-              adoptCurrentRecipientFromValues(draftValues);
-            }
+          if (draft.protocolRecordId !== null) {
             setValues(draftValues);
-            setRecordId(draft.protocolRecordId);
-          } else {
-            const sameRecipient =
-              Number(draftValues.recipientId) === currentRecipient.id;
+          } else if (!currentRecipient) {
+            adoptCurrentRecipientFromValues(draftValues);
+            setValues(draftValues);
+          } else if (Number(draftValues.recipientId) === currentRecipient.id) {
             const mergedValues = {
               ...draftValues,
-              ...generatedHistoryValues(draftValues),
               ...recipientProfileValuesForForms(currentRecipient),
+              ...generatedHistoryValues(draftValues),
             };
             const component = getIndicationComponent(mergedValues);
 
@@ -98,7 +95,7 @@ export const useProtocolDraft = ({
                   mergedValues,
                   readCurrentIndications(currentRecipient.id, component),
                 );
-              } else if (sameRecipient) {
+              } else {
                 writeCurrentIndications(
                   currentRecipient.id,
                   component,
@@ -108,8 +105,10 @@ export const useProtocolDraft = ({
             }
 
             setValues(mergedValues);
-            setRecordId(sameRecipient ? draft.protocolRecordId : null);
+          } else {
+            setValues(draftValues);
           }
+          setRecordId(draft.protocolRecordId);
           setLastInputAt(draft.updatedAt);
           return;
         }

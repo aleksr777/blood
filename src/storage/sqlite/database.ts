@@ -1,164 +1,62 @@
-import sqlite3InitModule, { type Database } from '@sqlite.org/sqlite-wasm';
+import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import { migrateLegacyOpfsDepartments } from './legacy-opfs-migration';
 import { migrateRecipientNameConstraint } from './recipient-name-migration';
 
 const DATABASE_FILE = '/blood.sqlite3';
-const DATABASE_LOCK_NAME = 'blood-opfs-sahpool-access';
-
-const getSqlite3 = (() => {
-  let promise: ReturnType<typeof sqlite3InitModule> | null = null;
-
-  return () => {
-    promise ??= sqlite3InitModule();
-    return promise;
-  };
-})();
-
-const installPool = async () => {
-  const sqlite3 = await getSqlite3();
-  return sqlite3.installOpfsSAHPoolVfs({
-    initialCapacity: 6,
-    name: 'blood-opfs-sahpool',
-    directory: '/blood-opfs-sahpool',
-  });
-};
-
-type Pool = Awaited<ReturnType<typeof installPool>>;
-
-let poolPromise: Promise<Pool> | null = null;
-let activeDatabase: Database | null = null;
-let schemaInitialized = false;
-let requestQueue: Promise<void> = Promise.resolve();
-
-const getPool = () => {
-  if (!poolPromise) {
-    poolPromise = installPool().catch((error) => {
-      poolPromise = null;
-      throw error;
-    });
-  }
-
-  return poolPromise;
-};
-
-const initializeSchema = async (db: Database) => {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS departments (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      normalized_name TEXT NOT NULL UNIQUE,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS saved_options (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      category TEXT NOT NULL,
-      value TEXT NOT NULL,
-      normalized_value TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      UNIQUE(category, normalized_value)
-    );
-
-    CREATE TABLE IF NOT EXISTS protocol_draft (
-      id INTEGER PRIMARY KEY CHECK (id = 1),
-      values_json TEXT NOT NULL,
-      updated_at INTEGER NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS registration_draft (
-      id INTEGER PRIMARY KEY CHECK (id = 1),
-      values_json TEXT NOT NULL,
-      updated_at INTEGER NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS recipients (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      full_name TEXT NOT NULL,
-      normalized_name TEXT NOT NULL,
-      birth_date TEXT NOT NULL DEFAULT '',
-      profile_json TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS protocol_records (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      recipient_id INTEGER NOT NULL,
-      values_json TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      FOREIGN KEY(recipient_id) REFERENCES recipients(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS registration_records (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      recipient_id INTEGER NOT NULL,
-      values_json TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      FOREIGN KEY(recipient_id) REFERENCES recipients(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS blood_request_records (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      recipient_id INTEGER NOT NULL,
-      kind TEXT NOT NULL,
-      values_json TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      FOREIGN KEY(recipient_id) REFERENCES recipients(id)
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_recipients_name
-      ON recipients(normalized_name);
-    CREATE INDEX IF NOT EXISTS idx_protocol_records_recipient
-      ON protocol_records(recipient_id, updated_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_registration_records_recipient
-      ON registration_records(recipient_id, updated_at DESC);
-    CREATE INDEX IF NOT EXISTS idx_blood_request_records_recipient_kind
-      ON blood_request_records(recipient_id, kind, updated_at DESC);
-  `);
-
-  migrateRecipientNameConstraint(db);
-
-  const sqlite3 = await getSqlite3();
-  await migrateLegacyOpfsDepartments(sqlite3, db);
-};
+const DATABASE_OWNER_LOCK = 'blood-opfs-sahpool-owner';
 
 type LockManagerLike = {
   request: <T>(
     name: string,
-    options: { mode: 'exclusive' },
-    callback: () => Promise<T>,
+    options: { mode: 'exclusive'; ifAvailable: true },
+    callback: (lock: unknown | null) => Promise<T>,
   ) => Promise<T>;
 };
 
-const withOriginLock = async <T>(callback: () => Promise<T>) => {
+let ownerLockPromise: Promise<void> | null = null;
+
+const acquireDatabaseOwnerLock = () => {
+  if (ownerLockPromise) return ownerLockPromise;
+
   const lockManager = (
     globalThis.navigator as unknown as { locks?: LockManagerLike }
   ).locks;
 
-  if (!lockManager) return callback();
+  if (!lockManager) {
+    ownerLockPromise = Promise.resolve();
+    return ownerLockPromise;
+  }
 
-  return lockManager.request(
-    DATABASE_LOCK_NAME,
-    { mode: 'exclusive' },
-    callback,
-  );
+  ownerLockPromise = new Promise<void>((resolve, reject) => {
+    void lockManager
+      .request(
+        DATABASE_OWNER_LOCK,
+        { mode: 'exclusive', ifAvailable: true },
+        async (lock) => {
+          if (!lock) {
+            reject(
+              new Error(
+                'Приложение уже открыто в другой вкладке. ' +
+                  'Закройте другие вкладки с приложением и повторите действие.',
+              ),
+            );
+            return;
+          }
+
+          resolve();
+
+          // Keep the lock for the lifetime of this worker. The browser
+          // releases it automatically when the worker/tab is closed.
+          await new Promise<void>(() => undefined);
+        },
+      )
+      .catch(reject);
+  });
+
+  return ownerLockPromise;
 };
 
-const enqueue = <T>(callback: () => Promise<T>) => {
-  const run = requestQueue.then(callback, callback);
-  requestQueue = run.then(
-    () => undefined,
-    () => undefined,
-  );
-  return run;
-};
-
-const describeAccessConflict = (error: unknown) => {
+const describeDatabaseError = (error: unknown) => {
   const message = error instanceof Error ? error.message : String(error);
 
   if (
@@ -167,60 +65,119 @@ const describeAccessConflict = (error: unknown) => {
     message.includes('Writable stream associated with the same file')
   ) {
     return new Error(
-      'Локальная база данных занята другой старой вкладкой приложения. ' +
-        'Закройте другие вкладки с приложением, обновите страницу и повторите действие.',
+      'Локальная база данных занята другой вкладкой или старой версией приложения. ' +
+        'Закройте все вкладки с приложением, откройте его снова и повторите действие.',
     );
   }
 
   return error instanceof Error ? error : new Error(message);
 };
 
-export type SqliteDatabase = Database;
+const openDatabase = async () => {
+  try {
+    await acquireDatabaseOwnerLock();
 
-export const getDatabase = async (): Promise<SqliteDatabase> => {
-  if (!activeDatabase) {
-    throw new Error('SQLite database is not active.');
+    const sqlite3 = await sqlite3InitModule();
+    const pool = await sqlite3.installOpfsSAHPoolVfs({
+      initialCapacity: 6,
+      name: 'blood-opfs-sahpool',
+      directory: '/blood-opfs-sahpool',
+    });
+    const db = new pool.OpfsSAHPoolDb(DATABASE_FILE);
+
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS departments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        normalized_name TEXT NOT NULL UNIQUE,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS saved_options (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category TEXT NOT NULL,
+        value TEXT NOT NULL,
+        normalized_value TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        UNIQUE(category, normalized_value)
+      );
+
+      CREATE TABLE IF NOT EXISTS protocol_draft (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        values_json TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS registration_draft (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        values_json TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS recipients (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL,
+        normalized_name TEXT NOT NULL,
+        birth_date TEXT NOT NULL DEFAULT '',
+        profile_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS protocol_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipient_id INTEGER NOT NULL,
+        values_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY(recipient_id) REFERENCES recipients(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS registration_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipient_id INTEGER NOT NULL,
+        values_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY(recipient_id) REFERENCES recipients(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS blood_request_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipient_id INTEGER NOT NULL,
+        kind TEXT NOT NULL,
+        values_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY(recipient_id) REFERENCES recipients(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_recipients_name
+        ON recipients(normalized_name);
+      CREATE INDEX IF NOT EXISTS idx_protocol_records_recipient
+        ON protocol_records(recipient_id, updated_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_registration_records_recipient
+        ON registration_records(recipient_id, updated_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_blood_request_records_recipient_kind
+        ON blood_request_records(recipient_id, kind, updated_at DESC);
+    `);
+
+    migrateRecipientNameConstraint(db);
+
+    await migrateLegacyOpfsDepartments(sqlite3, db);
+    return db;
+  } catch (error) {
+    throw describeDatabaseError(error);
   }
-
-  return activeDatabase;
 };
 
-export const withDatabaseAccess = <T>(callback: () => Promise<T>) =>
-  enqueue(() =>
-    withOriginLock(async () => {
-      let pool: Pool | null = null;
-      let db: Database | null = null;
+export type SqliteDatabase = Awaited<ReturnType<typeof openDatabase>>;
 
-      try {
-        pool = await getPool();
+let databasePromise: ReturnType<typeof openDatabase> | null = null;
 
-        if (pool.isPaused()) {
-          await pool.unpauseVfs();
-        }
-
-        db = new pool.OpfsSAHPoolDb(DATABASE_FILE);
-        activeDatabase = db;
-
-        if (!schemaInitialized) {
-          await initializeSchema(db);
-          schemaInitialized = true;
-        }
-
-        return await callback();
-      } catch (error) {
-        throw describeAccessConflict(error);
-      } finally {
-        activeDatabase = null;
-
-        if (db) {
-          try {
-            db.close();
-          } finally {
-            pool?.pauseVfs();
-          }
-        } else {
-          pool?.pauseVfs();
-        }
-      }
-    }),
-  );
+export const getDatabase = () => {
+  databasePromise ??= openDatabase();
+  return databasePromise;
+};

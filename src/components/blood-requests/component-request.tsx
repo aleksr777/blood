@@ -342,7 +342,10 @@ const currentAutoValues = async (
   const protocolDraft = await loadProtocolDraft();
   const sameRecipient =
     Number(protocolDraft.values.recipientId) === recipient.id;
-  const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
+  const currentProtocolValues =
+    sameRecipient && protocolDraft.protocolRecordId === null
+      ? protocolDraft.values
+      : {};
 
   const values: ProtocolValues = {
     ...recipient.profile,
@@ -374,19 +377,20 @@ const mergeAutoValues = (
 ): DirectionDraft => {
   if (!recipient) return current;
 
+  const recipientChanged = current.sourceRecipientId !== String(recipient.id);
   const next: DirectionDraft = {
     ...current,
     sourceRecipientId: String(recipient.id),
-    recipientProfileSnapshot: {
-      ...recipient.profile,
-      recipientId: String(recipient.id),
-      recipientName: recipient.fullName,
-    },
     autoValues: { ...autoValues },
   };
 
   AUTO_FIELDS.forEach((field) => {
-    next[field] = autoValues[field] ?? '';
+    const currentValue = current[field] ?? '';
+    const previousAuto = current.autoValues[field] ?? '';
+
+    if (recipientChanged || !currentValue || currentValue === previousAuto) {
+      next[field] = autoValues[field] ?? '';
+    }
   });
 
   return next;
@@ -523,17 +527,21 @@ export const ComponentRequest = () => {
 
   const refreshCurrentData = useCallback(async (
     recipient = readCurrentRecipient(),
+    force = false,
   ) => {
     setCurrentRecipient(recipient);
+    if (savedRecordIdRef.current !== null && !force) return;
 
     const autoValues = await currentAutoValues(recipient);
     const protocolDraft = recipient ? await loadProtocolDraft() : null;
     const currentProtocolValues =
       recipient &&
       protocolDraft &&
+      protocolDraft.protocolRecordId === null &&
       Number(protocolDraft.values.recipientId) === recipient.id
         ? protocolDraft.values
         : {};
+    if (savedRecordIdRef.current !== null && !force) return;
 
     setDraft((current) => {
       const recipientChanged = Boolean(
@@ -541,12 +549,6 @@ export const ComponentRequest = () => {
           current.sourceRecipientId &&
           current.sourceRecipientId !== String(recipient.id),
       );
-
-      if (recipientChanged && savedRecordIdRef.current !== null) {
-        savedRecordIdRef.current = null;
-        setSavedRecordId(null);
-      }
-
       let next = mergeAutoValues(current, recipient, autoValues);
       if (!recipient) return next;
 
@@ -684,6 +686,7 @@ export const ComponentRequest = () => {
 
   const updateFields = (changes: Record<string, string>) => {
     if (
+      savedRecordId === null &&
       currentRecipient &&
       changes.individualSelectionIndications !== undefined
     ) {
@@ -714,6 +717,7 @@ export const ComponentRequest = () => {
         Boolean(changes.indicationComponent) &&
         changes.indicationComponent !== currentComponent;
       const sharedIndications =
+        savedRecordId === null &&
         currentRecipient &&
         componentChanged &&
         component
@@ -725,7 +729,7 @@ export const ComponentRequest = () => {
         ...changes,
       };
 
-      if (currentRecipient && component) {
+      if (savedRecordId === null && currentRecipient && component) {
         writeCurrentIndications(
           currentRecipient.id,
           component,
@@ -787,26 +791,50 @@ export const ComponentRequest = () => {
   const save = async (afterPrint = false) => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
 
-    const recipient = readCurrentRecipient();
-    if (!recipient) {
+    const historicalRecipientId = Number(draft.sourceRecipientId);
+    if (savedRecordId === null && !currentRecipient) {
       setStatus('Выберите реципиента перед сохранением заявки.');
+      return false;
+    }
+    if (
+      savedRecordId !== null &&
+      (!Number.isFinite(historicalRecipientId) || historicalRecipientId <= 0)
+    ) {
+      setStatus('Не удалось определить реципиента сохранённого бланка.');
       return false;
     }
 
     try {
-      const draftToSave = {
-        ...draft,
-        sourceRecipientId: String(recipient.id),
-        recipientProfileSnapshot: {
-          ...recipient.profile,
-          recipientId: String(recipient.id),
-          recipientName: recipient.fullName,
-        },
-      };
+      const recipientId =
+        savedRecordId !== null
+          ? historicalRecipientId
+          : currentRecipient!.id;
+      const protocolDraft =
+        savedRecordId === null ? await loadProtocolDraft() : null;
+      const currentProtocolValues =
+        savedRecordId === null &&
+        currentRecipient &&
+        protocolDraft &&
+        protocolDraft.protocolRecordId === null &&
+        Number(protocolDraft.values.recipientId) === currentRecipient.id
+          ? protocolDraft.values
+          : {};
+      const draftToSave =
+        savedRecordId === null
+          ? {
+              ...draft,
+              recipientProfileSnapshot: {
+                ...currentRecipient!.profile,
+                ...currentProtocolValues,
+                recipientId: String(currentRecipient!.id),
+                recipientName: currentRecipient!.fullName,
+              },
+            }
+          : draft;
 
       const record = await saveBloodRequestRecord({
         recordId: savedRecordId,
-        recipientId: recipient.id,
+        recipientId,
         kind: 'component-request',
         values: { ...draftToSave },
       });
@@ -842,7 +870,7 @@ export const ComponentRequest = () => {
       if (recipientChanged) {
         setSavedRecordId(null);
       }
-      await refreshCurrentData(readCurrentRecipient());
+      await refreshCurrentData(readCurrentRecipient(), recipientChanged);
       return true;
     } catch (error) {
       console.error('Не удалось выбрать реципиента для направления:', error);
@@ -856,16 +884,8 @@ export const ComponentRequest = () => {
   ) => {
     try {
       await switchCurrentRecipient(recipient);
-      const currentRecipient = readCurrentRecipient();
-      const autoValues = await currentAutoValues(currentRecipient);
-      setCurrentRecipient(currentRecipient);
-      setDraft(
-        mergeAutoValues(
-          draftFromRecord(record.values),
-          currentRecipient,
-          autoValues,
-        ),
-      );
+      setCurrentRecipient(readCurrentRecipient());
+      setDraft(draftFromRecord(record.values));
       savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
       setRegistryOpen(false);
@@ -896,11 +916,11 @@ export const ComponentRequest = () => {
   };
 
   const examinationValues = useMemo<ProtocolValues>(() => {
-    if (currentRecipient) {
+    if (savedRecordId === null) {
       return {
-        ...currentRecipient.profile,
-        recipientId: String(currentRecipient.id),
-        recipientName: currentRecipient.fullName,
+        ...(currentRecipient?.profile ?? {}),
+        recipientId: currentRecipient ? String(currentRecipient.id) : '',
+        recipientName: currentRecipient?.fullName ?? '',
       };
     }
 
@@ -913,7 +933,31 @@ export const ComponentRequest = () => {
       diagnosis: draft.diagnosis,
       department: draft.department,
     };
-  }, [currentRecipient, draft]);
+  }, [currentRecipient, draft, savedRecordId]);
+
+  const bloodGroupMismatch = getBloodGroupMismatch({
+    ...examinationValues,
+    donorAbo: draft.componentAbo,
+    donorRh: draft.componentRh,
+  });
+
+  useEffect(() => {
+    if (!bloodGroupMismatch.key) {
+      setDismissedBloodGroupWarningKey('');
+    }
+  }, [bloodGroupMismatch.key]);
+
+  const bloodGroupWarning =
+    bloodGroupMismatch.key &&
+    bloodGroupMismatch.key !== dismissedBloodGroupWarningKey
+      ? bloodGroupMismatch.message
+      : '';
+
+  const dismissBloodGroupWarning = () => {
+    if (bloodGroupMismatch.key) {
+      setDismissedBloodGroupWarningKey(bloodGroupMismatch.key);
+    }
+  };
 
   const updateExamination = async (changes: ProtocolValues) => {
     if (savedRecordId !== null) {
@@ -933,18 +977,66 @@ export const ComponentRequest = () => {
           recipientProfileSnapshot: snapshot,
         };
 
-        if (changes.recipientN  const updateExamination = async (changes: ProtocolValues) => {
-    const recipient = readCurrentRecipient();
-    if (!recipient) return;
+        if (changes.recipientName !== undefined) {
+          next.recipientName = changes.recipientName;
+        }
+        if (changes.recipientBirthDate !== undefined) {
+          next.recipientAge = formatRecipientAge(changes.recipientBirthDate);
+        }
+        if (changes.recipientSex !== undefined) {
+          next.recipientSex = changes.recipientSex;
+        }
+        if (changes.medicalRecordNumber !== undefined) {
+          next.medicalRecordNumber = changes.medicalRecordNumber;
+        }
+        if (changes.diagnosis !== undefined) {
+          next.diagnosis = changes.diagnosis;
+        }
+        if (
+          changes.recipientAbo !== undefined ||
+          changes.recipientRh !== undefined
+        ) {
+          next.recipientAboRh = [snapshot.recipientAbo, snapshot.recipientRh]
+            .filter(Boolean)
+            .join(' ');
+        }
+        if (
+          Object.keys(changes).some(
+            (key) =>
+              key === 'recipientAntigens' ||
+              key.startsWith('recipientAntigen'),
+          )
+        ) {
+          next.recipientPhenotype = formatRecipientAntigens(snapshot);
+        }
+        if (
+          Object.keys(changes).some((key) =>
+            [
+              'recipientPregnanciesCount',
+              'recipientBirthsCount',
+              'recipientSpontaneousAbortionsCount',
+              'recipientHemolyticDiseaseNewbornHistory',
+            ].includes(key),
+          )
+        ) {
+          next.obstetricHistory =
+            snapshot.recipientSex === 'Женский'
+              ? formatObstetricHistory(snapshot)
+              : '';
+        }
+
+        return next;
+      });
+      return;
+    }
+
+    if (!currentRecipient) return;
 
     try {
-      await updateCurrentRecipientProfile(recipient, changes);
+      await updateCurrentRecipientProfile(currentRecipient, changes);
       await refreshCurrentData(readCurrentRecipient());
     } catch (error) {
-      console.error(
-        'Не удалось обновить общие данные медицинского обследования реципиента:',
-        error,
-      );
+      console.error('Не удалось обновить общие данные медицинского обследования реципиента:', error);
     }
   };
 

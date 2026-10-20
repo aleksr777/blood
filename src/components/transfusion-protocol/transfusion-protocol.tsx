@@ -301,6 +301,11 @@ export const TransfusionProtocol = () => {
       {workspace.registryOpen && (
         <RecipientDatabaseModal
           initialRecipientId={registryRecipientId}
+          initialRecipientName={
+            readCurrentRecipient()?.fullName ??
+            workspace.values.recipientName ??
+            ''
+          }
           onClose={() => {
             setRegistryRecipientId(null);
             workspace.setRegistryOpen(false);

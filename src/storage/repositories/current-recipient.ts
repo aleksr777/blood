@@ -215,13 +215,6 @@ export const recipientProfileValuesForForms = (recipient: {
   recipientName: recipient.fullName,
 });
 
-const protocolValuesForRecipient = (recipient: RecipientRecord): ProtocolValuesRecord =>
-  recipientProfileValuesForForms(recipient);
-
-const registrationValuesForRecipient = (
-  recipient: RecipientRecord,
-): ProtocolValuesRecord => recipientProfileValuesForForms(recipient);
-
 const savePreviousProtocol = async (draft: ProtocolDraftState, nextRecipientId: number) => {
   const recipientId = getRecipientId(draft.values);
   if (!recipientId || recipientId === nextRecipientId || !draft.values.recipientName?.trim()) {

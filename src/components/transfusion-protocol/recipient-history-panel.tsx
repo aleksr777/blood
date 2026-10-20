@@ -29,6 +29,7 @@ type Props = {
     recipient: RecipientRecord,
   ) => void;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
+  currentRecipientId?: number | null;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
   onDeleteRecord: (record: ProtocolRecord) => void;
@@ -71,6 +72,7 @@ export const RecipientHistoryPanel = ({
   onOpenIndividualSelectionDirectionRecord,
   onOpenComponentRequestRecord,
   onUseRecipient,
+  currentRecipientId = null,
   onEdit,
   onDelete,
   onDeleteRecord,
@@ -133,6 +135,7 @@ export const RecipientHistoryPanel = ({
                 <button
                   type="button"
                   className={styles.action}
+                  disabled={recipient.id === currentRecipientId}
                   onClick={() => onUseRecipient(recipient)}
                 >
                   Выбрать

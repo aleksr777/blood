@@ -10,6 +10,7 @@ import {
   writeCurrentIndications,
 } from '../../storage/repositories/current-indications';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
+import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-deletion';
 import {
   findProtocolRecordsByComponentUnitNumber,
   listProtocolRecords,
@@ -591,6 +592,20 @@ export const useProtocolWorkspace = () => {
     }
   };
 
+  const handleRecipientDeleted = (recipientId: number) => {
+    if (Number(values.recipientId) !== recipientId) return;
+
+    previousBlankIndicationsRef.current = null;
+    draft.touch();
+    setRecordId(null);
+    setValues(clearRecipientLinkedValues(values, recipientId));
+    setPreviousTransfusionSuggestion('');
+    setHistoryRefreshToken((current) => current + 1);
+    setComponentUnitNumberChecked(false);
+    setDismissedComponentUnitWarningKey('');
+    setStatus('Реципиент удалён. Связанные с ним данные удалены из текущего бланка.');
+  };
+
   const expiredReagents = getExpiredReagentWarnings(values);
   const hemaconExpirationWarning = getHemaconExpirationWarning(values.expirationDate);
   const expirationWarnings = [
@@ -624,5 +639,6 @@ export const useProtocolWorkspace = () => {
     dismissComponentUnitNumberWarning,
     clearForm,
     openRecord,
+    handleRecipientDeleted,
   };
 };

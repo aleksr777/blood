@@ -87,14 +87,22 @@ const readPendingRegistrationRecord = (): RegistrationRecord | null => {
 
 export const TransfusionRegistration = () => {
   const [initialRecord] = useState<RegistrationRecord | null>(readPendingRegistrationRecord);
-  const [values, setValues] = useState<ProtocolValues>(() =>
-    initialRecord
+  const [values, setValues] = useState<ProtocolValues>(() => {
+    if (!initialRecord) return {};
+
+    const recordValues = {
+      ...initialRecord.values,
+      recipientId: String(initialRecord.recipientId),
+    };
+    const currentRecipient = readCurrentRecipient();
+
+    return currentRecipient
       ? {
-          ...initialRecord.values,
-          recipientId: String(initialRecord.recipientId),
+          ...recordValues,
+          ...recipientProfileValuesForForms(currentRecipient),
         }
-      : {},
-  );
+      : recordValues;
+  });
   const [recordId, setRecordId] = useState<number | null>(initialRecord?.id ?? null);
   const [draftLoaded, setDraftLoaded] = useState(Boolean(initialRecord));
   const [registryOpen, setRegistryOpen] = useState(false);
@@ -108,7 +116,7 @@ export const TransfusionRegistration = () => {
     Number.isFinite(currentRecipientId) && currentRecipientId > 0;
   const storedCurrentRecipient = readCurrentRecipient();
   const currentRecipientProfile =
-    recordId === null && storedCurrentRecipient?.id === currentRecipientId
+    storedCurrentRecipient?.id === currentRecipientId
       ? storedCurrentRecipient.profile
       : {};
   const birthDateParts = getBirthDateParts(values.recipientBirthDate);
@@ -117,12 +125,22 @@ export const TransfusionRegistration = () => {
 
   useEffect(() => {
     if (initialRecord) {
+      const currentRecipient = readCurrentRecipient();
+      const recordValues = {
+        ...initialRecord.values,
+        recipientId: String(initialRecord.recipientId),
+      };
+      const sameRecipient =
+        !currentRecipient || currentRecipient.id === initialRecord.recipientId;
+
       void saveRegistrationDraft({
-        values: {
-          ...initialRecord.values,
-          recipientId: String(initialRecord.recipientId),
-        },
-        registrationRecordId: initialRecord.id,
+        values: currentRecipient
+          ? {
+              ...recordValues,
+              ...recipientProfileValuesForForms(currentRecipient),
+            }
+          : recordValues,
+        registrationRecordId: sameRecipient ? initialRecord.id : null,
         updatedAt: Date.now(),
       }).catch((error: unknown) =>
         console.error('Не удалось сохранить открытый лист регистрации как текущий:', error),
@@ -137,20 +155,21 @@ export const TransfusionRegistration = () => {
 
         if (Object.keys(draft.values).length > 0) {
           const currentRecipient = readCurrentRecipient();
-          if (draft.registrationRecordId !== null) {
+          if (!currentRecipient) {
+            if (draft.registrationRecordId === null) {
+              adoptCurrentRecipientFromValues(draft.values);
+            }
             setValues(draft.values);
-          } else if (!currentRecipient) {
-            adoptCurrentRecipientFromValues(draft.values);
-            setValues(draft.values);
-          } else if (Number(draft.values.recipientId) === currentRecipient.id) {
+            setRecordId(draft.registrationRecordId);
+          } else {
+            const sameRecipient =
+              Number(draft.values.recipientId) === currentRecipient.id;
             setValues({
               ...draft.values,
               ...recipientProfileValuesForForms(currentRecipient),
             });
-          } else {
-            setValues(draft.values);
+            setRecordId(sameRecipient ? draft.registrationRecordId : null);
           }
-          setRecordId(draft.registrationRecordId);
           return;
         }
 
@@ -228,10 +247,15 @@ export const TransfusionRegistration = () => {
     const switched = await selectRecipient(recipient);
     if (!switched) return;
 
+    const currentRecipient = readCurrentRecipient();
     setRecordId(record.id);
     setValues({
       ...record.values,
-      recipientId: String(record.recipientId),
+      ...(currentRecipient
+        ? recipientProfileValuesForForms(currentRecipient)
+        : {
+            recipientId: String(record.recipientId),
+          }),
     });
     setRegistryRecipientId(null);
     setRegistryOpen(false);
@@ -246,10 +270,15 @@ export const TransfusionRegistration = () => {
     if (!switched) return;
 
     try {
+      const currentRecipient = readCurrentRecipient();
       await saveProtocolDraft({
         values: {
           ...record.values,
-          recipientId: String(record.recipientId),
+          ...(currentRecipient
+            ? recipientProfileValuesForForms(currentRecipient)
+            : {
+                recipientId: String(record.recipientId),
+              }),
         },
         protocolRecordId: record.id,
         updatedAt: Date.now(),

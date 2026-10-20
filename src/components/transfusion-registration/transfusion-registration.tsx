@@ -321,7 +321,12 @@ export const TransfusionRegistration = () => {
   };
 
   const openRecipients = () => {
-    setRegistryRecipientId(null);
+    const storedRecipient = readCurrentRecipient();
+    setRegistryRecipientId(
+      currentRecipientAvailable
+        ? currentRecipientId
+        : storedRecipient?.id ?? null,
+    );
     setRegistryOpen(true);
   };
 

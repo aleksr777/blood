@@ -256,6 +256,8 @@ export const syncCurrentRecipientProfile = async (
   changes: ProtocolValuesRecord,
   activeDraft: ActiveDraftOverride,
 ): Promise<RecipientProfileSyncResult | null> => {
+  if (activeDraft.recordId !== null) return null;
+
   const hasGeneratedTransfusionHistory = Boolean(
     changes.previousTransfusionsAutoText?.trim() ||
       activeDraft.values.previousTransfusionsAutoText?.trim(),
@@ -333,7 +335,7 @@ export const syncCurrentRecipientProfile = async (
       protocolRecordId: null,
       updatedAt: Date.now(),
     };
-  } else {
+  } else if (protocolDraft.protocolRecordId === null) {
     protocolDraft = {
       ...protocolDraft,
       values: {
@@ -352,7 +354,7 @@ export const syncCurrentRecipientProfile = async (
       registrationRecordId: null,
       updatedAt: Date.now(),
     };
-  } else {
+  } else if (registrationDraft.registrationRecordId === null) {
     registrationDraft = {
       ...registrationDraft,
       values: { ...registrationDraft.values, ...sharedValues },
@@ -414,15 +416,21 @@ export const switchCurrentRecipient = async (
 
   if (activeRecipientId === recipient.id && !hasConflictingDraft) {
     const profileValues = recipientProfileValuesForForms(recipient);
-    const protocolValues = {
-      ...protocolDraft.values,
-      ...profileValues,
-      ...generatedTransfusionHistoryValues(protocolDraft.values),
-    };
-    const registrationValues = {
-      ...registrationDraft.values,
-      ...profileValues,
-    };
+    const protocolValues =
+      protocolDraft.protocolRecordId === null
+        ? {
+            ...protocolDraft.values,
+            ...profileValues,
+            ...generatedTransfusionHistoryValues(protocolDraft.values),
+          }
+        : protocolDraft.values;
+    const registrationValues =
+      registrationDraft.registrationRecordId === null
+        ? {
+            ...registrationDraft.values,
+            ...profileValues,
+          }
+        : registrationDraft.values;
     const now = Date.now();
 
     await Promise.all([

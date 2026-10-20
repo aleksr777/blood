@@ -906,7 +906,7 @@ export const ComponentRequest = () => {
         'component-request',
       ),
     );
-    setStatus('Реципиент удалён. Связанные с ним данные удалены из текущего заявки.');
+    setStatus('Реципиент удалён. Связанные с ним данные удалены из текущей заявки.');
   };
 
   const examinationValues = useMemo<ProtocolValues>(() => {

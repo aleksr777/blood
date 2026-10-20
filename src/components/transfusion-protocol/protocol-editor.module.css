@@ -361,8 +361,8 @@
 }
 
 .customSelectControlNeutral {
-  border-color: #b8c4d6;
-  background: #e2e8f0;
+  border-color: #94a3b8;
+  background: #cbd5e1;
   color: #111827;
 }
 
@@ -373,7 +373,7 @@
 }
 
 .customSelectControlNeutral .customSelectArrow {
-  border-left-color: #b8c4d6;
+  border-left-color: #94a3b8;
 }
 
 .customSelectControl:focus-visible {
@@ -508,13 +508,13 @@
 
 .customSelectOptionToneNeutral,
 .customSelectOptionNeutralEmpty {
-  background: #e2e8f0;
+  background: #cbd5e1;
   color: #111827;
 }
 
 .customSelectOptionToneNeutral:focus-visible,
 .customSelectOptionNeutralEmpty:focus-visible {
-  background: #cbd5e1;
+  background: #b8c4d6;
   color: #111827;
 }
 

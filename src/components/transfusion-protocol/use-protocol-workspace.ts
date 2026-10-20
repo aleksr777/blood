@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
+  recipientProfileValuesForForms,
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
@@ -530,11 +531,16 @@ export const useProtocolWorkspace = () => {
         }
       : {};
 
+    const currentRecipient = readCurrentRecipient();
     setRecordId(record.id);
     setValues({
       ...record.values,
-      recipientId: String(record.recipientId),
       ...generatedHistory,
+      ...(currentRecipient
+        ? recipientProfileValuesForForms(currentRecipient)
+        : {
+            recipientId: String(record.recipientId),
+          }),
     });
     setRegistryOpen(false);
     setStatus('Сохранённый бланк открыт для просмотра и редактирования.');

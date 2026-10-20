@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
+import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
 import type {
   RecipientRecord,
   RegistrationRecord,
@@ -213,9 +214,13 @@ export const TransfusionProtocol = () => {
         onClear={workspace.clearForm}
         onNew={() => void workspace.newBlank()}
         onOpenRegistry={() => {
-          const recipientId = Number(workspace.values.recipientId);
+          const currentRecipient = readCurrentRecipient();
+          const formRecipientId = Number(workspace.values.recipientId);
           setRegistryRecipientId(
-            Number.isFinite(recipientId) && recipientId > 0 ? recipientId : null,
+            currentRecipient?.id ??
+              (Number.isFinite(formRecipientId) && formRecipientId > 0
+                ? formRecipientId
+                : null),
           );
           workspace.setRegistryOpen(true);
         }}
@@ -271,9 +276,13 @@ export const TransfusionProtocol = () => {
           previousTransfusionSuggestion={workspace.previousTransfusionSuggestion}
           persistReusableOptions={workspace.recordId === null}
           onOpenRecipients={() => {
-            const recipientId = Number(workspace.values.recipientId);
+            const currentRecipient = readCurrentRecipient();
+            const formRecipientId = Number(workspace.values.recipientId);
             setRegistryRecipientId(
-              Number.isFinite(recipientId) && recipientId > 0 ? recipientId : null,
+              currentRecipient?.id ??
+                (Number.isFinite(formRecipientId) && formRecipientId > 0
+                  ? formRecipientId
+                  : null),
             );
             workspace.setActiveBlock(null);
             workspace.setRegistryOpen(true);
@@ -292,9 +301,6 @@ export const TransfusionProtocol = () => {
       {workspace.registryOpen && (
         <RecipientDatabaseModal
           initialRecipientId={registryRecipientId}
-          initialRecipientName={
-            registryRecipientId ? (workspace.values.recipientName ?? '') : ''
-          }
           onClose={() => {
             setRegistryRecipientId(null);
             workspace.setRegistryOpen(false);

@@ -1,5 +1,5 @@
 import type { DatabaseRequest, DatabaseResponse } from './database-types';
-import { getDatabase } from './database';
+import { withDatabaseAccess } from './database';
 import {
   importDepartments,
   listDepartments,
@@ -48,10 +48,9 @@ import {
   updateRecipient,
 } from './recipient-store';
 
-const handleRequest = async (request: DatabaseRequest) => {
+const dispatchRequest = async (request: DatabaseRequest) => {
   switch (request.action) {
     case 'init':
-      await getDatabase();
       return true;
     case 'departments:list':
       return listDepartments();
@@ -164,6 +163,9 @@ const handleRequest = async (request: DatabaseRequest) => {
       return removeBloodRequestRecord((request.payload as { id: number }).id);
   }
 };
+
+const handleRequest = (request: DatabaseRequest) =>
+  withDatabaseAccess(() => dispatchRequest(request));
 
 const send = (response: DatabaseResponse) => {
   const scope = globalThis as unknown as { postMessage: (message: DatabaseResponse) => void };

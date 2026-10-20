@@ -346,10 +346,10 @@ const currentAutoValues = async (
   const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
 
   const values: ProtocolValues = {
+    ...currentProtocolValues,
     ...recipient.profile,
     recipientId: String(recipient.id),
     recipientName: recipient.fullName,
-    ...currentProtocolValues,
   };
 
   return {

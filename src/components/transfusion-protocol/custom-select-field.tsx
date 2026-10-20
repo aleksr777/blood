@@ -30,7 +30,10 @@ export const CustomSelectField = ({
   const [open, setOpen] = useState(false);
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
   const allOptions = allowEmpty ? ['', ...options] : options;
-  const toneBloodGroupOptions = Boolean(tone && name.toLocaleLowerCase().includes('abo'));
+  const normalizedName = name.toLocaleLowerCase();
+  const toneBloodGroupOptions = Boolean(tone && normalizedName.includes('abo'));
+  const isBloodGroupField =
+    normalizedName.includes('abo') || normalizedName.includes('rh');
 
   const select = (nextValue: string) => {
     onChange(nextValue);
@@ -47,6 +50,9 @@ export const CustomSelectField = ({
           compact ? styles.customSelectControlCompact : '',
           tone === 'positive' ? styles.customSelectControlRhPositive : '',
           tone === 'negative' ? styles.customSelectControlRhNegative : '',
+          tone === 'neutral' && isBloodGroupField
+            ? styles.customSelectControlNeutral
+            : '',
         ].filter(Boolean).join(' ')}
         aria-label={label}
         aria-haspopup="listbox"
@@ -77,6 +83,9 @@ export const CustomSelectField = ({
           toneBloodGroupOptions && tone === 'negative'
             ? styles.historyDropdownRhNegative
             : '',
+          tone === 'neutral' && isBloodGroupField
+            ? styles.historyDropdownNeutral
+            : '',
         ].filter(Boolean).join(' ')}
         data-state={dropdownState}
         role="listbox"
@@ -104,7 +113,7 @@ export const CustomSelectField = ({
                 : '',
               !option &&
               tone === 'neutral' &&
-              name.toLocaleLowerCase().includes('rh')
+              normalizedName.includes('rh')
                 ? styles.customSelectOptionNeutralEmpty
                 : '',
             ].filter(Boolean).join(' ')}

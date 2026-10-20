@@ -90,7 +90,7 @@ export const IndividualSelectionComponentModal = ({
       ? 'negative'
       : normalizedComponentRh === 'Rh(+)'
         ? 'positive'
-        : undefined;
+        : 'neutral';
   const isErythrocytes = component === 'erythrocytes';
   const requiresIndividualSelection =
     isErythrocytes && componentSelectionRequirement === 'individual';

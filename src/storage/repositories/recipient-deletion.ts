@@ -78,14 +78,15 @@ const requestRecipientFields = [
   'individualSelectionIndications',
 ] as const;
 
-export const clearRecipientLinkedRequestDraft = <T extends Record<string, unknown>>(
+export const clearRecipientLinkedRequestDraft = <T extends object>(
   draft: T,
   recipientId: number,
   kind: 'component-request' | 'individual-selection-direction',
 ): T => {
-  if (Number(draft.sourceRecipientId) !== recipientId) return draft;
+  const source = draft as Record<string, unknown>;
+  if (Number(source.sourceRecipientId) !== recipientId) return draft;
 
-  const next: Record<string, unknown> = { ...draft };
+  const next: Record<string, unknown> = { ...source };
 
   requestRecipientFields.forEach((field) => {
     if (field in next) next[field] = '';

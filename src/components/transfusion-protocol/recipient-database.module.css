@@ -113,6 +113,7 @@
 .open,
 .recordDelete,
 .secondaryAction,
+.disconnectAction,
 .dangerAction,
 .createRecipient,
 .categoryBack {
@@ -150,6 +151,12 @@
 .secondaryAction {
   border-color: #64748b;
   background: #fff;
+  color: #334155;
+}
+
+.disconnectAction {
+  border-color: #64748b;
+  background: #f8fafc;
   color: #334155;
 }
 

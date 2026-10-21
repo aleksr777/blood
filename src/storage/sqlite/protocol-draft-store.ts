@@ -35,8 +35,7 @@ export const loadProtocolDraft = async (): Promise<ProtocolDraftState> => {
     if (!isValues(state.values)) return emptyDraft();
     return {
       values: state.values,
-      protocolRecordId:
-        typeof state.protocolRecordId === 'number' ? state.protocolRecordId : null,
+      protocolRecordId: typeof state.protocolRecordId === 'number' ? state.protocolRecordId : null,
       updatedAt: Number(row.updated_at) || 0,
     };
   } catch {

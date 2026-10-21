@@ -5,8 +5,7 @@ export const COMPLICATIONS_STATUS = {
   had: 'had',
 } as const;
 
-export type ComplicationsStatus =
-  (typeof COMPLICATIONS_STATUS)[keyof typeof COMPLICATIONS_STATUS];
+export type ComplicationsStatus = (typeof COMPLICATIONS_STATUS)[keyof typeof COMPLICATIONS_STATUS];
 
 export const getComplicationsStatus = (values: ProtocolValues): ComplicationsStatus | '' => {
   const status = values.complicationsStatus;

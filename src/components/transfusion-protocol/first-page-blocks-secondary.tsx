@@ -1,11 +1,7 @@
 import { formatComponentUnitNumber } from './component-unit-number';
 import { formatDonorAntigens } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
-import {
-  formatHistoryValue,
-  getHistoryStatus,
-  HISTORY_STATUS,
-} from './recipient-history-model';
+import { formatHistoryValue, getHistoryStatus, HISTORY_STATUS } from './recipient-history-model';
 import { getSelectionStatus, SELECTION_STATUS } from './selection-model';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate } from './protocol-types';
@@ -39,12 +35,9 @@ const formatObstetricHistory = (values: ProtocolPageProps['values']) => {
 
 export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   const previousTransfusionsHad =
-    getHistoryStatus(
-      values.previousTransfusionsStatus,
-      values.previousTransfusions,
-    ) === HISTORY_STATUS.had;
-  const obstetricHistory =
-    values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '';
+    getHistoryStatus(values.previousTransfusionsStatus, values.previousTransfusions) ===
+    HISTORY_STATUS.had;
+  const obstetricHistory = values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '';
 
   return (
     <tbody
@@ -56,33 +49,21 @@ export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
       <SectionTitle>Анамнез реципиента</SectionTitle>
       {obstetricHistory && (
         <tr className="row-history row-obstetric-history">
-          <LabeledCell
-            colSpan={6}
-            label="Акушерский анамнез"
-            value={obstetricHistory}
-          />
+          <LabeledCell colSpan={6} label="Акушерский анамнез" value={obstetricHistory} />
         </tr>
       )}
       <tr className="row-history">
         <LabeledCell
           colSpan={previousTransfusionsHad ? 2 : 6}
           label="Трансфузии компонентов крови в анамнезе"
-          value={formatHistoryValue(
-            values,
-            'previousTransfusionsStatus',
-            'previousTransfusions',
-          )}
+          value={formatHistoryValue(values, 'previousTransfusionsStatus', 'previousTransfusions')}
         />
         {previousTransfusionsHad && (
           <>
             <LabeledCell
               colSpan={2}
               label="Реакции и осложнения на трансфузии в анамнезе"
-              value={formatHistoryValue(
-                values,
-                'previousReactionsStatus',
-                'previousReactions',
-              )}
+              value={formatHistoryValue(values, 'previousReactionsStatus', 'previousReactions')}
             />
             <LabeledCell
               colSpan={2}

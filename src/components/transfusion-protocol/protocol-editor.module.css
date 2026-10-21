@@ -217,6 +217,11 @@
   background: #111;
 }
 
+.historyDropdownNeutral {
+  border-color: #c9ced6;
+  background: #f1f3f5;
+}
+
 .historyRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 1.85rem 1.85rem;
@@ -360,6 +365,22 @@
   border-left-color: rgb(255 255 255 / 45%);
 }
 
+.customSelectControlNeutral {
+  border-color: #c9ced6;
+  background: #f1f3f5;
+  color: #111827;
+}
+
+.customSelectControlNeutral .customSelectValue,
+.customSelectControlNeutral .customSelectPlaceholder,
+.customSelectControlNeutral .customSelectArrow {
+  color: #111827;
+}
+
+.customSelectControlNeutral .customSelectArrow {
+  border-left-color: #c9ced6;
+}
+
 .customSelectControl:focus-visible {
   border-color: #2563eb;
   outline: 2px solid rgb(37 99 235 / 16%);
@@ -488,6 +509,18 @@
 .customSelectOptionToneNegative:focus-visible {
   background: #000;
   color: #fff;
+}
+
+.customSelectOptionToneNeutral,
+.customSelectOptionNeutralEmpty {
+  background: #f1f3f5;
+  color: #111827;
+}
+
+.customSelectOptionToneNeutral:focus-visible,
+.customSelectOptionNeutralEmpty:focus-visible {
+  background: #e5e7eb;
+  color: #111827;
 }
 
 .bloodGroupWarning {

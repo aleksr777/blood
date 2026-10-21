@@ -1,5 +1,4 @@
-export const sanitizeDoseQuantity = (value: string) =>
-  value.replace(/\D/g, '');
+export const sanitizeDoseQuantity = (value: string) => value.replace(/\D/g, '');
 
 const doseWord = (value: number) => {
   const lastTwo = value % 100;

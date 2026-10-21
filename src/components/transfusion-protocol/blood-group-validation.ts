@@ -29,18 +29,11 @@ export const getBloodGroupMismatch = (values: ProtocolValues) => {
   }
 
   if (rhMismatch) {
-    differences.push(
-      `резус-принадлежность: реципиент — ${recipientRh}, донор — ${donorRh}`,
-    );
+    differences.push(`резус-принадлежность: реципиент — ${recipientRh}, донор — ${donorRh}`);
   }
 
   return {
-    key: [
-      recipientAbo,
-      donorAbo,
-      recipientRh,
-      donorRh,
-    ].join('|'),
+    key: [recipientAbo, donorAbo, recipientRh, donorRh].join('|'),
     message:
       `Внимание: данные реципиента и донора не совпадают — ${differences.join('; ')}. ` +
       'Проверьте правильность введённых данных и допустимость трансфузии.',

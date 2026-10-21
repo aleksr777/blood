@@ -58,10 +58,7 @@ export const useModalAutoHeight = (
       if (settleTimer !== null) {
         window.clearTimeout(settleTimer);
       }
-      settleTimer = window.setTimeout(
-        revealEnteringContent,
-        SIZE_TRANSITION_FALLBACK_MS,
-      );
+      settleTimer = window.setTimeout(revealEnteringContent, SIZE_TRANSITION_FALLBACK_MS);
     };
 
     const updateHeight = () => {
@@ -84,16 +81,11 @@ export const useModalAutoHeight = (
           : window.innerHeight;
         const targetHeight = Math.min(naturalHeight, maximumHeight);
         const heightChanged =
-          previousHeight !== null &&
-          Math.abs(targetHeight - previousHeight) > SIZE_TOLERANCE_PX;
-        const hasEnteringContent = Boolean(
-          content.querySelector('[data-modal-content-entering]'),
-        );
+          previousHeight !== null && Math.abs(targetHeight - previousHeight) > SIZE_TOLERANCE_PX;
+        const hasEnteringContent = Boolean(content.querySelector('[data-modal-content-entering]'));
         const sizeAnimating = dialog.dataset.sizeAnimating === 'true';
 
-        dialog.dataset.sizeScrollable = String(
-          naturalHeight > maximumHeight + SIZE_TOLERANCE_PX,
-        );
+        dialog.dataset.sizeScrollable = String(naturalHeight > maximumHeight + SIZE_TOLERANCE_PX);
 
         if (initialized && heightChanged && hasEnteringContent && !reducedMotion) {
           dialog.dataset.sizeAnimating = 'true';
@@ -109,16 +101,9 @@ export const useModalAutoHeight = (
             readyFrame = null;
             dialog.dataset.sizeReady = 'true';
           });
-        } else if (
-          hasEnteringContent &&
-          reducedMotion
-        ) {
+        } else if (hasEnteringContent && reducedMotion) {
           revealEnteringContent();
-        } else if (
-          hasEnteringContent &&
-          !heightChanged &&
-          !sizeAnimating
-        ) {
+        } else if (hasEnteringContent && !heightChanged && !sizeAnimating) {
           revealEnteringContent();
         }
       });

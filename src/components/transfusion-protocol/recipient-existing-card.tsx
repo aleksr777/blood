@@ -1,8 +1,5 @@
 import type { RecipientRecord } from '../../storage/repositories/recipients';
-import {
-  formatAlloimmuneAntibodies,
-  formatRecipientAntigens,
-} from './recipient-examination-model';
+import { formatAlloimmuneAntibodies, formatRecipientAntigens } from './recipient-examination-model';
 import styles from './recipient-field.module.css';
 
 const TEXT_DETAILS = [
@@ -47,9 +44,7 @@ export const RecipientExistingCard = ({
     <div className={styles.existingCard}>
       <div className={styles.existingTitle}>Карточка № {recipient.id}</div>
       <div className={styles.existingName}>{recipient.fullName}</div>
-      <div className={styles.existingMeta}>
-        Сохранённых бланков: {recipient.protocolCount}
-      </div>
+      <div className={styles.existingMeta}>Сохранённых бланков: {recipient.protocolCount}</div>
 
       {expanded && (
         <div className={styles.existingDetails}>

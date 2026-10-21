@@ -1,3 +1,4 @@
+import { persistLocalDraft } from '../../storage/repositories/local-draft';
 import {
   useCallback,
   useEffect,
@@ -8,6 +9,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 import {
+  hasRecipientProfileDifference,
   readCurrentRecipient,
   switchCurrentRecipient,
   updateCurrentRecipientProfile,
@@ -23,6 +25,7 @@ import {
   writeCurrentIndividualSelectionIndications,
 } from '../../storage/repositories/current-indications';
 import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
+import { clearRecipientLinkedRequestDraft } from '../../storage/repositories/recipient-deletion';
 import {
   saveBloodRequestRecord,
   updateRecipient,
@@ -31,6 +34,7 @@ import {
 } from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
+import { getBloodGroupMismatch } from '../transfusion-protocol/blood-group-validation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import {
   formatAlloimmuneAntibodies,
@@ -45,10 +49,7 @@ import { IndividualSelectionComponentModal } from './individual-selection-compon
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
 import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
-import {
-  RequestEditorModal,
-  type RequestEditorField,
-} from './request-editor-modal';
+import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import styles from './individual-selection-direction.module.css';
 
@@ -67,8 +68,7 @@ const loadSavedRecordId = () => {
   }
 };
 
-const DEFAULT_MEDICAL_ORGANIZATION =
-  'ФБУЗ "Медико-санитарная часть №32" ФМБА России, г. Заречный.';
+const DEFAULT_MEDICAL_ORGANIZATION = 'ФБУЗ "Медико-санитарная часть №32" ФМБА России, г. Заречный.';
 
 const TRANSFUSION_ORDER_TEXT: Record<string, string> = {
   planned: 'плановая',
@@ -95,6 +95,8 @@ type AutoField =
 type DirectionDraft = Record<AutoField, string> & {
   sourceRecipientId: string;
   requiredComponent: string;
+  componentAbo: string;
+  componentRh: string;
   quantity: string;
   transfusionOrder: string;
   componentSelectionRequirement: string;
@@ -109,13 +111,7 @@ type DirectionDraft = Record<AutoField, string> & {
 };
 
 type Editor =
-  | 'organization'
-  | 'component'
-  | 'examination'
-  | 'recipient'
-  | 'obstetric'
-  | 'footer'
-  | null;
+  'organization' | 'component' | 'examination' | 'recipient' | 'obstetric' | 'footer' | null;
 
 const AUTO_FIELDS: AutoField[] = [
   'recipientAboRh',
@@ -158,6 +154,8 @@ const FOOTER_FIELDS: RequestEditorField[] = [
 const emptyDraft = (): DirectionDraft => ({
   sourceRecipientId: '',
   requiredComponent: '',
+  componentAbo: '',
+  componentRh: '',
   quantity: '',
   transfusionOrder: '',
   componentSelectionRequirement: '',
@@ -196,12 +194,12 @@ const loadDraft = (): DirectionDraft => {
     const savedValues = Object.fromEntries(
       Object.keys(blank).flatMap((key) => {
         if (
-        key === 'autoValues' ||
-        key === 'indicationValues' ||
-        key === 'recipientProfileSnapshot'
-      ) {
-        return [];
-      }
+          key === 'autoValues' ||
+          key === 'indicationValues' ||
+          key === 'recipientProfileSnapshot'
+        ) {
+          return [];
+        }
         const value = parsed[key as keyof DirectionDraft];
         return typeof value === 'string' ? [[key, value]] : [];
       }),
@@ -249,9 +247,7 @@ const loadDraft = (): DirectionDraft => {
   }
 };
 
-const draftFromRecord = (
-  values: Record<string, unknown>,
-): DirectionDraft => {
+const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
   const blank = emptyDraft();
   const savedValues = Object.fromEntries(
     Object.keys(blank).flatMap((key) => {
@@ -279,9 +275,7 @@ const draftFromRecord = (
       : {};
 
   const autoValues =
-    values.autoValues &&
-    typeof values.autoValues === 'object' &&
-    !Array.isArray(values.autoValues)
+    values.autoValues && typeof values.autoValues === 'object' && !Array.isArray(values.autoValues)
       ? Object.fromEntries(
           Object.entries(values.autoValues).filter(
             (entry): entry is [string, string] => typeof entry[1] === 'string',
@@ -316,10 +310,7 @@ const formatObstetricHistory = (values: ProtocolValues) => {
     ['беременности', values.recipientPregnanciesCount],
     ['роды', values.recipientBirthsCount],
     ['самопроизвольные аборты', values.recipientSpontaneousAbortionsCount],
-    [
-      'гемолитическая болезнь новорождённого',
-      values.recipientHemolyticDiseaseNewbornHistory,
-    ],
+    ['гемолитическая болезнь новорождённого', values.recipientHemolyticDiseaseNewbornHistory],
   ] as const;
 
   return items
@@ -334,32 +325,25 @@ const currentAutoValues = async (
   if (!recipient) return {};
 
   const protocolDraft = await loadProtocolDraft();
-  const sameRecipient =
-    Number(protocolDraft.values.recipientId) === recipient.id;
-  const currentProtocolValues =
-    sameRecipient && protocolDraft.protocolRecordId === null
-      ? protocolDraft.values
-      : {};
+  const sameRecipient = Number(protocolDraft.values.recipientId) === recipient.id;
+  const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
 
   const values: ProtocolValues = {
+    ...currentProtocolValues,
     ...recipient.profile,
     recipientId: String(recipient.id),
     recipientName: recipient.fullName,
-    ...currentProtocolValues,
   };
 
   return {
-    recipientAboRh: [values.recipientAbo, values.recipientRh]
-      .filter(Boolean)
-      .join(' '),
+    recipientAboRh: [values.recipientAbo, values.recipientRh].filter(Boolean).join(' '),
     recipientPhenotype: formatRecipientAntigens(values),
     recipientName: recipient.fullName,
     recipientAge: formatRecipientAge(values.recipientBirthDate),
     department: values.department?.trim() ?? '',
     medicalRecordNumber: values.medicalRecordNumber?.trim() ?? '',
     diagnosis: values.diagnosis?.trim() ?? '',
-    obstetricHistory:
-      values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '',
+    obstetricHistory: values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '',
     recipientSex: values.recipientSex?.trim() ?? '',
   };
 };
@@ -371,29 +355,25 @@ const mergeAutoValues = (
 ): DirectionDraft => {
   if (!recipient) return current;
 
-  const recipientChanged = current.sourceRecipientId !== String(recipient.id);
   const next: DirectionDraft = {
     ...current,
     sourceRecipientId: String(recipient.id),
+    recipientProfileSnapshot: {
+      ...recipient.profile,
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    },
     autoValues: { ...autoValues },
   };
 
   AUTO_FIELDS.forEach((field) => {
-    const currentValue = current[field] ?? '';
-    const previousAuto = current.autoValues[field] ?? '';
-
-    if (recipientChanged || !currentValue || currentValue === previousAuto) {
-      next[field] = autoValues[field] ?? '';
-    }
+    next[field] = autoValues[field] ?? '';
   });
 
   return next;
 };
 
-const activateOnKeyboard = (
-  event: KeyboardEvent<HTMLElement>,
-  action: () => void,
-) => {
+const activateOnKeyboard = (event: KeyboardEvent<HTMLElement>, action: () => void) => {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
     action();
@@ -408,11 +388,7 @@ type AdaptiveRuledFieldProps = {
   minRows?: number;
 };
 
-const AdaptiveRuledField = ({
-  label,
-  value,
-  minRows = 1,
-}: AdaptiveRuledFieldProps) => {
+const AdaptiveRuledField = ({ label, value, minRows = 1 }: AdaptiveRuledFieldProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const inlineMeasureRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
@@ -424,14 +400,11 @@ const AdaptiveRuledField = ({
     const measure = measureRef.current;
     if (!inlineMeasure || !measure) return;
 
-    const lineHeight = Number.parseFloat(
-      window.getComputedStyle(inlineMeasure).lineHeight,
-    );
+    const lineHeight = Number.parseFloat(window.getComputedStyle(inlineMeasure).lineHeight);
     if (!Number.isFinite(lineHeight) || lineHeight <= 0) return;
 
     const inlineHeight = inlineMeasure.scrollHeight;
-    const shouldBreakBeforeValue =
-      Boolean(value) && inlineHeight > lineHeight + 0.5;
+    const shouldBreakBeforeValue = Boolean(value) && inlineHeight > lineHeight + 0.5;
 
     setBreakBeforeValue((current) =>
       current === shouldBreakBeforeValue ? current : shouldBreakBeforeValue,
@@ -486,11 +459,7 @@ const AdaptiveRuledField = ({
       <div ref={measureRef} className={styles.adaptiveMeasure} aria-hidden="true">
         <span className={styles.adaptiveMeasureValue}>{value || ' '}</span>
       </div>
-      <div
-        ref={inlineMeasureRef}
-        className={styles.adaptiveInlineMeasure}
-        aria-hidden="true"
-      >
+      <div ref={inlineMeasureRef} className={styles.adaptiveInlineMeasure} aria-hidden="true">
         {inlineContent}
       </div>
     </div>
@@ -509,119 +478,150 @@ export const ComponentRequest = () => {
   const [editor, setEditor] = useState<Editor>(null);
   const [registryOpen, setRegistryOpen] = useState(false);
   const [status, setStatus] = useState('');
-  const [savedRecordId, setSavedRecordId] = useState<number | null>(
-    loadSavedRecordId,
-  );
+  const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
+  const [savedRecordId, setSavedRecordId] = useState<number | null>(loadSavedRecordId);
   const savedRecordIdRef = useRef(savedRecordId);
   savedRecordIdRef.current = savedRecordId;
+  const refreshVersionRef = useRef(0);
+  const profileEditVersionRef = useRef(0);
+  const pendingProfileUpdateRef = useRef<Promise<void>>(Promise.resolve());
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
 
-  const refreshCurrentData = useCallback(async (
-    recipient = readCurrentRecipient(),
-    force = false,
-  ) => {
-    setCurrentRecipient(recipient);
-    if (savedRecordIdRef.current !== null && !force) return;
+  const detachSavedRecord = () => {
+    if (savedRecordIdRef.current === null) return;
+    savedRecordIdRef.current = null;
+    setSavedRecordId(null);
+  };
 
-    const autoValues = await currentAutoValues(recipient);
-    const protocolDraft = recipient ? await loadProtocolDraft() : null;
-    const currentProtocolValues =
-      recipient &&
-      protocolDraft &&
-      protocolDraft.protocolRecordId === null &&
-      Number(protocolDraft.values.recipientId) === recipient.id
-        ? protocolDraft.values
-        : {};
-    if (savedRecordIdRef.current !== null && !force) return;
+  const refreshCurrentData = useCallback(
+    async (recipient = readCurrentRecipient(), baseDraft?: DirectionDraft) => {
+      const refreshVersion = ++refreshVersionRef.current;
+      if ((readCurrentRecipient()?.id ?? null) !== (recipient?.id ?? null)) return;
+      setCurrentRecipient(recipient);
 
-    setDraft((current) => {
+      const autoValues = await currentAutoValues(recipient);
+      const protocolDraft = recipient ? await loadProtocolDraft() : null;
+      const currentProtocolValues =
+        recipient && protocolDraft && Number(protocolDraft.values.recipientId) === recipient.id
+          ? protocolDraft.values
+          : {};
+
+      const current = baseDraft ?? draftRef.current;
       const recipientChanged = Boolean(
         recipient &&
-          current.sourceRecipientId &&
-          current.sourceRecipientId !== String(recipient.id),
-      );
-      let next = mergeAutoValues(current, recipient, autoValues);
-      if (!recipient) return next;
-
-      if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
-        next = {
-          ...next,
-          individualSelectionIndications:
-            readCurrentIndividualSelectionIndications(recipient.id),
-        };
-      } else if (recipientChanged) {
-        next = {
-          ...next,
-          individualSelectionIndications: '',
-        };
-      } else if (next.individualSelectionIndications.trim()) {
-        writeCurrentIndividualSelectionIndications(
-          recipient.id,
-          next.individualSelectionIndications,
-        );
-      }
-
-      const component = getIndicationComponent(next.indicationValues);
-      if (!component) return next;
-
-      if (hasStoredCurrentIndications(recipient.id, component)) {
-        return {
-          ...next,
-          indicationValues: {
-            ...(recipientChanged ? {} : next.indicationValues),
-            ...readCurrentIndications(recipient.id, component),
-          },
-        };
-      }
-
-      const protocolIndications = currentIndicationsForComponent(
-        currentProtocolValues,
-        component,
-      );
-      const hasProtocolIndications = Object.entries(protocolIndications).some(
-        ([key, value]) =>
-          key !== 'indicationComponent' && value.trim() !== '',
+        current.sourceRecipientId &&
+        current.sourceRecipientId !== String(recipient.id),
       );
 
-      if (hasProtocolIndications) {
-        writeCurrentIndications(
-          recipient.id,
-          component,
-          protocolIndications,
-        );
-        return {
-          ...next,
-          indicationValues: {
-            ...(recipientChanged ? {} : next.indicationValues),
-            ...protocolIndications,
-          },
-        };
+      const base =
+        recipientChanged && !baseDraft
+          ? {
+              ...emptyDraft(),
+              medicalOrganization: current.medicalOrganization,
+              doctorName: current.doctorName,
+              doctorPhone: current.doctorPhone,
+              directionDate: todayKey(),
+            }
+          : current;
+      let next = mergeAutoValues(base, recipient, autoValues);
+      if (recipient) {
+        if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
+          next = {
+            ...next,
+            individualSelectionIndications: readCurrentIndividualSelectionIndications(recipient.id),
+          };
+        } else if (recipientChanged) {
+          next = {
+            ...next,
+            individualSelectionIndications: '',
+          };
+        } else if (
+          savedRecordIdRef.current === null &&
+          next.individualSelectionIndications.trim()
+        ) {
+          writeCurrentIndividualSelectionIndications(
+            recipient.id,
+            next.individualSelectionIndications,
+          );
+        }
+
+        const component = getIndicationComponent(next.indicationValues);
+        if (component) {
+          if (hasStoredCurrentIndications(recipient.id, component)) {
+            next = {
+              ...next,
+              indicationValues: {
+                ...(recipientChanged ? {} : next.indicationValues),
+                ...readCurrentIndications(recipient.id, component),
+              },
+            };
+          } else {
+            const protocolIndications = currentIndicationsForComponent(
+              currentProtocolValues,
+              component,
+            );
+            const hasProtocolIndications = Object.entries(protocolIndications).some(
+              ([key, value]) => key !== 'indicationComponent' && value.trim() !== '',
+            );
+
+            if (hasProtocolIndications) {
+              writeCurrentIndications(recipient.id, component, protocolIndications);
+              next = {
+                ...next,
+                indicationValues: {
+                  ...(recipientChanged ? {} : next.indicationValues),
+                  ...protocolIndications,
+                },
+              };
+            } else if (savedRecordIdRef.current === null && !recipientChanged) {
+              writeCurrentIndications(recipient.id, component, next.indicationValues);
+            } else if (recipientChanged) {
+              next = {
+                ...next,
+                indicationValues: { indicationComponent: component },
+              };
+            }
+          }
+        }
+
+        const recipientDataChanged =
+          recipientChanged ||
+          hasRecipientProfileDifference(current.recipientProfileSnapshot, recipient) ||
+          AUTO_FIELDS.some((field) => current[field] !== next[field]) ||
+          current.individualSelectionIndications !== next.individualSelectionIndications ||
+          JSON.stringify(current.indicationValues) !== JSON.stringify(next.indicationValues);
+
+        if (savedRecordIdRef.current !== null && recipientDataChanged) {
+          detachSavedRecord();
+        }
       }
 
-      if (!recipientChanged) {
-        writeCurrentIndications(
-          recipient.id,
-          component,
-          next.indicationValues,
-        );
-        return next;
-      }
-
-      return {
-        ...next,
-        indicationValues: { indicationComponent: component },
-      };
-    });
-  }, [savedRecordId]);
+      if (
+        refreshVersion !== refreshVersionRef.current ||
+        (readCurrentRecipient()?.id ?? null) !== (recipient?.id ?? null)
+      )
+        return;
+      draftRef.current = next;
+      setDraft(next);
+    },
+    [],
+  );
 
   useEffect(() => {
-    void refreshCurrentData();
+    void refreshCurrentData().catch((error: unknown) => {
+      console.error('Не удалось загрузить текущие данные реципиента:', error);
+      setStatus('Не удалось загрузить текущие данные реципиента. Повторите действие.');
+    });
   }, [refreshCurrentData]);
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    if (!persistLocalDraft(STORAGE_KEY, draft)) {
+      setStatus('Не удалось сохранить черновик в браузере. Сохраните бланк в базе данных.');
+    }
   }, [draft]);
 
   useEffect(() => {
@@ -629,10 +629,7 @@ export const ComponentRequest = () => {
       if (savedRecordId === null) {
         window.localStorage.removeItem(SAVED_RECORD_ID_STORAGE_KEY);
       } else {
-        window.localStorage.setItem(
-          SAVED_RECORD_ID_STORAGE_KEY,
-          String(savedRecordId),
-        );
+        window.localStorage.setItem(SAVED_RECORD_ID_STORAGE_KEY, String(savedRecordId));
       }
     } catch (error) {
       console.error('Не удалось сохранить идентификатор открытой заявки:', error);
@@ -678,11 +675,12 @@ export const ComponentRequest = () => {
   ]);
 
   const updateFields = (changes: Record<string, string>) => {
-    if (
-      savedRecordId === null &&
-      currentRecipient &&
-      changes.individualSelectionIndications !== undefined
-    ) {
+    detachSavedRecord();
+    if (changes.department !== undefined && currentRecipient) {
+      void updateExamination({ department: changes.department });
+    }
+
+    if (currentRecipient && changes.individualSelectionIndications !== undefined) {
       writeCurrentIndividualSelectionIndications(
         currentRecipient.id,
         changes.individualSelectionIndications,
@@ -698,22 +696,21 @@ export const ComponentRequest = () => {
         }
       });
 
+      draftRef.current = next;
       return next;
     });
   };
 
   const updateIndications = (changes: ProtocolValues) => {
+    detachSavedRecord();
+
     setDraft((current) => {
       const currentComponent = getIndicationComponent(current.indicationValues);
       const component = changes.indicationComponent || currentComponent;
       const componentChanged =
-        Boolean(changes.indicationComponent) &&
-        changes.indicationComponent !== currentComponent;
+        Boolean(changes.indicationComponent) && changes.indicationComponent !== currentComponent;
       const sharedIndications =
-        savedRecordId === null &&
-        currentRecipient &&
-        componentChanged &&
-        component
+        currentRecipient && componentChanged && component
           ? readCurrentIndications(currentRecipient.id, component)
           : {};
       const indicationValues = {
@@ -722,18 +719,16 @@ export const ComponentRequest = () => {
         ...changes,
       };
 
-      if (savedRecordId === null && currentRecipient && component) {
-        writeCurrentIndications(
-          currentRecipient.id,
-          component,
-          indicationValues,
-        );
+      if (currentRecipient && component) {
+        writeCurrentIndications(currentRecipient.id, component, indicationValues);
       }
 
-      return {
+      const next = {
         ...current,
         indicationValues,
       };
+      draftRef.current = next;
+      return next;
     });
   };
 
@@ -745,12 +740,12 @@ export const ComponentRequest = () => {
       recipient,
       autoValues,
     );
+    savedRecordIdRef.current = null;
     setSavedRecordId(null);
     setDraft({
       ...next,
       individualSelectionIndications:
-        recipient &&
-        hasStoredCurrentIndividualSelectionIndications(recipient.id)
+        recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
           ? readCurrentIndividualSelectionIndications(recipient.id)
           : '',
     });
@@ -765,91 +760,67 @@ export const ComponentRequest = () => {
       recipient,
       autoValues,
     );
+    savedRecordIdRef.current = null;
     setSavedRecordId(null);
     setDraft({
       ...next,
       individualSelectionIndications:
-        recipient &&
-        hasStoredCurrentIndividualSelectionIndications(recipient.id)
+        recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
           ? readCurrentIndividualSelectionIndications(recipient.id)
           : '',
     });
-    setStatus(
-      recipient
-        ? 'Создан новый бланк для текущего реципиента.'
-        : 'Создан новый бланк.',
-    );
+    setStatus(recipient ? 'Создан новый бланк для текущего реципиента.' : 'Создан новый бланк.');
   };
 
   const save = async (afterPrint = false) => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-
-    const historicalRecipientId = Number(draft.sourceRecipientId);
-    if (savedRecordId === null && !currentRecipient) {
+    await pendingProfileUpdateRef.current;
+    const recipient = readCurrentRecipient();
+    if (!recipient) {
       setStatus('Выберите реципиента перед сохранением заявки.');
       return false;
     }
-    if (
-      savedRecordId !== null &&
-      (!Number.isFinite(historicalRecipientId) || historicalRecipientId <= 0)
-    ) {
-      setStatus('Не удалось определить реципиента сохранённого бланка.');
-      return false;
+
+    if (savedRecordId !== null) {
+      setStatus(
+        afterPrint
+          ? 'Сохранённая заявка не изменена.'
+          : 'Сохранённая заявка не изменена. Исходная запись оставлена без изменений.',
+      );
+      return true;
     }
 
     try {
-      const recipientId =
-        savedRecordId !== null
-          ? historicalRecipientId
-          : currentRecipient!.id;
-      const protocolDraft =
-        savedRecordId === null ? await loadProtocolDraft() : null;
-      const currentProtocolValues =
-        savedRecordId === null &&
-        currentRecipient &&
-        protocolDraft &&
-        protocolDraft.protocolRecordId === null &&
-        Number(protocolDraft.values.recipientId) === currentRecipient.id
-          ? protocolDraft.values
-          : {};
-      const draftToSave =
-        savedRecordId === null
-          ? {
-              ...draft,
-              recipientProfileSnapshot: {
-                ...currentRecipient!.profile,
-                ...currentProtocolValues,
-                recipientId: String(currentRecipient!.id),
-                recipientName: currentRecipient!.fullName,
-              },
-            }
-          : draft;
+      const draftToSave = {
+        ...draftRef.current,
+        sourceRecipientId: String(recipient.id),
+        recipientProfileSnapshot: {
+          ...recipient.profile,
+          recipientId: String(recipient.id),
+          recipientName: recipient.fullName,
+        },
+      };
 
       const record = await saveBloodRequestRecord({
-        recordId: savedRecordId,
-        recipientId,
+        recipientId: recipient.id,
         kind: 'component-request',
         values: { ...draftToSave },
       });
+
+      draftRef.current = draftToSave;
       setDraft(draftToSave);
       savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
-      setStatus(
-        afterPrint
-          ? 'Заявка сохранена после печати.'
-          : 'Заявка сохранена.',
-      );
+      setStatus(afterPrint ? 'Заявка сохранена после печати.' : 'Заявка сохранена.');
       return true;
     } catch (error) {
       console.error('Не удалось сохранить заявку:', error);
-      setStatus(
-        error instanceof Error ? error.message : 'Не удалось сохранить заявку.',
-      );
+      setStatus(error instanceof Error ? error.message : 'Не удалось сохранить заявку.');
       return false;
     }
   };
 
   const selectRecipient = async (recipient: RecipientRecord) => {
+    ++profileEditVersionRef.current;
     try {
       const historicalRecipientId = Number(draft.sourceRecipientId);
       const previousRecipientId =
@@ -857,13 +828,13 @@ export const ComponentRequest = () => {
         Number.isFinite(historicalRecipientId) &&
         historicalRecipientId > 0
           ? historicalRecipientId
-          : currentRecipient?.id ?? null;
+          : (currentRecipient?.id ?? null);
       await switchCurrentRecipient(recipient);
       const recipientChanged = previousRecipientId !== recipient.id;
       if (recipientChanged) {
-        setSavedRecordId(null);
+        detachSavedRecord();
       }
-      await refreshCurrentData(readCurrentRecipient(), recipientChanged);
+      await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
       console.error('Не удалось выбрать реципиента для направления:', error);
@@ -871,30 +842,68 @@ export const ComponentRequest = () => {
     }
   };
 
-  const openSavedRequest = async (
-    record: BloodRequestRecord,
-    recipient: RecipientRecord,
-  ) => {
+  const openSavedRequest = async (record: BloodRequestRecord, recipient: RecipientRecord) => {
     try {
       await switchCurrentRecipient(recipient);
-      setCurrentRecipient(readCurrentRecipient());
-      setDraft(draftFromRecord(record.values));
+      const currentRecipient = readCurrentRecipient();
+      const sourceDraft = draftFromRecord(record.values);
+
       savedRecordIdRef.current = record.id;
       setSavedRecordId(record.id);
+      draftRef.current = sourceDraft;
+      setDraft(sourceDraft);
+      setCurrentRecipient(currentRecipient);
+
+      await refreshCurrentData(currentRecipient, sourceDraft);
+
       setRegistryOpen(false);
-      setStatus('Сохранённая заявка открыта.');
+      setStatus(
+        savedRecordIdRef.current === null
+          ? 'Сохранённая заявка открыта с актуальными данными текущего реципиента. При сохранении будет создан новый бланк.'
+          : 'Сохранённая заявка открыта.',
+      );
     } catch (error) {
       console.error('Не удалось открыть сохранённую заявку:', error);
       setStatus('Не удалось открыть сохранённую заявку.');
     }
   };
 
+  const handleRecipientDeleted = (recipientId: number) => {
+    if (currentRecipient?.id === recipientId) {
+      setCurrentRecipient(null);
+    }
+
+    if (Number(draft.sourceRecipientId) !== recipientId) return;
+
+    savedRecordIdRef.current = null;
+    setSavedRecordId(null);
+    setDraft((current) =>
+      clearRecipientLinkedRequestDraft(current, recipientId, 'component-request'),
+    );
+    setStatus('Реципиент удалён. Связанные с ним данные удалены из текущей заявки.');
+  };
+
+  const handleRecipientDisconnected = (recipientId: number) => {
+    if (currentRecipient?.id === recipientId) {
+      setCurrentRecipient(null);
+    }
+
+    if (Number(draft.sourceRecipientId) !== recipientId) return;
+
+    savedRecordIdRef.current = null;
+    setSavedRecordId(null);
+    setDraft((current) =>
+      clearRecipientLinkedRequestDraft(current, recipientId, 'component-request'),
+    );
+    setStatus('Текущий реципиент отключён. Связанные с ним данные удалены из текущей заявки.');
+  };
+
   const examinationValues = useMemo<ProtocolValues>(() => {
-    if (savedRecordId === null) {
+    if (currentRecipient) {
       return {
-        ...(currentRecipient?.profile ?? {}),
-        recipientId: currentRecipient ? String(currentRecipient.id) : '',
-        recipientName: currentRecipient?.fullName ?? '',
+        ...currentRecipient.profile,
+        recipientId: String(currentRecipient.id),
+        recipientName: currentRecipient.fullName,
       };
     }
 
@@ -907,87 +916,59 @@ export const ComponentRequest = () => {
       diagnosis: draft.diagnosis,
       department: draft.department,
     };
-  }, [currentRecipient, draft, savedRecordId]);
+  }, [currentRecipient, draft]);
 
-  const updateExamination = async (changes: ProtocolValues) => {
-    if (savedRecordId !== null) {
-      setDraft((current) => {
-        const snapshot: ProtocolValues = {
-          ...current.recipientProfileSnapshot,
-          recipientId: current.sourceRecipientId,
-          recipientName: current.recipientName,
-          recipientSex: current.recipientSex,
-          medicalRecordNumber: current.medicalRecordNumber,
-          diagnosis: current.diagnosis,
-          department: current.department,
-          ...changes,
-        };
-        const next = {
-          ...current,
-          recipientProfileSnapshot: snapshot,
-        };
+  const bloodGroupMismatch = getBloodGroupMismatch({
+    ...examinationValues,
+    donorAbo: draft.componentAbo,
+    donorRh: draft.componentRh,
+  });
 
-        if (changes.recipientName !== undefined) {
-          next.recipientName = changes.recipientName;
-        }
-        if (changes.recipientBirthDate !== undefined) {
-          next.recipientAge = formatRecipientAge(changes.recipientBirthDate);
-        }
-        if (changes.recipientSex !== undefined) {
-          next.recipientSex = changes.recipientSex;
-        }
-        if (changes.medicalRecordNumber !== undefined) {
-          next.medicalRecordNumber = changes.medicalRecordNumber;
-        }
-        if (changes.diagnosis !== undefined) {
-          next.diagnosis = changes.diagnosis;
-        }
-        if (
-          changes.recipientAbo !== undefined ||
-          changes.recipientRh !== undefined
-        ) {
-          next.recipientAboRh = [snapshot.recipientAbo, snapshot.recipientRh]
-            .filter(Boolean)
-            .join(' ');
-        }
-        if (
-          Object.keys(changes).some(
-            (key) =>
-              key === 'recipientAntigens' ||
-              key.startsWith('recipientAntigen'),
-          )
-        ) {
-          next.recipientPhenotype = formatRecipientAntigens(snapshot);
-        }
-        if (
-          Object.keys(changes).some((key) =>
-            [
-              'recipientPregnanciesCount',
-              'recipientBirthsCount',
-              'recipientSpontaneousAbortionsCount',
-              'recipientHemolyticDiseaseNewbornHistory',
-            ].includes(key),
-          )
-        ) {
-          next.obstetricHistory =
-            snapshot.recipientSex === 'Женский'
-              ? formatObstetricHistory(snapshot)
-              : '';
-        }
-
-        return next;
-      });
-      return;
+  useEffect(() => {
+    if (!bloodGroupMismatch.key) {
+      setDismissedBloodGroupWarningKey('');
     }
+  }, [bloodGroupMismatch.key]);
 
-    if (!currentRecipient) return;
+  const bloodGroupWarning =
+    bloodGroupMismatch.key && bloodGroupMismatch.key !== dismissedBloodGroupWarningKey
+      ? bloodGroupMismatch.message
+      : '';
 
-    try {
-      await updateCurrentRecipientProfile(currentRecipient, changes);
-      await refreshCurrentData(readCurrentRecipient());
-    } catch (error) {
-      console.error('Не удалось обновить общие данные медицинского обследования реципиента:', error);
+  const dismissBloodGroupWarning = () => {
+    if (bloodGroupMismatch.key) {
+      setDismissedBloodGroupWarningKey(bloodGroupMismatch.key);
     }
+  };
+
+  const updateExamination = (changes: ProtocolValues) => {
+    detachSavedRecord();
+    const recipient = readCurrentRecipient();
+    if (!recipient) return Promise.resolve();
+    const version = ++profileEditVersionRef.current;
+    setCurrentRecipient((current) =>
+      current?.id === recipient.id
+        ? {
+            ...current,
+            profile: { ...current.profile, ...changes },
+          }
+        : current,
+    );
+
+    const operation = (async () => {
+      try {
+        await updateCurrentRecipientProfile(recipient, changes);
+        if (version !== profileEditVersionRef.current) return;
+        await refreshCurrentData(readCurrentRecipient());
+      } catch (error) {
+        console.error('Не удалось обновить общие данные реципиента:', error);
+        if (version === profileEditVersionRef.current) {
+          setStatus('Не удалось сохранить данные реципиента. Повторите ввод.');
+        }
+      }
+    })();
+    pendingProfileUpdateRef.current = operation;
+    return operation;
   };
 
   const editorConfig = useMemo(() => {
@@ -1023,8 +1004,7 @@ export const ComponentRequest = () => {
   const isErythrocytes = selectedComponent === 'erythrocytes';
   const requiresIndividualSelection =
     isErythrocytes && draft.componentSelectionRequirement === 'individual';
-  const transfusionOrderText =
-    TRANSFUSION_ORDER_TEXT[draft.transfusionOrder] ?? '';
+  const transfusionOrderText = TRANSFUSION_ORDER_TEXT[draft.transfusionOrder] ?? '';
   const componentSelectionRequirementText =
     COMPONENT_SELECTION_REQUIREMENT_TEXT[draft.componentSelectionRequirement] ?? '';
 
@@ -1035,14 +1015,9 @@ export const ComponentRequest = () => {
       role="button"
       tabIndex={0}
       onClick={() => setEditor('organization')}
-      onKeyDown={(event) =>
-        activateOnKeyboard(event, () => setEditor('organization'))
-      }
+      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('organization'))}
     >
-      <AdaptiveRuledField
-        label="Наименование ЛПУ:"
-        value={draft.medicalOrganization}
-      />
+      <AdaptiveRuledField label="Наименование ЛПУ:" value={draft.medicalOrganization} />
       <AdaptiveRuledField label="Отделение:" value={draft.department} />
     </div>,
 
@@ -1052,25 +1027,16 @@ export const ComponentRequest = () => {
       role="button"
       tabIndex={0}
       onClick={() => setEditor('recipient')}
-      onKeyDown={(event) =>
-        activateOnKeyboard(event, () => setEditor('recipient'))
-      }
+      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
     >
-      <AdaptiveRuledField
-        label="Ф.И.О. реципиента:"
-        value={draft.recipientName}
-      />
+      <AdaptiveRuledField label="Ф.И.О. реципиента:" value={draft.recipientName} />
       <div className={styles.singleLine}>
         <span>Возраст:</span>
-        <span className={styles.valueLine}>
-          {displayValue(draft.recipientAge)}
-        </span>
+        <span className={styles.valueLine}>{displayValue(draft.recipientAge)}</span>
       </div>
       <div className={styles.singleLine}>
         <span>№ медицинской карты:</span>
-        <span className={styles.valueLine}>
-          {displayValue(draft.medicalRecordNumber)}
-        </span>
+        <span className={styles.valueLine}>{displayValue(draft.medicalRecordNumber)}</span>
       </div>
       <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
     </div>,
@@ -1081,20 +1047,13 @@ export const ComponentRequest = () => {
       role="button"
       tabIndex={0}
       onClick={() => setEditor('examination')}
-      onKeyDown={(event) =>
-        activateOnKeyboard(event, () => setEditor('examination'))
-      }
+      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('examination'))}
     >
       <div className={styles.singleLine}>
         <span>Группа крови и резус-фактор реципиента:</span>
-        <span className={styles.valueLine}>
-          {displayValue(draft.recipientAboRh)}
-        </span>
+        <span className={styles.valueLine}>{displayValue(draft.recipientAboRh)}</span>
       </div>
-      <AdaptiveRuledField
-        label="Фенотип реципиента:"
-        value={draft.recipientPhenotype}
-      />
+      <AdaptiveRuledField label="Фенотип реципиента:" value={draft.recipientPhenotype} />
       <AdaptiveRuledField
         label="Аллоиммунные антитела:"
         value={formatAlloimmuneAntibodies(examinationValues)}
@@ -1109,9 +1068,7 @@ export const ComponentRequest = () => {
             role="button"
             tabIndex={0}
             onClick={() => setEditor('obstetric')}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor('obstetric'))
-            }
+            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('obstetric'))}
           >
             <AdaptiveRuledField
               label="Акушерский анамнез у женщин:"
@@ -1127,33 +1084,30 @@ export const ComponentRequest = () => {
       role="button"
       tabIndex={0}
       onClick={() => setEditor('component')}
-      onKeyDown={(event) =>
-        activateOnKeyboard(event, () => setEditor('component'))
-      }
+      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('component'))}
     >
       <AdaptiveRuledField
         label="Наименование требуемого компонента:"
         value={draft.requiredComponent}
       />
       <div className={styles.singleLine}>
-        <span>Количество:</span>
+        <span>Группа крови и резус-фактор компонента:</span>
         <span className={styles.valueLine}>
-          {displayValue(formatDoseQuantity(draft.quantity))}
+          {displayValue([draft.componentAbo, draft.componentRh].filter(Boolean).join(' '))}
         </span>
       </div>
-      <AdaptiveRuledField
-        label="Порядок трансфузии:"
-        value={transfusionOrderText}
-      />
+      <div className={styles.singleLine}>
+        <span>Количество:</span>
+        <span className={styles.valueLine}>{displayValue(formatDoseQuantity(draft.quantity))}</span>
+      </div>
+      <AdaptiveRuledField label="Порядок трансфузии:" value={transfusionOrderText} />
       <AdaptiveRuledField
         label="Показания к трансфузии:"
         value={formatIndications(draft.indicationValues)}
       />
       {isErythrocytes && componentSelectionRequirementText && (
         <div className={styles.singleLine}>
-          <span className={styles.valueLine}>
-            {componentSelectionRequirementText}
-          </span>
+          <span className={styles.valueLine}>{componentSelectionRequirementText}</span>
         </div>
       )}
       {requiresIndividualSelection && (
@@ -1170,28 +1124,20 @@ export const ComponentRequest = () => {
       role="button"
       tabIndex={0}
       onClick={() => setEditor('footer')}
-      onKeyDown={(event) =>
-        activateOnKeyboard(event, () => setEditor('footer'))
-      }
+      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('footer'))}
     >
       <div className={styles.directionDate}>
         <span>Дата направления:</span>{' '}
-        <span className={styles.enteredValue}>
-          {formatDirectionDate(draft.directionDate)}
-        </span>
+        <span className={styles.enteredValue}>{formatDirectionDate(draft.directionDate)}</span>
       </div>
 
       <div className={`${styles.singleLine} ${styles.doctorLine}`}>
         <span>Врач, назначивший трансфузию:</span>
-        <span className={styles.valueLine}>
-          {displayValue(draft.doctorName)}
-        </span>
+        <span className={styles.valueLine}>{displayValue(draft.doctorName)}</span>
       </div>
       <div className={styles.singleLine}>
         <span>Контактный телефон:</span>
-        <span className={styles.valueLine}>
-          {displayValue(draft.doctorPhone)}
-        </span>
+        <span className={styles.valueLine}>{displayValue(draft.doctorPhone)}</span>
       </div>
     </div>,
   ];
@@ -1237,24 +1183,29 @@ export const ComponentRequest = () => {
             <button type="button" className="save-button" onClick={() => void save()}>
               Сохранить
             </button>
-            <button
-              type="button"
-              className="print-button"
-              onClick={() => printPage(1)}
-            >
+            <button type="button" className="print-button" onClick={() => printPage(1)}>
               Печать страницы 1
             </button>
-            <button
-              type="button"
-              className="print-button"
-              onClick={() => printPage(2)}
-            >
+            <button type="button" className="print-button" onClick={() => printPage(2)}>
               Печать страницы 2
             </button>
           </div>
           {status && (
             <div className="toolbar-status" role="status">
               {status}
+            </div>
+          )}
+          {bloodGroupWarning && (
+            <div className="toolbar-blood-group-warning" role="alert">
+              <span>{bloodGroupWarning}</span>
+              <button
+                type="button"
+                className="toolbar-warning-dismiss"
+                aria-label="Закрыть предупреждение"
+                onClick={dismissBloodGroupWarning}
+              >
+                ×
+              </button>
             </div>
           )}
         </div>
@@ -1279,9 +1230,7 @@ export const ComponentRequest = () => {
           aria-label="Выдано из трансфузиологического кабинета, страница 2"
         >
           <div className={styles.issuedContent}>
-            <h2 className={styles.issuedTitle}>
-              Выдано из трансфузиологического кабинета
-            </h2>
+            <h2 className={styles.issuedTitle}>Выдано из трансфузиологического кабинета</h2>
 
             <table className={styles.issuedTable}>
               <colgroup>
@@ -1329,15 +1278,11 @@ export const ComponentRequest = () => {
                 <span className={styles.issuedDateLine} />
               </div>
               <div className={styles.issuedFooterRow}>
-                <span className={styles.issuedFooterLabel}>
-                  Получил компоненты крови:
-                </span>
+                <span className={styles.issuedFooterLabel}>Получил компоненты крови:</span>
                 <span className={styles.issuedSignatureLine} />
               </div>
               <div className={styles.issuedFooterRow}>
-                <span className={styles.issuedFooterLabel}>
-                  Выдал компоненты крови:
-                </span>
+                <span className={styles.issuedFooterLabel}>Выдал компоненты крови:</span>
                 <span className={styles.issuedSignatureLine} />
               </div>
             </div>
@@ -1369,12 +1314,16 @@ export const ComponentRequest = () => {
       {editor === 'component' && (
         <IndividualSelectionComponentModal
           requiredComponent={draft.requiredComponent}
+          componentAbo={draft.componentAbo}
+          componentRh={draft.componentRh}
           quantity={draft.quantity}
           transfusionOrder={draft.transfusionOrder}
           componentSelectionRequirement={draft.componentSelectionRequirement}
           individualSelectionIndications={draft.individualSelectionIndications}
           indicationValues={draft.indicationValues}
           showRequestOptions
+          bloodGroupWarning={bloodGroupWarning}
+          onDismissBloodGroupWarning={dismissBloodGroupWarning}
           onLocalChange={updateFields}
           onIndicationsChange={updateIndications}
           onClose={() => setEditor(null)}
@@ -1384,6 +1333,8 @@ export const ComponentRequest = () => {
       {editor === 'examination' && (
         <IndividualSelectionExaminationModal
           values={examinationValues}
+          bloodGroupWarning={bloodGroupWarning}
+          onDismissBloodGroupWarning={dismissBloodGroupWarning}
           onChange={updateExamination}
           onClose={() => setEditor(null)}
         />
@@ -1407,6 +1358,8 @@ export const ComponentRequest = () => {
           onOpenComponentRequestRecord={(record, recipient) => {
             void openSavedRequest(record, recipient);
           }}
+          onRecipientDeleted={handleRecipientDeleted}
+          onRecipientDisconnected={handleRecipientDisconnected}
           onClose={() => setRegistryOpen(false)}
         />
       )}

@@ -6,13 +6,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run typecheck && vite build",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.node.json --noEmit",
+    "test": "vitest run",
+    "check": "npm run lint && npm test && npm run build",
     "lint": "eslint .",
-    "fix": "eslint --fix",
+    "fix": "eslint . --fix",
     "preview": "vite preview",
     "prettier": "prettier . --check --ignore-unknown",
     "prettier:fix": "prettier . -w",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "npm run check && gh-pages -d dist"
   },
   "dependencies": {
     "@sqlite.org/sqlite-wasm": "3.53.4-build1",
@@ -21,10 +24,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^22.13.10",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react-swc": "^3.7.1",
+    "@vitejs/plugin-react-swc": "^4.3.3",
     "eslint": "^9.15.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
@@ -33,14 +37,19 @@
     "eslint-plugin-react-refresh": "^0.4.14",
     "gh-pages": "^6.3.0",
     "globals": "^15.12.0",
+    "jsdom": "^26.1.0",
     "prettier": "^3.3.3",
-    "stylelint": "^16.10.0",
+    "stylelint": "^16.26.1",
     "stylelint-config-standard": "^36.0.1",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.15.0",
-    "vite": "^5.4.10"
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
   },
   "overrides": {
     "eslint": "^9.15.0"
+  },
+  "engines": {
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
   }
 }

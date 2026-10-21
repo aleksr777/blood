@@ -16,19 +16,15 @@ type Props = {
   individualSelectionDirectionRecords: BloodRequestRecord[];
   componentRequestRecords: BloodRequestRecord[];
   onOpenRecord?: (record: ProtocolRecord, recipient: RecipientRecord) => void;
-  onOpenRegistrationRecord?: (
-    record: RegistrationRecord,
-    recipient: RecipientRecord,
-  ) => void;
+  onOpenRegistrationRecord?: (record: RegistrationRecord, recipient: RecipientRecord) => void;
   onOpenIndividualSelectionDirectionRecord?: (
     record: BloodRequestRecord,
     recipient: RecipientRecord,
   ) => void;
-  onOpenComponentRequestRecord?: (
-    record: BloodRequestRecord,
-    recipient: RecipientRecord,
-  ) => void;
+  onOpenComponentRequestRecord?: (record: BloodRequestRecord, recipient: RecipientRecord) => void;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
+  onDisconnectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
+  currentRecipientId?: number | null;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
   onDeleteRecord: (record: ProtocolRecord) => void;
@@ -37,10 +33,7 @@ type Props = {
 };
 
 type RecordCategory =
-  | 'protocols'
-  | 'registrations'
-  | 'individual-selection-directions'
-  | 'component-requests';
+  'protocols' | 'registrations' | 'individual-selection-directions' | 'component-requests';
 
 const formatUpdated = (value: number) =>
   new Intl.DateTimeFormat('ru-RU', {
@@ -71,6 +64,8 @@ export const RecipientHistoryPanel = ({
   onOpenIndividualSelectionDirectionRecord,
   onOpenComponentRequestRecord,
   onUseRecipient,
+  onDisconnectRecipient,
+  currentRecipientId = null,
   onEdit,
   onDelete,
   onDeleteRecord,
@@ -83,9 +78,7 @@ export const RecipientHistoryPanel = ({
         recipient.profile.recipientBirthDate
           ? `Дата рождения: ${formatDate(recipient.profile.recipientBirthDate)}`
           : '',
-        recipient.profile.recipientSex
-          ? `Пол: ${recipient.profile.recipientSex}`
-          : '',
+        recipient.profile.recipientSex ? `Пол: ${recipient.profile.recipientSex}` : '',
         recipient.profile.recipientBirthDate
           ? `Возраст: ${formatRecipientAge(recipient.profile.recipientBirthDate)}`
           : '',
@@ -133,9 +126,20 @@ export const RecipientHistoryPanel = ({
                 <button
                   type="button"
                   className={styles.action}
+                  disabled={recipient.id === currentRecipientId}
                   onClick={() => onUseRecipient(recipient)}
                 >
                   Выбрать
+                </button>
+              )}
+              {onDisconnectRecipient && recipient.id === currentRecipientId && (
+                <button
+                  type="button"
+                  className={styles.disconnectAction}
+                  title="Снять реципиента как текущего"
+                  onClick={() => onDisconnectRecipient(recipient)}
+                >
+                  Отключить
                 </button>
               )}
               <button
@@ -163,9 +167,7 @@ export const RecipientHistoryPanel = ({
                 onClick={() => setCategory('protocols')}
               >
                 <span className={styles.categoryTitle}>Протоколы трансфузии</span>
-                <span className={styles.categoryMeta}>
-                  Сохранено: {recipient.protocolCount}
-                </span>
+                <span className={styles.categoryMeta}>Сохранено: {recipient.protocolCount}</span>
               </button>
 
               <button
@@ -173,9 +175,7 @@ export const RecipientHistoryPanel = ({
                 className={styles.categoryButton}
                 onClick={() => setCategory('registrations')}
               >
-                <span className={styles.categoryTitle}>
-                  Листы регистрации трансфузий
-                </span>
+                <span className={styles.categoryTitle}>Листы регистрации трансфузий</span>
                 <span className={styles.categoryMeta}>
                   Сохранено: {recipient.registrationCount}
                 </span>
@@ -186,9 +186,7 @@ export const RecipientHistoryPanel = ({
                 className={styles.categoryButton}
                 onClick={() => setCategory('individual-selection-directions')}
               >
-                <span className={styles.categoryTitle}>
-                  Направления на индивидуальный подбор
-                </span>
+                <span className={styles.categoryTitle}>Направления на индивидуальный подбор</span>
                 <span className={styles.categoryMeta}>
                   Сохранено: {recipient.individualSelectionDirectionCount}
                 </span>
@@ -199,9 +197,7 @@ export const RecipientHistoryPanel = ({
                 className={styles.categoryButton}
                 onClick={() => setCategory('component-requests')}
               >
-                <span className={styles.categoryTitle}>
-                  Заявки в трансфузиологический кабинет
-                </span>
+                <span className={styles.categoryTitle}>Заявки в трансфузиологический кабинет</span>
                 <span className={styles.categoryMeta}>
                   Сохранено: {recipient.componentRequestCount}
                 </span>
@@ -223,17 +219,14 @@ export const RecipientHistoryPanel = ({
               {category === 'protocols' ? (
                 <div className={styles.records}>
                   {records.length === 0 && (
-                    <div className={styles.empty}>
-                      Сохранённых протоколов пока нет.
-                    </div>
+                    <div className={styles.empty}>Сохранённых протоколов пока нет.</div>
                   )}
                   {records.map((record) => (
                     <div key={record.id} className={styles.record}>
                       <div>
                         <div className={styles.recordTitle}>
                           Трансфузия:{' '}
-                          {formatDate(record.values.transfusionDate) ||
-                            'дата не указана'}
+                          {formatDate(record.values.transfusionDate) || 'дата не указана'}
                         </div>
                         <div className={styles.meta}>
                           Изменён: {formatUpdated(record.updatedAt)}
@@ -270,9 +263,7 @@ export const RecipientHistoryPanel = ({
                   {registrationRecords.map((record) => (
                     <div key={record.id} className={styles.record}>
                       <div>
-                        <div className={styles.recordTitle}>
-                          Лист регистрации
-                        </div>
+                        <div className={styles.recordTitle}>Лист регистрации</div>
                         <div className={styles.meta}>
                           Изменён: {formatUpdated(record.updatedAt)}
                         </div>
@@ -282,9 +273,7 @@ export const RecipientHistoryPanel = ({
                           <button
                             type="button"
                             className={styles.open}
-                            onClick={() =>
-                              onOpenRegistrationRecord(record, recipient)
-                            }
+                            onClick={() => onOpenRegistrationRecord(record, recipient)}
                           >
                             Открыть
                           </button>
@@ -303,16 +292,12 @@ export const RecipientHistoryPanel = ({
               ) : (
                 <div className={styles.records}>
                   {requestRecords.length === 0 && (
-                    <div className={styles.empty}>
-                      Сохранённых бланков пока нет.
-                    </div>
+                    <div className={styles.empty}>Сохранённых бланков пока нет.</div>
                   )}
                   {requestRecords.map((record) => (
                     <div key={record.id} className={styles.record}>
                       <div>
-                        <div className={styles.recordTitle}>
-                          {requestRecordTitle(record)}
-                        </div>
+                        <div className={styles.recordTitle}>{requestRecordTitle(record)}</div>
                         <div className={styles.meta}>
                           Изменён: {formatUpdated(record.updatedAt)}
                         </div>

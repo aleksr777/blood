@@ -1,9 +1,6 @@
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatIndications } from './indications-model';
-import {
-  formatAlloimmuneAntibodies,
-  formatRecipientAntigens,
-} from './recipient-examination-model';
+import { formatAlloimmuneAntibodies, formatRecipientAntigens } from './recipient-examination-model';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate, formatDateTime } from './protocol-types';
 
@@ -50,11 +47,7 @@ export const GeneralBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
     {part === 'times' && (
       <tr className="row-top-data">
         <LabeledCell colSpan={2} label="Отделение" value={values.department} />
-        <LabeledCell
-          colSpan={2}
-          label="№ медицинской карты"
-          value={values.medicalRecordNumber}
-        />
+        <LabeledCell colSpan={2} label="№ медицинской карты" value={values.medicalRecordNumber} />
         <td colSpan={2}>
           <div className="stacked-field">
             <div>Время начала трансфузии:</div>

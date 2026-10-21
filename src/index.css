@@ -163,7 +163,6 @@ input[type='radio']:checked:disabled {
   input[type='radio'] {
     transition: none;
   }
-
 }
 
 .app-shell {
@@ -545,7 +544,7 @@ a.site-navigation__link:focus-visible::after {
   background: #fff;
   color: #000;
   box-shadow: 0 8px 32px rgba(18, 31, 48, 0.12);
-  font-family: "Times New Roman", Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 10.3pt;
   font-weight: 700;
   line-height: 1.05;
@@ -654,7 +653,6 @@ a.site-navigation__link:focus-visible::after {
   .fill-block.is-logical-hovered > tr > :last-child {
     border-right-color: #2563eb;
   }
-
 }
 
 .document-title,
@@ -761,8 +759,6 @@ a.site-navigation__link:focus-visible::after {
   height: 15mm;
 }
 
-
-
 .row-reagents td {
   height: auto;
 }
@@ -853,11 +849,21 @@ a.site-navigation__link:focus-visible::after {
   line-height: 1.08;
 }
 
-.monitor-col-period { width: 38%; }
-.monitor-col-bp { width: 17%; }
-.monitor-col-pulse { width: 12%; }
-.monitor-col-temperature { width: 13%; }
-.monitor-col-urine { width: 20%; }
+.monitor-col-period {
+  width: 38%;
+}
+.monitor-col-bp {
+  width: 17%;
+}
+.monitor-col-pulse {
+  width: 12%;
+}
+.monitor-col-temperature {
+  width: 13%;
+}
+.monitor-col-urine {
+  width: 20%;
+}
 
 .monitor-header th:first-child {
   text-align: left;
@@ -902,14 +908,27 @@ a.site-navigation__link:focus-visible::after {
   font-weight: 700;
 }
 
-.span-2 { width: 33.333%; }
-.span-3 { width: 50%; }
-.span-4 { width: 66.667%; }
-.span-6 { width: 100%; }
-.w-30 { width: 30%; }
-.w-31 { width: 31%; }
-.w-39 { width: 39%; }
-
+.span-2 {
+  width: 33.333%;
+}
+.span-3 {
+  width: 50%;
+}
+.span-4 {
+  width: 66.667%;
+}
+.span-6 {
+  width: 100%;
+}
+.w-30 {
+  width: 30%;
+}
+.w-31 {
+  width: 31%;
+}
+.w-39 {
+  width: 39%;
+}
 
 .registration-app-shell {
   min-width: fit-content;
@@ -943,7 +962,7 @@ a.site-navigation__link:focus-visible::after {
   background: #fff;
   color: #000;
   box-shadow: 0 8px 32px rgb(18 31 48 / 12%);
-  font-family: "Times New Roman", Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   page: registration-page;
 }
 
@@ -1041,13 +1060,27 @@ a.site-navigation__link:focus-visible::after {
   min-width: 40mm;
 }
 
-.registration-blank--day { width: 7mm; }
-.registration-blank--date { width: 24mm; }
-.registration-blank--year { width: 13mm; }
-.registration-blank--sex { width: 20mm; }
-.registration-blank--age { width: 17mm; }
-.registration-blank--card { width: 26mm; }
-.registration-blank--room { width: 14mm; }
+.registration-blank--day {
+  width: 7mm;
+}
+.registration-blank--date {
+  width: 24mm;
+}
+.registration-blank--year {
+  width: 13mm;
+}
+.registration-blank--sex {
+  width: 20mm;
+}
+.registration-blank--age {
+  width: 17mm;
+}
+.registration-blank--card {
+  width: 26mm;
+}
+.registration-blank--room {
+  width: 14mm;
+}
 
 .registration-table-section {
   position: relative;
@@ -1114,15 +1147,33 @@ a.site-navigation__link:focus-visible::after {
   vertical-align: middle;
 }
 
-.registration-col-component { width: 22.3%; }
-.registration-col-liters { width: 6%; }
-.registration-col-units { width: 6%; }
-.registration-col-date { width: 8.1%; }
-.registration-col-doctor { width: 11.5%; }
-.registration-col-doctor-sign { width: 10.4%; }
-.registration-col-worker { width: 12.9%; }
-.registration-col-nurse-sign { width: 10%; }
-.registration-col-complications { width: 12.8%; }
+.registration-col-component {
+  width: 22.3%;
+}
+.registration-col-liters {
+  width: 6%;
+}
+.registration-col-units {
+  width: 6%;
+}
+.registration-col-date {
+  width: 8.1%;
+}
+.registration-col-doctor {
+  width: 11.5%;
+}
+.registration-col-doctor-sign {
+  width: 10.4%;
+}
+.registration-col-worker {
+  width: 12.9%;
+}
+.registration-col-nurse-sign {
+  width: 10%;
+}
+.registration-col-complications {
+  width: 12.8%;
+}
 
 @page registration-page {
   size: A4 portrait;
@@ -1340,7 +1391,6 @@ a.site-navigation__link:focus-visible::after {
     transform: translateX(210mm) rotate(90deg);
     transform-origin: top left;
   }
-
 }
 
 .monitor-wrapper {

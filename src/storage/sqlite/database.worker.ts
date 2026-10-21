@@ -13,11 +13,7 @@ import {
   removeSavedOption,
   renameSavedOption,
 } from './saved-option-store';
-import {
-  clearProtocolDraft,
-  loadProtocolDraft,
-  saveProtocolDraft,
-} from './protocol-draft-store';
+import { clearProtocolDraft, loadProtocolDraft, saveProtocolDraft } from './protocol-draft-store';
 import {
   findProtocolRecordsByComponentUnitNumber,
   listProtocolRecords,
@@ -126,10 +122,9 @@ const dispatchRequest = async (request: DatabaseRequest) => {
     }
     case 'protocol-records:save': {
       const payload = request.payload as {
-        recordId: number | null;
         values: Record<string, string>;
       };
-      return saveProtocolRecord(payload.recordId, payload.values);
+      return saveProtocolRecord(payload.values);
     }
     case 'protocol-records:remove':
       return removeProtocolRecord((request.payload as { id: number }).id);
@@ -137,10 +132,9 @@ const dispatchRequest = async (request: DatabaseRequest) => {
       return listRegistrationRecords((request.payload as { recipientId: number }).recipientId);
     case 'registration-records:save': {
       const payload = request.payload as {
-        recordId: number | null;
         values: Record<string, string>;
       };
-      return saveRegistrationRecord(payload.recordId, payload.values);
+      return saveRegistrationRecord(payload.values);
     }
     case 'registration-records:remove':
       return removeRegistrationRecord((request.payload as { id: number }).id);
@@ -153,7 +147,6 @@ const dispatchRequest = async (request: DatabaseRequest) => {
     }
     case 'blood-request-records:save': {
       const payload = request.payload as {
-        recordId: number | null;
         recipientId: number;
         kind: 'individual-selection-direction' | 'component-request';
         values: Record<string, unknown>;

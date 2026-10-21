@@ -1,14 +1,9 @@
 import { getDatabase, type SqliteDatabase } from './database';
-import type {
-  ComponentUnitNumberMatch,
-  ProtocolValuesRecord,
-} from './database-types';
+import type { ComponentUnitNumberMatch, ProtocolValuesRecord } from './database-types';
 import { mapProtocol } from './recipient-data';
 import { upsertRecipient } from './recipient-profile-store';
 
-
-const normalizeComponentUnitNumber = (value?: string) =>
-  (value ?? '').replace(/\D/g, '');
+const normalizeComponentUnitNumber = (value?: string) => (value ?? '').replace(/\D/g, '');
 
 export const findProtocolRecordsByComponentUnitNumber = async (
   componentUnitNumber: string,
@@ -37,12 +32,14 @@ export const findProtocolRecordsByComponentUnitNumber = async (
       const values = JSON.parse(String(row.valuesJson ?? '{}')) as ProtocolValuesRecord;
       if (normalizeComponentUnitNumber(values.componentUnitNumber) !== digits) return [];
 
-      return [{
-        id: Number(row.id),
-        recipientId: Number(row.recipientId),
-        recipientName: String(row.recipientName ?? ''),
-        transfusionDate: values.transfusionDate ?? '',
-      }];
+      return [
+        {
+          id: Number(row.id),
+          recipientId: Number(row.recipientId),
+          recipientName: String(row.recipientName ?? ''),
+          transfusionDate: values.transfusionDate ?? '',
+        },
+      ];
     } catch {
       return [];
     }
@@ -74,12 +71,17 @@ export const listProtocolRecords = async (recipientId: number) => {
   return rows.map(mapProtocol);
 };
 
-const insertProtocol = (
-  db: SqliteDatabase,
-  recipientId: number,
-  values: ProtocolValuesRecord,
-  now: number,
-) => {
+const insertProtocol = ({
+  db,
+  recipientId,
+  values,
+  now,
+}: {
+  db: SqliteDatabase;
+  recipientId: number;
+  values: ProtocolValuesRecord;
+  now: number;
+}) => {
   db.exec({
     sql: `
       INSERT INTO protocol_records (recipient_id, values_json, created_at, updated_at)
@@ -95,49 +97,15 @@ const insertProtocol = (
   return Number(rows[0].id);
 };
 
-const findRecordRecipient = (db: SqliteDatabase, id: number | null) => {
-  if (id === null) return null;
-  const rows = db.exec({
-    sql: 'SELECT recipient_id AS recipientId FROM protocol_records WHERE id = $id',
-    bind: { $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ recipientId: number }>;
-  return rows[0]?.recipientId ?? null;
-};
-
-export const saveProtocolRecord = async (
-  recordId: number | null,
-  values: ProtocolValuesRecord,
-) => {
+export const saveProtocolRecord = async (values: ProtocolValuesRecord) => {
   const db = await getDatabase();
-  const linkedId = findRecordRecipient(db, recordId);
-  const selectedId = Number(values.recipientId) > 0 ? Number(values.recipientId) : null;
-  if (linkedId !== null && selectedId !== null && selectedId !== linkedId) {
-    throw new Error('Для другого реципиента создайте новый бланк.');
-  }
-  const canUpdate = linkedId !== null && recordId !== null;
-  const recipientId = canUpdate
-    ? linkedId
-    : upsertRecipient(db, values, selectedId ?? linkedId);
-  const now = Date.now();
-  const id = canUpdate ? recordId : insertProtocol(db, recipientId, values, now);
-
-  if (canUpdate) {
-    db.exec({
-      sql: `
-        UPDATE protocol_records
-        SET recipient_id = $recipientId, values_json = $values, updated_at = $now
-        WHERE id = $id
-      `,
-      bind: {
-        $recipientId: recipientId,
-        $values: JSON.stringify(values),
-        $now: now,
-        $id: id,
-      },
-    });
-  }
+  const selectedId = Number(values.recipientId);
+  const recipientId = upsertRecipient(
+    db,
+    values,
+    Number.isSafeInteger(selectedId) && selectedId > 0 ? selectedId : null,
+  );
+  const id = insertProtocol({ db, recipientId, values, now: Date.now() });
 
   const rows = db.exec({
     sql: `

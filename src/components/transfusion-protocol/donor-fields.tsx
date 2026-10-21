@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { CustomSelectField } from './custom-select-field';
+import {
+  ABO_OPTIONS,
+  ANTIGEN_OPTIONS,
+  BloodGroupSelectField,
+  getBloodGroupTone,
+  normalizeBloodGroupRh,
+  RH_OPTIONS,
+} from './blood-group-select-field';
 import { DONOR_ANTIGENS } from './donor-model';
 import { INDICATION_COMPONENTS } from './indications-model';
 import {
@@ -30,43 +37,6 @@ const COMPONENT_NAME_OPTIONS: Record<string, string[]> = {
   'plasma-cryo': ['Свежезамороженная плазма'],
   platelets: [],
 };
-
-const SelectField = ({
-  name,
-  label,
-  options,
-  value,
-  onChange,
-  emptyLabel,
-  emptyDisplayLabel,
-  compact = false,
-  tone,
-}: {
-  name: string;
-  label: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-  emptyLabel?: string;
-  emptyDisplayLabel?: string;
-  compact?: boolean;
-  tone?: 'positive' | 'negative';
-}) => (
-  <div className={styles.selectField}>
-    <div className={styles.label}>{label}</div>
-    <CustomSelectField
-      name={name}
-      label={label}
-      options={options}
-      value={value}
-      emptyLabel={emptyLabel}
-      emptyDisplayLabel={emptyDisplayLabel}
-      compact={compact}
-      tone={tone}
-      onChange={onChange}
-    />
-  </div>
-);
 
 const inferLegacyComponentGroup = (name: string) => {
   const normalized = name.trim().toLocaleLowerCase();
@@ -259,25 +229,16 @@ const ComponentNameInput = ({
   );
 };
 
-const normalizeRh = (value?: string) => {
-  if (value === 'Rh(D)+' || value === 'Rh(+)') return 'Rh(+)';
-  if (value === 'Rh(D)-' || value === 'Rh(-)') return 'Rh(-)';
-  return '';
-};
-
 export const DonorFields = ({ values, onChange }: Props) => {
-  const legacyComponent = INDICATION_COMPONENTS.find(
-    ({ label }) => label === values.componentName,
-  );
+  const legacyComponent = INDICATION_COMPONENTS.find(({ label }) => label === values.componentName);
   const selectedComponent = values.componentGroup || legacyComponent?.value || '';
   const componentName =
     legacyComponent && values.componentName === legacyComponent.label
       ? ''
-      : values.componentName ?? '';
+      : (values.componentName ?? '');
   const componentNameOptions = COMPONENT_NAME_OPTIONS[selectedComponent] ?? [];
-  const donorRh = normalizeRh(values.donorRh);
-  const bloodGroupTone =
-    donorRh === 'Rh(-)' ? 'negative' : donorRh === 'Rh(+)' ? 'positive' : undefined;
+  const donorRh = normalizeBloodGroupRh(values.donorRh);
+  const bloodGroupTone = getBloodGroupTone(donorRh);
 
   return (
     <div className={styles.root}>
@@ -326,18 +287,18 @@ export const DonorFields = ({ values, onChange }: Props) => {
       </fieldset>
 
       <div className={styles.topGrid}>
-        <SelectField
+        <BloodGroupSelectField
           name="donorAbo"
           label="Группа крови AB0"
-          options={['O(I)', 'A(II)', 'B(III)', 'AB(IV)']}
+          options={ABO_OPTIONS}
           value={values.donorAbo ?? ''}
           tone={bloodGroupTone}
           onChange={(value) => onChange({ donorAbo: value })}
         />
-        <SelectField
+        <BloodGroupSelectField
           name="donorRh"
           label="Резус-принадлежность"
-          options={['Rh(+)', 'Rh(-)']}
+          options={RH_OPTIONS}
           value={donorRh}
           tone={bloodGroupTone}
           onChange={(value) => onChange({ donorRh: value })}
@@ -347,15 +308,16 @@ export const DonorFields = ({ values, onChange }: Props) => {
       <div className={styles.groupTitle}>Антигены:</div>
       <div className={styles.antigenGrid}>
         {DONOR_ANTIGENS.map(({ name, label }) => (
-          <SelectField
+          <BloodGroupSelectField
             key={name}
             name={name}
             label={label}
-            options={['+', '-']}
+            options={ANTIGEN_OPTIONS}
             value={values[name] ?? ''}
             emptyLabel=""
             emptyDisplayLabel=""
             compact
+            antigen
             onChange={(value) => onChange({ [name]: value, donorAntigens: '' })}
           />
         ))}

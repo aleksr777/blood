@@ -20,11 +20,9 @@ export const LabeledCell = ({
   rowSpan,
 }: LabeledCellProps) => (
   <td
-    className={[
-      className,
-      centered ? 'cell--centered' : '',
-      inline ? 'cell--inline' : '',
-    ].filter(Boolean).join(' ')}
+    className={[className, centered ? 'cell--centered' : '', inline ? 'cell--inline' : '']
+      .filter(Boolean)
+      .join(' ')}
     colSpan={colSpan}
     rowSpan={rowSpan}
   >

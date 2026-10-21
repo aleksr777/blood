@@ -48,5 +48,4 @@ export const PROTOCOL_CHUNK_ORDER: ProtocolChunkId[] = [
 export const getChunkBlockId = (chunkId: ProtocolChunkId): ProtocolBlockId =>
   chunkId.slice(0, chunkId.indexOf(':')) as ProtocolBlockId;
 
-export const getChunkPart = (chunkId: ProtocolChunkId) =>
-  chunkId.slice(chunkId.indexOf(':') + 1);
+export const getChunkPart = (chunkId: ProtocolChunkId) => chunkId.slice(chunkId.indexOf(':') + 1);

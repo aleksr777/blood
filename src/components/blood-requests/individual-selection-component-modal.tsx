@@ -2,19 +2,24 @@ import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
 import { Choice } from '../transfusion-protocol/indication-controls';
 import {
+  ABO_OPTIONS,
+  BloodGroupSelectField,
+  getBloodGroupTone,
+  normalizeBloodGroupRh,
+  RH_OPTIONS,
+} from '../transfusion-protocol/blood-group-select-field';
+import {
   IndicationComponentSelector,
   IndicationsFields,
 } from '../transfusion-protocol/indications-fields';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import { sanitizeDoseQuantity } from './dose-quantity';
+import editorStyles from '../transfusion-protocol/protocol-editor.module.css';
 import styles from './individual-selection-component-modal.module.css';
 
 const REQUIRED_COMPONENT_CATEGORY = 'individualSelectionRequiredComponent';
-const REQUIRED_COMPONENT_FIXED_OPTIONS = [
-  'эритроцитная взвесь',
-  'отмытые эритроциты',
-];
+const REQUIRED_COMPONENT_FIXED_OPTIONS = ['эритроцитная взвесь', 'отмытые эритроциты'];
 
 const REQUEST_REQUIRED_COMPONENT_CONFIG: Record<
   string,
@@ -34,11 +39,12 @@ const REQUEST_REQUIRED_COMPONENT_CONFIG: Record<
   },
 };
 
-const UNSELECTED_REQUEST_COMPONENT_CATEGORY =
-  'componentRequestRequiredComponent:unselected';
+const UNSELECTED_REQUEST_COMPONENT_CATEGORY = 'componentRequestRequiredComponent:unselected';
 
 type Props = {
   requiredComponent: string;
+  componentAbo?: string;
+  componentRh?: string;
   quantity: string;
   individualSelectionIndications: string;
   indicationValues: ProtocolValues;
@@ -46,6 +52,8 @@ type Props = {
   componentSelectionRequirement?: string;
   showRequestOptions?: boolean;
   fixedIndicationComponent?: string;
+  bloodGroupWarning?: string;
+  onDismissBloodGroupWarning?: () => void;
   onLocalChange: (values: Record<string, string>) => void;
   onIndicationsChange: (values: ProtocolValues) => void;
   onClose: () => void;
@@ -53,6 +61,8 @@ type Props = {
 
 export const IndividualSelectionComponentModal = ({
   requiredComponent,
+  componentAbo = '',
+  componentRh = '',
   quantity,
   individualSelectionIndications,
   indicationValues,
@@ -60,6 +70,8 @@ export const IndividualSelectionComponentModal = ({
   componentSelectionRequirement = '',
   showRequestOptions = false,
   fixedIndicationComponent,
+  bloodGroupWarning = '',
+  onDismissBloodGroupWarning,
   onLocalChange,
   onIndicationsChange,
   onClose,
@@ -74,6 +86,8 @@ export const IndividualSelectionComponentModal = ({
         indicationComponent: fixedIndicationComponent,
       }
     : indicationValues;
+  const normalizedComponentRh = normalizeBloodGroupRh(componentRh);
+  const componentBloodGroupTone = getBloodGroupTone(normalizedComponentRh);
   const isErythrocytes = component === 'erythrocytes';
   const requiresIndividualSelection =
     isErythrocytes && componentSelectionRequirement === 'individual';
@@ -82,9 +96,7 @@ export const IndividualSelectionComponentModal = ({
     : undefined;
   const requiredComponentCategory =
     requestComponentConfig?.category ??
-    (showRequestOptions
-      ? UNSELECTED_REQUEST_COMPONENT_CATEGORY
-      : REQUIRED_COMPONENT_CATEGORY);
+    (showRequestOptions ? UNSELECTED_REQUEST_COMPONENT_CATEGORY : REQUIRED_COMPONENT_CATEGORY);
   const requiredComponentFixedOptions =
     requestComponentConfig?.fixedOptions ??
     (showRequestOptions ? [] : REQUIRED_COMPONENT_FIXED_OPTIONS);
@@ -119,33 +131,36 @@ export const IndividualSelectionComponentModal = ({
   const handleClose = () => {
     const value = requiredComponent.trim();
     const isFixedOption = requiredComponentFixedOptions.some(
-      (option) =>
-        option.toLocaleLowerCase('ru-RU') === value.toLocaleLowerCase('ru-RU'),
+      (option) => option.toLocaleLowerCase('ru-RU') === value.toLocaleLowerCase('ru-RU'),
     );
-    const canRememberValue =
-      !showRequestOptions || Boolean(requestComponentConfig);
+    const canRememberValue = !showRequestOptions || Boolean(requestComponentConfig);
 
     if (value && !isFixedOption && canRememberValue) {
-      void rememberSavedOption(requiredComponentCategory, value).catch(
-        (error: unknown) => {
-          console.error(
-            'Не удалось сохранить вариант наименования требуемого компонента:',
-            error,
-          );
-        },
-      );
+      void rememberSavedOption(requiredComponentCategory, value).catch((error: unknown) => {
+        console.error('Не удалось сохранить вариант наименования требуемого компонента:', error);
+      });
     }
 
     onClose();
   };
 
   return (
-    <Modal
-      title="Выбор компонента и показания"
-      onClose={handleClose}
-      className={styles.modal}
-    >
+    <Modal title="Выбор компонента и показания" onClose={handleClose} className={styles.modal}>
       <div className={styles.root}>
+        {bloodGroupWarning && showRequestOptions && (
+          <div className={editorStyles.bloodGroupWarning} role="alert">
+            <span>{bloodGroupWarning}</span>
+            <button
+              type="button"
+              className={editorStyles.bloodGroupWarningDismiss}
+              aria-label="Закрыть предупреждение"
+              onClick={onDismissBloodGroupWarning}
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {!fixedIndicationComponent && (
           <IndicationComponentSelector
             values={indicationValues}
@@ -181,9 +196,7 @@ export const IndividualSelectionComponentModal = ({
           </>
         )}
 
-        {(!fixedIndicationComponent || showRequestOptions) && (
-          <div className={styles.divider} />
-        )}
+        {(!fixedIndicationComponent || showRequestOptions) && <div className={styles.divider} />}
 
         <div className={styles.localGrid}>
           <label className={styles.wide}>
@@ -214,6 +227,29 @@ export const IndividualSelectionComponentModal = ({
           </label>
         </div>
 
+        {showRequestOptions && (
+          <>
+            <div className={styles.bloodGroupGrid}>
+              <BloodGroupSelectField
+                name="componentAbo"
+                label="Группа крови AB0 компонента"
+                options={ABO_OPTIONS}
+                value={componentAbo}
+                tone={componentBloodGroupTone}
+                onChange={(value) => onLocalChange({ componentAbo: value })}
+              />
+              <BloodGroupSelectField
+                name="componentRh"
+                label="Резус-принадлежность компонента"
+                options={RH_OPTIONS}
+                value={normalizedComponentRh}
+                tone={componentBloodGroupTone}
+                onChange={(value) => onLocalChange({ componentRh: value })}
+              />
+            </div>
+          </>
+        )}
+
         <div className={styles.divider} />
 
         <section className={styles.indicationsSection}>
@@ -236,9 +272,7 @@ export const IndividualSelectionComponentModal = ({
                   type="radio"
                   name="componentRequestSelectionRequirement"
                   checked={componentSelectionRequirement === 'not-required'}
-                  onChange={() =>
-                    setComponentSelectionRequirement('not-required')
-                  }
+                  onChange={() => setComponentSelectionRequirement('not-required')}
                 >
                   индивидуальный подбор и подбор по фенотипу не требуется
                 </Choice>

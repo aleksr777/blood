@@ -139,7 +139,6 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
         })}
       </div>
 
-
       {compatibilityDangerWarning && (
         <div className={styles.dangerWarning} role="alert">
           {compatibilityDangerWarning}
@@ -150,8 +149,7 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
         {RADIO_GROUPS.map((group) => {
           const selected =
             values[group.name] || DEFAULT_RESULTS[group.name as keyof typeof DEFAULT_RESULTS];
-          const disabled =
-            group.name === 'confirmedDonorAboResult' && !showDonorAboConfirmation;
+          const disabled = group.name === 'confirmedDonorAboResult' && !showDonorAboConfirmation;
 
           return (
             <fieldset

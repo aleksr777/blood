@@ -12,7 +12,7 @@ type Props = {
   emptyDisplayLabel?: string;
   compact?: boolean;
   allowEmpty?: boolean;
-  tone?: 'positive' | 'negative';
+  tone?: 'positive' | 'negative' | 'neutral';
 };
 
 export const CustomSelectField = ({
@@ -30,7 +30,9 @@ export const CustomSelectField = ({
   const [open, setOpen] = useState(false);
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
   const allOptions = allowEmpty ? ['', ...options] : options;
-  const toneBloodGroupOptions = Boolean(tone && name.toLocaleLowerCase().includes('abo'));
+  const normalizedName = name.toLocaleLowerCase();
+  const toneBloodGroupOptions = Boolean(tone && normalizedName.includes('abo'));
+  const isBloodGroupField = normalizedName.includes('abo') || normalizedName.includes('rh');
 
   const select = (nextValue: string) => {
     onChange(nextValue);
@@ -47,7 +49,10 @@ export const CustomSelectField = ({
           compact ? styles.customSelectControlCompact : '',
           tone === 'positive' ? styles.customSelectControlRhPositive : '',
           tone === 'negative' ? styles.customSelectControlRhNegative : '',
-        ].filter(Boolean).join(' ')}
+          tone === 'neutral' && isBloodGroupField ? styles.customSelectControlNeutral : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         aria-label={label}
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -58,7 +63,9 @@ export const CustomSelectField = ({
             value ? styles.customSelectValue : styles.customSelectPlaceholder,
             value === '+' ? styles.customSelectPositive : '',
             value === '-' ? styles.customSelectNegative : '',
-          ].filter(Boolean).join(' ')}
+          ]
+            .filter(Boolean)
+            .join(' ')}
         >
           {value || emptyDisplayLabel || emptyLabel}
         </span>
@@ -71,13 +78,12 @@ export const CustomSelectField = ({
         className={[
           styles.historyDropdown,
           compact ? styles.historyDropdownCompact : '',
-          toneBloodGroupOptions && tone === 'positive'
-            ? styles.historyDropdownRhPositive
-            : '',
-          toneBloodGroupOptions && tone === 'negative'
-            ? styles.historyDropdownRhNegative
-            : '',
-        ].filter(Boolean).join(' ')}
+          toneBloodGroupOptions && tone === 'positive' ? styles.historyDropdownRhPositive : '',
+          toneBloodGroupOptions && tone === 'negative' ? styles.historyDropdownRhNegative : '',
+          tone === 'neutral' && isBloodGroupField ? styles.historyDropdownNeutral : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         data-state={dropdownState}
         role="listbox"
         aria-label={label}
@@ -99,7 +105,13 @@ export const CustomSelectField = ({
               toneBloodGroupOptions && tone === 'negative'
                 ? styles.customSelectOptionToneNegative
                 : '',
-            ].filter(Boolean).join(' ')}
+              toneBloodGroupOptions && tone === 'neutral'
+                ? styles.customSelectOptionToneNeutral
+                : '',
+              !option && isBloodGroupField ? styles.customSelectOptionNeutralEmpty : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
             role="option"
             aria-selected={value === option}
             onClick={() => select(option)}

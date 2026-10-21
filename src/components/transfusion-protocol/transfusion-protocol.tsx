@@ -1,13 +1,8 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
-import type {
-  RecipientRecord,
-  RegistrationRecord,
-} from '../../storage/repositories/recipients';
+import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
+import type { RecipientRecord, RegistrationRecord } from '../../storage/repositories/recipients';
 import { FirstPage } from './first-page';
-import {
-  PROTOCOL_CHUNK_ORDER,
-  type ProtocolChunkId,
-} from './protocol-pagination';
+import { PROTOCOL_CHUNK_ORDER, type ProtocolChunkId } from './protocol-pagination';
 import { ProtocolEditorModal } from './protocol-editor-modal';
 import { ProtocolToolbar } from './protocol-toolbar';
 import { RecipientDatabaseModal } from './recipient-database-modal';
@@ -57,8 +52,7 @@ export const TransfusionProtocol = () => {
       const firstStyle = window.getComputedStyle(firstSheet);
       const continuationStyle = window.getComputedStyle(continuationSheet);
       const firstZoom = Number.parseFloat(firstStyle.getPropertyValue('zoom')) || 1;
-      const continuationZoom =
-        Number.parseFloat(continuationStyle.getPropertyValue('zoom')) || 1;
+      const continuationZoom = Number.parseFloat(continuationStyle.getPropertyValue('zoom')) || 1;
 
       const firstPaddingBottom = Number.parseFloat(firstStyle.paddingBottom) * firstZoom;
       const firstCapacity =
@@ -128,13 +122,11 @@ export const TransfusionProtocol = () => {
 
   const highlightHoveredBlock = (blockId: string) => {
     clearHoveredBlock();
-    sheetsRef.current
-      ?.querySelectorAll<HTMLElement>('[data-protocol-block]')
-      .forEach((element) => {
-        if (element.dataset.protocolBlock === blockId) {
-          element.classList.add('is-logical-hovered');
-        }
-      });
+    sheetsRef.current?.querySelectorAll<HTMLElement>('[data-protocol-block]').forEach((element) => {
+      if (element.dataset.protocolBlock === blockId) {
+        element.classList.add('is-logical-hovered');
+      }
+    });
   };
 
   const handleSheetsMouseMove = (event: MouseEvent<HTMLDivElement>) => {
@@ -150,10 +142,7 @@ export const TransfusionProtocol = () => {
     clearHoveredBlock();
   };
 
-  const openRegistrationRecord = async (
-    record: RegistrationRecord,
-    recipient: RecipientRecord,
-  ) => {
+  const openRegistrationRecord = async (record: RegistrationRecord, recipient: RecipientRecord) => {
     const switched = await workspace.selectRecipient(recipient);
     if (!switched) return;
 
@@ -180,9 +169,7 @@ export const TransfusionProtocol = () => {
 
   const printPage = (pageIndex: number) => {
     const root = document.documentElement;
-    const sheetElements = Array.from(
-      document.querySelectorAll<HTMLElement>('.sheets .sheet'),
-    );
+    const sheetElements = Array.from(document.querySelectorAll<HTMLElement>('.sheets .sheet'));
 
     sheetElements.forEach((sheet, index) => {
       if (index !== pageIndex) sheet.dataset.printHidden = 'true';
@@ -213,7 +200,12 @@ export const TransfusionProtocol = () => {
         onClear={workspace.clearForm}
         onNew={() => void workspace.newBlank()}
         onOpenRegistry={() => {
-          setRegistryRecipientId(null);
+          const currentRecipient = readCurrentRecipient();
+          const formRecipientId = Number(workspace.values.recipientId);
+          setRegistryRecipientId(
+            currentRecipient?.id ??
+              (Number.isFinite(formRecipientId) && formRecipientId > 0 ? formRecipientId : null),
+          );
           workspace.setRegistryOpen(true);
         }}
         currentRecipientName={workspace.values.recipientName ?? ''}
@@ -268,7 +260,12 @@ export const TransfusionProtocol = () => {
           previousTransfusionSuggestion={workspace.previousTransfusionSuggestion}
           persistReusableOptions={workspace.recordId === null}
           onOpenRecipients={() => {
-            setRegistryRecipientId(null);
+            const currentRecipient = readCurrentRecipient();
+            const formRecipientId = Number(workspace.values.recipientId);
+            setRegistryRecipientId(
+              currentRecipient?.id ??
+                (Number.isFinite(formRecipientId) && formRecipientId > 0 ? formRecipientId : null),
+            );
             workspace.setActiveBlock(null);
             workspace.setRegistryOpen(true);
           }}
@@ -287,7 +284,7 @@ export const TransfusionProtocol = () => {
         <RecipientDatabaseModal
           initialRecipientId={registryRecipientId}
           initialRecipientName={
-            registryRecipientId ? (workspace.values.recipientName ?? '') : ''
+            readCurrentRecipient()?.fullName ?? workspace.values.recipientName ?? ''
           }
           onClose={() => {
             setRegistryRecipientId(null);
@@ -298,6 +295,8 @@ export const TransfusionProtocol = () => {
             void openRegistrationRecord(record, recipient)
           }
           onUseRecipient={workspace.selectRecipient}
+          onRecipientDeleted={workspace.handleRecipientDeleted}
+          onRecipientDisconnected={workspace.handleRecipientDisconnected}
         />
       )}
     </main>

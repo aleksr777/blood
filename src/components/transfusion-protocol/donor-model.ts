@@ -30,7 +30,7 @@ export const formatDonorAntigens = (values: ProtocolValues) => {
   const hasStructured = DONOR_ANTIGENS.some(({ name }) => Boolean(values[name]));
   if (!hasStructured) return values.donorAntigens ?? '';
 
-  return DONOR_ANTIGENS
-    .flatMap(({ name, symbol }) => (values[name] ? [`${symbol}${values[name]}`] : []))
-    .join(' ');
+  return DONOR_ANTIGENS.flatMap(({ name, symbol }) =>
+    values[name] ? [`${symbol}${values[name]}`] : [],
+  ).join(' ');
 };

@@ -1,4 +1,5 @@
 import type { ProtocolValuesRecord } from '../sqlite/database-types';
+import { INDICATION_FIELDS_BY_COMPONENT } from '../indication-fields';
 
 const STORAGE_KEY = 'blood:current-indications';
 
@@ -38,8 +39,7 @@ const readState = (): StoredState | null => {
         values && typeof values === 'object' && !Array.isArray(values)
           ? Object.fromEntries(
               Object.entries(values).filter(
-                (entry): entry is [string, string] =>
-                  typeof entry[1] === 'string',
+                (entry): entry is [string, string] => typeof entry[1] === 'string',
               ),
             )
           : {},
@@ -53,8 +53,7 @@ const readState = (): StoredState | null => {
         typeof parsed.individualSelectionIndications === 'string'
           ? parsed.individualSelectionIndications
           : '',
-      individualSelectionIndicationsSet:
-        parsed.individualSelectionIndicationsSet === true,
+      individualSelectionIndicationsSet: parsed.individualSelectionIndicationsSet === true,
     };
   } catch (error) {
     console.error('Не удалось прочитать общие показания к трансфузии:', error);
@@ -80,23 +79,14 @@ export const currentIndicationsForComponent = (
   return {
     indicationComponent: component,
     ...Object.fromEntries(
-      Object.entries(values).filter(
-        ([key]) => key === 'indications' || key.startsWith(prefix),
-      ),
+      Object.entries(values).filter(([key]) => key === 'indications' || key.startsWith(prefix)),
     ),
   };
 };
 
-export const hasStoredCurrentIndications = (
-  recipientId: number,
-  component: string,
-) => {
+export const hasStoredCurrentIndications = (recipientId: number, component: string) => {
   const state = readState();
-  return Boolean(
-    state &&
-      state.recipientId === recipientId &&
-      state.byComponent[component],
-  );
+  return Boolean(state && state.recipientId === recipientId && state.byComponent[component]);
 };
 
 export const readCurrentIndications = (
@@ -104,11 +94,15 @@ export const readCurrentIndications = (
   component: string,
 ): ProtocolValuesRecord => {
   const state = readState();
+  const emptyValues = Object.fromEntries(
+    (INDICATION_FIELDS_BY_COMPONENT[component] ?? []).map((field) => [field, '']),
+  );
   if (!state || state.recipientId !== recipientId) {
-    return { indicationComponent: component };
+    return { ...emptyValues, indicationComponent: component };
   }
 
   return {
+    ...emptyValues,
     indicationComponent: component,
     ...(state.byComponent[component] ?? {}),
   };
@@ -155,36 +149,36 @@ export const resetCurrentIndications = (recipientId: number) => {
   });
 };
 
-export const hasStoredCurrentIndividualSelectionIndications = (
-  recipientId: number,
-) => {
+export const clearCurrentIndicationsForRecipient = (recipientId: number) => {
+  const state = readState();
+  if (!state || state.recipientId !== recipientId) return false;
+
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.error('Не удалось очистить общие показания удалённого реципиента:', error);
+  }
+
+  return true;
+};
+
+export const hasStoredCurrentIndividualSelectionIndications = (recipientId: number) => {
   const state = readState();
   return Boolean(
-    state &&
-      state.recipientId === recipientId &&
-      state.individualSelectionIndicationsSet,
+    state && state.recipientId === recipientId && state.individualSelectionIndicationsSet,
   );
 };
 
-export const readCurrentIndividualSelectionIndications = (
-  recipientId: number,
-) => {
+export const readCurrentIndividualSelectionIndications = (recipientId: number) => {
   const state = readState();
-  if (
-    !state ||
-    state.recipientId !== recipientId ||
-    !state.individualSelectionIndicationsSet
-  ) {
+  if (!state || state.recipientId !== recipientId || !state.individualSelectionIndicationsSet) {
     return '';
   }
 
   return state.individualSelectionIndications;
 };
 
-export const writeCurrentIndividualSelectionIndications = (
-  recipientId: number,
-  value: string,
-) => {
+export const writeCurrentIndividualSelectionIndications = (recipientId: number, value: string) => {
   if (!Number.isFinite(recipientId) || recipientId <= 0) return;
 
   const current = readState();

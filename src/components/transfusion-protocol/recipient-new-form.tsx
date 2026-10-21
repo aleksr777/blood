@@ -42,12 +42,15 @@ export const RecipientNewForm = ({
     {checked && matchesCount > 0 && (
       <div className={styles.duplicateNotice} role="status">
         <div>
-          В базе есть {matchesCount} {matchesCount % 10 === 1 && matchesCount % 100 !== 11
+          В базе есть {matchesCount}{' '}
+          {matchesCount % 10 === 1 && matchesCount % 100 !== 11
             ? 'карточка'
-            : matchesCount % 10 >= 2 && matchesCount % 10 <= 4
-              && (matchesCount % 100 < 12 || matchesCount % 100 > 14)
+            : matchesCount % 10 >= 2 &&
+                matchesCount % 10 <= 4 &&
+                (matchesCount % 100 < 12 || matchesCount % 100 > 14)
               ? 'карточки'
-              : 'карточек'} с таким же ФИО.
+              : 'карточек'}{' '}
+          с таким же ФИО.
         </div>
         <button type="button" className={styles.viewMatches} onClick={onView}>
           Посмотреть данные совпадений
@@ -56,7 +59,9 @@ export const RecipientNewForm = ({
       </div>
     )}
     <div className={styles.footer}>
-      <ModalDismissButton className={styles.secondary} disabled={checking}>Отмена</ModalDismissButton>
+      <ModalDismissButton className={styles.secondary} disabled={checking}>
+        Отмена
+      </ModalDismissButton>
       <button type="button" className={styles.primary} disabled={checking} onClick={onCreate}>
         {checking ? 'Проверка...' : checked && matchesCount ? 'Создать нового' : 'Создать'}
       </button>

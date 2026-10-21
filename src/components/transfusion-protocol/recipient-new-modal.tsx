@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import {
-  findRecipientsByName,
-  type RecipientRecord,
-} from '../../storage/repositories/recipients';
+import { findRecipientsByName, type RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
 import { RecipientMatchList } from './recipient-match-list';
 import { RecipientNewForm } from './recipient-new-form';
@@ -16,8 +13,7 @@ type Props = {
   hint?: string;
 };
 
-const normalize = (value: string) =>
-  value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
+const normalize = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
 export const RecipientNewModal = ({
   onClose,
@@ -66,7 +62,7 @@ export const RecipientNewModal = ({
     }
   };
 
-  const useExisting = async (recipient: RecipientRecord) => {
+  const selectExisting = async (recipient: RecipientRecord) => {
     if (checking) return;
     setChecking(true);
     setError('');
@@ -94,7 +90,7 @@ export const RecipientNewModal = ({
           busy={checking}
           actionLabel={existingActionLabel}
           onBack={() => setViewing(false)}
-          onUse={(recipient) => void useExisting(recipient)}
+          onUse={(recipient) => void selectExisting(recipient)}
         />
       ) : (
         <RecipientNewForm
@@ -108,7 +104,11 @@ export const RecipientNewModal = ({
           onView={() => setViewing(true)}
         />
       )}
-      {error && <div className={styles.error} role="alert">{error}</div>}
+      {error && (
+        <div className={styles.error} role="alert">
+          {error}
+        </div>
+      )}
     </Modal>
   );
 };

@@ -21,12 +21,17 @@ export const listRegistrationRecords = async (recipientId: number) => {
   return rows.map(mapRegistration);
 };
 
-const insertRegistration = (
-  db: SqliteDatabase,
-  recipientId: number,
-  values: ProtocolValuesRecord,
-  now: number,
-) => {
+const insertRegistration = ({
+  db,
+  recipientId,
+  values,
+  now,
+}: {
+  db: SqliteDatabase;
+  recipientId: number;
+  values: ProtocolValuesRecord;
+  now: number;
+}) => {
   db.exec({
     sql: `
       INSERT INTO registration_records (recipient_id, values_json, created_at, updated_at)
@@ -44,59 +49,18 @@ const insertRegistration = (
   return Number(rows[0].id);
 };
 
-const findRegistrationRecipient = (db: SqliteDatabase, id: number | null) => {
-  if (id === null) return null;
-
-  const rows = db.exec({
-    sql: 'SELECT recipient_id AS recipientId FROM registration_records WHERE id = $id',
-    bind: { $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ recipientId: number }>;
-
-  return rows[0]?.recipientId ?? null;
-};
-
-export const saveRegistrationRecord = async (
-  recordId: number | null,
-  values: ProtocolValuesRecord,
-) => {
+export const saveRegistrationRecord = async (values: ProtocolValuesRecord) => {
   const db = await getDatabase();
-  const linkedId = findRegistrationRecipient(db, recordId);
-  const selectedId = Number(values.recipientId) > 0 ? Number(values.recipientId) : null;
-
-  if (linkedId !== null && selectedId !== null && selectedId !== linkedId) {
-    throw new Error('Для другого реципиента создайте новый лист регистрации.');
-  }
-
-  const recipientId = selectedId ?? linkedId;
-  if (recipientId === null) {
+  const selectedId = Number(values.recipientId);
+  if (!Number.isSafeInteger(selectedId) || selectedId <= 0) {
     throw new Error('Выберите реципиента перед сохранением листа регистрации.');
   }
-
-  const canUpdate = linkedId !== null && recordId !== null;
-  if (!canUpdate) {
-    upsertRecipient(db, values, recipientId);
-  }
-
-  const now = Date.now();
-  const id = canUpdate ? recordId : insertRegistration(db, recipientId, values, now);
-
-  if (canUpdate) {
-    db.exec({
-      sql: `
-        UPDATE registration_records
-        SET recipient_id = $recipientId, values_json = $values, updated_at = $now
-        WHERE id = $id
-      `,
-      bind: {
-        $recipientId: recipientId,
-        $values: JSON.stringify(values),
-        $now: now,
-        $id: id,
-      },
-    });
-  }
+  const recipientId = upsertRecipient(
+    db,
+    values,
+    Number.isSafeInteger(selectedId) && selectedId > 0 ? selectedId : null,
+  );
+  const id = insertRegistration({ db, recipientId, values, now: Date.now() });
 
   const rows = db.exec({
     sql: `

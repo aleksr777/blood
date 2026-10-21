@@ -1,3 +1,4 @@
+import { INDICATION_FIELDS_BY_COMPONENT } from '../../storage/indication-fields';
 import type { ProtocolValues } from './protocol-types';
 
 export const INDICATION_COMPONENTS = [
@@ -5,42 +6,6 @@ export const INDICATION_COMPONENTS = [
   { value: 'plasma-cryo', label: 'Плазма' },
   { value: 'platelets', label: 'Тромбоциты' },
 ] as const;
-
-const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
-  erythrocytes: [
-    'indications',
-    'indicationRbcBloodLoss',
-    'indicationRbcBloodLossPercent',
-    'indicationRbcOngoingBleeding',
-    'indicationRbcCirculatoryDisturbances',
-    'indicationRbcHemicHypoxia',
-    'indicationRbcThreshold',
-    'indicationRbcHgb',
-    'indicationRbcHct',
-    'indicationRbcOther',
-    'indicationRbcOtherText',
-  ],
-  'plasma-cryo': [
-    'indications',
-    'indicationPlasmaBloodLoss',
-    'indicationPlasmaBloodLossPercent',
-    'indicationPlasmaOngoingBleeding',
-    'indicationPlasmaFactorDeficiency',
-    'indicationPlasmaFibrinogenBleeding',
-    'indicationPlasmaFibrinogenLow',
-    'indicationPlasmaOther',
-    'indicationPlasmaOtherText',
-  ],
-  platelets: [
-    'indications',
-    'indicationPlateletHemorrhagicSyndrome',
-    'indicationPlateletHighBleedingRisk',
-    'indicationPlateletThrombocytopenia',
-    'indicationPlateletCount',
-    'indicationPlateletOther',
-    'indicationPlateletOtherText',
-  ],
-};
 
 export const getIndicationComponent = (values: ProtocolValues) =>
   values.componentGroup || values.indicationComponent || '';
@@ -55,9 +20,7 @@ export const indicationValuesForComponent = (
   return {
     indicationComponent: component,
     ...Object.fromEntries(
-      fields.flatMap((field) =>
-        values[field] !== undefined ? [[field, values[field]]] : [],
-      ),
+      fields.flatMap((field) => (values[field] !== undefined ? [[field, values[field]]] : [])),
     ),
   };
 };
@@ -88,11 +51,15 @@ export const formatIndications = (values: ProtocolValues) => {
     if (yes(values.indicationRbcHemicHypoxia)) {
       items.push('Признаки гемической гипоксии');
     }
-    if (values.indicationRbcThreshold === '70-25') items.push('Снижение гемоглобина менее 70 г/л и гематокрита менее 25%');
+    if (values.indicationRbcThreshold === '70-25')
+      items.push('Снижение гемоглобина менее 70 г/л и гематокрита менее 25%');
     if (values.indicationRbcThreshold === 'custom') {
       const hgb = values.indicationRbcHgb?.trim();
       const hct = values.indicationRbcHct?.trim();
-      if (hgb || hct) items.push(`Снижение гемоглобина менее ${hgb || '…'} г/л и гематокрита менее ${hct || '…'}%`);
+      if (hgb || hct)
+        items.push(
+          `Снижение гемоглобина менее ${hgb || '…'} г/л и гематокрита менее ${hct || '…'}%`,
+        );
     }
     if (yes(values.indicationRbcOther) && values.indicationRbcOtherText?.trim()) {
       items.push(values.indicationRbcOtherText.trim());
@@ -100,10 +67,7 @@ export const formatIndications = (values: ProtocolValues) => {
   }
 
   if (values.indicationComponent === 'plasma-cryo') {
-    if (
-      values.indicationPlasmaBloodLoss === 'custom' &&
-      values.indicationPlasmaBloodLossPercent
-    ) {
+    if (values.indicationPlasmaBloodLoss === 'custom' && values.indicationPlasmaBloodLossPercent) {
       items.push(`Острая кровопотеря более ${values.indicationPlasmaBloodLossPercent}% ОЦК`);
     }
     if (yes(values.indicationPlasmaOngoingBleeding)) items.push('Продолжающееся кровотечение');
@@ -139,5 +103,5 @@ export const formatIndications = (values: ProtocolValues) => {
     }
   }
 
-  return items.length ? joinIndications(items) : values.indications ?? '';
+  return items.length ? joinIndications(items) : (values.indications ?? '');
 };

@@ -19,9 +19,9 @@ export const formatRecipientAntigens = (values: ProtocolValues) => {
   const hasStructured = RECIPIENT_ANTIGENS.some(({ name }) => Boolean(values[name]));
   if (!hasStructured) return values.recipientAntigens ?? '';
 
-  return RECIPIENT_ANTIGENS
-    .flatMap(({ name, symbol }) => (values[name] ? [`${symbol}${values[name]}`] : []))
-    .join(' ');
+  return RECIPIENT_ANTIGENS.flatMap(({ name, symbol }) =>
+    values[name] ? [`${symbol}${values[name]}`] : [],
+  ).join(' ');
 };
 
 export const formatAlloimmuneAntibodies = (values: ProtocolValues) => {

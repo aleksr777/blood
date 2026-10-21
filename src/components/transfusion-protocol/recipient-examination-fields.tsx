@@ -1,4 +1,11 @@
-import { CustomSelectField } from './custom-select-field';
+import {
+  ABO_OPTIONS,
+  ANTIGEN_OPTIONS,
+  BloodGroupSelectField,
+  getBloodGroupTone,
+  normalizeBloodGroupRh,
+  RH_OPTIONS,
+} from './blood-group-select-field';
 import { ANTIBODY_STATUS, RECIPIENT_ANTIGENS } from './recipient-examination-model';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-examination-fields.module.css';
@@ -7,56 +14,13 @@ type Props = {
   onChange: (values: ProtocolValues) => void;
   showAlloimmuneAntibodies?: boolean;
 };
-const SelectField = ({
-  name,
-  label,
-  options,
-  value,
-  onChange,
-  emptyLabel,
-  emptyDisplayLabel,
-  compact = false,
-  tone,
-}: {
-  name: string;
-  label: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-  emptyLabel?: string;
-  emptyDisplayLabel?: string;
-  compact?: boolean;
-  tone?: 'positive' | 'negative';
-}) => (
-  <div className={styles.selectField}>
-    <div className={styles.label}>{label}</div>
-    <CustomSelectField
-      name={name}
-      label={label}
-      options={options}
-      value={value}
-      emptyLabel={emptyLabel}
-      emptyDisplayLabel={emptyDisplayLabel}
-      compact={compact}
-      tone={tone}
-      onChange={onChange}
-    />
-  </div>
-);
-const normalizeRh = (value?: string) => {
-  if (value === 'Rh(D)+' || value === 'Rh(+)') return 'Rh(+)';
-  if (value === 'Rh(D)-' || value === 'Rh(-)') return 'Rh(-)';
-  return '';
-};
-
 export const RecipientExaminationFields = ({
   values,
   onChange,
   showAlloimmuneAntibodies = true,
 }: Props) => {
-  const recipientRh = normalizeRh(values.recipientRh);
-  const bloodGroupTone =
-    recipientRh === 'Rh(-)' ? 'negative' : recipientRh === 'Rh(+)' ? 'positive' : undefined;
+  const recipientRh = normalizeBloodGroupRh(values.recipientRh);
+  const bloodGroupTone = getBloodGroupTone(recipientRh);
 
   const setStatus = (status: string) =>
     onChange({
@@ -65,18 +29,18 @@ export const RecipientExaminationFields = ({
   return (
     <div className={styles.root}>
       <div className={styles.topGrid}>
-        <SelectField
+        <BloodGroupSelectField
           name="recipientAbo"
           label="Группа крови AB0"
-          options={['O(I)', 'A(II)', 'B(III)', 'AB(IV)']}
+          options={ABO_OPTIONS}
           value={values.recipientAbo ?? ''}
           tone={bloodGroupTone}
           onChange={(value) => onChange({ recipientAbo: value })}
         />
-        <SelectField
+        <BloodGroupSelectField
           name="recipientRh"
           label="Резус-принадлежность"
-          options={['Rh(+)', 'Rh(-)']}
+          options={RH_OPTIONS}
           value={recipientRh}
           tone={bloodGroupTone}
           onChange={(value) => onChange({ recipientRh: value })}
@@ -86,15 +50,16 @@ export const RecipientExaminationFields = ({
       <div className={styles.groupTitle}>Антигены:</div>
       <div className={styles.antigenGrid}>
         {RECIPIENT_ANTIGENS.map(({ name, label }) => (
-          <SelectField
+          <BloodGroupSelectField
             key={name}
             name={name}
             label={label}
-            options={['+', '-']}
+            options={ANTIGEN_OPTIONS}
             value={values[name] ?? ''}
             emptyLabel=""
             emptyDisplayLabel=""
             compact
+            antigen
             onChange={(value) => onChange({ [name]: value, recipientAntigens: '' })}
           />
         ))}

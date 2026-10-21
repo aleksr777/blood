@@ -1,8 +1,5 @@
 import { getDatabase } from './database';
-import type {
-  ProtocolValuesRecord,
-  RegistrationDraftState,
-} from './database-types';
+import type { ProtocolValuesRecord, RegistrationDraftState } from './database-types';
 
 const isValues = (value: unknown): value is ProtocolValuesRecord =>
   typeof value === 'object' &&
@@ -45,9 +42,7 @@ export const loadRegistrationDraft = async (): Promise<RegistrationDraftState> =
     return {
       values: state.values,
       registrationRecordId:
-        typeof state.registrationRecordId === 'number'
-          ? state.registrationRecordId
-          : null,
+        typeof state.registrationRecordId === 'number' ? state.registrationRecordId : null,
       updatedAt: Number(row.updated_at) || 0,
     };
   } catch {

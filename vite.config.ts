@@ -10,6 +10,9 @@ const legacyMigrationHeaders = {
 export default defineConfig({
   plugins: [react()],
   base: '/blood/',
+  build: {
+    target: ['es2020', 'edge88', 'firefox78', 'chrome87', 'safari14'],
+  },
   server: {
     headers: legacyMigrationHeaders,
   },
@@ -19,5 +22,4 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@sqlite.org/sqlite-wasm'],
   },
-  //base: '/template-react-base', // для gh-pages
 });

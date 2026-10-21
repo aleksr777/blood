@@ -7,11 +7,7 @@ const parseIsoDate = (value?: string) => {
   const day = Number(match[3]);
   const date = new Date(year, month - 1, day);
 
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
     return null;
   }
 
@@ -54,10 +50,7 @@ const ageWord = (age: number) => {
   return 'лет';
 };
 
-export const formatRecipientAge = (
-  birthDate?: string,
-  referenceDate?: string,
-) => {
+export const formatRecipientAge = (birthDate?: string, referenceDate?: string) => {
   const age = calculateRecipientAge(birthDate, referenceDate);
   return age === null ? '' : `${age} ${ageWord(age)}`;
 };

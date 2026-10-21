@@ -99,19 +99,13 @@ export const getReagentExpirationWarning = (
   return `${title} — срок годности истёк ${formatDate(expirationDate)}`;
 };
 
-export const getExpiredReagentWarnings = (
-  values: ProtocolValues,
-  now = new Date(),
-): string[] =>
+export const getExpiredReagentWarnings = (values: ProtocolValues, now = new Date()): string[] =>
   REAGENTS.flatMap(({ title, expiration }) => {
     const warning = getReagentExpirationWarning(title, values[expiration], now);
     return warning ? [warning] : [];
   });
 
-export const getHemaconExpirationWarning = (
-  expirationDate?: string,
-  now = new Date(),
-) => {
+export const getHemaconExpirationWarning = (expirationDate?: string, now = new Date()) => {
   if (!expirationDate || expirationDate >= localIsoDate(now)) return '';
 
   return `Срок годности гемакона истёк ${formatDate(expirationDate)}`;

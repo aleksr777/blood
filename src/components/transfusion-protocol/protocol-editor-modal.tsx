@@ -16,11 +16,7 @@ import { SelectionFields } from './selection-fields';
 import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
-import type {
-  ProtocolBlockId,
-  ProtocolFieldConfig,
-  ProtocolValues,
-} from './protocol-types';
+import type { ProtocolBlockId, ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 
 type Props = {
   blockId: ProtocolBlockId;
@@ -32,7 +28,7 @@ type Props = {
   previousTransfusionSuggestion: string;
   persistReusableOptions: boolean;
   onOpenRecipients: () => void;
-  onSelectRecipient: (recipient: RecipientRecord) => void | Promise<void>;
+  onSelectRecipient: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
   onSave: (values: ProtocolValues) => void;
   onClose: (values: ProtocolValues) => void;
 };
@@ -94,10 +90,7 @@ export const ProtocolEditorModal = ({
       field={field}
       value={
         field.name === 'recipientAge'
-          ? formatRecipientAge(
-              draft.recipientBirthDate,
-              draft.transfusionDate,
-            )
+          ? formatRecipientAge(draft.recipientBirthDate, draft.transfusionDate)
           : (draft[field.name] ?? '')
       }
       onChange={changeValue}
@@ -119,10 +112,7 @@ export const ProtocolEditorModal = ({
               <div key={field.name}>
                 <div className={styles.fieldLabel}>{field.label}</div>
                 <div className={styles.calculatedValue}>
-                  {formatRecipientAge(
-                    draft.recipientBirthDate,
-                    draft.transfusionDate,
-                  ) || '—'}
+                  {formatRecipientAge(draft.recipientBirthDate, draft.transfusionDate) || '—'}
                 </div>
               </div>,
             ];
@@ -136,7 +126,11 @@ export const ProtocolEditorModal = ({
 
   return (
     <Modal title={config.title} onClose={handleClose} className={styles[config.size]}>
-      <div className={[styles.grid, blockId === 'history' ? styles.historyGrid : ''].filter(Boolean).join(' ')}>
+      <div
+        className={[styles.grid, blockId === 'history' ? styles.historyGrid : '']
+          .filter(Boolean)
+          .join(' ')}
+      >
         {bloodGroupWarning && (blockId === 'examination' || blockId === 'donor') && (
           <div className={styles.bloodGroupWarning} role="alert">
             <span>{bloodGroupWarning}</span>
@@ -159,10 +153,7 @@ export const ProtocolEditorModal = ({
               'recipientSex',
               'recipientAge',
             ])}
-            {renderGeneralGroup('Госпитализация', [
-              'department',
-              'medicalRecordNumber',
-            ])}
+            {renderGeneralGroup('Госпитализация', ['department', 'medicalRecordNumber'])}
             {renderGeneralGroup('Данные трансфузии', [
               'requestDateTime',
               'transfusionDate',
@@ -232,7 +223,7 @@ export const ProtocolEditorModal = ({
                     field={field}
                     value={draft[field.name] ?? ''}
                     onChange={changeValue}
-                      onOpenRecipients={handleOpenRecipients}
+                    onOpenRecipients={handleOpenRecipients}
                     onSelectRecipient={onSelectRecipient}
                   />
 

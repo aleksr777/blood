@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import {
   adoptCurrentRecipientFromValues,
+  hasRecipientProfileDifference,
+  mergeRecipientProfileValues,
   readCurrentRecipient,
   recipientProfileValuesForForms,
 } from '../../storage/repositories/current-recipient';
@@ -14,21 +16,13 @@ import {
   loadProtocolDraft,
   saveProtocolDraft,
 } from '../../storage/repositories/protocol-draft';
+import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import { getIndicationComponent } from './indications-model';
 import { reagentDefaultsForNewBlank } from './reagent-defaults';
 import type { ProtocolValues } from './protocol-types';
 
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 const hasValues = (values: ProtocolValues) => Object.keys(values).length > 0;
-
-const generatedHistoryValues = (values: ProtocolValues): ProtocolValues =>
-  values.previousTransfusionsAutoText?.trim()
-    ? {
-        previousTransfusionsStatus: values.previousTransfusionsStatus ?? '',
-        previousTransfusions: values.previousTransfusions ?? '',
-        previousTransfusionsAutoText: values.previousTransfusionsAutoText,
-      }
-    : {};
 
 type Props = {
   values: ProtocolValues;
@@ -38,19 +32,14 @@ type Props = {
   onExpire: () => void;
 };
 
-export const useProtocolDraft = ({
-  values,
-  recordId,
-  setValues,
-  setRecordId,
-  onExpire,
-}: Props) => {
+export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onExpire }: Props) => {
   const [loaded, setLoaded] = useState(false);
   const [lastInputAt, setLastInputAt] = useState(0);
 
   const expire = useCallback(() => {
     setLastInputAt(0);
-    setValues({});
+    const currentRecipient = readCurrentRecipient();
+    setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
     setRecordId(null);
     onExpire();
     void clearProtocolDraft().catch((error: unknown) =>
@@ -76,39 +65,44 @@ export const useProtocolDraft = ({
                 }
               : draft.values;
           const currentRecipient = readCurrentRecipient();
-          if (draft.protocolRecordId !== null) {
+          if (!currentRecipient) {
+            if (draft.protocolRecordId === null) {
+              adoptCurrentRecipientFromValues(draftValues);
+            }
             setValues(draftValues);
-          } else if (!currentRecipient) {
-            adoptCurrentRecipientFromValues(draftValues);
-            setValues(draftValues);
-          } else if (Number(draftValues.recipientId) === currentRecipient.id) {
-            const mergedValues = {
-              ...draftValues,
-              ...recipientProfileValuesForForms(currentRecipient),
-              ...generatedHistoryValues(draftValues),
-            };
+            setRecordId(draft.protocolRecordId);
+          } else {
+            const previousRecipientId = Number(draftValues.recipientId);
+            const recipientChanged =
+              Number.isFinite(previousRecipientId) &&
+              previousRecipientId > 0 &&
+              previousRecipientId !== currentRecipient.id;
+            const baseValues = recipientChanged
+              ? clearRecipientLinkedValues(draftValues, previousRecipientId)
+              : draftValues;
+            const profileChanged =
+              recipientChanged || hasRecipientProfileDifference(draftValues, currentRecipient);
+            const mergedValues = mergeRecipientProfileValues(baseValues, currentRecipient);
             const component = getIndicationComponent(mergedValues);
 
             if (component) {
               if (hasStoredCurrentIndications(currentRecipient.id, component)) {
-                Object.assign(
-                  mergedValues,
-                  readCurrentIndications(currentRecipient.id, component),
-                );
-              } else {
-                writeCurrentIndications(
-                  currentRecipient.id,
-                  component,
-                  mergedValues,
-                );
+                Object.assign(mergedValues, readCurrentIndications(currentRecipient.id, component));
+              } else if (draft.protocolRecordId === null && !recipientChanged) {
+                writeCurrentIndications(currentRecipient.id, component, mergedValues);
               }
             }
 
             setValues(mergedValues);
-          } else {
-            setValues(draftValues);
+            const indicationsChanged = Object.entries(mergedValues).some(
+              ([field, value]) => (draftValues[field] ?? '') !== value,
+            );
+            setRecordId(
+              (profileChanged || indicationsChanged) && draft.protocolRecordId !== null
+                ? null
+                : draft.protocolRecordId,
+            );
           }
-          setRecordId(draft.protocolRecordId);
           setLastInputAt(draft.updatedAt);
           return;
         }

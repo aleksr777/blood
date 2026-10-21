@@ -20,30 +20,20 @@ export const listProtocolRecords = (recipientId: number) =>
 export const findProtocolRecordsByComponentUnitNumber = (
   componentUnitNumber: string,
   excludeRecordId: number | null,
-) =>
-  database.findProtocolRecordsByComponentUnitNumber(
-    componentUnitNumber,
-    excludeRecordId,
-  );
+) => database.findProtocolRecordsByComponentUnitNumber(componentUnitNumber, excludeRecordId);
 
-export const removeProtocolRecord = (id: number) =>
-  database.removeProtocolRecord(id);
+export const removeProtocolRecord = (id: number) => database.removeProtocolRecord(id);
 
-export const saveProtocolRecord = (
-  recordId: number | null,
-  values: ProtocolValuesRecord,
-) => database.saveProtocolRecord(recordId, values);
+export const saveProtocolRecord = (values: ProtocolValuesRecord) =>
+  database.saveProtocolRecord(values);
 
 export const listRegistrationRecords = (recipientId: number) =>
   database.listRegistrationRecords(recipientId);
 
-export const saveRegistrationRecord = (
-  recordId: number | null,
-  values: ProtocolValuesRecord,
-) => database.saveRegistrationRecord(recordId, values);
+export const saveRegistrationRecord = (values: ProtocolValuesRecord) =>
+  database.saveRegistrationRecord(values);
 
-export const removeRegistrationRecord = (id: number) =>
-  database.removeRegistrationRecord(id);
+export const removeRegistrationRecord = (id: number) => database.removeRegistrationRecord(id);
 
 export const listBloodRequestRecords = (
   recipientId: number,
@@ -54,8 +44,7 @@ export const saveBloodRequestRecord = (
   input: import('../sqlite/database-types').SaveBloodRequestRecordInput,
 ) => database.saveBloodRequestRecord(input);
 
-export const removeBloodRequestRecord = (id: number) =>
-  database.removeBloodRequestRecord(id);
+export const removeBloodRequestRecord = (id: number) => database.removeBloodRequestRecord(id);
 
 export type {
   BloodRequestRecord,

@@ -62,15 +62,16 @@ const Modal = ({
     >
       <ModalCloseContext.Provider value={requestClose}>
         <div ref={contentRef} className={styles.content}>
-          <button
-            type="button"
-            className={styles.close}
-            aria-label="Close modal"
-            disabled={!dismissible}
-            onClick={requestPointerClose}
-          >
-            ×
-          </button>
+          {dismissible && (
+            <button
+              type="button"
+              className={styles.close}
+              aria-label="Close modal"
+              onClick={requestPointerClose}
+            >
+              ×
+            </button>
+          )}
           <h2 className={styles.title} id={label}>
             {title}
           </h2>

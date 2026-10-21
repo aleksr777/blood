@@ -15,6 +15,7 @@ class TestWorker extends EventTarget {
         ok: !failed,
         result: message.action === 'init' ? true : [],
         error: failed ? 'База занята другой вкладкой' : undefined,
+        errorCode: failed ? 'database-in-use' : undefined,
       };
       this.dispatchEvent(new MessageEvent('message', { data: response }));
     });
@@ -44,7 +45,11 @@ describe('database initialization', () => {
   it('allows a retry after the other tab is closed', async () => {
     const { database } = await import('./database-client');
     failInitialization = true;
-    await expect(database.searchRecipients('')).rejects.toThrow('База занята');
+    await expect(database.searchRecipients('')).rejects.toMatchObject({
+      message: 'База занята другой вкладкой',
+      code: 'database-in-use',
+    });
+    expect(navigator.storage.persist).not.toHaveBeenCalled();
     failInitialization = false;
     await expect(database.searchRecipients('')).resolves.toEqual([]);
     expect(actions).toEqual(['init', 'init', 'recipients:search']);

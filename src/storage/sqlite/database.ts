@@ -2,6 +2,7 @@ import { initializeSchema } from './database-schema';
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import { migrateLegacyOpfsDepartments } from './legacy-opfs-migration';
 import { migrateRecipientNameConstraint } from './recipient-name-migration';
+import { DatabaseError } from './database-errors';
 
 const DATABASE_FILE = '/blood.sqlite3';
 const DATABASE_OWNER_LOCK = 'blood-opfs-sahpool-owner';
@@ -31,9 +32,10 @@ const acquireDatabaseOwnerLock = () => {
       .request(DATABASE_OWNER_LOCK, { mode: 'exclusive', ifAvailable: true }, async (lock) => {
         if (!lock) {
           reject(
-            new Error(
+            new DatabaseError(
               'Приложение уже открыто в другой вкладке. ' +
                 'Закройте другие вкладки с приложением и повторите действие.',
+              'database-in-use',
             ),
           );
           return;
@@ -62,9 +64,10 @@ const describeDatabaseError = (error: unknown) => {
     message.includes('another open Access Handle') ||
     message.includes('Writable stream associated with the same file')
   ) {
-    return new Error(
+    return new DatabaseError(
       'Локальная база данных занята другой вкладкой или старой версией приложения. ' +
         'Закройте все вкладки с приложением, откройте его снова и повторите действие.',
+      'database-in-use',
     );
   }
 

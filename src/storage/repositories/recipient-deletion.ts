@@ -1,5 +1,8 @@
 import { clearCurrentIndicationsForRecipient } from './current-indications';
-import { clearCurrentRecipientIfMatches } from './current-recipient';
+import {
+  clearCurrentRecipientIfMatches,
+  readCurrentRecipient,
+} from './current-recipient';
 import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft';
 import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft';
 import { clearRecipientLinkedValues } from './recipient-linked-values';
@@ -69,7 +72,7 @@ const clearStoredRequestDraft = (
   }
 };
 
-export const clearDeletedRecipientFromCurrentForms = async (
+const clearRecipientFromCurrentForms = async (
   recipientId: number,
 ) => {
   const [protocolDraft, registrationDraft] = await Promise.all([
@@ -122,5 +125,27 @@ export const clearDeletedRecipientFromCurrentForms = async (
   return {
     protocolLinked,
     registrationLinked,
+  };
+};
+
+
+export const clearDeletedRecipientFromCurrentForms = clearRecipientFromCurrentForms;
+
+export const disconnectCurrentRecipientFromCurrentForms = async (
+  recipientId: number,
+) => {
+  const currentRecipient = readCurrentRecipient();
+  if (!currentRecipient || currentRecipient.id !== recipientId) {
+    return {
+      disconnected: false,
+      protocolLinked: false,
+      registrationLinked: false,
+    };
+  }
+
+  const result = await clearRecipientFromCurrentForms(recipientId);
+  return {
+    disconnected: true,
+    ...result,
   };
 };

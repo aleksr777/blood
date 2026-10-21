@@ -947,6 +947,27 @@ export const ComponentRequest = () => {
     setStatus('Реципиент удалён. Связанные с ним данные удалены из текущей заявки.');
   };
 
+  const handleRecipientDisconnected = (recipientId: number) => {
+    if (currentRecipient?.id === recipientId) {
+      setCurrentRecipient(null);
+    }
+
+    if (Number(draft.sourceRecipientId) !== recipientId) return;
+
+    savedRecordIdRef.current = null;
+    setSavedRecordId(null);
+    setDraft((current) =>
+      clearRecipientLinkedRequestDraft(
+        current,
+        recipientId,
+        'component-request',
+      ),
+    );
+    setStatus(
+      'Текущий реципиент отключён. Связанные с ним данные удалены из текущей заявки.',
+    );
+  };
+
   const examinationValues = useMemo<ProtocolValues>(() => {
     if (currentRecipient) {
       return {
@@ -1455,6 +1476,7 @@ export const ComponentRequest = () => {
             void openSavedRequest(record, recipient);
           }}
           onRecipientDeleted={handleRecipientDeleted}
+          onRecipientDisconnected={handleRecipientDisconnected}
           onClose={() => setRegistryOpen(false)}
         />
       )}

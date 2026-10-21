@@ -1,3 +1,5 @@
+import type { DatabaseErrorCode } from './database-errors';
+
 export type ProtocolValuesRecord = Record<string, string>;
 
 export type DepartmentRecord = {
@@ -119,4 +121,5 @@ export type DatabaseResponse = {
   ok: boolean;
   result?: unknown;
   error?: string;
+  errorCode?: DatabaseErrorCode;
 };

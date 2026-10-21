@@ -47,5 +47,7 @@ SyncAccessHandle Pool VFS (`opfs-sahpool`). SQLite runs inside a Web Worker and 
 require a backend or COOP/COEP response headers.
 
 The storage is persistent between sessions for the same site origin and browser profile.
-The SAH pool is intended for a single active database connection per origin, so opening the
-application in multiple tabs at the same time is not supported yet.
+The SAH pool allows one active database connection per origin. Before mounting any forms,
+the application checks database ownership. Additional tabs show a blocking dialog without
+modifying drafts. The dialog can request focus in the working tab (subject to browser
+restrictions), or retry opening the database after the working tab is closed.

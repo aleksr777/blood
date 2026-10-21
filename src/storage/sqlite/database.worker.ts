@@ -1,5 +1,6 @@
 import type { DatabaseRequest, DatabaseResponse } from './database-types';
 import { getDatabase } from './database';
+import { DatabaseError } from './database-errors';
 import {
   importDepartments,
   listDepartments,
@@ -179,6 +180,11 @@ globalThis.addEventListener('message', (event: MessageEvent<DatabaseRequest>) =>
     .then((result) => send({ id: event.data.id, ok: true, result }))
     .catch((error: unknown) => {
       const message = error instanceof Error ? error.message : String(error);
-      send({ id: event.data.id, ok: false, error: message });
+      send({
+        id: event.data.id,
+        ok: false,
+        error: message,
+        errorCode: error instanceof DatabaseError ? error.code : undefined,
+      });
     });
 });

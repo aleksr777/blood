@@ -1,3 +1,4 @@
+import { DatabaseError } from './database-errors';
 import type {
   BloodRequestRecord,
   BloodRequestRecordKind,
@@ -45,7 +46,9 @@ worker.addEventListener('message', (event: MessageEvent<DatabaseResponse>) => {
   pending.delete(event.data.id);
   window.clearTimeout(request.timeoutId);
   if (event.data.ok) request.resolve(event.data.result);
-  else request.reject(new Error(event.data.error ?? 'Ошибка SQLite.'));
+  else {
+    request.reject(new DatabaseError(event.data.error ?? 'Ошибка SQLite.', event.data.errorCode));
+  }
 });
 
 const request = <T>(action: DatabaseAction, payload?: unknown) => {
@@ -77,12 +80,12 @@ let initialization: Promise<void> | null = null;
 
 export const initializeDatabase = () => {
   initialization ??= (async () => {
+    await request<boolean>('init');
     try {
       await navigator.storage?.persist?.();
     } catch {
       // Persistence permission is optional; OPFS can still be available.
     }
-    await request<boolean>('init');
   })().catch((error: unknown) => {
     initialization = null;
     throw error;

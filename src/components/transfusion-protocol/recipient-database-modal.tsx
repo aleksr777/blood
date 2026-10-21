@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
-import { clearDeletedRecipientFromCurrentForms } from '../../storage/repositories/recipient-deletion';
+import {
+  clearDeletedRecipientFromCurrentForms,
+  disconnectCurrentRecipientFromCurrentForms,
+} from '../../storage/repositories/recipient-deletion';
 import {
   createRecipient,
   findRecipientsByName,
@@ -43,6 +46,7 @@ type Props = {
   ) => void;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   onRecipientDeleted?: (recipientId: number) => void | Promise<void>;
+  onRecipientDisconnected?: (recipientId: number) => void | Promise<void>;
   initialRecipientId?: number | null;
   initialRecipientName?: string;
 };
@@ -55,6 +59,7 @@ export const RecipientDatabaseModal = ({
   onOpenComponentRequestRecord,
   onUseRecipient,
   onRecipientDeleted,
+  onRecipientDisconnected,
   initialRecipientId = null,
   initialRecipientName = '',
 }: Props) => {
@@ -94,6 +99,9 @@ export const RecipientDatabaseModal = ({
   const [deletingBloodRequestRecord, setDeletingBloodRequestRecord] =
     useState<BloodRequestRecord | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentRecipientId, setCurrentRecipientId] = useState<number | null>(
+    () => readCurrentRecipient()?.id ?? null,
+  );
 
   useEffect(() => {
     if (!initialRecipient.id && !initialRecipient.name) {
@@ -238,6 +246,7 @@ export const RecipientDatabaseModal = ({
 
     if (readCurrentRecipient()?.id === updated.id && onUseRecipient) {
       await onUseRecipient(updated);
+      setCurrentRecipientId(updated.id);
     }
   };
 
@@ -252,6 +261,14 @@ export const RecipientDatabaseModal = ({
     setRegistrationRecords([]);
     setIndividualSelectionDirectionRecords([]);
     setComponentRequestRecords([]);
+  };
+
+  const disconnectRecipient = async (recipient: RecipientRecord) => {
+    const result = await disconnectCurrentRecipientFromCurrentForms(recipient.id);
+    if (!result.disconnected) return;
+
+    setCurrentRecipientId(null);
+    await onRecipientDisconnected?.(recipient.id);
   };
 
   const deleteRecord = async (record: ProtocolRecord) => {
@@ -340,7 +357,7 @@ export const RecipientDatabaseModal = ({
         />
         <RecipientHistoryPanel
           recipient={selected}
-          currentRecipientId={readCurrentRecipient()?.id ?? null}
+          currentRecipientId={currentRecipientId}
           records={records}
           registrationRecords={registrationRecords}
           individualSelectionDirectionRecords={individualSelectionDirectionRecords}
@@ -360,6 +377,7 @@ export const RecipientDatabaseModal = ({
                 }
               : undefined
           }
+          onDisconnectRecipient={disconnectRecipient}
           onEdit={setEditing}
           onDelete={setDeleting}
           onDeleteRecord={setDeletingRecord}

@@ -232,7 +232,10 @@ export const RecipientDatabaseModal = ({
     setQuery('');
 
     if (onUseRecipient) {
-      await onUseRecipient(created);
+      const accepted = await onUseRecipient(created);
+      if (accepted !== false) {
+        setCurrentRecipientId(created.id);
+      }
     }
   };
   const openExistingRecipient = (recipient: RecipientRecord) => {

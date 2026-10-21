@@ -40,13 +40,7 @@ type Props = {
   onExpire: () => void;
 };
 
-export const useProtocolDraft = ({
-  values,
-  recordId,
-  setValues,
-  setRecordId,
-  onExpire,
-}: Props) => {
+export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onExpire }: Props) => {
   const [loaded, setLoaded] = useState(false);
   const [lastInputAt, setLastInputAt] = useState(0);
 
@@ -94,8 +88,7 @@ export const useProtocolDraft = ({
               ? clearRecipientLinkedValues(draftValues, previousRecipientId)
               : draftValues;
             const profileChanged =
-              recipientChanged ||
-              hasRecipientProfileDifference(draftValues, currentRecipient);
+              recipientChanged || hasRecipientProfileDifference(draftValues, currentRecipient);
             const mergedValues = {
               ...baseValues,
               ...generatedHistoryValues(baseValues),
@@ -105,24 +98,15 @@ export const useProtocolDraft = ({
 
             if (component) {
               if (hasStoredCurrentIndications(currentRecipient.id, component)) {
-                Object.assign(
-                  mergedValues,
-                  readCurrentIndications(currentRecipient.id, component),
-                );
+                Object.assign(mergedValues, readCurrentIndications(currentRecipient.id, component));
               } else if (draft.protocolRecordId === null && !recipientChanged) {
-                writeCurrentIndications(
-                  currentRecipient.id,
-                  component,
-                  mergedValues,
-                );
+                writeCurrentIndications(currentRecipient.id, component, mergedValues);
               }
             }
 
             setValues(mergedValues);
             setRecordId(
-              profileChanged && draft.protocolRecordId !== null
-                ? null
-                : draft.protocolRecordId,
+              profileChanged && draft.protocolRecordId !== null ? null : draft.protocolRecordId,
             );
           }
           setLastInputAt(draft.updatedAt);

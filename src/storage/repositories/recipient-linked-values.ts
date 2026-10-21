@@ -50,8 +50,6 @@ export const clearRecipientLinkedValues = (
   if (Number(values.recipientId) !== recipientId) return values;
 
   return Object.fromEntries(
-    Object.entries(values).filter(
-      ([name]) => !isRecipientLinkedProtocolField(name),
-    ),
+    Object.entries(values).filter(([name]) => !isRecipientLinkedProtocolField(name)),
   );
 };

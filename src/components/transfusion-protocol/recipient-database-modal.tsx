@@ -32,18 +32,12 @@ import styles from './recipient-database.module.css';
 type Props = {
   onClose: () => void;
   onOpenRecord?: (record: ProtocolRecord, recipient: RecipientRecord) => void;
-  onOpenRegistrationRecord?: (
-    record: RegistrationRecord,
-    recipient: RecipientRecord,
-  ) => void;
+  onOpenRegistrationRecord?: (record: RegistrationRecord, recipient: RecipientRecord) => void;
   onOpenIndividualSelectionDirectionRecord?: (
     record: BloodRequestRecord,
     recipient: RecipientRecord,
   ) => void;
-  onOpenComponentRequestRecord?: (
-    record: BloodRequestRecord,
-    recipient: RecipientRecord,
-  ) => void;
+  onOpenComponentRequestRecord?: (record: BloodRequestRecord, recipient: RecipientRecord) => void;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   onRecipientDeleted?: (recipientId: number) => void | Promise<void>;
   onRecipientDisconnected?: (recipientId: number) => void | Promise<void>;
@@ -73,8 +67,7 @@ export const RecipientDatabaseModal = ({
         : null;
     const id = requestedRecipientId ?? currentRecipient?.id ?? null;
     const name =
-      initialRecipientName.trim() ||
-      (currentRecipient?.id === id ? currentRecipient.fullName : '');
+      initialRecipientName.trim() || (currentRecipient?.id === id ? currentRecipient.fullName : '');
 
     return { id, name };
   });
@@ -86,10 +79,10 @@ export const RecipientDatabaseModal = ({
   const [selected, setSelected] = useState<RecipientRecord | null>(null);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
   const [registrationRecords, setRegistrationRecords] = useState<RegistrationRecord[]>([]);
-  const [individualSelectionDirectionRecords, setIndividualSelectionDirectionRecords] =
-    useState<BloodRequestRecord[]>([]);
-  const [componentRequestRecords, setComponentRequestRecords] =
-    useState<BloodRequestRecord[]>([]);
+  const [individualSelectionDirectionRecords, setIndividualSelectionDirectionRecords] = useState<
+    BloodRequestRecord[]
+  >([]);
+  const [componentRequestRecords, setComponentRequestRecords] = useState<BloodRequestRecord[]>([]);
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<RecipientRecord | null>(null);
   const [deleting, setDeleting] = useState<RecipientRecord | null>(null);
@@ -132,9 +125,7 @@ export const RecipientDatabaseModal = ({
         setSelected(recipient);
         setQuery('');
       })
-      .catch((error: unknown) =>
-        console.error('Не удалось открыть текущего реципиента:', error),
-      )
+      .catch((error: unknown) => console.error('Не удалось открыть текущего реципиента:', error))
       .finally(() => {
         if (!active) return;
         setInitializingRecipient(false);
@@ -157,9 +148,7 @@ export const RecipientDatabaseModal = ({
           if (!active) return;
           setRecipients(items);
           setSelected((current) => {
-            const currentMatch = current
-              ? items.find(({ id }) => id === current.id)
-              : undefined;
+            const currentMatch = current ? items.find(({ id }) => id === current.id) : undefined;
             if (currentMatch) return currentMatch;
 
             const initialMatch = initialRecipient.id
@@ -174,10 +163,8 @@ export const RecipientDatabaseModal = ({
                 .toLocaleLowerCase('ru-RU');
               const exactMatches = items.filter(
                 ({ fullName }) =>
-                  fullName
-                    .trim()
-                    .replace(/\s+/g, ' ')
-                    .toLocaleLowerCase('ru-RU') === normalizedInitialName,
+                  fullName.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU') ===
+                  normalizedInitialName,
               );
               if (exactMatches.length === 1) return exactMatches[0];
             }
@@ -208,12 +195,7 @@ export const RecipientDatabaseModal = ({
       listBloodRequestRecords(selected.id, 'individual-selection-direction'),
       listBloodRequestRecords(selected.id, 'component-request'),
     ])
-      .then(([
-        protocolItems,
-        registrationItems,
-        directionItems,
-        componentRequestItems,
-      ]) => {
+      .then(([protocolItems, registrationItems, directionItems, componentRequestItems]) => {
         setRecords(protocolItems);
         setRegistrationRecords(registrationItems);
         setIndividualSelectionDirectionRecords(directionItems);
@@ -316,9 +298,7 @@ export const RecipientDatabaseModal = ({
         current.filter(({ id }) => id !== record.id),
       );
     } else {
-      setComponentRequestRecords((current) =>
-        current.filter(({ id }) => id !== record.id),
-      );
+      setComponentRequestRecords((current) => current.filter(({ id }) => id !== record.id));
     }
 
     const countField =
@@ -367,9 +347,7 @@ export const RecipientDatabaseModal = ({
           componentRequestRecords={componentRequestRecords}
           onOpenRecord={onOpenRecord}
           onOpenRegistrationRecord={onOpenRegistrationRecord}
-          onOpenIndividualSelectionDirectionRecord={
-            onOpenIndividualSelectionDirectionRecord
-          }
+          onOpenIndividualSelectionDirectionRecord={onOpenIndividualSelectionDirectionRecord}
           onOpenComponentRequestRecord={onOpenComponentRequestRecord}
           onUseRecipient={
             onUseRecipient

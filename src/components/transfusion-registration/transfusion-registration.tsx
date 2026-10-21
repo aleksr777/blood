@@ -95,10 +95,9 @@ export const TransfusionRegistration = () => {
     const previousRecipientId = initialRecord.recipientId;
     const recipientChanged =
       currentRecipient !== null && currentRecipient.id !== previousRecipientId;
-    const baseValues =
-      recipientChanged
-        ? clearRecipientLinkedValues(initialRecord.values, previousRecipientId)
-        : initialRecord.values;
+    const baseValues = recipientChanged
+      ? clearRecipientLinkedValues(initialRecord.values, previousRecipientId)
+      : initialRecord.values;
 
     return {
       ...baseValues,
@@ -117,8 +116,7 @@ export const TransfusionRegistration = () => {
 
     const recipientChanged = currentRecipient.id !== initialRecord.recipientId;
     const profileChanged =
-      recipientChanged ||
-      hasRecipientProfileDifference(initialRecord.values, currentRecipient);
+      recipientChanged || hasRecipientProfileDifference(initialRecord.values, currentRecipient);
 
     return profileChanged ? null : initialRecord.id;
   });
@@ -130,13 +128,10 @@ export const TransfusionRegistration = () => {
   const [status, setStatus] = useState('');
 
   const currentRecipientId = Number(values.recipientId);
-  const currentRecipientAvailable =
-    Number.isFinite(currentRecipientId) && currentRecipientId > 0;
+  const currentRecipientAvailable = Number.isFinite(currentRecipientId) && currentRecipientId > 0;
   const storedCurrentRecipient = readCurrentRecipient();
   const currentRecipientProfile =
-    storedCurrentRecipient?.id === currentRecipientId
-      ? storedCurrentRecipient.profile
-      : {};
+    storedCurrentRecipient?.id === currentRecipientId ? storedCurrentRecipient.profile : {};
   const birthDateParts = getBirthDateParts(values.recipientBirthDate);
   const recipientAge = formatRecipientAge(values.recipientBirthDate);
   const registrationRows = parseRegistrationTransfusionRows(values);
@@ -166,13 +161,11 @@ export const TransfusionRegistration = () => {
             Number.isFinite(previousRecipientId) &&
             previousRecipientId > 0 &&
             previousRecipientId !== currentRecipient.id;
-          const baseValues =
-            recipientChanged
-              ? clearRecipientLinkedValues(draft.values, previousRecipientId)
-              : draft.values;
+          const baseValues = recipientChanged
+            ? clearRecipientLinkedValues(draft.values, previousRecipientId)
+            : draft.values;
           const profileChanged =
-            recipientChanged ||
-            hasRecipientProfileDifference(draft.values, currentRecipient);
+            recipientChanged || hasRecipientProfileDifference(draft.values, currentRecipient);
 
           setValues({
             ...baseValues,
@@ -244,19 +237,12 @@ export const TransfusionRegistration = () => {
       return true;
     } catch (error) {
       console.error('Не удалось сменить текущего реципиента:', error);
-      setStatus(
-        error instanceof Error
-          ? error.message
-          : 'Не удалось сменить текущего реципиента.',
-      );
+      setStatus(error instanceof Error ? error.message : 'Не удалось сменить текущего реципиента.');
       return false;
     }
   };
 
-  const openRegistrationRecord = async (
-    record: RegistrationRecord,
-    recipient: RecipientRecord,
-  ) => {
+  const openRegistrationRecord = async (record: RegistrationRecord, recipient: RecipientRecord) => {
     const switched = await selectRecipient(recipient);
     if (!switched) return;
 
@@ -283,10 +269,7 @@ export const TransfusionRegistration = () => {
     );
   };
 
-  const openProtocolRecord = async (
-    record: ProtocolRecord,
-    recipient: RecipientRecord,
-  ) => {
+  const openProtocolRecord = async (record: ProtocolRecord, recipient: RecipientRecord) => {
     const switched = await selectRecipient(recipient);
     if (!switched) return;
 
@@ -346,18 +329,12 @@ export const TransfusionRegistration = () => {
       setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
       setStatus(
-        afterPrint
-          ? 'Лист регистрации сохранён после печати.'
-          : 'Лист регистрации сохранён.',
+        afterPrint ? 'Лист регистрации сохранён после печати.' : 'Лист регистрации сохранён.',
       );
       return true;
     } catch (error) {
       console.error('Не удалось сохранить лист регистрации:', error);
-      setStatus(
-        error instanceof Error
-          ? error.message
-          : 'Не удалось сохранить лист регистрации.',
-      );
+      setStatus(error instanceof Error ? error.message : 'Не удалось сохранить лист регистрации.');
       return false;
     }
   };
@@ -384,8 +361,7 @@ export const TransfusionRegistration = () => {
   const openRecipients = () => {
     const storedRecipient = readCurrentRecipient();
     setRegistryRecipientId(
-      storedRecipient?.id ??
-        (currentRecipientAvailable ? currentRecipientId : null),
+      storedRecipient?.id ?? (currentRecipientAvailable ? currentRecipientId : null),
     );
     setRegistryOpen(true);
   };
@@ -498,8 +474,8 @@ export const TransfusionRegistration = () => {
           <div className="registration-legal-reference">
             <div>Учетная форма № 003/у</div>
             <div>
-              Приложение № 3 к приказу Министерства здравоохранения Российской Федерации от 5 августа
-              2022 г. № 530н
+              Приложение № 3 к приказу Министерства здравоохранения Российской Федерации от 5
+              августа 2022 г. № 530н
             </div>
           </div>
 
@@ -544,9 +520,7 @@ export const TransfusionRegistration = () => {
                 {values.recipientSex ?? ''}
               </span>
               <span>Возраст</span>
-              <span className="registration-blank registration-blank--age">
-                {recipientAge}
-              </span>
+              <span className="registration-blank registration-blank--age">{recipientAge}</span>
               <span>№ медицинской карты</span>
               <span className="registration-blank registration-blank--card">
                 {values.medicalRecordNumber ?? ''}
@@ -571,60 +545,60 @@ export const TransfusionRegistration = () => {
           >
             <table className="registration-table">
               <colgroup>
-              <col className="registration-col-component" />
-              <col className="registration-col-liters" />
-              <col className="registration-col-units" />
-              <col className="registration-col-date" />
-              <col className="registration-col-doctor" />
-              <col className="registration-col-doctor-sign" />
-              <col className="registration-col-worker" />
-              <col className="registration-col-nurse-sign" />
-              <col className="registration-col-complications" />
+                <col className="registration-col-component" />
+                <col className="registration-col-liters" />
+                <col className="registration-col-units" />
+                <col className="registration-col-date" />
+                <col className="registration-col-doctor" />
+                <col className="registration-col-doctor-sign" />
+                <col className="registration-col-worker" />
+                <col className="registration-col-nurse-sign" />
+                <col className="registration-col-complications" />
               </colgroup>
               <thead>
-              <tr>
-                <th rowSpan={2}>Наименование компонента крови</th>
-                <th colSpan={2}>Количество</th>
-                <th rowSpan={2}>Дата проведения трансфузии</th>
-                <th rowSpan={2}>
-                  Фамилия, имя, отчество (при наличии) лечащего врача (врача-специалиста),
-                  проводившего трансфузию
-                </th>
-                <th rowSpan={2}>
-                  Подпись лечащего врача (врача-специалиста), проводившего трансфузию
-                </th>
-                <th rowSpan={2}>
-                  Фамилия, имя, отчество (при наличии) медицинского работника, ответственного за
-                  выполнение трансфузии
-                </th>
-                <th rowSpan={2}>
-                  Подпись медицинской сестры, ответственной за выполнение трансфузии
-                </th>
-                <th rowSpan={2}>Информация о наличии посттрансфузионных осложнений (да/нет)</th>
-              </tr>
-              <tr>
-                <th>литр</th>
-                <th>единицы</th>
-              </tr>
+                <tr>
+                  <th rowSpan={2}>Наименование компонента крови</th>
+                  <th colSpan={2}>Количество</th>
+                  <th rowSpan={2}>Дата проведения трансфузии</th>
+                  <th rowSpan={2}>
+                    Фамилия, имя, отчество (при наличии) лечащего врача (врача-специалиста),
+                    проводившего трансфузию
+                  </th>
+                  <th rowSpan={2}>
+                    Подпись лечащего врача (врача-специалиста), проводившего трансфузию
+                  </th>
+                  <th rowSpan={2}>
+                    Фамилия, имя, отчество (при наличии) медицинского работника, ответственного за
+                    выполнение трансфузии
+                  </th>
+                  <th rowSpan={2}>
+                    Подпись медицинской сестры, ответственной за выполнение трансфузии
+                  </th>
+                  <th rowSpan={2}>Информация о наличии посттрансфузионных осложнений (да/нет)</th>
+                </tr>
+                <tr>
+                  <th>литр</th>
+                  <th>единицы</th>
+                </tr>
               </thead>
               <tbody>
-              {Array.from({ length: ROW_COUNT }, (_, index) => {
-                const row = registrationRows[index];
+                {Array.from({ length: ROW_COUNT }, (_, index) => {
+                  const row = registrationRows[index];
 
-                return (
-                  <tr key={row?.protocolId ?? `empty-${index}`}>
-                    <td>{row?.componentName || ' '}</td>
-                    <td>{row?.amountLiters || ' '}</td>
-                    <td>{row?.units || ' '}</td>
-                    <td>{row?.transfusionDate || ' '}</td>
-                    <td>{row?.doctorName || ' '}</td>
-                    <td>&nbsp;</td>
-                    <td>{row?.workerName || ' '}</td>
-                    <td>&nbsp;</td>
-                    <td>{row?.complications || ' '}</td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={row?.protocolId ?? `empty-${index}`}>
+                      <td>{row?.componentName || ' '}</td>
+                      <td>{row?.amountLiters || ' '}</td>
+                      <td>{row?.units || ' '}</td>
+                      <td>{row?.transfusionDate || ' '}</td>
+                      <td>{row?.doctorName || ' '}</td>
+                      <td>&nbsp;</td>
+                      <td>{row?.workerName || ' '}</td>
+                      <td>&nbsp;</td>
+                      <td>{row?.complications || ' '}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -658,15 +632,9 @@ export const TransfusionRegistration = () => {
       {registryOpen && (
         <RecipientDatabaseModal
           initialRecipientId={registryRecipientId}
-          initialRecipientName={
-            readCurrentRecipient()?.fullName ??
-            values.recipientName ??
-            ''
-          }
+          initialRecipientName={readCurrentRecipient()?.fullName ?? values.recipientName ?? ''}
           onUseRecipient={selectRecipient}
-          onOpenRecord={(record, recipient) =>
-            void openProtocolRecord(record, recipient)
-          }
+          onOpenRecord={(record, recipient) => void openProtocolRecord(record, recipient)}
           onOpenRegistrationRecord={(record, recipient) =>
             void openRegistrationRecord(record, recipient)
           }

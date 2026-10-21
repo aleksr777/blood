@@ -95,8 +95,7 @@ export const database = {
     withDatabase<DepartmentRecord[]>('departments:remember', { name }),
   renameDepartment: (id: number, name: string) =>
     withDatabase<DepartmentRecord[]>('departments:rename', { id, name }),
-  removeDepartment: (id: number) =>
-    withDatabase<DepartmentRecord[]>('departments:remove', { id }),
+  removeDepartment: (id: number) => withDatabase<DepartmentRecord[]>('departments:remove', { id }),
   importDepartments: (names: string[]) =>
     withDatabase<DepartmentRecord[]>('departments:import', { names }),
   listSavedOptions: (category: string) =>
@@ -107,28 +106,24 @@ export const database = {
     withDatabase<SavedOptionRecord[]>('saved-options:rename', { category, id, value }),
   removeSavedOption: (category: string, id: number) =>
     withDatabase<SavedOptionRecord[]>('saved-options:remove', { category, id }),
-  loadProtocolDraft: () =>
-    withDatabase<ProtocolDraftState>('protocol-draft:load'),
+  loadProtocolDraft: () => withDatabase<ProtocolDraftState>('protocol-draft:load'),
   saveProtocolDraft: (state: ProtocolDraftState) =>
     withDatabase<void>('protocol-draft:save', { state }),
   clearProtocolDraft: () => withDatabase<void>('protocol-draft:clear'),
-  loadRegistrationDraft: () =>
-    withDatabase<RegistrationDraftState>('registration-draft:load'),
+  loadRegistrationDraft: () => withDatabase<RegistrationDraftState>('registration-draft:load'),
   saveRegistrationDraft: (state: RegistrationDraftState) =>
     withDatabase<void>('registration-draft:save', { state }),
   clearRegistrationDraft: () => withDatabase<void>('registration-draft:clear'),
   searchRecipients: (query: string) =>
     withDatabase<RecipientRecord[]>('recipients:search', { query }),
-  getRecipientById: (id: number) =>
-    withDatabase<RecipientRecord>('recipients:get', { id }),
+  getRecipientById: (id: number) => withDatabase<RecipientRecord>('recipients:get', { id }),
   findRecipientsByName: (fullName: string) =>
     withDatabase<RecipientRecord[]>('recipients:find-name', { fullName }),
   createRecipient: (fullName: string) =>
     withDatabase<RecipientRecord>('recipients:create', { fullName }),
   updateRecipient: (id: number, values: ProtocolValuesRecord) =>
     withDatabase<RecipientRecord>('recipients:update', { id, values }),
-  removeRecipient: (id: number) =>
-    withDatabase<void>('recipients:remove', { id }),
+  removeRecipient: (id: number) => withDatabase<void>('recipients:remove', { id }),
   listProtocolRecords: (recipientId: number) =>
     withDatabase<ProtocolRecord[]>('protocol-records:list', { recipientId }),
   findProtocolRecordsByComponentUnitNumber: (
@@ -141,18 +136,14 @@ export const database = {
     }),
   saveProtocolRecord: (recordId: number | null, values: ProtocolValuesRecord) =>
     withDatabase<ProtocolRecord>('protocol-records:save', { recordId, values }),
-  removeProtocolRecord: (id: number) =>
-    withDatabase<void>('protocol-records:remove', { id }),
+  removeProtocolRecord: (id: number) => withDatabase<void>('protocol-records:remove', { id }),
   listRegistrationRecords: (recipientId: number) =>
     withDatabase<RegistrationRecord[]>('registration-records:list', { recipientId }),
   saveRegistrationRecord: (recordId: number | null, values: ProtocolValuesRecord) =>
     withDatabase<RegistrationRecord>('registration-records:save', { recordId, values }),
   removeRegistrationRecord: (id: number) =>
     withDatabase<void>('registration-records:remove', { id }),
-  listBloodRequestRecords: (
-    recipientId: number,
-    kind: BloodRequestRecordKind,
-  ) =>
+  listBloodRequestRecords: (recipientId: number, kind: BloodRequestRecordKind) =>
     withDatabase<BloodRequestRecord[]>('blood-request-records:list', {
       recipientId,
       kind,

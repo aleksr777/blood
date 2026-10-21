@@ -15,11 +15,7 @@ type Props = {
   onSelectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
 };
 
-const BasicControl = ({
-  field,
-  value,
-  onChange,
-}: Pick<Props, 'field' | 'value' | 'onChange'>) => {
+const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' | 'onChange'>) => {
   if (field.type === 'textarea') {
     return (
       <textarea

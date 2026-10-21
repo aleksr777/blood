@@ -2,10 +2,7 @@ import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
 import { ProtocolFieldControl } from '../transfusion-protocol/protocol-field-control';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
-import type {
-  ProtocolFieldConfig,
-  ProtocolValues,
-} from '../transfusion-protocol/protocol-types';
+import type { ProtocolFieldConfig, ProtocolValues } from '../transfusion-protocol/protocol-types';
 import styles from './individual-selection-recipient-modal.module.css';
 
 const RECIPIENT_NAME_FIELD: ProtocolFieldConfig = {

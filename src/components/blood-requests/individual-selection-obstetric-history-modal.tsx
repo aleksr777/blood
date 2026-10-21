@@ -9,11 +9,7 @@ type Props = {
   onClose: () => void;
 };
 
-export const IndividualSelectionObstetricHistoryModal = ({
-  values,
-  onChange,
-  onClose,
-}: Props) => (
+export const IndividualSelectionObstetricHistoryModal = ({ values, onChange, onClose }: Props) => (
   <Modal title="Акушерский анамнез" onClose={onClose} className={styles.large}>
     <div className={styles.grid}>
       <RecipientHistoryFields

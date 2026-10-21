@@ -1,9 +1,6 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 
-export const useOverlayDropdown = (
-  open: boolean,
-  setOpen: Dispatch<SetStateAction<boolean>>,
-) => {
+export const useOverlayDropdown = (open: boolean, setOpen: Dispatch<SetStateAction<boolean>>) => {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

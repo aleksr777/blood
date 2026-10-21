@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import {
-  findRecipientsByName,
-  type RecipientRecord,
-} from '../../storage/repositories/recipients';
+import { findRecipientsByName, type RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
 import { RecipientMatchList } from './recipient-match-list';
 import { RecipientNewForm } from './recipient-new-form';
@@ -16,8 +13,7 @@ type Props = {
   hint?: string;
 };
 
-const normalize = (value: string) =>
-  value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
+const normalize = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
 export const RecipientNewModal = ({
   onClose,
@@ -108,7 +104,11 @@ export const RecipientNewModal = ({
           onView={() => setViewing(true)}
         />
       )}
-      {error && <div className={styles.error} role="alert">{error}</div>}
+      {error && (
+        <div className={styles.error} role="alert">
+          {error}
+        </div>
+      )}
     </Modal>
   );
 };

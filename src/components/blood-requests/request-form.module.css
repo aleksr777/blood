@@ -33,7 +33,7 @@
   background: #fff;
   color: #111;
   box-shadow: 0 8px 32px rgb(18 31 48 / 12%);
-  font-family: "Times New Roman", Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 10.5pt;
   line-height: 1.12;
   page: blood-request-page;
@@ -180,7 +180,7 @@
   padding: 1mm;
   background: transparent;
   color: #111;
-  font-family: "Times New Roman", Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 8pt;
   line-height: 1.05;
   text-align: center;

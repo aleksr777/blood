@@ -11,13 +11,7 @@ type Props = {
   onUse: (recipient: RecipientRecord) => void;
 };
 
-export const RecipientMatchList = ({
-  matches,
-  busy,
-  actionLabel,
-  onBack,
-  onUse,
-}: Props) => {
+export const RecipientMatchList = ({ matches, busy, actionLabel, onBack, onUse }: Props) => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   return (
@@ -33,7 +27,7 @@ export const RecipientMatchList = ({
             expanded={expandedId === recipient.id}
             actionLabel={actionLabel}
             disabled={busy}
-            onToggle={() => setExpandedId((id) => id === recipient.id ? null : recipient.id)}
+            onToggle={() => setExpandedId((id) => (id === recipient.id ? null : recipient.id))}
             onUse={() => onUse(recipient)}
           />
         ))}

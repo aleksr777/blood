@@ -19,10 +19,7 @@ import editorStyles from '../transfusion-protocol/protocol-editor.module.css';
 import styles from './individual-selection-component-modal.module.css';
 
 const REQUIRED_COMPONENT_CATEGORY = 'individualSelectionRequiredComponent';
-const REQUIRED_COMPONENT_FIXED_OPTIONS = [
-  'эритроцитная взвесь',
-  'отмытые эритроциты',
-];
+const REQUIRED_COMPONENT_FIXED_OPTIONS = ['эритроцитная взвесь', 'отмытые эритроциты'];
 
 const REQUEST_REQUIRED_COMPONENT_CONFIG: Record<
   string,
@@ -42,8 +39,7 @@ const REQUEST_REQUIRED_COMPONENT_CONFIG: Record<
   },
 };
 
-const UNSELECTED_REQUEST_COMPONENT_CATEGORY =
-  'componentRequestRequiredComponent:unselected';
+const UNSELECTED_REQUEST_COMPONENT_CATEGORY = 'componentRequestRequiredComponent:unselected';
 
 type Props = {
   requiredComponent: string;
@@ -100,9 +96,7 @@ export const IndividualSelectionComponentModal = ({
     : undefined;
   const requiredComponentCategory =
     requestComponentConfig?.category ??
-    (showRequestOptions
-      ? UNSELECTED_REQUEST_COMPONENT_CATEGORY
-      : REQUIRED_COMPONENT_CATEGORY);
+    (showRequestOptions ? UNSELECTED_REQUEST_COMPONENT_CATEGORY : REQUIRED_COMPONENT_CATEGORY);
   const requiredComponentFixedOptions =
     requestComponentConfig?.fixedOptions ??
     (showRequestOptions ? [] : REQUIRED_COMPONENT_FIXED_OPTIONS);
@@ -137,32 +131,21 @@ export const IndividualSelectionComponentModal = ({
   const handleClose = () => {
     const value = requiredComponent.trim();
     const isFixedOption = requiredComponentFixedOptions.some(
-      (option) =>
-        option.toLocaleLowerCase('ru-RU') === value.toLocaleLowerCase('ru-RU'),
+      (option) => option.toLocaleLowerCase('ru-RU') === value.toLocaleLowerCase('ru-RU'),
     );
-    const canRememberValue =
-      !showRequestOptions || Boolean(requestComponentConfig);
+    const canRememberValue = !showRequestOptions || Boolean(requestComponentConfig);
 
     if (value && !isFixedOption && canRememberValue) {
-      void rememberSavedOption(requiredComponentCategory, value).catch(
-        (error: unknown) => {
-          console.error(
-            'Не удалось сохранить вариант наименования требуемого компонента:',
-            error,
-          );
-        },
-      );
+      void rememberSavedOption(requiredComponentCategory, value).catch((error: unknown) => {
+        console.error('Не удалось сохранить вариант наименования требуемого компонента:', error);
+      });
     }
 
     onClose();
   };
 
   return (
-    <Modal
-      title="Выбор компонента и показания"
-      onClose={handleClose}
-      className={styles.modal}
-    >
+    <Modal title="Выбор компонента и показания" onClose={handleClose} className={styles.modal}>
       <div className={styles.root}>
         {bloodGroupWarning && showRequestOptions && (
           <div className={editorStyles.bloodGroupWarning} role="alert">
@@ -213,9 +196,7 @@ export const IndividualSelectionComponentModal = ({
           </>
         )}
 
-        {(!fixedIndicationComponent || showRequestOptions) && (
-          <div className={styles.divider} />
-        )}
+        {(!fixedIndicationComponent || showRequestOptions) && <div className={styles.divider} />}
 
         <div className={styles.localGrid}>
           <label className={styles.wide}>
@@ -291,9 +272,7 @@ export const IndividualSelectionComponentModal = ({
                   type="radio"
                   name="componentRequestSelectionRequirement"
                   checked={componentSelectionRequirement === 'not-required'}
-                  onChange={() =>
-                    setComponentSelectionRequirement('not-required')
-                  }
+                  onChange={() => setComponentSelectionRequirement('not-required')}
                 >
                   индивидуальный подбор и подбор по фенотипу не требуется
                 </Choice>

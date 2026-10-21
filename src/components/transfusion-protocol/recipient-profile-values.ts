@@ -4,23 +4,13 @@ import type { ProtocolValues } from './protocol-types';
 
 export const PROFILE_FIELDS = RECIPIENT_PROFILE_FIELDS;
 
-export const recipientValues = (
-  fullName: string,
-  recipient?: RecipientRecord,
-): ProtocolValues => ({
+export const recipientValues = (fullName: string, recipient?: RecipientRecord): ProtocolValues => ({
   recipientName: fullName,
   recipientId: recipient ? String(recipient.id) : '',
-  ...Object.fromEntries(
-    PROFILE_FIELDS.map((field) => [field, recipient?.profile[field] ?? '']),
-  ),
+  ...Object.fromEntries(PROFILE_FIELDS.map((field) => [field, recipient?.profile[field] ?? ''])),
 });
 
-
-const CURRENT_RECIPIENT_FIELDS = [
-  'recipientName',
-  'recipientId',
-  ...PROFILE_FIELDS,
-] as const;
+const CURRENT_RECIPIENT_FIELDS = ['recipientName', 'recipientId', ...PROFILE_FIELDS] as const;
 
 export const currentRecipientValues = (values: ProtocolValues): ProtocolValues => {
   const generatedHistory = Boolean(values.previousTransfusionsAutoText?.trim());
@@ -34,9 +24,7 @@ export const currentRecipientValues = (values: ProtocolValues): ProtocolValues =
         return [];
       }
 
-      return values[field] !== undefined && values[field] !== ''
-        ? [[field, values[field]]]
-        : [];
+      return values[field] !== undefined && values[field] !== '' ? [[field, values[field]]] : [];
     }),
   );
 };

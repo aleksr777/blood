@@ -11,12 +11,7 @@ type Props = {
   onDelete: () => Promise<void>;
 };
 
-export const ProtocolRecordDeleteModal = ({
-  record,
-  recipientName,
-  onClose,
-  onDelete,
-}: Props) => {
+export const ProtocolRecordDeleteModal = ({ record, recipientName, onClose, onDelete }: Props) => {
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(false);
   const transfusionDate = formatDate(record.values.transfusionDate) || 'дата не указана';

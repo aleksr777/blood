@@ -1,13 +1,7 @@
 import { resetCurrentIndications } from './current-indications';
 import { clearRecipientLinkedValues } from './recipient-linked-values';
-import {
-  loadProtocolDraft,
-  saveProtocolDraft,
-} from './protocol-draft';
-import {
-  loadRegistrationDraft,
-  saveRegistrationDraft,
-} from './registration-draft';
+import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft';
+import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft';
 import {
   saveProtocolRecord,
   saveRegistrationRecord,
@@ -53,22 +47,15 @@ const registrationRecipientOnlyFields = new Set([
   ...RECIPIENT_PROFILE_FIELDS,
 ]);
 
-const hasDocumentData = (
-  values: ProtocolValuesRecord,
-  ignoredFields: Set<string>,
-) =>
-  Object.entries(values).some(
-    ([key, value]) => !ignoredFields.has(key) && value.trim() !== '',
-  );
+const hasDocumentData = (values: ProtocolValuesRecord, ignoredFields: Set<string>) =>
+  Object.entries(values).some(([key, value]) => !ignoredFields.has(key) && value.trim() !== '');
 
 const getRecipientId = (values: ProtocolValuesRecord) => {
   const id = Number(values.recipientId);
   return Number.isFinite(id) && id > 0 ? id : null;
 };
 
-const generatedTransfusionHistoryValues = (
-  values: ProtocolValuesRecord,
-): ProtocolValuesRecord => {
+const generatedTransfusionHistoryValues = (values: ProtocolValuesRecord): ProtocolValuesRecord => {
   if (!values.previousTransfusionsAutoText?.trim()) return {};
 
   return {
@@ -128,9 +115,7 @@ export const readCurrentRecipient = (): CurrentRecipient | null => {
     }
 
     const rawProfile =
-      parsed.profile &&
-      typeof parsed.profile === 'object' &&
-      !Array.isArray(parsed.profile)
+      parsed.profile && typeof parsed.profile === 'object' && !Array.isArray(parsed.profile)
         ? Object.fromEntries(
             Object.entries(parsed.profile).filter(
               (entry): entry is [string, string] => typeof entry[1] === 'string',
@@ -194,10 +179,7 @@ export const adoptCurrentRecipientFromValues = (values: ProtocolValuesRecord) =>
   };
 
   try {
-    window.localStorage.setItem(
-      CURRENT_RECIPIENT_STORAGE_KEY,
-      JSON.stringify(recipient),
-    );
+    window.localStorage.setItem(CURRENT_RECIPIENT_STORAGE_KEY, JSON.stringify(recipient));
   } catch (error) {
     console.error('Не удалось восстановить текущего реципиента:', error);
   }
@@ -226,9 +208,7 @@ export const hasRecipientProfileDifference = (
   },
 ) => {
   const profileValues = recipientProfileValuesForForms(recipient);
-  return Object.entries(profileValues).some(
-    ([field, value]) => (values[field] ?? '') !== value,
-  );
+  return Object.entries(profileValues).some(([field, value]) => (values[field] ?? '') !== value);
 };
 
 const savePreviousProtocol = async (draft: ProtocolDraftState, nextRecipientId: number) => {
@@ -247,10 +227,7 @@ const savePreviousProtocol = async (draft: ProtocolDraftState, nextRecipientId: 
   return true;
 };
 
-const savePreviousRegistration = async (
-  draft: RegistrationDraftState,
-  nextRecipientId: number,
-) => {
+const savePreviousRegistration = async (draft: RegistrationDraftState, nextRecipientId: number) => {
   const recipientId = getRecipientId(draft.values);
   if (!recipientId || recipientId === nextRecipientId || !draft.values.recipientName?.trim()) {
     return false;
@@ -351,10 +328,7 @@ export const syncCurrentRecipientProfile = async (
       updatedAt: Date.now(),
     };
   } else {
-    const profileChanged = hasRecipientProfileDifference(
-      protocolDraft.values,
-      recipient,
-    );
+    const profileChanged = hasRecipientProfileDifference(protocolDraft.values, recipient);
     protocolDraft = {
       ...protocolDraft,
       values: {
@@ -374,20 +348,14 @@ export const syncCurrentRecipientProfile = async (
     await savePreviousRegistration(registrationDraft, recipient.id);
     registrationDraft = {
       values: {
-        ...clearRecipientLinkedValues(
-          registrationDraft.values,
-          registrationRecipientId,
-        ),
+        ...clearRecipientLinkedValues(registrationDraft.values, registrationRecipientId),
         ...sharedValues,
       },
       registrationRecordId: null,
       updatedAt: Date.now(),
     };
   } else {
-    const profileChanged = hasRecipientProfileDifference(
-      registrationDraft.values,
-      recipient,
-    );
+    const profileChanged = hasRecipientProfileDifference(registrationDraft.values, recipient);
     registrationDraft = {
       ...registrationDraft,
       values: { ...registrationDraft.values, ...sharedValues },
@@ -399,10 +367,7 @@ export const syncCurrentRecipientProfile = async (
     };
   }
 
-  await Promise.all([
-    saveProtocolDraft(protocolDraft),
-    saveRegistrationDraft(registrationDraft),
-  ]);
+  await Promise.all([saveProtocolDraft(protocolDraft), saveRegistrationDraft(registrationDraft)]);
 
   writeCurrentRecipient(recipient);
 
@@ -443,20 +408,14 @@ export const switchCurrentRecipient = async (
 
   const protocolRecipientId = getRecipientId(protocolDraft.values);
   const registrationRecipientId = getRecipientId(registrationDraft.values);
-  const activeRecipientId =
-    storedRecipient?.id ??
-    protocolRecipientId ??
-    registrationRecipientId;
+  const activeRecipientId = storedRecipient?.id ?? protocolRecipientId ?? registrationRecipientId;
   const hasConflictingDraft =
     (protocolRecipientId !== null && protocolRecipientId !== recipient.id) ||
     (registrationRecipientId !== null && registrationRecipientId !== recipient.id);
 
   if (activeRecipientId === recipient.id && !hasConflictingDraft) {
     const profileValues = recipientProfileValuesForForms(recipient);
-    const protocolProfileChanged = hasRecipientProfileDifference(
-      protocolDraft.values,
-      recipient,
-    );
+    const protocolProfileChanged = hasRecipientProfileDifference(protocolDraft.values, recipient);
     const registrationProfileChanged = hasRecipientProfileDifference(
       registrationDraft.values,
       recipient,
@@ -484,8 +443,7 @@ export const switchCurrentRecipient = async (
       saveRegistrationDraft({
         values: registrationValues,
         registrationRecordId:
-          registrationProfileChanged &&
-          registrationDraft.registrationRecordId !== null
+          registrationProfileChanged && registrationDraft.registrationRecordId !== null
             ? null
             : registrationDraft.registrationRecordId,
         updatedAt: now,
@@ -504,8 +462,7 @@ export const switchCurrentRecipient = async (
           ? null
           : protocolDraft.protocolRecordId,
       registrationRecordId:
-        registrationProfileChanged &&
-        registrationDraft.registrationRecordId !== null
+        registrationProfileChanged && registrationDraft.registrationRecordId !== null
           ? null
           : registrationDraft.registrationRecordId,
     };
@@ -525,10 +482,7 @@ export const switchCurrentRecipient = async (
   };
   const registrationValues = {
     ...(registrationRecipientId !== null && registrationRecipientId !== recipient.id
-      ? clearRecipientLinkedValues(
-          registrationDraft.values,
-          registrationRecipientId,
-        )
+      ? clearRecipientLinkedValues(registrationDraft.values, registrationRecipientId)
       : registrationDraft.values),
     ...profileValues,
   };

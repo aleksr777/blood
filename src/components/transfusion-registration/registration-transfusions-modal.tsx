@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-  listProtocolRecords,
-  type ProtocolRecord,
-} from '../../storage/repositories/recipients';
+import { listProtocolRecords, type ProtocolRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
 import { formatDate } from '../transfusion-protocol/protocol-types';
 import {
@@ -31,31 +28,22 @@ const formatTime = (record: ProtocolRecord) =>
 
 const recordLabel = (record: ProtocolRecord) => {
   const values = record.values;
-  const dateTime = [
-    formatDate(values.transfusionDate),
-    formatTime(record),
-  ].filter(Boolean).join(' ');
+  const dateTime = [formatDate(values.transfusionDate), formatTime(record)]
+    .filter(Boolean)
+    .join(' ');
   const component = values.componentName?.trim() || 'Компонент не указан';
   const details = [
     values.amountMl?.trim() ? `${values.amountMl.trim()} мл` : '',
-    values.componentUnitNumber?.trim()
-      ? `№ ${values.componentUnitNumber.trim()}`
-      : '',
-  ].filter(Boolean).join(' · ');
+    values.componentUnitNumber?.trim() ? `№ ${values.componentUnitNumber.trim()}` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return { dateTime, component, details };
 };
 
-export const RegistrationTransfusionsModal = ({
-  recipientId,
-  values,
-  onApply,
-  onClose,
-}: Props) => {
-  const initialRows = useMemo(
-    () => parseRegistrationTransfusionRows(values),
-    [values],
-  );
+export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, onClose }: Props) => {
+  const initialRows = useMemo(() => parseRegistrationTransfusionRows(values), [values]);
   const [records, setRecords] = useState<ProtocolRecord[]>([]);
   const [periodDays, setPeriodDays] = useState('1');
   const [selectedIds, setSelectedIds] = useState(
@@ -108,8 +96,7 @@ export const RegistrationTransfusionsModal = ({
         })
         .sort(
           (left, right) =>
-            getProtocolTransfusionTimestamp(right) -
-            getProtocolTransfusionTimestamp(left),
+            getProtocolTransfusionTimestamp(right) - getProtocolTransfusionTimestamp(left),
         ),
     [cutoff, records, selectedIds],
   );
@@ -131,23 +118,20 @@ export const RegistrationTransfusionsModal = ({
       .filter(({ id }) => selectedIds.has(id))
       .sort(
         (left, right) =>
-          getProtocolTransfusionTimestamp(left) -
-          getProtocolTransfusionTimestamp(right),
+          getProtocolTransfusionTimestamp(left) - getProtocolTransfusionTimestamp(right),
       );
 
     const selectedRecordIds = new Set(selectedRecords.map(({ id }) => id));
     const preservedRows = initialRows.filter(
-      ({ protocolId }) =>
-        selectedIds.has(protocolId) && !selectedRecordIds.has(protocolId),
+      ({ protocolId }) => selectedIds.has(protocolId) && !selectedRecordIds.has(protocolId),
     );
-    const rows = [
-      ...preservedRows,
-      ...selectedRecords.map(buildRegistrationTransfusionRow),
-    ].slice(0, MAX_ROWS);
+    const rows = [...preservedRows, ...selectedRecords.map(buildRegistrationTransfusionRow)].slice(
+      0,
+      MAX_ROWS,
+    );
 
     onApply({
-      [REGISTRATION_TRANSFUSION_ROWS_FIELD]:
-        serializeRegistrationTransfusionRows(rows),
+      [REGISTRATION_TRANSFUSION_ROWS_FIELD]: serializeRegistrationTransfusionRows(rows),
     });
     onClose();
   };
@@ -157,11 +141,7 @@ export const RegistrationTransfusionsModal = ({
     : 'За выбранный период сохранённых протоколов трансфузий нет.';
 
   return (
-    <Modal
-      title="Трансфузии для листа регистрации"
-      onClose={onClose}
-      className={styles.modal}
-    >
+    <Modal title="Трансфузии для листа регистрации" onClose={onClose} className={styles.modal}>
       <div className={styles.root}>
         {!recipientId ? (
           <div className={styles.empty}>Сначала выберите текущего реципиента.</div>
@@ -205,7 +185,9 @@ export const RegistrationTransfusionsModal = ({
                         styles.item,
                         checked ? styles.itemSelected : '',
                         disabled ? styles.itemDisabled : '',
-                      ].filter(Boolean).join(' ')}
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
                     >
                       <input
                         type="checkbox"

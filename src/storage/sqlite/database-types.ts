@@ -36,9 +36,7 @@ export type RegistrationRecord = {
   updatedAt: number;
 };
 
-export type BloodRequestRecordKind =
-  | 'individual-selection-direction'
-  | 'component-request';
+export type BloodRequestRecordKind = 'individual-selection-direction' | 'component-request';
 
 export type BloodRequestRecordValues = Record<string, unknown>;
 

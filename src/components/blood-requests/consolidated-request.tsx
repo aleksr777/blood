@@ -1,10 +1,7 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
 import { formatDate } from '../transfusion-protocol/protocol-types';
 import { SiteNavigation } from '../site-navigation/site-navigation';
-import {
-  RequestEditorModal,
-  type RequestEditorField,
-} from './request-editor-modal';
+import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import styles from './request-form.module.css';
 
 const STORAGE_KEY = 'blood:summary-request-draft';
@@ -34,11 +31,7 @@ type Draft = {
   rows: RequestRow[];
 };
 
-type Editor =
-  | { kind: 'details' }
-  | { kind: 'row'; index: number }
-  | { kind: 'signatures' }
-  | null;
+type Editor = { kind: 'details' } | { kind: 'row'; index: number } | { kind: 'signatures' } | null;
 
 const DETAIL_FIELDS: RequestEditorField[] = [
   {
@@ -100,8 +93,7 @@ const ROW_FIELDS: RequestEditorField[] = [
   { name: 'recipientRh', label: 'Резус-принадлежность реципиента' },
   {
     name: 'recipientAntigens',
-    label:
-      'Антигены эритроцитов C, c, E, e, K, k реципиента, антигены других систем',
+    label: 'Антигены эритроцитов C, c, E, e, K, k реципиента, антигены других систем',
     type: 'textarea',
     wide: true,
   },
@@ -169,10 +161,7 @@ const loadDraft = (): Draft => {
   }
 };
 
-const activateOnKeyboard = (
-  event: KeyboardEvent<HTMLElement>,
-  action: () => void,
-) => {
+const activateOnKeyboard = (event: KeyboardEvent<HTMLElement>, action: () => void) => {
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault();
     action();
@@ -193,14 +182,11 @@ export const ConsolidatedRequest = () => {
     setDraft((current) => ({
       ...current,
       organization: changes.organization ?? current.organization,
-      transfusionHeadPhone:
-        changes.transfusionHeadPhone ?? current.transfusionHeadPhone,
+      transfusionHeadPhone: changes.transfusionHeadPhone ?? current.transfusionHeadPhone,
       supplier: changes.supplier ?? current.supplier,
       requestDate: changes.requestDate ?? current.requestDate,
-      transfusionHeadName:
-        changes.transfusionHeadName ?? current.transfusionHeadName,
-      organizationHeadName:
-        changes.organizationHeadName ?? current.organizationHeadName,
+      transfusionHeadName: changes.transfusionHeadName ?? current.transfusionHeadName,
+      organizationHeadName: changes.organizationHeadName ?? current.organizationHeadName,
     }));
   };
 
@@ -298,9 +284,7 @@ export const ConsolidatedRequest = () => {
             role="button"
             tabIndex={0}
             onClick={() => setEditor({ kind: 'details' })}
-            onKeyDown={(event) =>
-              activateOnKeyboard(event, () => setEditor({ kind: 'details' }))
-            }
+            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor({ kind: 'details' }))}
           >
             <div className={styles.formLines}>
               <div className={styles.lineField}>

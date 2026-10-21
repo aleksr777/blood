@@ -38,18 +38,13 @@ const COMPONENT_NAME_OPTIONS: Record<string, string[]> = {
   platelets: [],
 };
 
-
 const inferLegacyComponentGroup = (name: string) => {
   const normalized = name.trim().toLocaleLowerCase();
 
   if (normalized.includes('эритроц') || normalized.includes('эритромас')) {
     return 'erythrocytes';
   }
-  if (
-    normalized.includes('плазм') ||
-    normalized === 'сзп' ||
-    normalized.startsWith('сзп ')
-  ) {
+  if (normalized.includes('плазм') || normalized === 'сзп' || normalized.startsWith('сзп ')) {
     return 'plasma-cryo';
   }
   if (normalized.includes('тромбоц')) {
@@ -98,9 +93,7 @@ const ComponentNameInput = ({
         ]);
 
         const existingValues = new Set(
-          scopedItems.map(({ value: itemValue }) =>
-            itemValue.trim().toLocaleLowerCase(),
-          ),
+          scopedItems.map(({ value: itemValue }) => itemValue.trim().toLocaleLowerCase()),
         );
 
         for (const item of legacyItems) {
@@ -119,10 +112,7 @@ const ComponentNameInput = ({
         setSavedOptions(nextItems);
         setStatus('ready');
       } catch (error) {
-        console.error(
-          'Не удалось загрузить сохранённые наименования компонентов:',
-          error,
-        );
+        console.error('Не удалось загрузить сохранённые наименования компонентов:', error);
         if (active) setStatus('error');
       }
     })();
@@ -132,9 +122,7 @@ const ComponentNameInput = ({
     };
   }, [componentGroup]);
 
-  const fixedSet = new Set(
-    fixedOptions.map((option) => option.trim().toLocaleLowerCase()),
-  );
+  const fixedSet = new Set(fixedOptions.map((option) => option.trim().toLocaleLowerCase()));
   const editableOptions = savedOptions.filter(
     (item) => !fixedSet.has(item.value.trim().toLocaleLowerCase()),
   );
@@ -242,14 +230,12 @@ const ComponentNameInput = ({
 };
 
 export const DonorFields = ({ values, onChange }: Props) => {
-  const legacyComponent = INDICATION_COMPONENTS.find(
-    ({ label }) => label === values.componentName,
-  );
+  const legacyComponent = INDICATION_COMPONENTS.find(({ label }) => label === values.componentName);
   const selectedComponent = values.componentGroup || legacyComponent?.value || '';
   const componentName =
     legacyComponent && values.componentName === legacyComponent.label
       ? ''
-      : values.componentName ?? '';
+      : (values.componentName ?? '');
   const componentNameOptions = COMPONENT_NAME_OPTIONS[selectedComponent] ?? [];
   const donorRh = normalizeBloodGroupRh(values.donorRh);
   const bloodGroupTone = getBloodGroupTone(donorRh);

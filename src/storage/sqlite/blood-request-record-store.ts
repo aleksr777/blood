@@ -125,9 +125,7 @@ export const saveBloodRequestRecord = async ({
 
   const now = Date.now();
   const id =
-    linked && recordId !== null
-      ? recordId
-      : insertRecord({ db, recipientId, kind, values, now });
+    linked && recordId !== null ? recordId : insertRecord({ db, recipientId, kind, values, now });
 
   if (linked) {
     db.exec({

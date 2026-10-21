@@ -72,7 +72,6 @@ export const RegistrationPatientDetailsModal = ({
           onChange={(event) => onChange({ medicalRecordNumber: event.target.value })}
         />
       </label>
-
     </div>
   </Modal>
 );

@@ -1,13 +1,5 @@
-import {
-  ExaminationBlock,
-  GeneralBlock,
-  IndicationsBlock,
-} from './first-page-blocks-primary';
-import {
-  DonorBlock,
-  HistoryBlock,
-  SelectionBlock,
-} from './first-page-blocks-secondary';
+import { ExaminationBlock, GeneralBlock, IndicationsBlock } from './first-page-blocks-primary';
+import { DonorBlock, HistoryBlock, SelectionBlock } from './first-page-blocks-secondary';
 import {
   CompatibilityTestsBlock,
   ComplicationsBlock,

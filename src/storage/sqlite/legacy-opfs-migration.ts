@@ -41,10 +41,7 @@ const insertDepartment = (db: Database, name: string) => {
   });
 };
 
-export const migrateLegacyOpfsDepartments = async (
-  sqlite3: Sqlite3Static,
-  target: Database,
-) => {
+export const migrateLegacyOpfsDepartments = async (sqlite3: Sqlite3Static, target: Database) => {
   if (!globalThis.crossOriginIsolated) return;
 
   let legacy: Database | null = null;

@@ -1,8 +1,7 @@
 import { database } from '../sqlite/database-client';
 import type { SavedOptionRecord } from '../sqlite/database-types';
 
-export const loadSavedOptions = (category: string) =>
-  database.listSavedOptions(category);
+export const loadSavedOptions = (category: string) => database.listSavedOptions(category);
 
 export const rememberSavedOption = (category: string, value: string) =>
   database.rememberSavedOption(category, value);

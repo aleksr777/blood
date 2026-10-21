@@ -1,8 +1,4 @@
-import type {
-  ProtocolRecord,
-  ProtocolValuesRecord,
-  RegistrationRecord,
-} from './database-types';
+import type { ProtocolRecord, ProtocolValuesRecord, RegistrationRecord } from './database-types';
 
 export const RECIPIENT_PROFILE_FIELDS = [
   'recipientBirthDate',
@@ -38,8 +34,7 @@ export const RECIPIENT_PROFILE_FIELDS = [
 
 export const normalizeName = (value: string) => value.trim().replace(/\s+/g, ' ');
 
-export const normalizeKey = (value: string) =>
-  normalizeName(value).toLocaleLowerCase('ru-RU');
+export const normalizeKey = (value: string) => normalizeName(value).toLocaleLowerCase('ru-RU');
 
 export const parseValues = (value: string): ProtocolValuesRecord => {
   try {
@@ -62,16 +57,11 @@ const GENERATED_TRANSFUSION_HISTORY_FIELDS = new Set([
 ]);
 
 export const profileFromValues = (values: ProtocolValuesRecord) => {
-  const hasGeneratedTransfusionHistory = Boolean(
-    values.previousTransfusionsAutoText?.trim(),
-  );
+  const hasGeneratedTransfusionHistory = Boolean(values.previousTransfusionsAutoText?.trim());
 
   return Object.fromEntries(
     RECIPIENT_PROFILE_FIELDS.flatMap((field) => {
-      if (
-        hasGeneratedTransfusionHistory &&
-        GENERATED_TRANSFUSION_HISTORY_FIELDS.has(field)
-      ) {
+      if (hasGeneratedTransfusionHistory && GENERATED_TRANSFUSION_HISTORY_FIELDS.has(field)) {
         return [];
       }
 
@@ -85,16 +75,11 @@ export const mergeProfileValues = (
   values: ProtocolValuesRecord,
 ): ProtocolValuesRecord => {
   const next = profileFromValues(current);
-  const hasGeneratedTransfusionHistory = Boolean(
-    values.previousTransfusionsAutoText?.trim(),
-  );
+  const hasGeneratedTransfusionHistory = Boolean(values.previousTransfusionsAutoText?.trim());
 
   RECIPIENT_PROFILE_FIELDS.forEach((field) => {
     if (!(field in values)) return;
-    if (
-      hasGeneratedTransfusionHistory &&
-      GENERATED_TRANSFUSION_HISTORY_FIELDS.has(field)
-    ) {
+    if (hasGeneratedTransfusionHistory && GENERATED_TRANSFUSION_HISTORY_FIELDS.has(field)) {
       return;
     }
 
@@ -113,7 +98,6 @@ export const mapProtocol = (row: Record<string, unknown>): ProtocolRecord => ({
   createdAt: Number(row.createdAt),
   updatedAt: Number(row.updatedAt),
 });
-
 
 export const mapRegistration = (row: Record<string, unknown>): RegistrationRecord => ({
   id: Number(row.id),

@@ -28,10 +28,7 @@ import {
   getComponentUnitNumberWarning,
 } from './component-unit-number';
 import { hasHemaconData } from './donor-model';
-import {
-  getIndicationComponent,
-  indicationValuesForComponent,
-} from './indications-model';
+import { getIndicationComponent, indicationValuesForComponent } from './indications-model';
 import {
   getExpiredReagentWarnings,
   getHemaconExpirationWarning,
@@ -63,9 +60,7 @@ const PROTOCOL_BLOCK_IDS: ProtocolBlockId[] = [
   'doctor',
 ];
 
-type StoredOpenWindow =
-  | { type: 'block'; blockId: ProtocolBlockId }
-  | { type: 'registry' };
+type StoredOpenWindow = { type: 'block'; blockId: ProtocolBlockId } | { type: 'registry' };
 
 const readStoredOpenWindow = (): StoredOpenWindow | null => {
   try {
@@ -158,10 +153,7 @@ export const useProtocolWorkspace = () => {
 
     let active = true;
 
-    void findProtocolRecordsByComponentUnitNumber(
-      values.componentUnitNumber ?? '',
-      recordId,
-    )
+    void findProtocolRecordsByComponentUnitNumber(values.componentUnitNumber ?? '', recordId)
       .then((matches) => {
         if (!active) return;
 
@@ -177,8 +169,7 @@ export const useProtocolWorkspace = () => {
         ]
           .filter(Boolean)
           .join(', ');
-        const additional =
-          matches.length > 1 ? ` Найдено совпадений: ${matches.length}.` : '';
+        const additional = matches.length > 1 ? ` Найдено совпадений: ${matches.length}.` : '';
 
         setDuplicateComponentUnitWarning({
           key: `duplicate:${digits}:${matches.map(({ id }) => id).join(',')}`,
@@ -206,11 +197,7 @@ export const useProtocolWorkspace = () => {
     }
 
     const today = getLocalDateKey();
-    if (
-      recordId !== null &&
-      values.transfusionDate &&
-      values.transfusionDate !== today
-    ) {
+    if (recordId !== null && values.transfusionDate && values.transfusionDate !== today) {
       setPreviousTransfusionSuggestion('');
       return undefined;
     }
@@ -222,19 +209,13 @@ export const useProtocolWorkspace = () => {
       .then((records) => {
         if (!active) return;
 
-        const previousRecords = recordId === null
-          ? records
-          : records.filter(({ id }) => id !== recordId);
+        const previousRecords =
+          recordId === null ? records : records.filter(({ id }) => id !== recordId);
         const now = new Date();
 
-        setPreviousTransfusionSuggestion(
-          buildPreviousTransfusionHistory(previousRecords, now),
-        );
+        setPreviousTransfusionSuggestion(buildPreviousTransfusionHistory(previousRecords, now));
 
-        const nextEligibleAt = getNextPreviousTransfusionEligibilityTime(
-          previousRecords,
-          now,
-        );
+        const nextEligibleAt = getNextPreviousTransfusionEligibilityTime(previousRecords, now);
         if (nextEligibleAt !== null) {
           const delay = Math.max(0, nextEligibleAt - Date.now() + 1000);
           refreshTimer = window.setTimeout(
@@ -246,10 +227,7 @@ export const useProtocolWorkspace = () => {
       .catch((error: unknown) => {
         if (!active) return;
         setPreviousTransfusionSuggestion('');
-        console.error(
-          'Не удалось сформировать предложение по предыдущим трансфузиям:',
-          error,
-        );
+        console.error('Не удалось сформировать предложение по предыдущим трансфузиям:', error);
       });
 
     return () => {
@@ -258,12 +236,7 @@ export const useProtocolWorkspace = () => {
         window.clearTimeout(refreshTimer);
       }
     };
-  }, [
-    historyRefreshToken,
-    recordId,
-    values.recipientId,
-    values.transfusionDate,
-  ]);
+  }, [historyRefreshToken, recordId, values.recipientId, values.transfusionDate]);
 
   const saveValues = (nextValues: ProtocolValues) => {
     draft.touch();
@@ -273,22 +246,17 @@ export const useProtocolWorkspace = () => {
       setRecordId(null);
     }
 
-    const selectedComponent =
-      nextValues.componentGroup || nextValues.indicationComponent || '';
+    const selectedComponent = nextValues.componentGroup || nextValues.indicationComponent || '';
     const currentComponent = getIndicationComponent(values);
     const currentRecipient = readCurrentRecipient();
-    const componentChanged =
-      Boolean(selectedComponent) && selectedComponent !== currentComponent;
+    const componentChanged = Boolean(selectedComponent) && selectedComponent !== currentComponent;
     const sharedIndications =
-      componentChanged &&
-      currentRecipient &&
-      Number(values.recipientId) === currentRecipient.id
+      componentChanged && currentRecipient && Number(values.recipientId) === currentRecipient.id
         ? readCurrentIndications(currentRecipient.id, selectedComponent)
         : {};
     const carriedIndications = previousBlankIndicationsRef.current;
     const shouldCarryIndications =
-      Boolean(selectedComponent) &&
-      carriedIndications?.component === selectedComponent;
+      Boolean(selectedComponent) && carriedIndications?.component === selectedComponent;
     const appliedValues = {
       ...(shouldCarryIndications ? carriedIndications.values : {}),
       ...sharedIndications,
@@ -306,16 +274,8 @@ export const useProtocolWorkspace = () => {
     setValues(merged);
 
     const activeComponent = getIndicationComponent(merged);
-    if (
-      activeComponent &&
-      currentRecipient &&
-      Number(merged.recipientId) === currentRecipient.id
-    ) {
-      writeCurrentIndications(
-        currentRecipient.id,
-        activeComponent,
-        merged,
-      );
+    if (activeComponent && currentRecipient && Number(merged.recipientId) === currentRecipient.id) {
+      writeCurrentIndications(currentRecipient.id, activeComponent, merged);
     }
 
     void syncCurrentRecipientProfile(appliedValues, {
@@ -356,11 +316,7 @@ export const useProtocolWorkspace = () => {
       return true;
     } catch (error) {
       console.error('Не удалось сменить текущего реципиента:', error);
-      setStatus(
-        error instanceof Error
-          ? error.message
-          : 'Не удалось сменить текущего реципиента.',
-      );
+      setStatus(error instanceof Error ? error.message : 'Не удалось сменить текущего реципиента.');
       return false;
     }
   };
@@ -419,16 +375,12 @@ export const useProtocolWorkspace = () => {
         previousBlankSaved = true;
       } catch (error) {
         console.error('Не удалось автоматически сохранить предыдущий бланк:', error);
-        setStatus(
-          'Новый бланк не создан: не удалось автоматически сохранить предыдущий бланк.',
-        );
+        setStatus('Новый бланк не создан: не удалось автоматически сохранить предыдущий бланк.');
         return;
       }
     }
 
-    const previousComponent = openedFromDatabase
-      ? ''
-      : getIndicationComponent(sourceValues);
+    const previousComponent = openedFromDatabase ? '' : getIndicationComponent(sourceValues);
     previousBlankIndicationsRef.current = previousComponent
       ? {
           component: previousComponent,
@@ -504,9 +456,7 @@ export const useProtocolWorkspace = () => {
       .then(() => {
         if (currentRecipient) draft.touch();
       })
-      .catch((error: unknown) =>
-        console.error('Не удалось очистить сохранённый бланк:', error),
-      );
+      .catch((error: unknown) => console.error('Не удалось очистить сохранённый бланк:', error));
   };
 
   const openRecord = async (record: ProtocolRecord, recipient: RecipientRecord) => {
@@ -525,11 +475,9 @@ export const useProtocolWorkspace = () => {
       : false;
     const generatedHistory = record.values.previousTransfusionsAutoText?.trim()
       ? {
-          previousTransfusionsStatus:
-            record.values.previousTransfusionsStatus ?? '',
+          previousTransfusionsStatus: record.values.previousTransfusionsStatus ?? '',
           previousTransfusions: record.values.previousTransfusions ?? '',
-          previousTransfusionsAutoText:
-            record.values.previousTransfusionsAutoText,
+          previousTransfusionsAutoText: record.values.previousTransfusionsAutoText,
         }
       : {};
 
@@ -628,17 +576,12 @@ export const useProtocolWorkspace = () => {
     setHistoryRefreshToken((current) => current + 1);
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
-    setStatus(
-      'Текущий реципиент отключён. Связанные с ним данные удалены из текущего бланка.',
-    );
+    setStatus('Текущий реципиент отключён. Связанные с ним данные удалены из текущего бланка.');
   };
 
   const expiredReagents = getExpiredReagentWarnings(values);
   const hemaconExpirationWarning = getHemaconExpirationWarning(values.expirationDate);
-  const expirationWarnings = [
-    hemaconExpirationWarning,
-    ...expiredReagents,
-  ].filter(Boolean);
+  const expirationWarnings = [hemaconExpirationWarning, ...expiredReagents].filter(Boolean);
   const reagentWarning = expirationWarnings.length
     ? `Внимание: ${expirationWarnings.join('; ')}.`
     : '';

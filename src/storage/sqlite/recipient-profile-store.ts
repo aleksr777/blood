@@ -30,12 +30,10 @@ export const upsertRecipient = (
       rowMode: 'object',
       returnValue: 'resultRows',
     }) as Array<{ id: number; profileJson: string }>;
-    if (!existing[0]) throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
+    if (!existing[0])
+      throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
 
-    const profile = mergeProfileValues(
-      parseValues(existing[0].profileJson),
-      values,
-    );
+    const profile = mergeProfileValues(parseValues(existing[0].profileJson), values);
 
     db.exec({
       sql: `

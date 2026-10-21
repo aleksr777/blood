@@ -28,17 +28,13 @@ export const RecipientListPanel = ({
     if (!list || !selected) return undefined;
 
     const frame = window.requestAnimationFrame(() => {
-      const item = list.querySelector<HTMLElement>(
-        `[data-recipient-id="${selected.id}"]`,
-      );
+      const item = list.querySelector<HTMLElement>(`[data-recipient-id="${selected.id}"]`);
       if (!item) return;
 
       const listRect = list.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
       const targetScrollTop =
-        list.scrollTop +
-        (itemRect.top - listRect.top) -
-        (list.clientHeight - itemRect.height) / 2;
+        list.scrollTop + (itemRect.top - listRect.top) - (list.clientHeight - itemRect.height) / 2;
 
       list.scrollTo({
         top: Math.max(0, targetScrollTop),
@@ -82,8 +78,8 @@ export const RecipientListPanel = ({
           >
             <span className={styles.personName}>{recipient.fullName}</span>
             <span className={styles.meta}>
-              Карточка № {recipient.id} · протоколов: {recipient.protocolCount} · листов регистрации:{' '}
-              {recipient.registrationCount} · направлений:{' '}
+              Карточка № {recipient.id} · протоколов: {recipient.protocolCount} · листов
+              регистрации: {recipient.registrationCount} · направлений:{' '}
               {recipient.individualSelectionDirectionCount} · заявок:{' '}
               {recipient.componentRequestCount}
             </span>

@@ -19,11 +19,7 @@ const parseIsoDate = (value?: string) => {
   const day = Number(match[3]);
   const date = new Date(year, month - 1, day);
 
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
     return null;
   }
 
@@ -57,13 +53,7 @@ const getHistoryEligibleAt = (record: ProtocolRecord) => {
 
   const endTime = parseTime(record.values.endTime);
   const transfusionEndedAt = endTime
-    ? new Date(
-        date.year,
-        date.month - 1,
-        date.day,
-        endTime.hour,
-        endTime.minute,
-      ).getTime()
+    ? new Date(date.year, date.month - 1, date.day, endTime.hour, endTime.minute).getTime()
     : new Date(date.year, date.month - 1, date.day, 23, 59, 59, 999).getTime();
 
   return transfusionEndedAt + HISTORY_DELAY_MS;
@@ -77,20 +67,13 @@ const describeProtocol = (record: ProtocolRecord) => {
   return `${formatDate(values.transfusionDate)} — ${component}, ${amount} мл`;
 };
 
-export const buildPreviousTransfusionHistory = (
-  records: ProtocolRecord[],
-  now = new Date(),
-) => {
+export const buildPreviousTransfusionHistory = (records: ProtocolRecord[], now = new Date()) => {
   const currentTime = now.getTime();
 
   return records
     .filter((record) => {
       const eligibleAt = getHistoryEligibleAt(record);
-      return (
-        eligibleAt !== null &&
-        currentTime > eligibleAt &&
-        hasCompleteComponentData(record)
-      );
+      return eligibleAt !== null && currentTime > eligibleAt && hasCompleteComponentData(record);
     })
     .sort((left, right) => {
       const leftTime = getHistoryEligibleAt(left) ?? 0;

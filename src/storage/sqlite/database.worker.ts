@@ -13,11 +13,7 @@ import {
   removeSavedOption,
   renameSavedOption,
 } from './saved-option-store';
-import {
-  clearProtocolDraft,
-  loadProtocolDraft,
-  saveProtocolDraft,
-} from './protocol-draft-store';
+import { clearProtocolDraft, loadProtocolDraft, saveProtocolDraft } from './protocol-draft-store';
 import {
   findProtocolRecordsByComponentUnitNumber,
   listProtocolRecords,

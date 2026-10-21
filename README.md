@@ -28,8 +28,6 @@ npm run preview
 
 Печатная форма разделена на две страницы A4. При печати панель управления и служебная подсказка скрываются.
 
-
-
 ## Client database
 
 Persistent shared application data is stored locally in SQLite WASM using the OPFS

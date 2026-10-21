@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import {
-  createRecipient,
-  type RecipientRecord,
-} from '../../storage/repositories/recipients';
+import { createRecipient, type RecipientRecord } from '../../storage/repositories/recipients';
 import { RecipientNewModal } from './recipient-new-modal';
 import styles from './recipient-field.module.css';
 
@@ -34,7 +31,11 @@ export const RecipientField = ({ value, onSelectRecipient, onOpenRecipients }: P
           <button type="button" className="secondary-button" onClick={onOpenRecipients}>
             Реципиенты
           </button>
-          <button type="button" className={styles.primary} onClick={() => setNewRecipientOpen(true)}>
+          <button
+            type="button"
+            className={styles.primary}
+            onClick={() => setNewRecipientOpen(true)}
+          >
             Новый
           </button>
         </div>

@@ -1,8 +1,5 @@
 import { clearCurrentIndicationsForRecipient } from './current-indications';
-import {
-  clearCurrentRecipientIfMatches,
-  readCurrentRecipient,
-} from './current-recipient';
+import { clearCurrentRecipientIfMatches, readCurrentRecipient } from './current-recipient';
 import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft';
 import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft';
 import { clearRecipientLinkedValues } from './recipient-linked-values';
@@ -42,9 +39,7 @@ export const clearRecipientLinkedRequestDraft = <T extends object>(
   next.recipientProfileSnapshot = {};
   next.autoValues = {};
   next.indicationValues =
-    kind === 'individual-selection-direction'
-      ? { indicationComponent: 'erythrocytes' }
-      : {};
+    kind === 'individual-selection-direction' ? { indicationComponent: 'erythrocytes' } : {};
 
   return next as T;
 };
@@ -72,47 +67,33 @@ const clearStoredRequestDraft = (
   }
 };
 
-const clearRecipientFromCurrentForms = async (
-  recipientId: number,
-) => {
+const clearRecipientFromCurrentForms = async (recipientId: number) => {
   const [protocolDraft, registrationDraft] = await Promise.all([
     loadProtocolDraft(),
     loadRegistrationDraft(),
   ]);
 
-  const protocolLinked =
-    Number(protocolDraft.values.recipientId) === recipientId;
-  const registrationLinked =
-    Number(registrationDraft.values.recipientId) === recipientId;
+  const protocolLinked = Number(protocolDraft.values.recipientId) === recipientId;
+  const registrationLinked = Number(registrationDraft.values.recipientId) === recipientId;
 
   await Promise.all([
     protocolLinked
       ? saveProtocolDraft({
-          values: clearRecipientLinkedValues(
-            protocolDraft.values,
-            recipientId,
-          ),
+          values: clearRecipientLinkedValues(protocolDraft.values, recipientId),
           protocolRecordId: null,
           updatedAt: Date.now(),
         })
       : Promise.resolve(),
     registrationLinked
       ? saveRegistrationDraft({
-          values: clearRecipientLinkedValues(
-            registrationDraft.values,
-            recipientId,
-          ),
+          values: clearRecipientLinkedValues(registrationDraft.values, recipientId),
           registrationRecordId: null,
           updatedAt: Date.now(),
         })
       : Promise.resolve(),
   ]);
 
-  clearStoredRequestDraft(
-    COMPONENT_REQUEST_STORAGE_KEY,
-    recipientId,
-    'component-request',
-  );
+  clearStoredRequestDraft(COMPONENT_REQUEST_STORAGE_KEY, recipientId, 'component-request');
   clearStoredRequestDraft(
     INDIVIDUAL_SELECTION_STORAGE_KEY,
     recipientId,
@@ -128,12 +109,9 @@ const clearRecipientFromCurrentForms = async (
   };
 };
 
-
 export const clearDeletedRecipientFromCurrentForms = clearRecipientFromCurrentForms;
 
-export const disconnectCurrentRecipientFromCurrentForms = async (
-  recipientId: number,
-) => {
+export const disconnectCurrentRecipientFromCurrentForms = async (recipientId: number) => {
   const currentRecipient = readCurrentRecipient();
   if (!currentRecipient || currentRecipient.id !== recipientId) {
     return {

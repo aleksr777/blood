@@ -18,9 +18,7 @@ let ownerLockPromise: Promise<void> | null = null;
 const acquireDatabaseOwnerLock = () => {
   if (ownerLockPromise) return ownerLockPromise;
 
-  const lockManager = (
-    globalThis.navigator as unknown as { locks?: LockManagerLike }
-  ).locks;
+  const lockManager = (globalThis.navigator as unknown as { locks?: LockManagerLike }).locks;
 
   if (!lockManager) {
     ownerLockPromise = Promise.resolve();
@@ -29,27 +27,23 @@ const acquireDatabaseOwnerLock = () => {
 
   ownerLockPromise = new Promise<void>((resolve, reject) => {
     void lockManager
-      .request(
-        DATABASE_OWNER_LOCK,
-        { mode: 'exclusive', ifAvailable: true },
-        async (lock) => {
-          if (!lock) {
-            reject(
-              new Error(
-                'Приложение уже открыто в другой вкладке. ' +
-                  'Закройте другие вкладки с приложением и повторите действие.',
-              ),
-            );
-            return;
-          }
+      .request(DATABASE_OWNER_LOCK, { mode: 'exclusive', ifAvailable: true }, async (lock) => {
+        if (!lock) {
+          reject(
+            new Error(
+              'Приложение уже открыто в другой вкладке. ' +
+                'Закройте другие вкладки с приложением и повторите действие.',
+            ),
+          );
+          return;
+        }
 
-          resolve();
+        resolve();
 
-          // Keep the lock for the lifetime of this worker. The browser
-          // releases it automatically when the worker/tab is closed.
-          await new Promise<void>(() => undefined);
-        },
-      )
+        // Keep the lock for the lifetime of this worker. The browser
+        // releases it automatically when the worker/tab is closed.
+        await new Promise<void>(() => undefined);
+      })
       .catch(reject);
   });
 

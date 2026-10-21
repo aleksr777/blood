@@ -14,11 +14,7 @@ export const IndividualSelectionTransfusionHistoryModal = ({
   onChange,
   onClose,
 }: Props) => (
-  <Modal
-    title="Гемотрансфузионный анамнез"
-    onClose={onClose}
-    className={styles.large}
-  >
+  <Modal title="Гемотрансфузионный анамнез" onClose={onClose} className={styles.large}>
     <div className={styles.grid}>
       <RecipientHistoryFields
         values={values}

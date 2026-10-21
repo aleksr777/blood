@@ -1,8 +1,5 @@
 import { getDatabase, type SqliteDatabase } from './database';
-import type {
-  ProtocolValuesRecord,
-  RecipientRecord,
-} from './database-types';
+import type { ProtocolValuesRecord, RecipientRecord } from './database-types';
 import {
   mergeProfileValues,
   normalizeKey,
@@ -17,9 +14,7 @@ const mapRecipient = (row: Record<string, unknown>): RecipientRecord => ({
   profile: profileFromValues(parseValues(String(row.profileJson))),
   protocolCount: Number(row.protocolCount ?? 0),
   registrationCount: Number(row.registrationCount ?? 0),
-  individualSelectionDirectionCount: Number(
-    row.individualSelectionDirectionCount ?? 0,
-  ),
+  individualSelectionDirectionCount: Number(row.individualSelectionDirectionCount ?? 0),
   componentRequestCount: Number(row.componentRequestCount ?? 0),
 });
 const getRecipient = (db: SqliteDatabase, id: number) => {
@@ -100,10 +95,7 @@ export const findRecipientsByName = async (fullName: string) => {
   }) as Array<Record<string, unknown>>;
   return rows.map(mapRecipient);
 };
-export const updateRecipient = async (
-  id: number,
-  values: ProtocolValuesRecord,
-) => {
+export const updateRecipient = async (id: number, values: ProtocolValuesRecord) => {
   const fullName = normalizeName(values.recipientName ?? '');
   if (!fullName) throw new Error('Укажите ФИО реципиента.');
 
@@ -120,10 +112,7 @@ export const updateRecipient = async (
 
   const normalizedName = normalizeKey(fullName);
   const now = Date.now();
-  const profile = mergeProfileValues(
-    parseValues(existingRows[0].profileJson),
-    values,
-  );
+  const profile = mergeProfileValues(parseValues(existingRows[0].profileJson), values);
 
   db.exec({
     sql: `

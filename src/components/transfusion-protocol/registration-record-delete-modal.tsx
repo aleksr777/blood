@@ -33,9 +33,7 @@ export const RegistrationRecordDeleteModal = ({
       onClose();
     } catch (deleteError) {
       setError(
-        deleteError instanceof Error
-          ? deleteError.message
-          : 'Не удалось удалить лист регистрации.',
+        deleteError instanceof Error ? deleteError.message : 'Не удалось удалить лист регистрации.',
       );
     } finally {
       setDeleting(false);

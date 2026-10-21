@@ -23,13 +23,7 @@ type Props = {
   onClose: () => void;
 };
 
-export const RequestEditorModal = ({
-  title,
-  fields,
-  values,
-  onChange,
-  onClose,
-}: Props) => {
+export const RequestEditorModal = ({ title, fields, values, onChange, onClose }: Props) => {
   const [draft, setDraft] = useState<Record<string, string>>(() =>
     Object.fromEntries(fields.map(({ name }) => [name, values[name] ?? ''])),
   );
@@ -69,10 +63,7 @@ export const RequestEditorModal = ({
     <Modal title={title} onClose={handleClose} className={styles.modal}>
       <div className={styles.grid}>
         {fields.map((field) => (
-          <label
-            key={field.name}
-            className={field.wide ? styles.wide : undefined}
-          >
+          <label key={field.name} className={field.wide ? styles.wide : undefined}>
             <span>{field.label}</span>
             {field.name === 'department' ? (
               <DepartmentField

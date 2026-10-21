@@ -64,8 +64,7 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
   const detailedReagents = hasDetailedReagents(values);
   const recipientAboConfirmed =
     (values.confirmedRecipientAboResult || 'Подтверждено') === 'Подтверждено';
-  const donorAboConfirmed =
-    (values.confirmedDonorAboResult || 'Подтверждено') === 'Подтверждено';
+  const donorAboConfirmed = (values.confirmedDonorAboResult || 'Подтверждено') === 'Подтверждено';
   const showDonorAboConfirmation = values.componentGroup === 'erythrocytes';
   const planeTestResult = values.planeTestResult || 'Совместимо';
   const biologicalTestResult = values.biologicalTestResult || 'Совместимо';
@@ -124,7 +123,9 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
                 className={[
                   'compatibility-inline-value',
                   recipientAboConfirmed ? '' : 'compatibility-inline-value--below',
-                ].filter(Boolean).join(' ')}
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
               >
                 {recipientAboConfirmed ? values.recipientAbo : 'Не подтверждено'}
               </span>
@@ -141,7 +142,9 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
                   className={[
                     'compatibility-inline-value',
                     donorAboConfirmed ? '' : 'compatibility-inline-value--below',
-                  ].filter(Boolean).join(' ')}
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                 >
                   {donorAboConfirmed ? values.donorAbo : 'Не подтверждено'}
                 </span>

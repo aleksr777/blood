@@ -69,11 +69,7 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
         </label>
         <label>
           <span>Возраст</span>
-          <input
-            type="text"
-            value={formatRecipientAge(values.recipientBirthDate)}
-            readOnly
-          />
+          <input type="text" value={formatRecipientAge(values.recipientBirthDate)} readOnly />
         </label>
         <div className={styles.wide}>
           <RecipientExaminationFields values={values} onChange={changeValues} />
@@ -85,7 +81,12 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
       {error && <div className={styles.error}>{error}</div>}
       <div className={styles.actions}>
         <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>
-        <button type="button" className={styles.primary} disabled={saving} onClick={() => void save()}>
+        <button
+          type="button"
+          className={styles.primary}
+          disabled={saving}
+          onClick={() => void save()}
+        >
           {saving ? 'Сохранение...' : 'Сохранить'}
         </button>
       </div>

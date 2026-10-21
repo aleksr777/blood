@@ -1,14 +1,9 @@
 import { getDatabase, type SqliteDatabase } from './database';
-import type {
-  ComponentUnitNumberMatch,
-  ProtocolValuesRecord,
-} from './database-types';
+import type { ComponentUnitNumberMatch, ProtocolValuesRecord } from './database-types';
 import { mapProtocol } from './recipient-data';
 import { upsertRecipient } from './recipient-profile-store';
 
-
-const normalizeComponentUnitNumber = (value?: string) =>
-  (value ?? '').replace(/\D/g, '');
+const normalizeComponentUnitNumber = (value?: string) => (value ?? '').replace(/\D/g, '');
 
 export const findProtocolRecordsByComponentUnitNumber = async (
   componentUnitNumber: string,
@@ -37,12 +32,14 @@ export const findProtocolRecordsByComponentUnitNumber = async (
       const values = JSON.parse(String(row.valuesJson ?? '{}')) as ProtocolValuesRecord;
       if (normalizeComponentUnitNumber(values.componentUnitNumber) !== digits) return [];
 
-      return [{
-        id: Number(row.id),
-        recipientId: Number(row.recipientId),
-        recipientName: String(row.recipientName ?? ''),
-        transfusionDate: values.transfusionDate ?? '',
-      }];
+      return [
+        {
+          id: Number(row.id),
+          recipientId: Number(row.recipientId),
+          recipientName: String(row.recipientName ?? ''),
+          transfusionDate: values.transfusionDate ?? '',
+        },
+      ];
     } catch {
       return [];
     }
@@ -106,10 +103,7 @@ const findRecordRecipient = (db: SqliteDatabase, id: number | null) => {
   return rows[0]?.recipientId ?? null;
 };
 
-export const saveProtocolRecord = async (
-  recordId: number | null,
-  values: ProtocolValuesRecord,
-) => {
+export const saveProtocolRecord = async (recordId: number | null, values: ProtocolValuesRecord) => {
   const db = await getDatabase();
   const linkedId = findRecordRecipient(db, recordId);
   const selectedId = Number(values.recipientId) > 0 ? Number(values.recipientId) : null;
@@ -117,9 +111,7 @@ export const saveProtocolRecord = async (
     throw new Error('Для другого реципиента создайте новый бланк.');
   }
   const canUpdate = linkedId !== null && recordId !== null;
-  const recipientId = canUpdate
-    ? linkedId
-    : upsertRecipient(db, values, selectedId ?? linkedId);
+  const recipientId = canUpdate ? linkedId : upsertRecipient(db, values, selectedId ?? linkedId);
   const now = Date.now();
   const id = canUpdate ? recordId : insertProtocol(db, recipientId, values, now);
 

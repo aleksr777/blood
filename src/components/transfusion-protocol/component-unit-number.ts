@@ -9,9 +9,7 @@ export const formatComponentUnitNumber = (value?: string) => {
   const digits = getComponentUnitDigits(value);
   if (!digits) return '';
 
-  return [digits.slice(0, 6), digits.slice(6, 12), digits.slice(12, 14)]
-    .filter(Boolean)
-    .join(' ');
+  return [digits.slice(0, 6), digits.slice(6, 12), digits.slice(12, 14)].filter(Boolean).join(' ');
 };
 
 export const getComponentUnitNumberWarning = (values: ProtocolValues) => {

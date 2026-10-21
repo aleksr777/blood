@@ -71,10 +71,7 @@ export const buildRegistrationTransfusionRow = (
   transfusionDate: formatDate(record.values.transfusionDate),
   doctorName: record.values.doctorName?.trim() ?? '',
   workerName: record.values.nurseName?.trim() ?? '',
-  complications:
-    getComplicationsStatus(record.values) === COMPLICATIONS_STATUS.had
-      ? 'Да'
-      : 'Нет',
+  complications: getComplicationsStatus(record.values) === COMPLICATIONS_STATUS.had ? 'Да' : 'Нет',
 });
 
 export const parseRegistrationTransfusionRows = (
@@ -90,29 +87,27 @@ export const parseRegistrationTransfusionRows = (
     return parsed.flatMap((item) => {
       if (!item || typeof item !== 'object') return [];
       const row = item as Partial<RegistrationTransfusionRow>;
-      if (
-        typeof row.protocolId !== 'number' ||
-        !Number.isFinite(row.protocolId)
-      ) {
+      if (typeof row.protocolId !== 'number' || !Number.isFinite(row.protocolId)) {
         return [];
       }
 
-      return [{
-        protocolId: row.protocolId,
-        componentName: typeof row.componentName === 'string' ? row.componentName : '',
-        amountLiters: typeof row.amountLiters === 'string' ? row.amountLiters : '',
-        units: typeof row.units === 'string' ? row.units : '',
-        transfusionDate: typeof row.transfusionDate === 'string' ? row.transfusionDate : '',
-        doctorName: typeof row.doctorName === 'string' ? row.doctorName : '',
-        workerName: typeof row.workerName === 'string' ? row.workerName : '',
-        complications: typeof row.complications === 'string' ? row.complications : '',
-      }];
+      return [
+        {
+          protocolId: row.protocolId,
+          componentName: typeof row.componentName === 'string' ? row.componentName : '',
+          amountLiters: typeof row.amountLiters === 'string' ? row.amountLiters : '',
+          units: typeof row.units === 'string' ? row.units : '',
+          transfusionDate: typeof row.transfusionDate === 'string' ? row.transfusionDate : '',
+          doctorName: typeof row.doctorName === 'string' ? row.doctorName : '',
+          workerName: typeof row.workerName === 'string' ? row.workerName : '',
+          complications: typeof row.complications === 'string' ? row.complications : '',
+        },
+      ];
     });
   } catch {
     return [];
   }
 };
 
-export const serializeRegistrationTransfusionRows = (
-  rows: RegistrationTransfusionRow[],
-) => JSON.stringify(rows);
+export const serializeRegistrationTransfusionRows = (rows: RegistrationTransfusionRow[]) =>
+  JSON.stringify(rows);

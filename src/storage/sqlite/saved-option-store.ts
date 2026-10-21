@@ -17,8 +17,7 @@ const getRows = (db: SqliteDatabase, category: string) =>
     returnValue: 'resultRows',
   }) as SavedOptionRecord[];
 
-export const listSavedOptions = async (category: string) =>
-  getRows(await getDatabase(), category);
+export const listSavedOptions = async (category: string) => getRows(await getDatabase(), category);
 
 export const rememberSavedOption = async (category: string, value: string) => {
   const nextValue = normalize(value);

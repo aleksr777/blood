@@ -1001,6 +1001,27 @@ export const IndividualSelectionDirection = () => {
     setStatus('Реципиент удалён. Связанные с ним данные удалены из текущего направления.');
   };
 
+  const handleRecipientDisconnected = (recipientId: number) => {
+    if (currentRecipient?.id === recipientId) {
+      setCurrentRecipient(null);
+    }
+
+    if (Number(draft.sourceRecipientId) !== recipientId) return;
+
+    savedRecordIdRef.current = null;
+    setSavedRecordId(null);
+    setDraft((current) =>
+      clearRecipientLinkedRequestDraft(
+        current,
+        recipientId,
+        'individual-selection-direction',
+      ),
+    );
+    setStatus(
+      'Текущий реципиент отключён. Связанные с ним данные удалены из текущего направления.',
+    );
+  };
+
   const examinationValues = useMemo<ProtocolValues>(() => {
     if (currentRecipient) {
       return {
@@ -1465,6 +1486,7 @@ export const IndividualSelectionDirection = () => {
             void openSavedDirection(record, recipient);
           }}
           onRecipientDeleted={handleRecipientDeleted}
+          onRecipientDisconnected={handleRecipientDisconnected}
           onClose={() => setRegistryOpen(false)}
         />
       )}

@@ -29,6 +29,7 @@ type Props = {
     recipient: RecipientRecord,
   ) => void;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
+  onDisconnectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
   currentRecipientId?: number | null;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
@@ -72,6 +73,7 @@ export const RecipientHistoryPanel = ({
   onOpenIndividualSelectionDirectionRecord,
   onOpenComponentRequestRecord,
   onUseRecipient,
+  onDisconnectRecipient,
   currentRecipientId = null,
   onEdit,
   onDelete,
@@ -139,6 +141,16 @@ export const RecipientHistoryPanel = ({
                   onClick={() => onUseRecipient(recipient)}
                 >
                   Выбрать
+                </button>
+              )}
+              {onDisconnectRecipient && recipient.id === currentRecipientId && (
+                <button
+                  type="button"
+                  className={styles.disconnectAction}
+                  title="Снять реципиента как текущего"
+                  onClick={() => onDisconnectRecipient(recipient)}
+                >
+                  Отключить
                 </button>
               )}
               <button

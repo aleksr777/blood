@@ -428,6 +428,17 @@ export const TransfusionRegistration = () => {
     setStatus('Реципиент удалён. Связанные с ним данные удалены из текущего листа регистрации.');
   };
 
+  const handleRecipientDisconnected = (recipientId: number) => {
+    if (Number(values.recipientId) !== recipientId) return;
+
+    setRecordId(null);
+    setValues(clearRecipientLinkedValues(values, recipientId));
+    setRegistryRecipientId(null);
+    setStatus(
+      'Текущий реципиент отключён. Связанные с ним данные удалены из текущего листа регистрации.',
+    );
+  };
+
   const print = () => {
     const root = document.documentElement;
 
@@ -660,6 +671,7 @@ export const TransfusionRegistration = () => {
             void openRegistrationRecord(record, recipient)
           }
           onRecipientDeleted={handleRecipientDeleted}
+          onRecipientDisconnected={handleRecipientDisconnected}
           onClose={() => {
             setRegistryRecipientId(null);
             setRegistryOpen(false);

@@ -38,9 +38,12 @@ const App = () => {
 
     const handleHashChange = () => {
       const nextPage = getPage();
-      if (nextPage === page) return;
-
       clearTransitionTimer();
+      if (nextPage === page) {
+        setTransitionPhase('idle');
+        return;
+      }
+
       setTransitionPhase('leaving');
 
       transitionTimerRef.current = window.setTimeout(() => {

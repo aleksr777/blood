@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } 
 import {
   adoptCurrentRecipientFromValues,
   hasRecipientProfileDifference,
+  mergeRecipientProfileValues,
   readCurrentRecipient,
   recipientProfileValuesForForms,
 } from '../../storage/repositories/current-recipient';
@@ -23,15 +24,6 @@ import type { ProtocolValues } from './protocol-types';
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 const hasValues = (values: ProtocolValues) => Object.keys(values).length > 0;
 
-const generatedHistoryValues = (values: ProtocolValues): ProtocolValues =>
-  values.previousTransfusionsAutoText?.trim()
-    ? {
-        previousTransfusionsStatus: values.previousTransfusionsStatus ?? '',
-        previousTransfusions: values.previousTransfusions ?? '',
-        previousTransfusionsAutoText: values.previousTransfusionsAutoText,
-      }
-    : {};
-
 type Props = {
   values: ProtocolValues;
   recordId: number | null;
@@ -46,7 +38,8 @@ export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onE
 
   const expire = useCallback(() => {
     setLastInputAt(0);
-    setValues({});
+    const currentRecipient = readCurrentRecipient();
+    setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
     setRecordId(null);
     onExpire();
     void clearProtocolDraft().catch((error: unknown) =>
@@ -89,11 +82,7 @@ export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onE
               : draftValues;
             const profileChanged =
               recipientChanged || hasRecipientProfileDifference(draftValues, currentRecipient);
-            const mergedValues = {
-              ...baseValues,
-              ...generatedHistoryValues(baseValues),
-              ...recipientProfileValuesForForms(currentRecipient),
-            };
+            const mergedValues = mergeRecipientProfileValues(baseValues, currentRecipient);
             const component = getIndicationComponent(mergedValues);
 
             if (component) {
@@ -105,8 +94,13 @@ export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onE
             }
 
             setValues(mergedValues);
+            const indicationsChanged = Object.entries(mergedValues).some(
+              ([field, value]) => (draftValues[field] ?? '') !== value,
+            );
             setRecordId(
-              profileChanged && draft.protocolRecordId !== null ? null : draft.protocolRecordId,
+              (profileChanged || indicationsChanged) && draft.protocolRecordId !== null
+                ? null
+                : draft.protocolRecordId,
             );
           }
           setLastInputAt(draft.updatedAt);

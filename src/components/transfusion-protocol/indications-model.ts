@@ -1,3 +1,4 @@
+import { INDICATION_FIELDS_BY_COMPONENT } from '../../storage/indication-fields';
 import type { ProtocolValues } from './protocol-types';
 
 export const INDICATION_COMPONENTS = [
@@ -5,42 +6,6 @@ export const INDICATION_COMPONENTS = [
   { value: 'plasma-cryo', label: 'Плазма' },
   { value: 'platelets', label: 'Тромбоциты' },
 ] as const;
-
-const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
-  erythrocytes: [
-    'indications',
-    'indicationRbcBloodLoss',
-    'indicationRbcBloodLossPercent',
-    'indicationRbcOngoingBleeding',
-    'indicationRbcCirculatoryDisturbances',
-    'indicationRbcHemicHypoxia',
-    'indicationRbcThreshold',
-    'indicationRbcHgb',
-    'indicationRbcHct',
-    'indicationRbcOther',
-    'indicationRbcOtherText',
-  ],
-  'plasma-cryo': [
-    'indications',
-    'indicationPlasmaBloodLoss',
-    'indicationPlasmaBloodLossPercent',
-    'indicationPlasmaOngoingBleeding',
-    'indicationPlasmaFactorDeficiency',
-    'indicationPlasmaFibrinogenBleeding',
-    'indicationPlasmaFibrinogenLow',
-    'indicationPlasmaOther',
-    'indicationPlasmaOtherText',
-  ],
-  platelets: [
-    'indications',
-    'indicationPlateletHemorrhagicSyndrome',
-    'indicationPlateletHighBleedingRisk',
-    'indicationPlateletThrombocytopenia',
-    'indicationPlateletCount',
-    'indicationPlateletOther',
-    'indicationPlateletOtherText',
-  ],
-};
 
 export const getIndicationComponent = (values: ProtocolValues) =>
   values.componentGroup || values.indicationComponent || '';

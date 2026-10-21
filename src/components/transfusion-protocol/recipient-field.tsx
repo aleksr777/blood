@@ -5,7 +5,7 @@ import styles from './recipient-field.module.css';
 
 type Props = {
   value: string;
-  onSelectRecipient: (recipient: RecipientRecord) => void | Promise<void>;
+  onSelectRecipient: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
   onOpenRecipients: () => void;
 };
 
@@ -13,12 +13,14 @@ export const RecipientField = ({ value, onSelectRecipient, onOpenRecipients }: P
   const [newRecipientOpen, setNewRecipientOpen] = useState(false);
 
   const select = async (recipient: RecipientRecord) => {
-    await onSelectRecipient(recipient);
+    if ((await onSelectRecipient(recipient)) === false) {
+      throw new Error('Не удалось выбрать реципиента. Повторите действие.');
+    }
   };
 
   const create = async (fullName: string) => {
     const created = await createRecipient(fullName);
-    await onSelectRecipient(created);
+    await select(created);
   };
 
   return (

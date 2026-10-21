@@ -78,7 +78,6 @@ export const ComplicationsFields = ({ values, onChange }: Props) => {
               field={field}
               value={values[field.name] ?? ''}
               onChange={changeValue}
-              onValuesChange={onChange}
             />
           ))}
         </div>

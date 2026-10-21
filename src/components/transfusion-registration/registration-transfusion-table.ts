@@ -47,8 +47,8 @@ export const getProtocolTransfusionTimestamp = (record: ProtocolRecord) =>
 export const hasRegistrationTransfusionData = (record: ProtocolRecord) =>
   Boolean(
     record.values.componentName?.trim() ||
-      record.values.componentUnitNumber?.trim() ||
-      record.values.amountMl?.trim(),
+    record.values.componentUnitNumber?.trim() ||
+    record.values.amountMl?.trim(),
   );
 
 const formatLiters = (amountMl?: string) => {

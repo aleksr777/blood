@@ -26,26 +26,6 @@ const mapRecord = (row: Record<string, unknown>): BloodRequestRecord => ({
   updatedAt: Number(row.updatedAt),
 });
 
-const findLinkedRecord = (
-  db: SqliteDatabase,
-  id: number | null,
-): { recipientId: number; kind: BloodRequestRecordKind } | null => {
-  if (id === null) return null;
-
-  const rows = db.exec({
-    sql: `
-      SELECT recipient_id AS recipientId, kind
-      FROM blood_request_records
-      WHERE id = $id
-    `,
-    bind: { $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ recipientId: number; kind: BloodRequestRecordKind }>;
-
-  return rows[0] ?? null;
-};
-
 export const listBloodRequestRecords = async (
   recipientId: number,
   kind: BloodRequestRecordKind,
@@ -104,43 +84,25 @@ const insertRecord = ({
 };
 
 export const saveBloodRequestRecord = async ({
-  recordId,
   recipientId,
   kind,
   values,
 }: SaveBloodRequestRecordInput) => {
-  if (!Number.isFinite(recipientId) || recipientId <= 0) {
+  if (!Number.isSafeInteger(recipientId) || recipientId <= 0) {
     throw new Error('Выберите реципиента перед сохранением бланка.');
   }
 
   const db = await getDatabase();
-  const linked = findLinkedRecord(db, recordId);
-
-  if (linked && linked.recipientId !== recipientId) {
-    throw new Error('Для другого реципиента создайте новый бланк.');
+  const recipients = db.exec({
+    sql: 'SELECT id FROM recipients WHERE id = $id',
+    bind: { $id: recipientId },
+    rowMode: 'object',
+    returnValue: 'resultRows',
+  }) as Array<{ id: number }>;
+  if (!recipients.length) {
+    throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
   }
-  if (linked && linked.kind !== kind) {
-    throw new Error('Тип сохранённого бланка не совпадает.');
-  }
-
-  const now = Date.now();
-  const id =
-    linked && recordId !== null ? recordId : insertRecord({ db, recipientId, kind, values, now });
-
-  if (linked) {
-    db.exec({
-      sql: `
-        UPDATE blood_request_records
-        SET values_json = $values, updated_at = $now
-        WHERE id = $id
-      `,
-      bind: {
-        $values: JSON.stringify(values),
-        $now: now,
-        $id: id,
-      },
-    });
-  }
+  const id = insertRecord({ db, recipientId, kind, values, now: Date.now() });
 
   const rows = db.exec({
     sql: `

@@ -1,4 +1,5 @@
 import type { ProtocolValuesRecord } from '../sqlite/database-types';
+import { INDICATION_FIELDS_BY_COMPONENT } from '../indication-fields';
 
 const STORAGE_KEY = 'blood:current-indications';
 
@@ -93,11 +94,15 @@ export const readCurrentIndications = (
   component: string,
 ): ProtocolValuesRecord => {
   const state = readState();
+  const emptyValues = Object.fromEntries(
+    (INDICATION_FIELDS_BY_COMPONENT[component] ?? []).map((field) => [field, '']),
+  );
   if (!state || state.recipientId !== recipientId) {
-    return { indicationComponent: component };
+    return { ...emptyValues, indicationComponent: component };
   }
 
   return {
+    ...emptyValues,
     indicationComponent: component,
     ...(state.byComponent[component] ?? {}),
   };

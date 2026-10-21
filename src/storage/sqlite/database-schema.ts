@@ -1,0 +1,82 @@
+import type { Database } from '@sqlite.org/sqlite-wasm';
+
+export const initializeSchema = (db: Database) => {
+  db.exec(`
+      CREATE TABLE IF NOT EXISTS departments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        normalized_name TEXT NOT NULL UNIQUE,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS saved_options (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category TEXT NOT NULL,
+        value TEXT NOT NULL,
+        normalized_value TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        UNIQUE(category, normalized_value)
+      );
+
+      CREATE TABLE IF NOT EXISTS protocol_draft (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        values_json TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS registration_draft (
+        id INTEGER PRIMARY KEY CHECK (id = 1),
+        values_json TEXT NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS recipients (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        full_name TEXT NOT NULL,
+        normalized_name TEXT NOT NULL,
+        birth_date TEXT NOT NULL DEFAULT '',
+        profile_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS protocol_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipient_id INTEGER NOT NULL,
+        values_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY(recipient_id) REFERENCES recipients(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS registration_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipient_id INTEGER NOT NULL,
+        values_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY(recipient_id) REFERENCES recipients(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS blood_request_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipient_id INTEGER NOT NULL,
+        kind TEXT NOT NULL,
+        values_json TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        FOREIGN KEY(recipient_id) REFERENCES recipients(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_recipients_name
+        ON recipients(normalized_name);
+      CREATE INDEX IF NOT EXISTS idx_protocol_records_recipient
+        ON protocol_records(recipient_id, updated_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_registration_records_recipient
+        ON registration_records(recipient_id, updated_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_blood_request_records_recipient_kind
+        ON blood_request_records(recipient_id, kind, updated_at DESC);
+    `);
+};

@@ -62,7 +62,7 @@ export const RecipientNewModal = ({
     }
   };
 
-  const useExisting = async (recipient: RecipientRecord) => {
+  const selectExisting = async (recipient: RecipientRecord) => {
     if (checking) return;
     setChecking(true);
     setError('');
@@ -90,7 +90,7 @@ export const RecipientNewModal = ({
           busy={checking}
           actionLabel={existingActionLabel}
           onBack={() => setViewing(false)}
-          onUse={(recipient) => void useExisting(recipient)}
+          onUse={(recipient) => void selectExisting(recipient)}
         />
       ) : (
         <RecipientNewForm

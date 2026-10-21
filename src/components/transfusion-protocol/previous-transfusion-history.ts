@@ -41,9 +41,9 @@ const hasCompleteComponentData = (record: ProtocolRecord) => {
 
   return Boolean(
     values.componentName?.trim() &&
-      values.amountMl?.trim() &&
-      values.componentUnitNumber?.trim() &&
-      values.expirationDate?.trim(),
+    values.amountMl?.trim() &&
+    values.componentUnitNumber?.trim() &&
+    values.expirationDate?.trim(),
   );
 };
 

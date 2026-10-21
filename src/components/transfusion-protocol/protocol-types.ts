@@ -13,13 +13,7 @@ export type ProtocolBlockId =
 export type ProtocolValues = Record<string, string>;
 
 export type ProtocolFieldType =
-  | 'text'
-  | 'date'
-  | 'time'
-  | 'datetime-local'
-  | 'number'
-  | 'textarea'
-  | 'select';
+  'text' | 'date' | 'time' | 'datetime-local' | 'number' | 'textarea' | 'select';
 
 export type ProtocolFieldConfig = {
   name: string;

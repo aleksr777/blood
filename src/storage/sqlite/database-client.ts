@@ -77,9 +77,16 @@ let initialization: Promise<void> | null = null;
 
 export const initializeDatabase = () => {
   initialization ??= (async () => {
-    await navigator.storage?.persist?.();
+    try {
+      await navigator.storage?.persist?.();
+    } catch {
+      // Persistence permission is optional; OPFS can still be available.
+    }
     await request<boolean>('init');
-  })();
+  })().catch((error: unknown) => {
+    initialization = null;
+    throw error;
+  });
 
   return initialization;
 };
@@ -134,13 +141,13 @@ export const database = {
       componentUnitNumber,
       excludeRecordId,
     }),
-  saveProtocolRecord: (recordId: number | null, values: ProtocolValuesRecord) =>
-    withDatabase<ProtocolRecord>('protocol-records:save', { recordId, values }),
+  saveProtocolRecord: (values: ProtocolValuesRecord) =>
+    withDatabase<ProtocolRecord>('protocol-records:save', { values }),
   removeProtocolRecord: (id: number) => withDatabase<void>('protocol-records:remove', { id }),
   listRegistrationRecords: (recipientId: number) =>
     withDatabase<RegistrationRecord[]>('registration-records:list', { recipientId }),
-  saveRegistrationRecord: (recordId: number | null, values: ProtocolValuesRecord) =>
-    withDatabase<RegistrationRecord>('registration-records:save', { recordId, values }),
+  saveRegistrationRecord: (values: ProtocolValuesRecord) =>
+    withDatabase<RegistrationRecord>('registration-records:save', { values }),
   removeRegistrationRecord: (id: number) =>
     withDatabase<void>('registration-records:remove', { id }),
   listBloodRequestRecords: (recipientId: number, kind: BloodRequestRecordKind) =>

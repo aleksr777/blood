@@ -1,3 +1,4 @@
+import { persistLocalDraft } from '../../storage/repositories/local-draft';
 import {
   useCallback,
   useEffect,
@@ -519,6 +520,9 @@ export const IndividualSelectionDirection = () => {
   const [savedRecordId, setSavedRecordId] = useState<number | null>(loadSavedRecordId);
   const savedRecordIdRef = useRef(savedRecordId);
   savedRecordIdRef.current = savedRecordId;
+  const refreshVersionRef = useRef(0);
+  const profileEditVersionRef = useRef(0);
+  const pendingProfileUpdateRef = useRef<Promise<void>>(Promise.resolve());
   const draftRef = useRef(draft);
   draftRef.current = draft;
   const [page2StartIndex, setPage2StartIndex] = useState(7);
@@ -536,6 +540,8 @@ export const IndividualSelectionDirection = () => {
 
   const refreshCurrentData = useCallback(
     async (recipient = readCurrentRecipient(), baseDraft?: DirectionDraft) => {
+      const refreshVersion = ++refreshVersionRef.current;
+      if ((readCurrentRecipient()?.id ?? null) !== (recipient?.id ?? null)) return;
       setCurrentRecipient(recipient);
 
       const autoValues = await currentAutoValues(recipient);
@@ -548,11 +554,21 @@ export const IndividualSelectionDirection = () => {
       const current = baseDraft ?? draftRef.current;
       const recipientChanged = Boolean(
         recipient &&
-          current.sourceRecipientId &&
-          current.sourceRecipientId !== String(recipient.id),
+        current.sourceRecipientId &&
+        current.sourceRecipientId !== String(recipient.id),
       );
 
-      let next = mergeAutoValues(current, recipient, autoValues);
+      const base =
+        recipientChanged && !baseDraft
+          ? {
+              ...emptyDraft(),
+              medicalOrganization: current.medicalOrganization,
+              doctorName: current.doctorName,
+              doctorPhone: current.doctorPhone,
+              directionDate: todayKey(),
+            }
+          : current;
+      let next = mergeAutoValues(base, recipient, autoValues);
       if (recipient) {
         if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
           next = {
@@ -624,6 +640,11 @@ export const IndividualSelectionDirection = () => {
         }
       }
 
+      if (
+        refreshVersion !== refreshVersionRef.current ||
+        (readCurrentRecipient()?.id ?? null) !== (recipient?.id ?? null)
+      )
+        return;
       draftRef.current = next;
       setDraft(next);
     },
@@ -631,11 +652,16 @@ export const IndividualSelectionDirection = () => {
   );
 
   useEffect(() => {
-    void refreshCurrentData();
+    void refreshCurrentData().catch((error: unknown) => {
+      console.error('Не удалось загрузить текущие данные реципиента:', error);
+      setStatus('Не удалось загрузить текущие данные реципиента. Повторите действие.');
+    });
   }, [refreshCurrentData]);
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    if (!persistLocalDraft(STORAGE_KEY, draft)) {
+      setStatus('Не удалось сохранить черновик в браузере. Сохраните бланк в базе данных.');
+    }
   }, [draft]);
 
   useEffect(() => {
@@ -690,6 +716,9 @@ export const IndividualSelectionDirection = () => {
 
   const updateFields = (changes: Record<string, string>) => {
     detachSavedRecord();
+    if (changes.department !== undefined && currentRecipient) {
+      void updateExamination({ department: changes.department });
+    }
 
     if (currentRecipient && changes.individualSelectionIndications !== undefined) {
       writeCurrentIndividualSelectionIndications(
@@ -796,8 +825,7 @@ export const IndividualSelectionDirection = () => {
   };
 
   const save = async (afterPrint = false) => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
-
+    await pendingProfileUpdateRef.current;
     const recipient = readCurrentRecipient();
     if (!recipient) {
       setStatus('Выберите реципиента перед сохранением направления.');
@@ -815,7 +843,7 @@ export const IndividualSelectionDirection = () => {
 
     try {
       const draftToSave = {
-        ...draft,
+        ...draftRef.current,
         sourceRecipientId: String(recipient.id),
         recipientProfileSnapshot: {
           ...recipient.profile,
@@ -825,7 +853,6 @@ export const IndividualSelectionDirection = () => {
       };
 
       const record = await saveBloodRequestRecord({
-        recordId: null,
         recipientId: recipient.id,
         kind: 'individual-selection-direction',
         values: { ...draftToSave },
@@ -845,6 +872,7 @@ export const IndividualSelectionDirection = () => {
   };
 
   const selectRecipient = async (recipient: RecipientRecord) => {
+    ++profileEditVersionRef.current;
     try {
       const historicalRecipientId = Number(draft.sourceRecipientId);
       const previousRecipientId =
@@ -944,21 +972,34 @@ export const IndividualSelectionDirection = () => {
     };
   }, [currentRecipient, draft]);
 
-  const updateExamination = async (changes: ProtocolValues) => {
+  const updateExamination = (changes: ProtocolValues) => {
     detachSavedRecord();
-
     const recipient = readCurrentRecipient();
-    if (!recipient) return;
+    if (!recipient) return Promise.resolve();
+    const version = ++profileEditVersionRef.current;
+    setCurrentRecipient((current) =>
+      current?.id === recipient.id
+        ? {
+            ...current,
+            profile: { ...current.profile, ...changes },
+          }
+        : current,
+    );
 
-    try {
-      await updateCurrentRecipientProfile(recipient, changes);
-      await refreshCurrentData(readCurrentRecipient());
-    } catch (error) {
-      console.error(
-        'Не удалось обновить общие данные медицинского обследования реципиента:',
-        error,
-      );
-    }
+    const operation = (async () => {
+      try {
+        await updateCurrentRecipientProfile(recipient, changes);
+        if (version !== profileEditVersionRef.current) return;
+        await refreshCurrentData(readCurrentRecipient());
+      } catch (error) {
+        console.error('Не удалось обновить общие данные реципиента:', error);
+        if (version === profileEditVersionRef.current) {
+          setStatus('Не удалось сохранить данные реципиента. Повторите ввод.');
+        }
+      }
+    })();
+    pendingProfileUpdateRef.current = operation;
+    return operation;
   };
 
   const editorConfig = useMemo(() => {

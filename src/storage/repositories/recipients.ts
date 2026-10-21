@@ -24,14 +24,14 @@ export const findProtocolRecordsByComponentUnitNumber = (
 
 export const removeProtocolRecord = (id: number) => database.removeProtocolRecord(id);
 
-export const saveProtocolRecord = (recordId: number | null, values: ProtocolValuesRecord) =>
-  database.saveProtocolRecord(recordId, values);
+export const saveProtocolRecord = (values: ProtocolValuesRecord) =>
+  database.saveProtocolRecord(values);
 
 export const listRegistrationRecords = (recipientId: number) =>
   database.listRegistrationRecords(recipientId);
 
-export const saveRegistrationRecord = (recordId: number | null, values: ProtocolValuesRecord) =>
-  database.saveRegistrationRecord(recordId, values);
+export const saveRegistrationRecord = (values: ProtocolValuesRecord) =>
+  database.saveRegistrationRecord(values);
 
 export const removeRegistrationRecord = (id: number) => database.removeRegistrationRecord(id);
 

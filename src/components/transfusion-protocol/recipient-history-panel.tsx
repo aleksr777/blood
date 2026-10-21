@@ -33,10 +33,7 @@ type Props = {
 };
 
 type RecordCategory =
-  | 'protocols'
-  | 'registrations'
-  | 'individual-selection-directions'
-  | 'component-requests';
+  'protocols' | 'registrations' | 'individual-selection-directions' | 'component-requests';
 
 const formatUpdated = (value: number) =>
   new Intl.DateTimeFormat('ru-RU', {

@@ -12,7 +12,7 @@ type Props = {
   value: string;
   onChange: (name: string, value: string) => void;
   onOpenRecipients?: () => void;
-  onSelectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
+  onSelectRecipient?: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
 };
 
 const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' | 'onChange'>) => {

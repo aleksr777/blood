@@ -3,6 +3,7 @@ import { clearCurrentRecipientIfMatches, readCurrentRecipient } from './current-
 import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft';
 import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft';
 import { clearRecipientLinkedValues } from './recipient-linked-values';
+import { runRecipientOperation } from './recipient-operation-queue';
 
 const COMPONENT_REQUEST_STORAGE_KEY = 'blood:component-request-direction-draft';
 const INDIVIDUAL_SELECTION_STORAGE_KEY = 'blood:individual-selection-direction-draft';
@@ -109,21 +110,23 @@ const clearRecipientFromCurrentForms = async (recipientId: number) => {
   };
 };
 
-export const clearDeletedRecipientFromCurrentForms = clearRecipientFromCurrentForms;
+export const clearDeletedRecipientFromCurrentForms = (recipientId: number) =>
+  runRecipientOperation(() => clearRecipientFromCurrentForms(recipientId));
 
-export const disconnectCurrentRecipientFromCurrentForms = async (recipientId: number) => {
-  const currentRecipient = readCurrentRecipient();
-  if (!currentRecipient || currentRecipient.id !== recipientId) {
+export const disconnectCurrentRecipientFromCurrentForms = (recipientId: number) =>
+  runRecipientOperation(async () => {
+    const currentRecipient = readCurrentRecipient();
+    if (!currentRecipient || currentRecipient.id !== recipientId) {
+      return {
+        disconnected: false,
+        protocolLinked: false,
+        registrationLinked: false,
+      };
+    }
+
+    const result = await clearRecipientFromCurrentForms(recipientId);
     return {
-      disconnected: false,
-      protocolLinked: false,
-      registrationLinked: false,
+      disconnected: true,
+      ...result,
     };
-  }
-
-  const result = await clearRecipientFromCurrentForms(recipientId);
-  return {
-    disconnected: true,
-    ...result,
-  };
-};
+  });

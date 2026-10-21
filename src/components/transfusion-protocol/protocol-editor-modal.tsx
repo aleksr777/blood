@@ -28,7 +28,7 @@ type Props = {
   previousTransfusionSuggestion: string;
   persistReusableOptions: boolean;
   onOpenRecipients: () => void;
-  onSelectRecipient: (recipient: RecipientRecord) => void | Promise<void>;
+  onSelectRecipient: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
   onSave: (values: ProtocolValues) => void;
   onClose: (values: ProtocolValues) => void;
 };

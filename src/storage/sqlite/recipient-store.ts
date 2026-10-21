@@ -130,58 +130,8 @@ export const updateRecipient = async (id: number, values: ProtocolValuesRecord) 
     },
   });
 
-  const records = db.exec({
-    sql: 'SELECT id, values_json AS valuesJson FROM protocol_records WHERE recipient_id = $id',
-    bind: { $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number; valuesJson: string }>;
-  for (const record of records) {
-    const recordValues = parseValues(record.valuesJson);
-    recordValues.recipientName = fullName;
-    delete recordValues.recipientBirthDate;
-    db.exec({
-      sql: 'UPDATE protocol_records SET values_json = $values, updated_at = $now WHERE id = $id',
-      bind: { $values: JSON.stringify(recordValues), $now: now, $id: record.id },
-    });
-  }
-
-  const registrationRecords = db.exec({
-    sql: 'SELECT id, values_json AS valuesJson FROM registration_records WHERE recipient_id = $id',
-    bind: { $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number; valuesJson: string }>;
-  for (const record of registrationRecords) {
-    const recordValues = parseValues(record.valuesJson);
-    recordValues.recipientName = fullName;
-    db.exec({
-      sql: 'UPDATE registration_records SET values_json = $values, updated_at = $now WHERE id = $id',
-      bind: { $values: JSON.stringify(recordValues), $now: now, $id: record.id },
-    });
-  }
-
-  const bloodRequestRecords = db.exec({
-    sql: 'SELECT id, values_json AS valuesJson FROM blood_request_records WHERE recipient_id = $id',
-    bind: { $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number; valuesJson: string }>;
-  for (const record of bloodRequestRecords) {
-    try {
-      const parsed: unknown = JSON.parse(record.valuesJson);
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) continue;
-      const values = parsed as Record<string, unknown>;
-      values.recipientName = fullName;
-      db.exec({
-        sql: 'UPDATE blood_request_records SET values_json = $values, updated_at = $now WHERE id = $id',
-        bind: { $values: JSON.stringify(values), $now: now, $id: record.id },
-      });
-    } catch {
-      // Keep an unreadable historical record unchanged.
-    }
-  }
-
+  // Saved forms are historical snapshots. Current forms receive profile updates
+  // through current-recipient.ts and are saved as new records when changed.
   return getRecipient(db, id);
 };
 export const removeRecipient = async (id: number) => {

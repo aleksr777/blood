@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
   hasRecipientProfileDifference,
+  mergeRecipientProfileValues,
   readCurrentRecipient,
   recipientProfileValuesForForms,
   switchCurrentRecipient,
@@ -67,7 +68,6 @@ const readPendingRegistrationRecord = (): RegistrationRecord | null => {
     const raw = window.sessionStorage.getItem(PENDING_REGISTRATION_RECORD_KEY);
     if (!raw) return null;
 
-    window.sessionStorage.removeItem(PENDING_REGISTRATION_RECORD_KEY);
     const parsed = JSON.parse(raw) as Partial<RegistrationRecord>;
 
     if (
@@ -137,7 +137,10 @@ export const TransfusionRegistration = () => {
   const registrationRows = parseRegistrationTransfusionRows(values);
 
   useEffect(() => {
-    if (initialRecord) return;
+    if (initialRecord) {
+      window.sessionStorage.removeItem(PENDING_REGISTRATION_RECORD_KEY);
+      return;
+    }
 
     let active = true;
     void loadRegistrationDraft()
@@ -280,14 +283,9 @@ export const TransfusionRegistration = () => {
         : false;
 
       await saveProtocolDraft({
-        values: {
-          ...record.values,
-          ...(currentRecipient
-            ? recipientProfileValuesForForms(currentRecipient)
-            : {
-                recipientId: String(record.recipientId),
-              }),
-        },
+        values: currentRecipient
+          ? mergeRecipientProfileValues(record.values, currentRecipient)
+          : { ...record.values, recipientId: String(record.recipientId) },
         protocolRecordId: profileChanged ? null : record.id,
         updatedAt: Date.now(),
       });
@@ -320,7 +318,7 @@ export const TransfusionRegistration = () => {
     }
 
     try {
-      const record = await saveRegistrationRecord(null, values);
+      const record = await saveRegistrationRecord(values);
       setRecordId(record.id);
       const savedValues = {
         ...values,
@@ -367,6 +365,7 @@ export const TransfusionRegistration = () => {
   };
 
   const updatePatientDetails = (nextValues: ProtocolValues) => {
+    if (!Object.entries(nextValues).some(([key, value]) => (values[key] ?? '') !== value)) return;
     const editingSavedRecord = recordId !== null;
     if (editingSavedRecord) {
       setRecordId(null);

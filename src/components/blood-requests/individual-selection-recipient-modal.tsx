@@ -40,7 +40,7 @@ type Props = {
   values: ProtocolValues;
   onRecipientChange: (values: ProtocolValues) => void | Promise<void>;
   onOpenRecipients: () => void;
-  onSelectRecipient: (recipient: RecipientRecord) => void | Promise<void>;
+  onSelectRecipient: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
   onClose: () => void;
 };
 

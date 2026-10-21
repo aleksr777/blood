@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
-  hasRecipientProfileDifference,
+  mergeRecipientProfileValues,
   readCurrentRecipient,
-  recipientProfileValuesForForms,
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
 import {
+  hasStoredCurrentIndications,
   readCurrentIndications,
   writeCurrentIndications,
 } from '../../storage/repositories/current-indications';
@@ -239,6 +239,7 @@ export const useProtocolWorkspace = () => {
   }, [historyRefreshToken, recordId, values.recipientId, values.transfusionDate]);
 
   const saveValues = (nextValues: ProtocolValues) => {
+    if (!Object.entries(nextValues).some(([key, value]) => (values[key] ?? '') !== value)) return;
     draft.touch();
 
     const editingSavedRecord = recordId !== null;
@@ -338,7 +339,7 @@ export const useProtocolWorkspace = () => {
     }
 
     try {
-      const record = await saveProtocolRecord(null, values);
+      const record = await saveProtocolRecord(values);
       setRecordId(record.id);
       const savedValues = { ...values, recipientId: String(record.recipientId) };
       setValues(savedValues);
@@ -367,7 +368,7 @@ export const useProtocolWorkspace = () => {
       }
 
       try {
-        const record = await saveProtocolRecord(null, values);
+        const record = await saveProtocolRecord(values);
         sourceValues = {
           ...values,
           recipientId: String(record.recipientId),
@@ -470,30 +471,25 @@ export const useProtocolWorkspace = () => {
     setActiveBlock(null);
 
     const currentRecipient = readCurrentRecipient();
-    const profileChanged = currentRecipient
-      ? hasRecipientProfileDifference(record.values, currentRecipient)
-      : false;
-    const generatedHistory = record.values.previousTransfusionsAutoText?.trim()
-      ? {
-          previousTransfusionsStatus: record.values.previousTransfusionsStatus ?? '',
-          previousTransfusions: record.values.previousTransfusions ?? '',
-          previousTransfusionsAutoText: record.values.previousTransfusionsAutoText,
-        }
-      : {};
-
-    setRecordId(profileChanged ? null : record.id);
-    setValues({
-      ...record.values,
-      ...generatedHistory,
-      ...(currentRecipient
-        ? recipientProfileValuesForForms(currentRecipient)
-        : {
-            recipientId: String(record.recipientId),
-          }),
-    });
+    const mergedValues = currentRecipient
+      ? mergeRecipientProfileValues(record.values, currentRecipient)
+      : { ...record.values, recipientId: String(record.recipientId) };
+    const component = getIndicationComponent(mergedValues);
+    if (
+      currentRecipient &&
+      component &&
+      hasStoredCurrentIndications(currentRecipient.id, component)
+    ) {
+      Object.assign(mergedValues, readCurrentIndications(currentRecipient.id, component));
+    }
+    const currentDataChanged = Object.entries(mergedValues).some(
+      ([field, value]) => (record.values[field] ?? '') !== value,
+    );
+    setRecordId(currentDataChanged ? null : record.id);
+    setValues(mergedValues);
     setRegistryOpen(false);
     setStatus(
-      profileChanged
+      currentDataChanged
         ? 'Сохранённый бланк открыт с актуальными данными текущего реципиента. При сохранении будет создан новый бланк.'
         : 'Сохранённый бланк открыт для просмотра и редактирования.',
     );

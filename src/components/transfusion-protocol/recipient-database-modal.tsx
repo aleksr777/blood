@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
+import { runRecipientOperation } from '../../storage/repositories/recipient-operation-queue';
 import {
   clearDeletedRecipientFromCurrentForms,
   disconnectCurrentRecipientFromCurrentForms,
@@ -181,11 +182,12 @@ export const RecipientDatabaseModal = ({
     };
   }, [initialRecipient.id, initialRecipient.name, initializingRecipient, query]);
   useEffect(() => {
+    let active = true;
+    setRecords([]);
+    setRegistrationRecords([]);
+    setIndividualSelectionDirectionRecords([]);
+    setComponentRequestRecords([]);
     if (!selected) {
-      setRecords([]);
-      setRegistrationRecords([]);
-      setIndividualSelectionDirectionRecords([]);
-      setComponentRequestRecords([]);
       return;
     }
 
@@ -196,12 +198,16 @@ export const RecipientDatabaseModal = ({
       listBloodRequestRecords(selected.id, 'component-request'),
     ])
       .then(([protocolItems, registrationItems, directionItems, componentRequestItems]) => {
+        if (!active) return;
         setRecords(protocolItems);
         setRegistrationRecords(registrationItems);
         setIndividualSelectionDirectionRecords(directionItems);
         setComponentRequestRecords(componentRequestItems);
       })
       .catch((error: unknown) => console.error('Не удалось загрузить бланки:', error));
+    return () => {
+      active = false;
+    };
   }, [selected]);
   const addRecipient = async (fullName: string) => {
     const created = await createRecipient(fullName);
@@ -225,7 +231,7 @@ export const RecipientDatabaseModal = ({
     setSelected(recipient);
   };
   const saveRecipient = async (recipient: RecipientRecord, values: ProtocolValues) => {
-    const updated = await updateRecipient(recipient.id, values);
+    const updated = await runRecipientOperation(() => updateRecipient(recipient.id, values));
     setRecipients((current) => current.map((item) => (item.id === updated.id ? updated : item)));
     setSelected(updated);
 

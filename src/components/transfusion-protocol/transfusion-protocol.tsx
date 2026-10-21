@@ -316,6 +316,7 @@ export const TransfusionProtocol = () => {
           }
           onUseRecipient={workspace.selectRecipient}
           onRecipientDeleted={workspace.handleRecipientDeleted}
+          onRecipientDisconnected={workspace.handleRecipientDisconnected}
         />
       )}
     </main>

@@ -51,3 +51,7 @@ The SAH pool allows one active database connection per origin. Before mounting a
 the application checks database ownership. Additional tabs show a blocking dialog without
 modifying drafts. The dialog can request focus in the working tab (subject to browser
 restrictions), or retry opening the database after the working tab is closed.
+
+Startup allows up to 60 seconds for downloading and opening SQLite and displays its current
+stage. A failed startup stops its worker; retrying creates a fresh worker and reopens the
+same storage. The optional persistent-storage permission request does not delay startup.

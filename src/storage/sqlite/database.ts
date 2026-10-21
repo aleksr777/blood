@@ -3,6 +3,7 @@ import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import { migrateLegacyOpfsDepartments } from './legacy-opfs-migration';
 import { migrateRecipientNameConstraint } from './recipient-name-migration';
 import { DatabaseError } from './database-errors';
+import type { DatabaseStartupReporter } from './database-startup';
 
 const DATABASE_FILE = '/blood.sqlite3';
 const DATABASE_OWNER_LOCK = 'blood-opfs-sahpool-owner';
@@ -74,11 +75,14 @@ const describeDatabaseError = (error: unknown) => {
   return error instanceof Error ? error : new Error(message);
 };
 
-const openDatabase = async () => {
+const openDatabase = async (onProgress?: DatabaseStartupReporter) => {
   try {
+    onProgress?.('ownership');
     await acquireDatabaseOwnerLock();
 
+    onProgress?.('sqlite');
     const sqlite3 = await sqlite3InitModule();
+    onProgress?.('storage');
     const pool = await sqlite3.installOpfsSAHPoolVfs({
       initialCapacity: 6,
       name: 'blood-opfs-sahpool',
@@ -86,10 +90,12 @@ const openDatabase = async () => {
     });
     const db = new pool.OpfsSAHPoolDb(DATABASE_FILE);
 
+    onProgress?.('schema');
     initializeSchema(db);
 
     migrateRecipientNameConstraint(db);
 
+    onProgress?.('migration');
     await migrateLegacyOpfsDepartments(sqlite3, db);
     return db;
   } catch (error) {
@@ -101,8 +107,8 @@ export type SqliteDatabase = Awaited<ReturnType<typeof openDatabase>>;
 
 let databasePromise: ReturnType<typeof openDatabase> | null = null;
 
-export const getDatabase = () => {
-  databasePromise ??= openDatabase().catch((error: unknown) => {
+export const getDatabase = (onProgress?: DatabaseStartupReporter) => {
+  databasePromise ??= openDatabase(onProgress).catch((error: unknown) => {
     databasePromise = null;
     throw error;
   });

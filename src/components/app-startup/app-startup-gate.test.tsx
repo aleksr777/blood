@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { StrictMode, useEffect } from 'react';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DatabaseError } from '../../storage/sqlite/database-errors';
 import { AppStartupGate } from './app-startup-gate';
@@ -26,7 +26,6 @@ const renderApp = () =>
 beforeEach(() => {
   initialize.mockReset().mockResolvedValue(undefined);
   localStorage.clear();
-  vi.stubGlobal('BroadcastChannel', undefined);
   vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
   Object.defineProperties(HTMLDialogElement.prototype, {
     showModal: {
@@ -45,7 +44,6 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
-  vi.unstubAllGlobals();
 });
 
 describe('application startup', () => {
@@ -69,36 +67,25 @@ describe('application startup', () => {
     localStorage.setItem('draft', 'saved');
     renderApp();
     const dialog = await screen.findByRole('dialog', { name: 'Приложение уже открыто' });
-    expect(screen.queryByRole('button', { name: 'Close modal' })).toBeNull();
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
+    await act(async () => new Promise((resolve) => window.setTimeout(resolve, 200)));
     fireEvent(dialog, new Event('cancel', { bubbles: true, cancelable: true }));
     fireEvent.click(dialog);
-    fireEvent.click(screen.getByRole('button', { name: 'Открыть здесь' }));
-    await waitFor(() => expect(initialize).toHaveBeenCalledTimes(3));
-    await waitFor(() =>
-      expect(
-        (screen.getByRole('button', { name: 'Открыть здесь' }) as HTMLButtonElement).disabled,
-      ).toBe(false),
-    );
     expect(screen.queryByRole('textbox')).toBeNull();
     expect(localStorage.getItem('draft')).toBe('saved');
     expect(dialog.hasAttribute('open')).toBe(true);
   });
 
-  it('opens the blocked tab after the working tab releases the database', async () => {
+  it('keeps the warning open after the working tab releases the database', async () => {
     initialize.mockRejectedValue(busy);
     renderApp();
-    await screen.findByRole('dialog');
+    const dialog = await screen.findByRole('dialog');
     initialize.mockResolvedValue(undefined);
-    fireEvent.click(screen.getByRole('button', { name: 'Открыть здесь' }));
-    expect(await screen.findByRole('textbox')).toBeTruthy();
-    expect(screen.queryByRole('dialog')).toBeNull();
-  });
-
-  it('offers manual switching when the browser cannot focus the working tab', async () => {
-    initialize.mockRejectedValue(busy);
-    renderApp();
-    fireEvent.click(await screen.findByRole('button', { name: 'Перейти в рабочую вкладку' }));
-    expect(screen.getByRole('status').textContent).toContain('вручную');
+    fireEvent(window, new Event('focus'));
+    fireEvent(window, new HashChangeEvent('hashchange'));
+    expect(initialize).toHaveBeenCalledTimes(2);
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
+    expect(dialog.hasAttribute('open')).toBe(true);
     expect(screen.queryByRole('textbox')).toBeNull();
   });
 

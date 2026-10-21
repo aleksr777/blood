@@ -617,6 +617,22 @@ export const useProtocolWorkspace = () => {
     setStatus('Реципиент удалён. Связанные с ним данные удалены из текущего бланка.');
   };
 
+  const handleRecipientDisconnected = (recipientId: number) => {
+    if (Number(values.recipientId) !== recipientId) return;
+
+    previousBlankIndicationsRef.current = null;
+    draft.touch();
+    setRecordId(null);
+    setValues(clearRecipientLinkedValues(values, recipientId));
+    setPreviousTransfusionSuggestion('');
+    setHistoryRefreshToken((current) => current + 1);
+    setComponentUnitNumberChecked(false);
+    setDismissedComponentUnitWarningKey('');
+    setStatus(
+      'Текущий реципиент отключён. Связанные с ним данные удалены из текущего бланка.',
+    );
+  };
+
   const expiredReagents = getExpiredReagentWarnings(values);
   const hemaconExpirationWarning = getHemaconExpirationWarning(values.expirationDate);
   const expirationWarnings = [
@@ -651,5 +667,6 @@ export const useProtocolWorkspace = () => {
     clearForm,
     openRecord,
     handleRecipientDeleted,
+    handleRecipientDisconnected,
   };
 };

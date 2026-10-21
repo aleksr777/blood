@@ -6,7 +6,6 @@ import {
   type DatabaseStartupStage,
 } from '../../storage/sqlite/database-startup';
 import Modal from '../modal/modal';
-import { useWorkingTabFocus } from './use-working-tab-focus';
 import styles from './app-startup-gate.module.css';
 
 type StartupState = {
@@ -20,9 +19,7 @@ const keepOpen = () => undefined;
 export const AppStartupGate = ({ children }: PropsWithChildren) => {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<StartupState>({ status: 'loading', retrying: true });
-  const [focusRequested, setFocusRequested] = useState(false);
   const [startupStage, setStartupStage] = useState<DatabaseStartupStage>('worker');
-  const requestWorkingTabFocus = useWorkingTabFocus(state.status === 'ready');
 
   useEffect(() => {
     let active = true;
@@ -73,43 +70,25 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
         >
           <div className={styles.message}>
             {blocked ? (
-              <>
-                <p>
-                  Приложение уже открыто в другой вкладке. Одновременно работать с ним можно только
-                  в одной вкладке.
-                </p>
-                <p>Перейдите в рабочую вкладку или закройте её, затем нажмите «Открыть здесь».</p>
-              </>
-            ) : (
-              <p>{state.message}</p>
-            )}
-            <div className={styles.actions} aria-busy={state.retrying}>
-              {blocked && (
-                <button
-                  type="button"
-                  className="save-button"
-                  onClick={() => {
-                    requestWorkingTabFocus();
-                    setFocusRequested(true);
-                  }}
-                >
-                  Перейти в рабочую вкладку
-                </button>
-              )}
-              <button
-                type="button"
-                className="secondary-button"
-                disabled={state.retrying}
-                onClick={retry}
-              >
-                {state.retrying ? 'Проверяем…' : blocked ? 'Открыть здесь' : 'Повторить'}
-              </button>
-            </div>
-            {state.retrying && <p role="status">{databaseStartupMessages[startupStage]}…</p>}
-            {blocked && focusRequested && (
-              <p role="status">
-                Если переключение не произошло, выберите рабочую вкладку приложения вручную.
+              <p>
+                Приложение уже открыто в другой вкладке. Одновременно работать с ним можно только в
+                одной вкладке.
               </p>
+            ) : (
+              <>
+                <p>{state.message}</p>
+                <div className={styles.actions} aria-busy={state.retrying}>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={state.retrying}
+                    onClick={retry}
+                  >
+                    {state.retrying ? 'Проверяем…' : 'Повторить'}
+                  </button>
+                </div>
+                {state.retrying && <p role="status">{databaseStartupMessages[startupStage]}…</p>}
+              </>
             )}
           </div>
         </Modal>

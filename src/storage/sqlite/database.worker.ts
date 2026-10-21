@@ -48,7 +48,7 @@ import {
 const dispatchRequest = async (request: DatabaseRequest) => {
   switch (request.action) {
     case 'init':
-      await getDatabase();
+      await getDatabase((progress) => send({ id: request.id, ok: true, progress }));
       return true;
     case 'departments:list':
       return listDepartments();

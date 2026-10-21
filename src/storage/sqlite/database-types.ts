@@ -1,4 +1,5 @@
 import type { DatabaseErrorCode } from './database-errors';
+import type { DatabaseStartupStage } from './database-startup';
 
 export type ProtocolValuesRecord = Record<string, string>;
 
@@ -122,4 +123,5 @@ export type DatabaseResponse = {
   result?: unknown;
   error?: string;
   errorCode?: DatabaseErrorCode;
+  progress?: DatabaseStartupStage;
 };

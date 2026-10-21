@@ -1,4 +1,4 @@
-export type DatabaseErrorCode = 'database-in-use';
+export type DatabaseErrorCode = 'database-in-use' | 'database-startup-timeout';
 
 export class DatabaseError extends Error {
   constructor(

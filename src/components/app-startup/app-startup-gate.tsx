@@ -1,6 +1,10 @@
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import { initializeDatabase } from '../../storage/sqlite/database-client';
 import { DatabaseError } from '../../storage/sqlite/database-errors';
+import {
+  databaseStartupMessages,
+  type DatabaseStartupStage,
+} from '../../storage/sqlite/database-startup';
 import Modal from '../modal/modal';
 import { useWorkingTabFocus } from './use-working-tab-focus';
 import styles from './app-startup-gate.module.css';
@@ -17,11 +21,14 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<StartupState>({ status: 'loading', retrying: true });
   const [focusRequested, setFocusRequested] = useState(false);
+  const [startupStage, setStartupStage] = useState<DatabaseStartupStage>('worker');
   const requestWorkingTabFocus = useWorkingTabFocus(state.status === 'ready');
 
   useEffect(() => {
     let active = true;
-    void initializeDatabase().then(
+    void initializeDatabase((stage) => {
+      if (active) setStartupStage(stage);
+    }).then(
       () => {
         if (active) setState({ status: 'ready', retrying: false });
       },
@@ -54,7 +61,10 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
   return (
     <main className={styles.screen}>
       {state.status === 'loading' ? (
-        <p role="status">Открываем приложение…</p>
+        <div className={styles.message} role="status">
+          <p>Открываем приложение…</p>
+          <p>{databaseStartupMessages[startupStage]}…</p>
+        </div>
       ) : (
         <Modal
           title={blocked ? 'Приложение уже открыто' : 'Не удалось открыть приложение'}
@@ -95,6 +105,7 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
                 {state.retrying ? 'Проверяем…' : blocked ? 'Открыть здесь' : 'Повторить'}
               </button>
             </div>
+            {state.retrying && <p role="status">{databaseStartupMessages[startupStage]}…</p>}
             {blocked && focusRequested && (
               <p role="status">
                 Если переключение не произошло, выберите рабочую вкладку приложения вручную.

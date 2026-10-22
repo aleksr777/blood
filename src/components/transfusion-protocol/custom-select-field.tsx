@@ -49,7 +49,7 @@ export const CustomSelectField = ({
           compact ? styles.customSelectControlCompact : '',
           tone === 'positive' ? styles.customSelectControlRhPositive : '',
           tone === 'negative' ? styles.customSelectControlRhNegative : '',
-          tone === 'neutral' && isBloodGroupField ? styles.customSelectControlNeutral : '',
+          tone === 'neutral' ? styles.customSelectControlNeutral : '',
         ]
           .filter(Boolean)
           .join(' ')}
@@ -67,7 +67,7 @@ export const CustomSelectField = ({
             .filter(Boolean)
             .join(' ')}
         >
-          {value || emptyDisplayLabel || emptyLabel}
+          {value || (emptyDisplayLabel ?? emptyLabel)}
         </span>
         <span className={styles.customSelectArrow} aria-hidden="true">
           ▾
@@ -75,13 +75,7 @@ export const CustomSelectField = ({
       </button>
 
       <div
-        className={[
-          styles.historyDropdown,
-          compact ? styles.historyDropdownCompact : '',
-          toneBloodGroupOptions && tone === 'positive' ? styles.historyDropdownRhPositive : '',
-          toneBloodGroupOptions && tone === 'negative' ? styles.historyDropdownRhNegative : '',
-          tone === 'neutral' && isBloodGroupField ? styles.historyDropdownNeutral : '',
-        ]
+        className={[styles.historyDropdown, compact ? styles.historyDropdownCompact : '']
           .filter(Boolean)
           .join(' ')}
         data-state={dropdownState}
@@ -99,16 +93,16 @@ export const CustomSelectField = ({
               option === '-' ? styles.customSelectOptionNegative : '',
               option === 'Rh(+)' ? styles.customSelectOptionRhPositive : '',
               option === 'Rh(-)' ? styles.customSelectOptionRhNegative : '',
-              toneBloodGroupOptions && tone === 'positive'
+              option && toneBloodGroupOptions && tone === 'positive'
                 ? styles.customSelectOptionTonePositive
                 : '',
-              toneBloodGroupOptions && tone === 'negative'
+              option && toneBloodGroupOptions && tone === 'negative'
                 ? styles.customSelectOptionToneNegative
                 : '',
-              toneBloodGroupOptions && tone === 'neutral'
+              option && toneBloodGroupOptions && tone === 'neutral'
                 ? styles.customSelectOptionToneNeutral
                 : '',
-              !option && isBloodGroupField ? styles.customSelectOptionNeutralEmpty : '',
+              !option && (isBloodGroupField || tone) ? styles.customSelectOptionNeutralEmpty : '',
             ]
               .filter(Boolean)
               .join(' ')}

@@ -44,19 +44,28 @@ export const BloodGroupSelectField = ({
   compact = false,
   antigen = false,
   tone,
-}: Props) => (
-  <div className={styles.field}>
-    <div className={antigen ? styles.antigenLabel : styles.label}>{label}</div>
-    <CustomSelectField
-      name={name}
-      label={label}
-      options={options}
-      value={value}
-      emptyLabel={emptyLabel}
-      emptyDisplayLabel={emptyDisplayLabel}
-      compact={compact}
-      tone={tone}
-      onChange={onChange}
-    />
-  </div>
-);
+}: Props) => {
+  const antigenTone = value === '+' ? 'positive' : value === '-' ? 'negative' : 'neutral';
+  const displayedTone = !value ? 'neutral' : antigen ? antigenTone : tone;
+
+  return (
+    <div
+      className={[styles.field, antigen ? styles.antigenField : ''].filter(Boolean).join(' ')}
+      data-blood-group-field={name}
+      data-tone={displayedTone}
+    >
+      <div className={antigen ? styles.antigenLabel : styles.label}>{label}</div>
+      <CustomSelectField
+        name={name}
+        label={label}
+        options={options}
+        value={value}
+        emptyLabel={emptyLabel}
+        emptyDisplayLabel={emptyDisplayLabel}
+        compact={compact}
+        tone={displayedTone}
+        onChange={onChange}
+      />
+    </div>
+  );
+};

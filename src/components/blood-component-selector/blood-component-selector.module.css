@@ -25,39 +25,68 @@
 }
 
 .choice {
+  --component-background: #f1f6fc;
+  --component-border: #bfd0e1;
+  --component-text: #3f617f;
+  --component-hover-background: #e1edf8;
+  --component-hover-border: #8aa9c5;
+  --component-selected-background: #426b96;
+  --component-selected-text: #fff;
+  --component-selected-hover: #365d84;
+
   min-width: 0;
   min-height: var(--control-height);
-  border: 1px solid var(--control-border);
+  border: 1px solid var(--component-border);
   border-radius: var(--control-radius);
   padding: var(--control-padding-y) var(--control-padding-x);
-  background: #f8fafc;
-  color: #475569;
+  background: var(--component-background);
+  color: var(--component-text);
   cursor: pointer;
   font: inherit;
   font-weight: 600;
   line-height: 1.3;
 }
 
+.choice[data-component='erythrocytes'] {
+  --component-background: #fdf2f3;
+  --component-border: #e7bdc5;
+  --component-text: #93424f;
+  --component-hover-background: #fae3e7;
+  --component-hover-border: #c56878;
+  --component-selected-background: #a7495c;
+  --component-selected-hover: #913e50;
+}
+
+.choice[data-component='plasma-cryo'] {
+  --component-background: #fff9e6;
+  --component-border: #e3cf8f;
+  --component-text: #76591f;
+  --component-hover-background: #fff0ba;
+  --component-hover-border: #c7a040;
+  --component-selected-background: #f3d780;
+  --component-selected-border: #b9902f;
+  --component-selected-text: #5c4618;
+  --component-selected-hover: #ebc968;
+}
+
 .choice:hover:enabled {
-  border-color: #829bb5;
-  background: #fff;
-  color: #294a68;
+  border-color: var(--component-hover-border);
+  background: var(--component-hover-background);
 }
 
 .choice[aria-pressed='true'] {
-  border-color: #426b96;
-  background: #426b96;
-  color: #fff;
+  border-color: var(--component-selected-border, var(--component-selected-background));
+  background: var(--component-selected-background);
+  color: var(--component-selected-text);
 }
 
 .choice[aria-pressed='true']:hover:enabled {
-  border-color: #365d84;
-  background: #365d84;
-  color: #fff;
+  border-color: var(--component-selected-border, var(--component-selected-hover));
+  background: var(--component-selected-hover);
 }
 
 .choice:focus-visible {
-  outline: 2px solid rgb(37 99 235 / 40%);
+  outline: 2px solid var(--component-text);
   outline-offset: 2px;
 }
 

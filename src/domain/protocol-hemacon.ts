@@ -6,9 +6,7 @@ export const getProtocolHemaconWarning = (values: Record<string, string>) => {
   if (normalizeComponentUnitNumber(values.componentUnitNumber).length !== 14) {
     missing.push('полный номер гемакона (14 цифр)');
   }
-  const amount = Number(values.amountMl?.replace(',', '.'));
-  if (!Number.isFinite(amount) || amount <= 0) missing.push('объём компонента');
-  if (!values.expirationDate?.trim()) missing.push('срок годности');
+  if (!values.donorAbo?.trim()) missing.push('группу крови гемакона');
 
   return missing.length
     ? `Сохранение и печать протокола недоступны. Заполните данные гемакона: ${missing.join(', ')}.`

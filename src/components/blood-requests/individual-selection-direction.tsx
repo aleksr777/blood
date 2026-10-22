@@ -66,8 +66,6 @@ const loadSavedRecordId = () => {
   }
 };
 
-const DEFAULT_MEDICAL_ORGANIZATION = 'ФБУЗ "Медико-санитарная часть №32" ФМБА России, г. Заречный.';
-
 type AutoField =
   | 'recipientAboRh'
   | 'recipientPhenotype'
@@ -154,7 +152,7 @@ const emptyDraft = (): DirectionDraft => ({
   recipientAge: '',
   department: '',
   medicalRecordNumber: '',
-  medicalOrganization: DEFAULT_MEDICAL_ORGANIZATION,
+  medicalOrganization: '',
   diagnosis: '',
   transfusionHistory: '',
   obstetricHistory: '',
@@ -167,16 +165,10 @@ const emptyDraft = (): DirectionDraft => ({
   autoValues: {},
 });
 
-const todayKey = () => {
-  const now = new Date();
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-};
-
 const loadDraft = (): DirectionDraft => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...emptyDraft(), directionDate: todayKey() };
+    if (!raw) return emptyDraft();
 
     const parsed = JSON.parse(raw) as Partial<DirectionDraft>;
     const blank = emptyDraft();
@@ -228,7 +220,6 @@ const loadDraft = (): DirectionDraft => {
           : {},
     } as DirectionDraft;
 
-    if (!next.directionDate) next.directionDate = todayKey();
     next.quantity = sanitizeDoseQuantity(next.quantity);
     next.indicationValues = {
       ...next.indicationValues,
@@ -236,7 +227,7 @@ const loadDraft = (): DirectionDraft => {
     };
     return next;
   } catch {
-    return { ...emptyDraft(), directionDate: todayKey() };
+    return emptyDraft();
   }
 };
 
@@ -296,7 +287,6 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
     autoValues,
   } as DirectionDraft;
 
-  if (!next.directionDate) next.directionDate = todayKey();
   next.quantity = sanitizeDoseQuantity(next.quantity);
   return next;
 };
@@ -565,7 +555,6 @@ export const IndividualSelectionDirection = () => {
               medicalOrganization: current.medicalOrganization,
               doctorName: current.doctorName,
               doctorPhone: current.doctorPhone,
-              directionDate: todayKey(),
             }
           : current;
       let next = mergeAutoValues(base, recipient, autoValues);
@@ -767,11 +756,7 @@ export const IndividualSelectionDirection = () => {
   const clear = async () => {
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
-    const next = mergeAutoValues(
-      { ...emptyDraft(), directionDate: todayKey() },
-      recipient,
-      autoValues,
-    );
+    const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
     const sharedIndividualSelectionIndications =
       recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
         ? readCurrentIndividualSelectionIndications(recipient.id)
@@ -797,11 +782,7 @@ export const IndividualSelectionDirection = () => {
   const newBlank = async () => {
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
-    const next = mergeAutoValues(
-      { ...emptyDraft(), directionDate: todayKey() },
-      recipient,
-      autoValues,
-    );
+    const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
     const sharedIndividualSelectionIndications =
       recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
         ? readCurrentIndividualSelectionIndications(recipient.id)

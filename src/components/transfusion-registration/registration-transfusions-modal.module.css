@@ -7,43 +7,6 @@
   gap: 1rem;
 }
 
-.filterRow {
-  display: flex;
-  align-items: end;
-  gap: 1rem;
-}
-
-.periodField {
-  display: grid;
-  gap: 0.4rem;
-  color: #263552;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.periodField input {
-  width: 8rem;
-  min-height: var(--control-height);
-  border: 1px solid var(--control-border);
-  border-radius: var(--control-radius);
-  padding: var(--control-padding-y) var(--control-padding-x);
-  background: #fff;
-  color: #111827;
-  font: inherit;
-}
-
-.periodField input:focus {
-  border-color: #2563eb;
-  outline: 2px solid rgb(37 99 235 / 16%);
-  outline-offset: 1px;
-}
-
-.filterHint {
-  padding-bottom: 0.45rem;
-  color: #64748b;
-  font-size: 0.82rem;
-}
-
 .summary {
   color: #475569;
   font-size: 0.84rem;
@@ -179,18 +142,9 @@
 }
 
 @media (max-width: 700px) {
-  .filterRow,
   .itemTopLine {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .filterHint {
-    padding-bottom: 0;
-  }
-
-  .periodField input {
-    width: 100%;
   }
 
   .itemTopLine > span {

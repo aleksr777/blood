@@ -21,6 +21,8 @@ type Props = {
   value: string;
   fixedOptions?: string[];
   rememberOnBlur?: boolean;
+  disabled?: boolean;
+  wrapOptions?: boolean;
   onChange: (value: string, previousOptionValue?: string) => void;
 };
 
@@ -31,6 +33,8 @@ export const SavedOptionsField = ({
   value,
   fixedOptions = [],
   rememberOnBlur = false,
+  disabled = false,
+  wrapOptions = false,
   onChange,
 }: Props) => {
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
@@ -109,6 +113,7 @@ export const SavedOptionsField = ({
           type="text"
           autoComplete="off"
           value={value}
+          disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
           onBlur={() => {
             if (rememberOnBlur && value.trim()) {
@@ -123,13 +128,16 @@ export const SavedOptionsField = ({
           className={styles.historyToggle}
           aria-label={`Показать сохранённые варианты: ${label}`}
           aria-expanded={open}
+          disabled={disabled}
           onClick={() => setOpen((current) => !current)}
         >
           ▾
         </button>
       </div>
       <div
-        className={styles.historyDropdown}
+        className={[styles.historyDropdown, wrapOptions ? styles.historyDropdownWrap : '']
+          .filter(Boolean)
+          .join(' ')}
         data-state={dropdownState}
         aria-hidden={dropdownState !== 'open'}
       >
@@ -138,7 +146,7 @@ export const SavedOptionsField = ({
             <button
               type="button"
               className={styles.historyValue}
-              title="Подставить значение"
+              title={option}
               onClick={() => {
                 onChange(option);
                 setOpen(false);

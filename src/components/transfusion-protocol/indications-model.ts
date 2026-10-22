@@ -1,12 +1,6 @@
 import { INDICATION_FIELDS_BY_COMPONENT } from '../../storage/indication-fields';
 import type { ProtocolValues } from './protocol-types';
 
-export const INDICATION_COMPONENTS = [
-  { value: 'erythrocytes', label: 'Эритроциты' },
-  { value: 'plasma-cryo', label: 'Плазма' },
-  { value: 'platelets', label: 'Тромбоциты' },
-] as const;
-
 export const getIndicationComponent = (values: ProtocolValues) =>
   values.componentGroup || values.indicationComponent || '';
 

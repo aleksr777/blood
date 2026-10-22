@@ -8,38 +8,20 @@ import {
   normalizeBloodGroupRh,
   RH_OPTIONS,
 } from '../transfusion-protocol/blood-group-select-field';
+import { IndicationsFields } from '../transfusion-protocol/indications-fields';
 import {
-  IndicationComponentSelector,
-  IndicationsFields,
-} from '../transfusion-protocol/indications-fields';
+  BloodComponentSelector,
+  type BloodComponentSelection,
+} from '../blood-component-selector/blood-component-selector';
+import {
+  BLOOD_COMPONENTS,
+  getBloodComponentNameCategory,
+  inferBloodComponentGroup,
+} from '../../domain/blood-components';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
-import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import { sanitizeDoseQuantity } from './dose-quantity';
 import editorStyles from '../transfusion-protocol/protocol-editor.module.css';
 import styles from './individual-selection-component-modal.module.css';
-
-const REQUIRED_COMPONENT_CATEGORY = 'individualSelectionRequiredComponent';
-const REQUIRED_COMPONENT_FIXED_OPTIONS = ['эритроцитная взвесь', 'отмытые эритроциты'];
-
-const REQUEST_REQUIRED_COMPONENT_CONFIG: Record<
-  string,
-  { category: string; fixedOptions: string[] }
-> = {
-  erythrocytes: {
-    category: 'componentRequestRequiredComponent:erythrocytes',
-    fixedOptions: ['эритроцитная взвесь', 'отмытые эритроциты'],
-  },
-  'plasma-cryo': {
-    category: 'componentRequestRequiredComponent:plasma',
-    fixedOptions: ['свежезамороженная плазма'],
-  },
-  platelets: {
-    category: 'componentRequestRequiredComponent:platelets',
-    fixedOptions: ['тромбоциты', 'концентрат тромбоцитов'],
-  },
-};
-
-const UNSELECTED_REQUEST_COMPONENT_CATEGORY = 'componentRequestRequiredComponent:unselected';
 
 type Props = {
   requiredComponent: string;
@@ -79,30 +61,27 @@ export const IndividualSelectionComponentModal = ({
   const component =
     fixedIndicationComponent ||
     indicationValues.componentGroup ||
-    indicationValues.indicationComponent;
-  const effectiveIndicationValues = fixedIndicationComponent
-    ? {
-        ...indicationValues,
-        indicationComponent: fixedIndicationComponent,
-      }
-    : indicationValues;
+    indicationValues.indicationComponent ||
+    inferBloodComponentGroup(requiredComponent);
+  const effectiveIndicationValues = {
+    ...indicationValues,
+    componentGroup: component,
+    indicationComponent: component,
+  };
   const normalizedComponentRh = normalizeBloodGroupRh(componentRh);
   const componentBloodGroupTone = getBloodGroupTone(normalizedComponentRh);
   const isErythrocytes = component === 'erythrocytes';
   const requiresIndividualSelection =
     isErythrocytes && componentSelectionRequirement === 'individual';
-  const requestComponentConfig = showRequestOptions
-    ? REQUEST_REQUIRED_COMPONENT_CONFIG[component]
-    : undefined;
-  const requiredComponentCategory =
-    requestComponentConfig?.category ??
-    (showRequestOptions ? UNSELECTED_REQUEST_COMPONENT_CATEGORY : REQUIRED_COMPONENT_CATEGORY);
+  const requiredComponentCategory = getBloodComponentNameCategory(component);
   const requiredComponentFixedOptions =
-    requestComponentConfig?.fixedOptions ??
-    (showRequestOptions ? [] : REQUIRED_COMPONENT_FIXED_OPTIONS);
+    BLOOD_COMPONENTS.find(({ value }) => value === component)?.names ?? [];
 
   const handleIndicationsChange = (changes: ProtocolValues) => {
-    onIndicationsChange(changes);
+    onIndicationsChange({
+      ...(component ? { componentGroup: component, indicationComponent: component } : {}),
+      ...changes,
+    });
 
     if (!showRequestOptions || !changes.indicationComponent) return;
 
@@ -122,6 +101,16 @@ export const IndividualSelectionComponentModal = ({
     }
   };
 
+  const handleComponentChange = ({ group, name }: BloodComponentSelection) => {
+    if (
+      group !== indicationValues.componentGroup ||
+      group !== indicationValues.indicationComponent
+    ) {
+      handleIndicationsChange({ componentGroup: group, indicationComponent: group });
+    }
+    onLocalChange({ requiredComponent: name });
+  };
+
   const setComponentSelectionRequirement = (value: string) => {
     onLocalChange({
       componentSelectionRequirement: value,
@@ -133,9 +122,7 @@ export const IndividualSelectionComponentModal = ({
     const isFixedOption = requiredComponentFixedOptions.some(
       (option) => option.toLocaleLowerCase('ru-RU') === value.toLocaleLowerCase('ru-RU'),
     );
-    const canRememberValue = !showRequestOptions || Boolean(requestComponentConfig);
-
-    if (value && !isFixedOption && canRememberValue) {
+    if (value && !isFixedOption && requiredComponentCategory) {
       void rememberSavedOption(requiredComponentCategory, value).catch((error: unknown) => {
         console.error('Не удалось сохранить вариант наименования требуемого компонента:', error);
       });
@@ -161,12 +148,13 @@ export const IndividualSelectionComponentModal = ({
           </div>
         )}
 
-        {!fixedIndicationComponent && (
-          <IndicationComponentSelector
-            values={indicationValues}
-            onChange={handleIndicationsChange}
-          />
-        )}
+        <BloodComponentSelector
+          group={component ?? ''}
+          name={requiredComponent}
+          inputName="requiredComponent"
+          fixedGroup={fixedIndicationComponent}
+          onChange={handleComponentChange}
+        />
 
         {showRequestOptions && (
           <>
@@ -196,21 +184,7 @@ export const IndividualSelectionComponentModal = ({
           </>
         )}
 
-        {(!fixedIndicationComponent || showRequestOptions) && <div className={styles.divider} />}
-
         <div className={styles.localGrid}>
-          <label className={styles.wide}>
-            <span>Наименование требуемого компонента</span>
-            <SavedOptionsField
-              name="requiredComponent"
-              label="Наименование требуемого компонента"
-              category={requiredComponentCategory}
-              value={requiredComponent}
-              fixedOptions={requiredComponentFixedOptions}
-              onChange={(value) => onLocalChange({ requiredComponent: value })}
-            />
-          </label>
-
           <label className={styles.quantityField}>
             <span>Количество доз</span>
             <input

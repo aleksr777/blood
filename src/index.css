@@ -1046,11 +1046,11 @@ a.site-navigation__link:focus-visible::after {
   display: inline-block;
   height: 4mm;
   border-bottom: 0.3mm solid #111;
-  padding: 0 0.8mm;
+  padding: 0;
   overflow: hidden;
   font-weight: 400;
   line-height: 4mm;
-  text-align: center;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

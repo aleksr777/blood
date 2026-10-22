@@ -1,20 +1,9 @@
 import type { ProtocolBlockConfig } from './protocol-types';
+import { getMonitoringFields, MONITORING_PERIODS } from './monitoring-model';
 
-const monitoringFields = [
-  ['before', 'Перед началом переливания'],
-  ['hour1', 'Через 1 час после переливания'],
-  ['hour2', 'Через 2 часа после переливания'],
-].flatMap(([prefix, period]) => [
-  { name: `${prefix}Bp`, label: `${period}: АД, мм рт. ст.` },
-  { name: `${prefix}Pulse`, label: `${period}: пульс, уд/мин`, type: 'number' as const },
-  {
-    name: `${prefix}Temperature`,
-    label: `${period}: температура, °C`,
-    type: 'number' as const,
-    step: '0.1',
-  },
-  { name: `${prefix}Urine`, label: `${period}: диурез, цвет мочи` },
-]);
+const monitoringFields = MONITORING_PERIODS.flatMap(({ prefix, title }) =>
+  getMonitoringFields(prefix).map((field) => ({ ...field, label: `${title}: ${field.label}` })),
+);
 
 export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
   {

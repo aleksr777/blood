@@ -58,13 +58,6 @@ export type SaveBloodRequestRecordInput = {
   values: BloodRequestRecordValues;
 };
 
-export type ComponentUnitNumberMatch = {
-  id: number;
-  recipientId: number;
-  recipientName: string;
-  transfusionDate: string;
-};
-
 export type ProtocolDraftState = {
   values: ProtocolValuesRecord;
   protocolRecordId: number | null;
@@ -101,7 +94,6 @@ export type DatabaseAction =
   | 'recipients:update'
   | 'recipients:remove'
   | 'protocol-records:list'
-  | 'protocol-records:find-component-unit'
   | 'protocol-records:save'
   | 'protocol-records:remove'
   | 'registration-records:list'

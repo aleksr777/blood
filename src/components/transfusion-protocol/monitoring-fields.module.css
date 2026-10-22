@@ -22,13 +22,36 @@
 
 .fields {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.vitals,
+.urine {
+  display: grid;
   gap: 0.75rem 1rem;
   min-width: 0;
 }
 
+.vitals {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 12rem) minmax(0, 10rem);
+  align-items: end;
+}
+
+.urine {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 @media (max-width: 720px) {
-  .fields {
+  .vitals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vitals > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .urine {
     grid-template-columns: 1fr;
   }
 }

@@ -93,6 +93,7 @@ export const SavedOptionsField = ({
       <div className={styles.departmentControl}>
         <input
           name={name}
+          aria-label={label}
           type="text"
           autoComplete="off"
           value={value}

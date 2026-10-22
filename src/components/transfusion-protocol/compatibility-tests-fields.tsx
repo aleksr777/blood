@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
-import { getReagentExpirationWarning } from './reagent-defaults';
+import { getReagentExpirationWarning, REAGENTS } from './reagent-defaults';
+import { ProtocolFieldControl } from './protocol-field-control';
 import type { ProtocolValues } from './protocol-types';
 import styles from './compatibility-tests-fields.module.css';
 
@@ -8,37 +9,6 @@ type Props = {
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
 };
-
-const REAGENTS = [
-  {
-    key: 'antiA',
-    title: 'Цоликлон "анти-A"',
-    series: 'reagentAntiASeries',
-    expiration: 'reagentAntiAExpiration',
-    manufacturer: 'reagentAntiAManufacturer',
-  },
-  {
-    key: 'antiB',
-    title: 'Цоликлон "анти-B"',
-    series: 'reagentAntiBSeries',
-    expiration: 'reagentAntiBExpiration',
-    manufacturer: 'reagentAntiBManufacturer',
-  },
-  {
-    key: 'antiAB',
-    title: 'Цоликлон "анти-AB"',
-    series: 'reagentAntiABSeries',
-    expiration: 'reagentAntiABExpiration',
-    manufacturer: 'reagentAntiABManufacturer',
-  },
-  {
-    key: 'antiD',
-    title: 'Цоликлон "анти-D"',
-    series: 'reagentAntiDSeries',
-    expiration: 'reagentAntiDExpiration',
-    manufacturer: 'reagentAntiDManufacturer',
-  },
-] as const;
 
 const DEFAULT_RESULTS = {
   confirmedRecipientAboResult: 'Подтверждено',
@@ -95,17 +65,14 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
           );
 
           return (
-            <fieldset key={reagent.key} className={styles.reagentGroup}>
+            <fieldset key={reagent.series} className={styles.reagentGroup}>
               <legend>{reagent.title}</legend>
               <div className={styles.reagentGrid}>
-                <label>
-                  <span>Серия</span>
-                  <input
-                    name={reagent.series}
-                    value={values[reagent.series] ?? ''}
-                    onChange={(event) => change(reagent.series, event.target.value)}
-                  />
-                </label>
+                <ProtocolFieldControl
+                  field={{ name: reagent.series, label: 'Серия' }}
+                  value={values[reagent.series] ?? ''}
+                  onChange={change}
+                />
                 <label>
                   <span>Годен до</span>
                   <input
@@ -115,14 +82,11 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
                     onChange={(event) => change(reagent.expiration, event.target.value)}
                   />
                 </label>
-                <label>
-                  <span>Производитель (коротко)</span>
-                  <input
-                    name={reagent.manufacturer}
-                    value={values[reagent.manufacturer] ?? ''}
-                    onChange={(event) => change(reagent.manufacturer, event.target.value)}
-                  />
-                </label>
+                <ProtocolFieldControl
+                  field={{ name: reagent.manufacturer, label: 'Производитель (коротко)' }}
+                  value={values[reagent.manufacturer] ?? ''}
+                  onChange={change}
+                />
               </div>
 
               {expirationWarning && (

@@ -1,5 +1,6 @@
 import { ProtocolFieldControl } from './protocol-field-control';
 import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
+import { getMonitoringFields, MONITORING_PERIODS } from './monitoring-model';
 import styles from './monitoring-fields.module.css';
 
 type Props = {
@@ -7,59 +8,31 @@ type Props = {
   onChange: (values: ProtocolValues) => void;
 };
 
-const GROUPS: Array<{
-  title: string;
-  fields: ProtocolFieldConfig[];
-}> = [
-  {
-    title: 'Перед началом переливания',
-    fields: [
-      { name: 'beforeBp', label: 'АД, мм рт. ст.' },
-      { name: 'beforePulse', label: 'Частота пульса, уд/мин', type: 'number' },
-      { name: 'beforeTemperature', label: 'Температура, °C', type: 'number', step: '0.1' },
-      { name: 'beforeUrine', label: 'Диурез, цвет мочи' },
-    ],
-  },
-  {
-    title: 'Через 1 час после переливания',
-    fields: [
-      { name: 'hour1Bp', label: 'АД, мм рт. ст.' },
-      { name: 'hour1Pulse', label: 'Частота пульса, уд/мин', type: 'number' },
-      { name: 'hour1Temperature', label: 'Температура, °C', type: 'number', step: '0.1' },
-      { name: 'hour1Urine', label: 'Диурез, цвет мочи' },
-    ],
-  },
-  {
-    title: 'Через 2 часа после переливания',
-    fields: [
-      { name: 'hour2Bp', label: 'АД, мм рт. ст.' },
-      { name: 'hour2Pulse', label: 'Частота пульса, уд/мин', type: 'number' },
-      { name: 'hour2Temperature', label: 'Температура, °C', type: 'number', step: '0.1' },
-      { name: 'hour2Urine', label: 'Диурез, цвет мочи' },
-    ],
-  },
-];
-
 export const MonitoringFields = ({ values, onChange }: Props) => {
   const changeValue = (name: string, value: string) => onChange({ [name]: value });
+  const renderField = (field: ProtocolFieldConfig) => (
+    <ProtocolFieldControl
+      key={field.name}
+      field={field}
+      value={values[field.name] ?? ''}
+      onChange={changeValue}
+    />
+  );
 
   return (
     <div className={styles.root}>
-      {GROUPS.map((group) => (
-        <fieldset key={group.title} className={styles.group}>
-          <legend>{group.title}</legend>
-          <div className={styles.fields}>
-            {group.fields.map((field) => (
-              <ProtocolFieldControl
-                key={field.name}
-                field={field}
-                value={values[field.name] ?? ''}
-                onChange={changeValue}
-              />
-            ))}
-          </div>
-        </fieldset>
-      ))}
+      {MONITORING_PERIODS.map(({ prefix, title }) => {
+        const fields = getMonitoringFields(prefix);
+        return (
+          <fieldset key={prefix} className={styles.group}>
+            <legend>{title}</legend>
+            <div className={styles.fields}>
+              <div className={styles.vitals}>{fields.slice(0, 3).map(renderField)}</div>
+              <div className={styles.urine}>{fields.slice(3).map(renderField)}</div>
+            </div>
+          </fieldset>
+        );
+      })}
     </div>
   );
 };

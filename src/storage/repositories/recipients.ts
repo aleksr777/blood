@@ -17,11 +17,6 @@ export const removeRecipient = (id: number) => database.removeRecipient(id);
 export const listProtocolRecords = (recipientId: number) =>
   database.listProtocolRecords(recipientId);
 
-export const findProtocolRecordsByComponentUnitNumber = (
-  componentUnitNumber: string,
-  excludeRecordId: number | null,
-) => database.findProtocolRecordsByComponentUnitNumber(componentUnitNumber, excludeRecordId);
-
 export const removeProtocolRecord = (id: number) => database.removeProtocolRecord(id);
 
 export const saveProtocolRecord = (values: ProtocolValuesRecord) =>
@@ -50,7 +45,6 @@ export type {
   BloodRequestRecord,
   BloodRequestRecordKind,
   BloodRequestRecordValues,
-  ComponentUnitNumberMatch,
   ProtocolRecord,
   RecipientRecord,
   RegistrationRecord,

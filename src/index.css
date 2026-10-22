@@ -1040,13 +1040,20 @@ a.site-navigation__link:focus-visible::after {
 
 .registration-patient-line--meta {
   justify-content: flex-start;
+  gap: 2.6mm;
+}
+
+.registration-meta-group {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.8mm;
 }
 
 .registration-blank {
   display: inline-block;
   height: 4mm;
   border-bottom: 0.3mm solid #111;
-  padding: 0;
+  padding: 0 0 0 0.8mm;
   overflow: hidden;
   font-weight: 400;
   line-height: 4mm;
@@ -1060,14 +1067,8 @@ a.site-navigation__link:focus-visible::after {
   min-width: 40mm;
 }
 
-.registration-blank--day {
-  width: 7mm;
-}
 .registration-blank--date {
-  width: 24mm;
-}
-.registration-blank--year {
-  width: 13mm;
+  width: 25mm;
 }
 .registration-blank--sex {
   width: 20mm;

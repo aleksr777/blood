@@ -1,5 +1,6 @@
 import { rememberDepartment } from '../../storage/repositories/departments';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
+import { getBloodComponentNameCategory } from '../../domain/blood-components';
 import type { ProtocolValues } from './protocol-types';
 import { REAGENTS } from './reagent-defaults';
 import { URINE_COLOR_FIELDS, SHARED_SAVED_OPTION_GROUPS } from '../../domain/shared-saved-options';
@@ -31,9 +32,6 @@ export const getSavedOptionCategory = (fieldName: string) => {
   return SAVED_OPTION_FIELDS.has(fieldName) ? fieldName : null;
 };
 
-export const getComponentNameOptionCategory = (componentGroup?: string) =>
-  componentGroup ? `componentName:${componentGroup}` : null;
-
 const logStorageError = (fieldName: string, error: unknown) => {
   console.error(`Не удалось сохранить значение поля ${fieldName}:`, error);
 };
@@ -45,7 +43,9 @@ export const persistProtocolOptions = (values: ProtocolValues) => {
     );
   }
 
-  const componentNameCategory = getComponentNameOptionCategory(values.componentGroup);
+  const componentNameCategory = getBloodComponentNameCategory(
+    values.componentGroup || values.indicationComponent,
+  );
   if (componentNameCategory && values.componentName) {
     void rememberSavedOption(componentNameCategory, values.componentName).catch((error: unknown) =>
       logStorageError('componentName', error),

@@ -24,7 +24,6 @@
   min-width: 0;
 }
 
-.componentGroup,
 .group {
   min-width: 0;
   margin: 0;
@@ -33,73 +32,11 @@
   padding: 0.75rem 0.85rem;
 }
 
-.componentGroup legend,
 .group legend {
   padding: 0 0.35rem;
   color: #263552;
   font-size: 0.9rem;
   font-weight: 700;
-}
-
-.componentChoices {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 10.5rem));
-  justify-content: start;
-  gap: 0.55rem;
-}
-
-.componentButton {
-  min-width: 0;
-  min-height: 2.15rem;
-  border: 2px solid transparent;
-  border-radius: 0.5rem;
-  padding: 0.3rem 0.55rem;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.componentButton[data-component='erythrocytes'] {
-  background: #c62828;
-  color: #fff;
-}
-
-.componentButton[data-component='plasma-cryo'] {
-  background: #f6c945;
-  color: #2f2a16;
-}
-
-.componentButton[data-component='platelets'] {
-  background: #1565c0;
-  color: #fff;
-}
-
-.componentButton:disabled {
-  cursor: default;
-  opacity: 0.38;
-  filter: grayscale(0.45) saturate(0.65);
-  box-shadow: none;
-  transform: none;
-}
-
-.componentButton:focus-visible {
-  outline: 3px solid rgb(37 99 235 / 28%);
-  outline-offset: 2px;
-}
-
-.componentButton[data-selected='true'] {
-  border-color: #17213f;
-  box-shadow:
-    0 0 0 2px #fff inset,
-    0 0 0 2px rgb(23 33 63 / 16%),
-    0 4px 10px rgb(23 33 63 / 16%);
-  filter: saturate(1.08) brightness(1.03);
-}
-
-.componentNameField {
-  margin-top: 0.75rem;
 }
 
 .choiceGrid {
@@ -171,12 +108,5 @@
 @media (prefers-reduced-motion: reduce) {
   .resizeShell[data-ready='true'] {
     transition: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .componentChoices {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
   }
 }

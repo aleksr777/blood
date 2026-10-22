@@ -156,6 +156,12 @@
   color: #1d4ed8;
 }
 
+.historyToggle:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: default;
+}
+
 .historyDropdown {
   --dropdown-motion-duration: 120ms;
   --dropdown-motion-easing: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -255,6 +261,11 @@
 .historyValue:focus-visible {
   background: #eff6ff;
   color: #1d4ed8;
+}
+
+.historyDropdownWrap .historyValue {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .historyInput {

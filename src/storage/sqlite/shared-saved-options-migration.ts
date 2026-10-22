@@ -1,10 +1,19 @@
 import { SHARED_SAVED_OPTION_GROUPS } from '../../domain/shared-saved-options';
+import { BLOOD_COMPONENTS, getBloodComponentNameCategory } from '../../domain/blood-components';
+import { migrateLegacyComponentNames } from './legacy-component-names-migration';
 import type { SqliteDatabase } from './database';
 
 export const migrateSharedSavedOptions = (db: SqliteDatabase) => {
+  const groups = [
+    ...SHARED_SAVED_OPTION_GROUPS,
+    ...BLOOD_COMPONENTS.map(({ value, legacyCategories }) => ({
+      category: getBloodComponentNameCategory(value)!,
+      fields: legacyCategories,
+    })),
+  ];
   db.exec('BEGIN IMMEDIATE');
   try {
-    for (const { category, fields } of SHARED_SAVED_OPTION_GROUPS) {
+    for (const { category, fields } of groups) {
       const categories = fields.map((_, index) => `$legacy${index}`).join(', ');
       const legacyBind = Object.fromEntries(
         fields.map((field, index) => [`$legacy${index}`, field]),
@@ -28,6 +37,7 @@ export const migrateSharedSavedOptions = (db: SqliteDatabase) => {
         bind: legacyBind,
       });
     }
+    migrateLegacyComponentNames(db);
     db.exec('COMMIT');
   } catch (error) {
     db.exec('ROLLBACK');

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getReagentExpirationWarning, REAGENTS } from './reagent-defaults';
+import { updateReagentManufacturerFields } from './reagent-manufacturer-values';
 import { ProtocolFieldControl } from './protocol-field-control';
 import type { ProtocolValues } from './protocol-types';
 import styles from './compatibility-tests-fields.module.css';
@@ -41,7 +42,16 @@ const RADIO_GROUPS = [
 ] as const;
 
 export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
-  const change = (name: string, value: string) => onChange({ [name]: value });
+  const change = (name: string, value: string, previousOptionValue?: string) => {
+    const sharedOptionEdit =
+      previousOptionValue !== undefined &&
+      REAGENTS.some(({ manufacturer }) => manufacturer === name);
+    onChange(
+      sharedOptionEdit
+        ? updateReagentManufacturerFields(values, previousOptionValue, value)
+        : { [name]: value },
+    );
+  };
   const compatibilityDangerWarning = getCompatibilityDangerWarning(values);
   const showDonorAboConfirmation = values.componentGroup === 'erythrocytes';
 

@@ -1,17 +1,16 @@
 import { CustomSelectField } from './custom-select-field';
 import { DepartmentField } from './department-field';
-import { getSavedOptionCategory } from './saved-field-config';
+import { getSavedOptionCategory, isSharedSavedOptionCategory } from './saved-field-config';
 import { RecipientField } from './recipient-field';
 import { SavedOptionsField } from './saved-options-field';
 import styles from './protocol-editor.module.css';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import type { ProtocolFieldConfig } from './protocol-types';
-import { URINE_COLOR_OPTION_CATEGORY } from '../../domain/urine-color-options';
 
 type Props = {
   field: ProtocolFieldConfig;
   value: string;
-  onChange: (name: string, value: string) => void;
+  onChange: (name: string, value: string, previousOptionValue?: string) => void;
   onOpenRecipients?: () => void;
   onSelectRecipient?: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
 };
@@ -48,7 +47,8 @@ export const ProtocolFieldControl = ({
   onSelectRecipient,
 }: Props) => {
   const className = field.wide ? styles.wide : undefined;
-  const change = (nextValue: string) => onChange(field.name, nextValue);
+  const change = (nextValue: string, previousOptionValue?: string) =>
+    onChange(field.name, nextValue, previousOptionValue);
 
   if (field.name === 'recipientName') {
     return (
@@ -97,7 +97,7 @@ export const ProtocolFieldControl = ({
           name={field.name}
           label={field.label}
           category={category}
-          rememberOnBlur={category === URINE_COLOR_OPTION_CATEGORY}
+          rememberOnBlur={isSharedSavedOptionCategory(category)}
           value={value}
           onChange={change}
         />

@@ -243,7 +243,7 @@ export const DonorFields = ({ values, onChange }: Props) => {
   return (
     <div className={styles.root}>
       <fieldset className={componentStyles.componentGroup}>
-        <legend>Компонент крови</legend>
+        <legend>Группа компонентов крови</legend>
         <div className={componentStyles.componentChoices}>
           {INDICATION_COMPONENTS.map(({ value, label }) => (
             <button
@@ -268,9 +268,7 @@ export const DonorFields = ({ values, onChange }: Props) => {
 
         {selectedComponent && (
           <div className={componentStyles.componentNameField}>
-            <div className={editorStyles.fieldLabel}>
-              Точное наименование компонента донорской крови
-            </div>
+            <div className={editorStyles.fieldLabel}>Наименование компонента донорской крови</div>
             <ComponentNameInput
               value={componentName}
               fixedOptions={componentNameOptions}

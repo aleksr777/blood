@@ -33,6 +33,7 @@ export const BloodComponentSelector = ({
             key={value}
             type="button"
             className={styles.choice}
+            data-component={value}
             aria-pressed={selectedGroup === value}
             disabled={Boolean(fixedGroup)}
             onClick={() => onChange({ group: value, name: value === selectedGroup ? name : '' })}

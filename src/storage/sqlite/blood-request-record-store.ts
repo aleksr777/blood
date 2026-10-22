@@ -1,4 +1,5 @@
-import { getDatabase, type SqliteDatabase } from './database';
+import { getDatabase } from './database';
+import { storeFormRecord, withFormRecordTransaction } from './form-record-store';
 import type {
   BloodRequestRecord,
   BloodRequestRecordKind,
@@ -47,77 +48,31 @@ export const listBloodRequestRecords = async (
   return rows.map(mapRecord);
 };
 
-const insertRecord = ({
-  db,
-  recipientId,
-  kind,
-  values,
-  now,
-}: {
-  db: SqliteDatabase;
-  recipientId: number;
-  kind: BloodRequestRecordKind;
-  values: BloodRequestRecordValues;
-  now: number;
-}) => {
-  db.exec({
-    sql: `
-      INSERT INTO blood_request_records
-        (recipient_id, kind, values_json, created_at, updated_at)
-      VALUES ($recipientId, $kind, $values, $now, $now)
-    `,
-    bind: {
-      $recipientId: recipientId,
-      $kind: kind,
-      $values: JSON.stringify(values),
-      $now: now,
-    },
-  });
-
-  const rows = db.exec({
-    sql: 'SELECT last_insert_rowid() AS id',
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number }>;
-
-  return Number(rows[0].id);
-};
-
 export const saveBloodRequestRecord = async ({
   recipientId,
   kind,
   values,
 }: SaveBloodRequestRecordInput) => {
+  if (kind !== 'component-request' && kind !== 'individual-selection-direction') {
+    throw new Error('Неизвестный тип заявки или направления.');
+  }
   if (!Number.isSafeInteger(recipientId) || recipientId <= 0) {
     throw new Error('Выберите реципиента перед сохранением бланка.');
   }
 
   const db = await getDatabase();
-  const recipients = db.exec({
-    sql: 'SELECT id FROM recipients WHERE id = $id',
-    bind: { $id: recipientId },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<{ id: number }>;
-  if (!recipients.length) {
-    throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
-  }
-  const id = insertRecord({ db, recipientId, kind, values, now: Date.now() });
-
-  const rows = db.exec({
-    sql: `
-      SELECT id, recipient_id AS recipientId, kind, values_json AS valuesJson,
-        created_at AS createdAt, updated_at AS updatedAt
-      FROM blood_request_records
-      WHERE id = $id
-    `,
-    bind: { $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<Record<string, unknown>>;
-
-  if (!rows[0]) throw new Error('Не удалось сохранить бланк.');
-  return mapRecord(rows[0]);
+  return withFormRecordTransaction(db, () => {
+    const recipients = db.exec({
+      sql: 'SELECT id FROM recipients WHERE id = $id',
+      bind: { $id: recipientId },
+      rowMode: 'object',
+      returnValue: 'resultRows',
+    }) as Array<{ id: number }>;
+    if (!recipients.length) {
+      throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
+    }
+    return mapRecord(storeFormRecord(db, { recipientId, kind, values }));
+  });
 };
 
 export const removeBloodRequestRecord = async (id: number) => {

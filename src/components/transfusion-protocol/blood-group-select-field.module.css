@@ -11,9 +11,46 @@
 
 .antigenLabel {
   min-height: 1.15rem;
-  margin-bottom: 0.02rem;
-  color: #263552;
+  margin-bottom: 0.35rem;
+  color: #52657d;
   font-size: 1rem;
   font-weight: 700;
   line-height: 1;
+  text-align: center;
+}
+
+.antigenField {
+  border: 1px solid #d8e0ec;
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.4rem 0.4rem;
+  background: #fff;
+}
+
+.antigenField[data-tone='positive'] {
+  border-color: #e7bdc5;
+  background: #fff8f9;
+}
+
+.antigenField[data-tone='positive'] .antigenLabel {
+  color: #93424f;
+}
+
+.antigenField[data-tone='negative'] {
+  border-color: #bfd0e1;
+  background: #f5f9ff;
+}
+
+.antigenField[data-tone='negative'] .antigenLabel {
+  color: #3f617f;
+}
+
+.antigenField [aria-haspopup='listbox'] {
+  grid-template-columns: minmax(0, 1fr) 1.25rem;
+  min-height: 2.25rem;
+}
+
+.antigenField [aria-haspopup='listbox'] > span:first-child {
+  padding-right: 0;
+  padding-left: 1.25rem;
+  text-align: center;
 }

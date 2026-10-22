@@ -63,7 +63,7 @@ export const DonorFields = ({ values, onChange }: Props) => {
             label={label}
             options={ANTIGEN_OPTIONS}
             value={values[name] ?? ''}
-            emptyLabel=""
+            emptyLabel="Не выбрано"
             emptyDisplayLabel=""
             compact
             antigen

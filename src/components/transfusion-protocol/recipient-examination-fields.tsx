@@ -56,7 +56,7 @@ export const RecipientExaminationFields = ({
             label={label}
             options={ANTIGEN_OPTIONS}
             value={values[name] ?? ''}
-            emptyLabel=""
+            emptyLabel="Не выбрано"
             emptyDisplayLabel=""
             compact
             antigen

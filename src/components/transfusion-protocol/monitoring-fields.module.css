@@ -39,7 +39,11 @@
 }
 
 .urine {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+}
+
+.urine > label {
+  max-width: 10rem;
 }
 
 .legacyValue {

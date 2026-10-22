@@ -2,9 +2,18 @@ import { rememberDepartment } from '../../storage/repositories/departments';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import type { ProtocolValues } from './protocol-types';
 import { REAGENTS } from './reagent-defaults';
-import { URINE_COLOR_FIELDS, URINE_COLOR_OPTION_CATEGORY } from '../../domain/urine-color-options';
+import { URINE_COLOR_FIELDS, SHARED_SAVED_OPTION_GROUPS } from '../../domain/shared-saved-options';
 
-const urineColorFields = new Set<string>(URINE_COLOR_FIELDS);
+const sharedCategories = new Map<string, string>(
+  SHARED_SAVED_OPTION_GROUPS.flatMap(({ category, fields }) =>
+    fields.map((field) => [field, category] as const),
+  ),
+);
+const sharedCategoryNames = new Set<string>(
+  SHARED_SAVED_OPTION_GROUPS.map(({ category }) => category),
+);
+
+export const isSharedSavedOptionCategory = (category: string) => sharedCategoryNames.has(category);
 
 const SAVED_OPTION_FIELDS = new Set([
   'collectionOrganization',
@@ -17,7 +26,8 @@ const SAVED_OPTION_FIELDS = new Set([
 ]);
 
 export const getSavedOptionCategory = (fieldName: string) => {
-  if (urineColorFields.has(fieldName)) return URINE_COLOR_OPTION_CATEGORY;
+  const sharedCategory = sharedCategories.get(fieldName);
+  if (sharedCategory) return sharedCategory;
   return SAVED_OPTION_FIELDS.has(fieldName) ? fieldName : null;
 };
 

@@ -21,7 +21,7 @@ type Props = {
   value: string;
   fixedOptions?: string[];
   rememberOnBlur?: boolean;
-  onChange: (value: string) => void;
+  onChange: (value: string, previousOptionValue?: string) => void;
 };
 
 export const SavedOptionsField = ({
@@ -64,7 +64,7 @@ export const SavedOptionsField = ({
         setItems(nextItems);
         setStatus('ready');
         if (edit && normalizeValue(value) === normalizeValue(edit.previousValue)) {
-          onChange(edit.value);
+          onChange(edit.value, edit.previousValue);
         }
       }),
     [category, value, onChange],

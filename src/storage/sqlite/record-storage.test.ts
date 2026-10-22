@@ -12,6 +12,7 @@ vi.mock('./database', () => ({ getDatabase: async () => state.db }));
 const hemacon = {
   componentName: 'Эритроцитная взвесь',
   componentUnitNumber: '76102200045636',
+  donorAbo: 'A(II)',
   amountMl: '250',
   expirationDate: '2026-12-31',
 };
@@ -150,12 +151,12 @@ describe('saved form snapshots', () => {
     expect(await listProtocolRecords(recipient.id)).toEqual([original]);
   });
 
-  it.each([
+  it.each<Record<string, string>>([
     { componentName: '' },
     { componentUnitNumber: '' },
     { componentUnitNumber: '761022' },
-    { amountMl: '0' },
-    { expirationDate: '' },
+    { donorAbo: '' },
+    { donorAbo: ' ', recipientAbo: 'A(II)' },
   ])(
     'rejects incomplete hemacon data before changing the recipient or archive: %j',
     async (missing) => {
@@ -172,6 +173,20 @@ describe('saved form snapshots', () => {
       expect(await listProtocolRecords(recipient.id)).toEqual([]);
     },
   );
+
+  it('saves a protocol with just the three required hemacon fields', async () => {
+    const recipient = await createRecipient('Тестовый Реципиент');
+    const values = {
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+      componentName: hemacon.componentName,
+      componentUnitNumber: hemacon.componentUnitNumber,
+      donorAbo: hemacon.donorAbo,
+    };
+    const record = await saveProtocolRecord(values);
+    expect(record.values).toEqual(values);
+    expect(await listProtocolRecords(recipient.id)).toEqual([record]);
+  });
 
   it('updates only the most recently saved matching record when legacy duplicates exist', async () => {
     const recipient = await createRecipient('Тест Старых Дублей');

@@ -9,6 +9,12 @@ import { listBloodRequestRecords, saveBloodRequestRecord } from './blood-request
 
 const state = vi.hoisted(() => ({ db: null as Database | null }));
 vi.mock('./database', () => ({ getDatabase: async () => state.db }));
+const hemacon = {
+  componentName: 'Эритроцитная взвесь',
+  componentUnitNumber: '76102200045636',
+  amountMl: '250',
+  expirationDate: '2026-12-31',
+};
 
 let sqlite3: Sqlite3Static;
 beforeAll(async () => {
@@ -28,7 +34,7 @@ describe('saved form snapshots', () => {
       recipientName: recipient.fullName,
       recipientBirthDate: '1980-01-02',
       diagnosis: 'Исходный диагноз',
-      componentUnitNumber: '12345678901234',
+      ...hemacon,
     };
     const protocol = await saveProtocolRecord(values);
     const registration = await saveRegistrationRecord(values);
@@ -55,12 +61,20 @@ describe('saved form snapshots', () => {
     });
   });
 
-  it('appends changed protocols and registration forms while retaining the original versions', async () => {
+  it('creates a new protocol for a different unit number and retains earlier records', async () => {
     const recipient = await createRecipient('Тестовый Реципиент');
-    const values = { recipientId: String(recipient.id), recipientName: recipient.fullName };
+    const values = {
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+      ...hemacon,
+    };
     const originalProtocol = await saveProtocolRecord({ ...values, amountMl: '250' });
     const originalRegistration = await saveRegistrationRecord({ ...values, roomNumber: '1' });
-    const editedProtocol = await saveProtocolRecord({ ...values, amountMl: '300' });
+    const editedProtocol = await saveProtocolRecord({
+      ...values,
+      componentUnitNumber: '76102200045736',
+      amountMl: '300',
+    });
     const editedRegistration = await saveRegistrationRecord({ ...values, roomNumber: '2' });
     expect(editedProtocol.id).not.toBe(originalProtocol.id);
     expect(editedRegistration.id).not.toBe(originalRegistration.id);
@@ -69,6 +83,119 @@ describe('saved form snapshots', () => {
       editedRegistration,
       originalRegistration,
     ]);
+  });
+
+  it('updates the same recipient and unit number, preserving the ID and creation time', async () => {
+    const recipient = await createRecipient('Тестовый Реципиент');
+    const values = {
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+      ...hemacon,
+    };
+    vi.spyOn(Date, 'now').mockReturnValue(1000);
+    const original = await saveProtocolRecord(values);
+    vi.mocked(Date.now).mockReturnValue(2000);
+    const edited = await saveProtocolRecord({
+      ...values,
+      componentUnitNumber: '761022 000456 36',
+      amountMl: '300',
+    });
+    expect(edited).toMatchObject({
+      id: original.id,
+      createdAt: 1000,
+      updatedAt: 2000,
+      values: { amountMl: '300' },
+    });
+    expect(await listProtocolRecords(recipient.id)).toEqual([edited]);
+    const repeated = await Promise.all(
+      Array.from({ length: 3 }, () => saveProtocolRecord(edited.values)),
+    );
+    expect(repeated.every((record) => record.id === original.id)).toBe(true);
+    expect(await listProtocolRecords(recipient.id)).toHaveLength(1);
+  });
+
+  it('keeps identical unit numbers in different recipients isolated', async () => {
+    const first = await createRecipient('Однофамилец Реципиент');
+    const second = await createRecipient(first.fullName);
+    const original = await saveProtocolRecord({
+      ...hemacon,
+      recipientId: String(first.id),
+      recipientName: first.fullName,
+    });
+    const other = await saveProtocolRecord({
+      ...hemacon,
+      recipientId: String(second.id),
+      recipientName: second.fullName,
+      amountMl: '300',
+    });
+    expect(other.id).not.toBe(original.id);
+    expect(await listProtocolRecords(first.id)).toEqual([original]);
+    expect(await listProtocolRecords(second.id)).toEqual([other]);
+  });
+
+  it('rolls back the recipient update if saving the matching protocol fails', async () => {
+    const recipient = await createRecipient('Исходное Имя');
+    const values = {
+      ...hemacon,
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    };
+    const original = await saveProtocolRecord(values);
+    state.db!.exec(`CREATE TRIGGER fail_protocol_update BEFORE UPDATE ON protocol_records
+      BEGIN SELECT RAISE(ABORT, 'Test write failure'); END`);
+    await expect(
+      saveProtocolRecord({ ...values, recipientName: 'Изменённое Имя', amountMl: '300' }),
+    ).rejects.toThrow('Test write failure');
+    expect((await getRecipientById(recipient.id)).fullName).toBe(recipient.fullName);
+    expect(await listProtocolRecords(recipient.id)).toEqual([original]);
+  });
+
+  it.each([
+    { componentName: '' },
+    { componentUnitNumber: '' },
+    { componentUnitNumber: '761022' },
+    { amountMl: '0' },
+    { expirationDate: '' },
+  ])(
+    'rejects incomplete hemacon data before changing the recipient or archive: %j',
+    async (missing) => {
+      const recipient = await createRecipient('Исходное Имя');
+      await expect(
+        saveProtocolRecord({
+          ...hemacon,
+          ...missing,
+          recipientId: String(recipient.id),
+          recipientName: 'Изменённое Имя',
+        }),
+      ).rejects.toThrow('Заполните данные гемакона');
+      expect((await getRecipientById(recipient.id)).fullName).toBe('Исходное Имя');
+      expect(await listProtocolRecords(recipient.id)).toEqual([]);
+    },
+  );
+
+  it('updates only the most recently saved matching record when legacy duplicates exist', async () => {
+    const recipient = await createRecipient('Тест Старых Дублей');
+    const values = {
+      ...hemacon,
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    };
+    const original = await saveProtocolRecord(values);
+    state.db!.exec({
+      sql: 'INSERT INTO protocol_records (recipient_id, values_json, created_at, updated_at) VALUES ($recipient, $values, $now, $now)',
+      bind: {
+        $recipient: recipient.id,
+        $values: JSON.stringify({ ...values, amountMl: '260' }),
+        $now: original.updatedAt + 1,
+      },
+    });
+    const [newest] = await listProtocolRecords(recipient.id);
+    const updated = await saveProtocolRecord({ ...values, amountMl: '300' });
+    expect(updated.id).toBe(newest.id);
+    const records = await listProtocolRecords(recipient.id);
+    expect(records).toHaveLength(2);
+    expect(records.find(({ id }) => id === original.id)).toEqual(original);
+    expect(records.find(({ id }) => id === newest.id)?.values.amountMl).toBe('300');
   });
 
   it('rejects requests for a deleted recipient rather than creating unreachable records', async () => {

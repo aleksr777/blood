@@ -445,6 +445,7 @@ a.site-navigation__link:focus-visible::after {
   transform: translateY(0);
 }
 
+.print-button:disabled,
 .clear-button:disabled,
 .new-button:disabled,
 .secondary-button:disabled,
@@ -1246,6 +1247,10 @@ a.site-navigation__link:focus-visible::after {
   }
 }
 
+.protocol-print-warning {
+  display: none;
+}
+
 @page {
   size: A4 portrait;
   margin: 0;
@@ -1273,6 +1278,33 @@ a.site-navigation__link:focus-visible::after {
 
   .app-header {
     display: none !important;
+  }
+
+  .protocol-app-shell[data-print-blocked='true'] .sheets {
+    display: none !important;
+  }
+
+  html[data-protocol-print-blocked='true'],
+  html[data-protocol-print-blocked='true'] body,
+  html[data-protocol-print-blocked='true'] #root,
+  .protocol-app-shell[data-print-blocked='true'] {
+    position: static !important;
+    width: 210mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  html[data-app-page='protocol'] dialog {
+    display: none !important;
+  }
+
+  .protocol-app-shell[data-print-blocked='true'] .protocol-print-warning {
+    display: block;
+    margin: 20mm;
+    font:
+      14pt Arial,
+      sans-serif;
   }
 
   .registration-patient-details {

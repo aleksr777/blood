@@ -63,9 +63,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
       .then((items) => {
         if (!active) return;
         setRecords(
-          [...items].sort(
-            (left, right) => right.updatedAt - left.updatedAt || right.id - left.id,
-          ),
+          [...items].sort((left, right) => right.updatedAt - left.updatedAt || right.id - left.id),
         );
       })
       .catch((error: unknown) => {

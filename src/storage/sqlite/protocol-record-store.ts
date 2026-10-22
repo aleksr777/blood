@@ -1,9 +1,11 @@
 import { getDatabase, type SqliteDatabase } from './database';
 import type { ComponentUnitNumberMatch, ProtocolValuesRecord } from './database-types';
-import { mapProtocol } from './recipient-data';
+import { mapProtocol, parseValues } from './recipient-data';
 import { upsertRecipient } from './recipient-profile-store';
-
-const normalizeComponentUnitNumber = (value?: string) => (value ?? '').replace(/\D/g, '');
+import {
+  getProtocolHemaconWarning,
+  normalizeComponentUnitNumber,
+} from '../../domain/protocol-hemacon';
 
 export const findProtocolRecordsByComponentUnitNumber = async (
   componentUnitNumber: string,
@@ -98,24 +100,57 @@ const insertProtocol = ({
 };
 
 export const saveProtocolRecord = async (values: ProtocolValuesRecord) => {
+  const warning = getProtocolHemaconWarning(values);
+  if (warning) throw new Error(warning);
+
   const db = await getDatabase();
   const selectedId = Number(values.recipientId);
-  const recipientId = upsertRecipient(
-    db,
-    values,
-    Number.isSafeInteger(selectedId) && selectedId > 0 ? selectedId : null,
-  );
-  const id = insertProtocol({ db, recipientId, values, now: Date.now() });
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const recipientId = upsertRecipient(
+      db,
+      values,
+      Number.isSafeInteger(selectedId) && selectedId > 0 ? selectedId : null,
+    );
+    const existing = db.exec({
+      sql: `
+        SELECT id, values_json AS valuesJson FROM protocol_records
+        WHERE recipient_id = $recipientId ORDER BY updated_at DESC, id DESC
+      `,
+      bind: { $recipientId: recipientId },
+      rowMode: 'object',
+      returnValue: 'resultRows',
+    }) as Array<{ id: number; valuesJson: string }>;
+    const number = normalizeComponentUnitNumber(values.componentUnitNumber);
+    const match = existing.find(
+      (record) =>
+        normalizeComponentUnitNumber(parseValues(record.valuesJson).componentUnitNumber) === number,
+    );
+    const savedValues = { ...values, recipientId: String(recipientId) };
+    const now = Date.now();
+    const id = match?.id ?? insertProtocol({ db, recipientId, values: savedValues, now });
+    if (match) {
+      db.exec({
+        sql: 'UPDATE protocol_records SET values_json = $values, updated_at = $now WHERE id = $id',
+        bind: { $values: JSON.stringify(savedValues), $now: now, $id: id },
+      });
+    }
 
-  const rows = db.exec({
-    sql: `
-      SELECT id, recipient_id AS recipientId, values_json AS valuesJson,
-        created_at AS createdAt, updated_at AS updatedAt
-      FROM protocol_records WHERE id = $id
-    `,
-    bind: { $id: id },
-    rowMode: 'object',
-    returnValue: 'resultRows',
-  }) as Array<Record<string, unknown>>;
-  return mapProtocol(rows[0]);
+    const rows = db.exec({
+      sql: `
+        SELECT id, recipient_id AS recipientId, values_json AS valuesJson,
+          created_at AS createdAt, updated_at AS updatedAt
+        FROM protocol_records WHERE id = $id
+      `,
+      bind: { $id: id },
+      rowMode: 'object',
+      returnValue: 'resultRows',
+    }) as Array<Record<string, unknown>>;
+    const record = mapProtocol(rows[0]);
+    db.exec('COMMIT');
+    return record;
+  } catch (error) {
+    db.exec('ROLLBACK');
+    throw error;
+  }
 };

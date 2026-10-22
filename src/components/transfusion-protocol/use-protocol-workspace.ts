@@ -28,6 +28,10 @@ import {
   getComponentUnitNumberWarning,
 } from './component-unit-number';
 import { hasHemaconData } from './donor-model';
+import {
+  getProtocolHemaconWarning,
+  normalizeComponentUnitNumber,
+} from '../../domain/protocol-hemacon';
 import { getIndicationComponent, indicationValuesForComponent } from './indications-model';
 import {
   getExpiredReagentWarnings,
@@ -162,19 +166,29 @@ export const useProtocolWorkspace = () => {
           return;
         }
 
-        const first = matches[0];
+        const recipientId = Number(values.recipientId);
+        const otherRecipients = matches.filter((match) => match.recipientId !== recipientId);
+        if (otherRecipients.length === 0) {
+          setDuplicateComponentUnitWarning({
+            key: `update:${recipientId}:${digits}`,
+            message: `У текущего реципиента уже есть протокол с номером гемакона ${formatComponentUnitNumber(digits)}. При сохранении он будет обновлён.`,
+          });
+          return;
+        }
+        const first = otherRecipients[0];
         const details = [
           first.recipientName,
           first.transfusionDate ? formatDate(first.transfusionDate) : '',
         ]
           .filter(Boolean)
           .join(', ');
-        const additional = matches.length > 1 ? ` Найдено совпадений: ${matches.length}.` : '';
+        const additional =
+          otherRecipients.length > 1 ? ` Найдено совпадений: ${otherRecipients.length}.` : '';
 
         setDuplicateComponentUnitWarning({
           key: `duplicate:${digits}:${matches.map(({ id }) => id).join(',')}`,
           message:
-            `Номер гемакона ${formatComponentUnitNumber(digits)} уже используется в другом бланке` +
+            `Номер гемакона ${formatComponentUnitNumber(digits)} уже используется в бланке другого реципиента` +
             `${details ? ` (${details})` : ''}.${additional} Проверьте правильность номера.`,
         });
       })
@@ -187,7 +201,7 @@ export const useProtocolWorkspace = () => {
     return () => {
       active = false;
     };
-  }, [recordId, values.componentUnitNumber]);
+  }, [recordId, values.componentUnitNumber, values.recipientId]);
 
   useEffect(() => {
     const recipientId = Number(values.recipientId);
@@ -209,8 +223,13 @@ export const useProtocolWorkspace = () => {
       .then((records) => {
         if (!active) return;
 
-        const previousRecords =
-          recordId === null ? records : records.filter(({ id }) => id !== recordId);
+        const currentNumber = normalizeComponentUnitNumber(values.componentUnitNumber);
+        const previousRecords = records.filter(
+          (record) =>
+            record.id !== recordId &&
+            (!currentNumber ||
+              normalizeComponentUnitNumber(record.values.componentUnitNumber) !== currentNumber),
+        );
         const now = new Date();
 
         setPreviousTransfusionSuggestion(buildPreviousTransfusionHistory(previousRecords, now));
@@ -236,7 +255,13 @@ export const useProtocolWorkspace = () => {
         window.clearTimeout(refreshTimer);
       }
     };
-  }, [historyRefreshToken, recordId, values.recipientId, values.transfusionDate]);
+  }, [
+    historyRefreshToken,
+    recordId,
+    values.recipientId,
+    values.transfusionDate,
+    values.componentUnitNumber,
+  ]);
 
   const saveValues = (nextValues: ProtocolValues) => {
     if (!Object.entries(nextValues).some(([key, value]) => (values[key] ?? '') !== value)) return;
@@ -322,20 +347,20 @@ export const useProtocolWorkspace = () => {
     }
   };
 
+  const validateHemacon = () => {
+    const warning = getProtocolHemaconWarning(values);
+    if (!warning) return true;
+    setStatus(warning);
+    setActiveBlock('donor');
+    return false;
+  };
+
   const saveToDatabase = async (afterPrint = false) => {
+    if (!validateHemacon()) return false;
     if (!values.recipientName?.trim()) {
       setStatus('Для сохранения укажите ФИО реципиента.');
       if (!afterPrint) setActiveBlock('general');
       return false;
-    }
-
-    if (recordId !== null) {
-      setStatus(
-        afterPrint
-          ? 'Сохранённый бланк не изменён.'
-          : 'Сохранённый бланк не изменён. Исходная запись оставлена без изменений.',
-      );
-      return true;
     }
 
     try {
@@ -348,7 +373,7 @@ export const useProtocolWorkspace = () => {
       return true;
     } catch (error) {
       console.error('Не удалось сохранить бланк в базе:', error);
-      setStatus('Не удалось сохранить бланк в базе.');
+      setStatus(error instanceof Error ? error.message : 'Не удалось сохранить бланк в базе.');
       return false;
     }
   };
@@ -359,6 +384,7 @@ export const useProtocolWorkspace = () => {
     let previousBlankSaved = false;
 
     if (hasHemaconData(values) && !openedFromDatabase) {
+      if (!validateHemacon()) return;
       if (!values.recipientName?.trim()) {
         setStatus(
           'Новый бланк не создан: для сохранения предыдущего бланка укажите ФИО реципиента.',
@@ -376,7 +402,11 @@ export const useProtocolWorkspace = () => {
         previousBlankSaved = true;
       } catch (error) {
         console.error('Не удалось автоматически сохранить предыдущий бланк:', error);
-        setStatus('Новый бланк не создан: не удалось автоматически сохранить предыдущий бланк.');
+        setStatus(
+          error instanceof Error
+            ? error.message
+            : 'Новый бланк не создан: не удалось автоматически сохранить предыдущий бланк.',
+        );
         return;
       }
     }
@@ -490,7 +520,7 @@ export const useProtocolWorkspace = () => {
     setRegistryOpen(false);
     setStatus(
       currentDataChanged
-        ? 'Сохранённый бланк открыт с актуальными данными текущего реципиента. При сохранении будет создан новый бланк.'
+        ? 'Бланк открыт с актуальными данными текущего реципиента. При сохранении запись с тем же номером гемакона будет обновлена.'
         : 'Сохранённый бланк открыт для просмотра и редактирования.',
     );
   };
@@ -595,6 +625,8 @@ export const useProtocolWorkspace = () => {
     saveValues,
     selectRecipient,
     saveToDatabase,
+    validateHemacon,
+    hemaconWarning: getProtocolHemaconWarning(values),
     newBlank,
     reagentWarning,
     compatibilityWarning,

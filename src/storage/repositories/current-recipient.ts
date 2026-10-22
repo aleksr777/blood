@@ -1,6 +1,7 @@
 import { resetCurrentIndications } from './current-indications';
 import { savePreviousRequestDrafts } from './request-drafts';
 import { runRecipientOperation } from './recipient-operation-queue';
+import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft';
 import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft';
 import {
@@ -249,6 +250,8 @@ const savePreviousProtocol = async (draft: ProtocolDraftState, nextRecipientId: 
     return false;
   }
 
+  const warning = getProtocolHemaconWarning(draft.values);
+  if (warning) throw new Error(warning);
   await saveProtocolRecord(draft.values);
   return true;
 };

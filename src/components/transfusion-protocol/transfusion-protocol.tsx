@@ -32,6 +32,14 @@ export const TransfusionProtocol = () => {
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
 
   useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.dataset.protocolPrintBlocked = String(Boolean(workspace.hemaconWarning));
+    return () => {
+      delete root.dataset.protocolPrintBlocked;
+    };
+  }, [workspace.hemaconWarning]);
+
+  useLayoutEffect(() => {
     const sheets = sheetsRef.current;
     if (!sheets) return undefined;
 
@@ -168,6 +176,7 @@ export const TransfusionProtocol = () => {
   };
 
   const printPage = (pageIndex: number) => {
+    if (!workspace.validateHemacon()) return;
     const root = document.documentElement;
     const sheetElements = Array.from(document.querySelectorAll<HTMLElement>('.sheets .sheet'));
 
@@ -188,10 +197,14 @@ export const TransfusionProtocol = () => {
   };
 
   return (
-    <main className="app-shell">
+    <main
+      className="app-shell protocol-app-shell"
+      data-print-blocked={Boolean(workspace.hemaconWarning)}
+    >
       <ProtocolToolbar
         status={workspace.status}
         warning={workspace.reagentWarning}
+        hemaconWarning={workspace.hemaconWarning}
         dangerWarning={workspace.compatibilityWarning}
         bloodGroupWarning={workspace.bloodGroupWarning}
         onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
@@ -225,6 +238,8 @@ export const TransfusionProtocol = () => {
         pageCount={pages.length}
         onPrintPage={printPage}
       />
+
+      <p className="protocol-print-warning">{workspace.hemaconWarning}</p>
 
       <div
         ref={sheetsRef}

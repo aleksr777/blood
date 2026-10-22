@@ -3,7 +3,12 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import { MonitorTable } from './monitor-table';
-import { formatMonitoringUrine, getMonitoringFields, MONITORING_PERIODS } from './monitoring-model';
+import {
+  formatMonitoringUrine,
+  getDiuresisInputValue,
+  getMonitoringFields,
+  MONITORING_PERIODS,
+} from './monitoring-model';
 
 afterEach(cleanup);
 
@@ -13,7 +18,11 @@ it.each(MONITORING_PERIODS)(
     const legacy = '100 мл, светло-жёлтая';
     const values = { [`${prefix}Urine`]: legacy };
     const fields = getMonitoringFields(prefix);
-    expect(fields.find(({ name }) => name === `${prefix}Urine`)?.label).toBe('Диурез');
+    expect(fields.find(({ name }) => name === `${prefix}Urine`)).toMatchObject({
+      label: 'Диурез, мл',
+      type: 'number',
+      step: 'any',
+    });
     expect(fields.find(({ name }) => name === `${prefix}UrineColor`)?.label).toBe('Цвет мочи');
     expect(formatMonitoringUrine(values, prefix)).toBe(legacy);
     render(<MonitorTable values={values} part={prefix === 'before' ? 'main' : prefix} />);
@@ -24,12 +33,23 @@ it.each(MONITORING_PERIODS)(
 it('prints both separately entered urine values without dropping either field', () => {
   render(
     <MonitorTable
-      values={{ beforeUrine: '150 мл', beforeUrineColor: 'Соломенно-жёлтая' }}
+      values={{ beforeUrine: '150', beforeUrineColor: 'Соломенно-жёлтая' }}
       part="main"
     />,
   );
   expect(screen.getByText('150 мл, Соломенно-жёлтая')).toBeTruthy();
   expect(formatMonitoringUrine({ hour1UrineColor: 'Жёлтая' }, 'hour1')).toBe('Жёлтая');
+  expect(formatMonitoringUrine({ hour1Urine: '0' }, 'hour1')).toBe('0 мл');
+  expect(formatMonitoringUrine({ hour2Urine: '125.5' }, 'hour2')).toBe('125,5 мл');
+});
+
+it('accepts existing volume notation without guessing a number from combined medical text', () => {
+  expect(getDiuresisInputValue(' 150 мл ')).toBe('150');
+  expect(getDiuresisInputValue('125,5')).toBe('125.5');
+  expect(getDiuresisInputValue('0')).toBe('0');
+  expect(getDiuresisInputValue('100 мл, светлая')).toBe('');
+  expect(getDiuresisInputValue('нет данных')).toBe('');
+  expect(getDiuresisInputValue('-10')).toBe('');
 });
 
 it('clears both monitoring fields when disconnecting a recipient while retaining reagent defaults', () => {

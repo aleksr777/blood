@@ -103,3 +103,22 @@ it('does not warn about saved unit number matches but still validates an incompl
   });
   expect(result.current.componentUnitNumberWarning).toContain('6 из 14 цифр');
 });
+
+it('retains every period when a shared color edit updates several fields in one batch', async () => {
+  const colors = ['beforeUrineColor', 'hour1UrineColor', 'hour2UrineColor'];
+  const { result } = await openDraft({
+    ...hemacon,
+    beforeUrine: '150',
+    ...Object.fromEntries(colors.map((name) => [name, 'Жёлтая'])),
+  });
+  for (const value of ['Светло-жёлтая', '']) {
+    await act(async () => {
+      for (const name of colors) result.current.saveValues({ [name]: value });
+    });
+    expect(result.current.values).toMatchObject({
+      ...hemacon,
+      beforeUrine: '150',
+      ...Object.fromEntries(colors.map((name) => [name, value])),
+    });
+  }
+});

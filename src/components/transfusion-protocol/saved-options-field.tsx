@@ -3,11 +3,16 @@ import {
   loadSavedOptions,
   removeSavedOption,
   renameSavedOption,
+  rememberSavedOption,
+  subscribeSavedOptions,
   type SavedOptionRecord,
 } from '../../storage/repositories/saved-options';
 import { SavedOptionItem } from './saved-option-item';
 import { useOverlayDropdown } from './use-overlay-dropdown';
 import styles from './protocol-editor.module.css';
+
+const normalizeValue = (value: string) =>
+  value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
 type Props = {
   name: string;
@@ -15,6 +20,7 @@ type Props = {
   category: string;
   value: string;
   fixedOptions?: string[];
+  rememberOnBlur?: boolean;
   onChange: (value: string) => void;
 };
 
@@ -24,6 +30,7 @@ export const SavedOptionsField = ({
   category,
   value,
   fixedOptions = [],
+  rememberOnBlur = false,
   onChange,
 }: Props) => {
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
@@ -51,25 +58,30 @@ export const SavedOptionsField = ({
     };
   }, [category]);
 
+  useEffect(
+    () =>
+      subscribeSavedOptions(category, ({ items: nextItems, edit }) => {
+        setItems(nextItems);
+        setStatus('ready');
+        if (edit && normalizeValue(value) === normalizeValue(edit.previousValue)) {
+          onChange(edit.value);
+        }
+      }),
+    [category, value, onChange],
+  );
+
   const rename = async (item: SavedOptionRecord, nextValue: string) => {
     try {
-      setItems(await renameSavedOption(category, item.id, nextValue.trim()));
-      if (value === item.value) onChange(nextValue.trim());
+      await renameSavedOption(category, item.id, nextValue.trim());
     } catch (error) {
       console.error(`Не удалось изменить значение ${category}:`, error);
     }
   };
 
   const remove = async (item: SavedOptionRecord) => {
-    const previous = items;
-    setItems((current) => current.filter(({ id }) => id !== item.id));
-    if (value === item.value) onChange('');
-
     try {
-      setItems(await removeSavedOption(category, item.id));
+      await removeSavedOption(category, item.id);
     } catch (error) {
-      setItems(previous);
-      if (value === item.value) onChange(item.value);
       console.error(`Не удалось удалить значение ${category}:`, error);
     }
   };
@@ -98,6 +110,13 @@ export const SavedOptionsField = ({
           autoComplete="off"
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          onBlur={() => {
+            if (rememberOnBlur && value.trim()) {
+              void rememberSavedOption(category, value).catch((error: unknown) =>
+                console.error(`Не удалось сохранить значение ${category}:`, error),
+              );
+            }
+          }}
         />
         <button
           type="button"

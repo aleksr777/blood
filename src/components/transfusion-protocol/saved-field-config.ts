@@ -2,7 +2,9 @@ import { rememberDepartment } from '../../storage/repositories/departments';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import type { ProtocolValues } from './protocol-types';
 import { REAGENTS } from './reagent-defaults';
-import { MONITORING_PERIODS } from './monitoring-model';
+import { URINE_COLOR_FIELDS, URINE_COLOR_OPTION_CATEGORY } from '../../domain/urine-color-options';
+
+const urineColorFields = new Set<string>(URINE_COLOR_FIELDS);
 
 const SAVED_OPTION_FIELDS = new Set([
   'collectionOrganization',
@@ -11,11 +13,13 @@ const SAVED_OPTION_FIELDS = new Set([
   'doctorName',
   'nurseName',
   ...REAGENTS.flatMap(({ series, manufacturer }) => [series, manufacturer]),
-  ...MONITORING_PERIODS.flatMap(({ prefix }) => [`${prefix}Urine`, `${prefix}UrineColor`]),
+  ...URINE_COLOR_FIELDS,
 ]);
 
-export const getSavedOptionCategory = (fieldName: string) =>
-  SAVED_OPTION_FIELDS.has(fieldName) ? fieldName : null;
+export const getSavedOptionCategory = (fieldName: string) => {
+  if (urineColorFields.has(fieldName)) return URINE_COLOR_OPTION_CATEGORY;
+  return SAVED_OPTION_FIELDS.has(fieldName) ? fieldName : null;
+};
 
 export const getComponentNameOptionCategory = (componentGroup?: string) =>
   componentGroup ? `componentName:${componentGroup}` : null;
@@ -42,7 +46,7 @@ export const persistProtocolOptions = (values: ProtocolValues) => {
     const value = values[fieldName];
     if (!value) return;
 
-    void rememberSavedOption(fieldName, value).catch((error: unknown) =>
+    void rememberSavedOption(getSavedOptionCategory(fieldName)!, value).catch((error: unknown) =>
       logStorageError(fieldName, error),
     );
   });

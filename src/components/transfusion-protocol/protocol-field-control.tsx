@@ -6,6 +6,7 @@ import { SavedOptionsField } from './saved-options-field';
 import styles from './protocol-editor.module.css';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import type { ProtocolFieldConfig } from './protocol-types';
+import { URINE_COLOR_OPTION_CATEGORY } from '../../domain/urine-color-options';
 
 type Props = {
   field: ProtocolFieldConfig;
@@ -96,6 +97,7 @@ export const ProtocolFieldControl = ({
           name={field.name}
           label={field.label}
           category={category}
+          rememberOnBlur={category === URINE_COLOR_OPTION_CATEGORY}
           value={value}
           onChange={change}
         />

@@ -4,6 +4,7 @@ import { migrateLegacyOpfsDepartments } from './legacy-opfs-migration';
 import { migrateRecipientNameConstraint } from './recipient-name-migration';
 import { DatabaseError } from './database-errors';
 import type { DatabaseStartupReporter } from './database-startup';
+import { migrateUrineColorOptions } from './urine-color-options-migration';
 
 const DATABASE_FILE = '/blood.sqlite3';
 const DATABASE_OWNER_LOCK = 'blood-opfs-sahpool-owner';
@@ -92,6 +93,7 @@ const openDatabase = async (onProgress?: DatabaseStartupReporter) => {
 
     onProgress?.('schema');
     initializeSchema(db);
+    migrateUrineColorOptions(db);
 
     migrateRecipientNameConstraint(db);
 

@@ -233,7 +233,7 @@ export const useProtocolWorkspace = () => {
     if (hasReagentDefaultUpdate(appliedValues)) {
       saveReagentDefaults(merged);
     }
-    setValues(merged);
+    setValues((current) => ({ ...current, ...appliedValues }));
 
     const activeComponent = getIndicationComponent(merged);
     if (activeComponent && currentRecipient && Number(merged.recipientId) === currentRecipient.id) {

@@ -110,7 +110,7 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
     size: 'medium',
     fields: [
       { name: 'doctorName', label: 'ФИО врача', wide: true },
-      { name: 'nurseName', label: 'ФИО медицинской сестры', wide: true },
+      { name: 'nurseName', label: 'ФИО мед. сестры / мед. брата', wide: true },
     ],
   },
 ];

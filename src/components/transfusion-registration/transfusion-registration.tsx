@@ -24,44 +24,13 @@ import {
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
-import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
+import { formatDate, type ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { RegistrationPatientDetailsModal } from './registration-patient-details-modal';
 import { parseRegistrationTransfusionRows } from './registration-transfusion-table';
 import { RegistrationTransfusionsModal } from './registration-transfusions-modal';
 
 const ROW_COUNT = 14;
 const PENDING_REGISTRATION_RECORD_KEY = 'blood:registration-open-record';
-
-const BIRTH_MONTHS = [
-  'января',
-  'февраля',
-  'марта',
-  'апреля',
-  'мая',
-  'июня',
-  'июля',
-  'августа',
-  'сентября',
-  'октября',
-  'ноября',
-  'декабря',
-] as const;
-
-const getBirthDateParts = (value?: string) => {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value ?? '');
-  if (!match) return { day: '', month: '', year: '' };
-
-  const monthIndex = Number(match[2]) - 1;
-  if (monthIndex < 0 || monthIndex >= BIRTH_MONTHS.length) {
-    return { day: '', month: '', year: '' };
-  }
-
-  return {
-    day: String(Number(match[3])),
-    month: BIRTH_MONTHS[monthIndex],
-    year: match[1],
-  };
-};
 
 const readPendingRegistrationRecord = (): RegistrationRecord | null => {
   try {
@@ -132,7 +101,7 @@ export const TransfusionRegistration = () => {
   const storedCurrentRecipient = readCurrentRecipient();
   const currentRecipientProfile =
     storedCurrentRecipient?.id === currentRecipientId ? storedCurrentRecipient.profile : {};
-  const birthDateParts = getBirthDateParts(values.recipientBirthDate);
+  const recipientBirthDate = formatDate(values.recipientBirthDate);
   const recipientAge = formatRecipientAge(values.recipientBirthDate);
   const registrationRows = parseRegistrationTransfusionRows(values);
 
@@ -496,33 +465,34 @@ export const TransfusionRegistration = () => {
             }}
           >
             <div className="registration-patient-line registration-patient-line--name">
-              <span>Фамилия, имя, отчество (при наличии)</span>
+              <span>Фамилия, имя, отчество (при наличии):</span>
               <span className="registration-blank registration-blank--name">
                 {values.recipientName ?? ''}
               </span>
             </div>
 
             <div className="registration-patient-line registration-patient-line--meta">
-              <span>Дата рождения «</span>
-              <span className="registration-blank registration-blank--day">
-                {birthDateParts.day}
+              <span className="registration-meta-group">
+                <span>Дата рождения:</span>
+                <span className="registration-blank registration-blank--date">
+                  {recipientBirthDate}
+                </span>
               </span>
-              <span>»</span>
-              <span className="registration-blank registration-blank--date">
-                {birthDateParts.month}
+              <span className="registration-meta-group">
+                <span>Пол:</span>
+                <span className="registration-blank registration-blank--sex">
+                  {values.recipientSex ?? ''}
+                </span>
               </span>
-              <span className="registration-blank registration-blank--year">
-                {birthDateParts.year}
+              <span className="registration-meta-group">
+                <span>Возраст:</span>
+                <span className="registration-blank registration-blank--age">{recipientAge}</span>
               </span>
-              <span>г. Пол</span>
-              <span className="registration-blank registration-blank--sex">
-                {values.recipientSex ?? ''}
-              </span>
-              <span>Возраст</span>
-              <span className="registration-blank registration-blank--age">{recipientAge}</span>
-              <span>№ медицинской карты</span>
-              <span className="registration-blank registration-blank--card">
-                {values.medicalRecordNumber ?? ''}
+              <span className="registration-meta-group">
+                <span>№ медицинской карты:</span>
+                <span className="registration-blank registration-blank--card">
+                  {values.medicalRecordNumber ?? ''}
+                </span>
               </span>
               <span>№ палаты</span>
               <span className="registration-blank registration-blank--room" />

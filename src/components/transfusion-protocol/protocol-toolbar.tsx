@@ -3,6 +3,7 @@ import { SiteNavigation } from '../site-navigation/site-navigation';
 type Props = {
   status: string;
   warning: string;
+  hemaconWarning: string;
   dangerWarning: string;
   bloodGroupWarning: string;
   onDismissBloodGroupWarning: () => void;
@@ -24,6 +25,7 @@ type Props = {
 export const ProtocolToolbar = ({
   status,
   warning,
+  hemaconWarning,
   dangerWarning,
   bloodGroupWarning,
   onDismissBloodGroupWarning,
@@ -61,7 +63,13 @@ export const ProtocolToolbar = ({
         <button type="button" className="secondary-button" onClick={onOpenRegistry}>
           Реципиенты
         </button>
-        <button type="button" className="save-button" onClick={onSave}>
+        <button
+          type="button"
+          className="save-button"
+          onClick={onSave}
+          disabled={Boolean(hemaconWarning)}
+          title={hemaconWarning || undefined}
+        >
           Сохранить
         </button>
         {Array.from({ length: pageCount }, (_, pageIndex) => (
@@ -70,11 +78,18 @@ export const ProtocolToolbar = ({
             type="button"
             className="print-button"
             onClick={() => onPrintPage(pageIndex)}
+            disabled={Boolean(hemaconWarning)}
+            title={hemaconWarning || undefined}
           >
             Печать страницы {pageIndex + 1}
           </button>
         ))}
       </div>
+      {hemaconWarning && (
+        <div className="toolbar-warning" role="alert">
+          {hemaconWarning}
+        </div>
+      )}
       {status && (
         <div className="toolbar-status" role="status">
           {status}

@@ -148,6 +148,8 @@ describe('current recipient profile', () => {
     const oldValues = {
       ...recipientProfileValuesForForms(recipient),
       componentUnitNumber: '12345678901234',
+      componentName: 'Эритроцитная взвесь',
+      expirationDate: '2026-12-31',
       amountMl: '250',
       endTime: '12:00',
       donorAbo: 'A(II)',
@@ -184,5 +186,34 @@ describe('current recipient profile', () => {
     expect(result.protocolValues.donorAbo).toBeUndefined();
     expect(result.protocolValues.endTime).toBeUndefined();
     expect(result.registrationValues.registrationTransfusionRows).toBeUndefined();
+  });
+
+  it('keeps an incomplete protocol draft when switching would require saving it', async () => {
+    const values = { ...recipientProfileValuesForForms(recipient), componentUnitNumber: '123456' };
+    adoptCurrentRecipientFromValues(values);
+    vi.mocked(loadProtocolDraft).mockResolvedValue({
+      values,
+      protocolRecordId: null,
+      updatedAt: Date.now(),
+    });
+    vi.mocked(loadRegistrationDraft).mockResolvedValue({
+      values: {},
+      registrationRecordId: null,
+      updatedAt: 0,
+    });
+    await expect(
+      switchCurrentRecipient({
+        ...recipient,
+        id: 2,
+        fullName: 'Другой Реципиент',
+        protocolCount: 0,
+        registrationCount: 0,
+        componentRequestCount: 0,
+        individualSelectionDirectionCount: 0,
+      }),
+    ).rejects.toThrow('Заполните данные гемакона');
+    expect(readCurrentRecipient()?.id).toBe(recipient.id);
+    expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+    expect(saveProtocolDraft).not.toHaveBeenCalled();
   });
 });

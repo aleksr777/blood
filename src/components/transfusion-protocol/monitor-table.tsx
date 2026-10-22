@@ -1,4 +1,5 @@
 import type { ProtocolValues } from './protocol-types';
+import { formatMonitoringUrine } from './monitoring-model';
 
 type Props = {
   values: ProtocolValues;
@@ -41,7 +42,7 @@ export const MonitorTable = ({ values, part }: Props) => (
             <ValueCell>{values.beforeBp}</ValueCell>
             <ValueCell>{values.beforePulse}</ValueCell>
             <ValueCell>{values.beforeTemperature}</ValueCell>
-            <ValueCell>{values.beforeUrine}</ValueCell>
+            <ValueCell>{formatMonitoringUrine(values, 'before')}</ValueCell>
           </tr>
         </>
       )}
@@ -52,7 +53,7 @@ export const MonitorTable = ({ values, part }: Props) => (
           <ValueCell>{values.hour1Bp}</ValueCell>
           <ValueCell>{values.hour1Pulse}</ValueCell>
           <ValueCell>{values.hour1Temperature}</ValueCell>
-          <ValueCell>{values.hour1Urine}</ValueCell>
+          <ValueCell>{formatMonitoringUrine(values, 'hour1')}</ValueCell>
         </tr>
       )}
 
@@ -62,7 +63,7 @@ export const MonitorTable = ({ values, part }: Props) => (
           <ValueCell>{values.hour2Bp}</ValueCell>
           <ValueCell>{values.hour2Pulse}</ValueCell>
           <ValueCell>{values.hour2Temperature}</ValueCell>
-          <ValueCell>{values.hour2Urine}</ValueCell>
+          <ValueCell>{formatMonitoringUrine(values, 'hour2')}</ValueCell>
         </tr>
       )}
     </tbody>

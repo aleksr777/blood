@@ -27,14 +27,17 @@ const recipientMonitoringFields = new Set([
   'beforePulse',
   'beforeTemperature',
   'beforeUrine',
+  'beforeUrineColor',
   'hour1Bp',
   'hour1Pulse',
   'hour1Temperature',
   'hour1Urine',
+  'hour1UrineColor',
   'hour2Bp',
   'hour2Pulse',
   'hour2Temperature',
   'hour2Urine',
+  'hour2UrineColor',
 ]);
 
 const isRecipientLinkedProtocolField = (name: string) =>

@@ -3,7 +3,6 @@ import type { DatabaseStartupReporter, DatabaseStartupStage } from './database-s
 import type {
   BloodRequestRecord,
   BloodRequestRecordKind,
-  ComponentUnitNumberMatch,
   DatabaseAction,
   DepartmentRecord,
   ProtocolDraftState,
@@ -90,14 +89,6 @@ export const database = {
   removeRecipient: (id: number) => withDatabase<void>('recipients:remove', { id }),
   listProtocolRecords: (recipientId: number) =>
     withDatabase<ProtocolRecord[]>('protocol-records:list', { recipientId }),
-  findProtocolRecordsByComponentUnitNumber: (
-    componentUnitNumber: string,
-    excludeRecordId: number | null,
-  ) =>
-    withDatabase<ComponentUnitNumberMatch[]>('protocol-records:find-component-unit', {
-      componentUnitNumber,
-      excludeRecordId,
-    }),
   saveProtocolRecord: (values: ProtocolValuesRecord) =>
     withDatabase<ProtocolRecord>('protocol-records:save', { values }),
   removeProtocolRecord: (id: number) => withDatabase<void>('protocol-records:remove', { id }),

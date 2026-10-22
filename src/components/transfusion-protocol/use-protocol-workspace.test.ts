@@ -12,7 +12,6 @@ vi.mock('../../storage/sqlite/database-client', () => ({
     saveProtocolDraft: vi.fn(async () => undefined),
     clearProtocolDraft: vi.fn(async () => undefined),
     saveProtocolRecord: vi.fn(),
-    findProtocolRecordsByComponentUnitNumber: vi.fn(async () => []),
     listProtocolRecords: vi.fn(async () => []),
   },
 }));
@@ -26,6 +25,7 @@ beforeEach(() => {
   window.localStorage.clear();
   window.sessionStorage.clear();
   adoptCurrentRecipientFromValues(recipient);
+  vi.mocked(database.listProtocolRecords).mockResolvedValue([]);
   vi.mocked(database.saveProtocolRecord).mockImplementation(async (values) => ({
     id: 7,
     recipientId: 1,
@@ -82,4 +82,24 @@ it('autosaves a complete hemacon on New blank without requiring volume or expira
   });
   expect(result.current.values.componentUnitNumber).toBeUndefined();
   expect(result.current.recordId).toBeNull();
+});
+
+it('does not warn about saved unit number matches but still validates an incomplete number', async () => {
+  vi.mocked(database.listProtocolRecords).mockResolvedValue([
+    {
+      id: 7,
+      recipientId: 1,
+      values: { ...recipient, ...hemacon },
+      createdAt: 1000,
+      updatedAt: 1000,
+    },
+  ]);
+  const { result } = await openDraft(hemacon);
+  await waitFor(() => expect(database.listProtocolRecords).toHaveBeenCalled());
+  expect(result.current.componentUnitNumberWarning).toBe('');
+  await act(async () => {
+    result.current.saveValues({ componentUnitNumber: '761022' });
+    result.current.validateComponentUnitNumber({ componentUnitNumber: '761022' });
+  });
+  expect(result.current.componentUnitNumberWarning).toContain('6 из 14 цифр');
 });

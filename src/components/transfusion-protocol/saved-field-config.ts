@@ -1,6 +1,8 @@
 import { rememberDepartment } from '../../storage/repositories/departments';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import type { ProtocolValues } from './protocol-types';
+import { REAGENTS } from './reagent-defaults';
+import { MONITORING_PERIODS } from './monitoring-model';
 
 const SAVED_OPTION_FIELDS = new Set([
   'collectionOrganization',
@@ -8,6 +10,8 @@ const SAVED_OPTION_FIELDS = new Set([
   'responsiblePerson',
   'doctorName',
   'nurseName',
+  ...REAGENTS.flatMap(({ series, manufacturer }) => [series, manufacturer]),
+  ...MONITORING_PERIODS.flatMap(({ prefix }) => [`${prefix}Urine`, `${prefix}UrineColor`]),
 ]);
 
 export const getSavedOptionCategory = (fieldName: string) =>

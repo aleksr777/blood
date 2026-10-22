@@ -14,7 +14,6 @@ import {
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import {
-  findProtocolRecordsByComponentUnitNumber,
   listProtocolRecords,
   saveProtocolRecord,
   type ProtocolRecord,
@@ -22,11 +21,7 @@ import {
 } from '../../storage/repositories/recipients';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
-import {
-  formatComponentUnitNumber,
-  getComponentUnitDigits,
-  getComponentUnitNumberWarning,
-} from './component-unit-number';
+import { getComponentUnitNumberWarning } from './component-unit-number';
 import { hasHemaconData } from './donor-model';
 import {
   getProtocolHemaconWarning,
@@ -47,7 +42,7 @@ import {
 } from './previous-transfusion-history';
 import { currentRecipientValues } from './recipient-profile-values';
 import { useProtocolDraft } from './use-protocol-draft';
-import { formatDate, type ProtocolBlockId, type ProtocolValues } from './protocol-types';
+import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 
 const OPEN_WINDOW_STORAGE_KEY = 'blood:protocol-open-window';
 
@@ -104,10 +99,6 @@ export const useProtocolWorkspace = () => {
   const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
   const [componentUnitNumberChecked, setComponentUnitNumberChecked] = useState(false);
   const [dismissedComponentUnitWarningKey, setDismissedComponentUnitWarningKey] = useState('');
-  const [duplicateComponentUnitWarning, setDuplicateComponentUnitWarning] = useState({
-    key: '',
-    message: '',
-  });
   const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
   const [previousTransfusionSuggestion, setPreviousTransfusionSuggestion] = useState('');
   const previousBlankIndicationsRef = useRef<{
@@ -147,61 +138,6 @@ export const useProtocolWorkspace = () => {
     setRecordId,
     onExpire: handleDraftExpire,
   });
-
-  useEffect(() => {
-    const digits = getComponentUnitDigits(values.componentUnitNumber);
-    if (digits.length !== 14) {
-      setDuplicateComponentUnitWarning({ key: '', message: '' });
-      return undefined;
-    }
-
-    let active = true;
-
-    void findProtocolRecordsByComponentUnitNumber(values.componentUnitNumber ?? '', recordId)
-      .then((matches) => {
-        if (!active) return;
-
-        if (matches.length === 0) {
-          setDuplicateComponentUnitWarning({ key: '', message: '' });
-          return;
-        }
-
-        const recipientId = Number(values.recipientId);
-        const otherRecipients = matches.filter((match) => match.recipientId !== recipientId);
-        if (otherRecipients.length === 0) {
-          setDuplicateComponentUnitWarning({
-            key: `update:${recipientId}:${digits}`,
-            message: `У текущего реципиента уже есть протокол с номером гемакона ${formatComponentUnitNumber(digits)}. При сохранении он будет обновлён.`,
-          });
-          return;
-        }
-        const first = otherRecipients[0];
-        const details = [
-          first.recipientName,
-          first.transfusionDate ? formatDate(first.transfusionDate) : '',
-        ]
-          .filter(Boolean)
-          .join(', ');
-        const additional =
-          otherRecipients.length > 1 ? ` Найдено совпадений: ${otherRecipients.length}.` : '';
-
-        setDuplicateComponentUnitWarning({
-          key: `duplicate:${digits}:${matches.map(({ id }) => id).join(',')}`,
-          message:
-            `Номер гемакона ${formatComponentUnitNumber(digits)} уже используется в бланке другого реципиента` +
-            `${details ? ` (${details})` : ''}.${additional} Проверьте правильность номера.`,
-        });
-      })
-      .catch((error: unknown) => {
-        if (!active) return;
-        setDuplicateComponentUnitWarning({ key: '', message: '' });
-        console.error('Не удалось проверить номер гемакона на совпадения:', error);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [recordId, values.componentUnitNumber, values.recipientId]);
 
   useEffect(() => {
     const recipientId = Number(values.recipientId);
@@ -545,9 +481,8 @@ export const useProtocolWorkspace = () => {
   };
 
   const componentUnitNumberState = getComponentUnitNumberWarning(values);
-  const activeComponentUnitNumberWarning = duplicateComponentUnitWarning.key
-    ? duplicateComponentUnitWarning
-    : componentUnitNumberChecked && componentUnitNumberState.key
+  const activeComponentUnitNumberWarning =
+    componentUnitNumberChecked && componentUnitNumberState.key
       ? componentUnitNumberState
       : { key: '', message: '' };
 
@@ -566,7 +501,7 @@ export const useProtocolWorkspace = () => {
   const validateComponentUnitNumber = (nextValues: ProtocolValues = values) => {
     const nextWarning = getComponentUnitNumberWarning(nextValues);
     setComponentUnitNumberChecked(Boolean(nextWarning.key));
-    if (!nextWarning.key && !duplicateComponentUnitWarning.key) {
+    if (!nextWarning.key) {
       setDismissedComponentUnitWarningKey('');
     }
   };

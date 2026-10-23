@@ -464,18 +464,17 @@ export const useProtocolWorkspace = () => {
   const bloodGroupMismatch = getBloodGroupMismatch(values);
 
   useEffect(() => {
-    if (!bloodGroupMismatch.key) {
-      setDismissedBloodGroupWarningKey('');
-    }
+    setDismissedBloodGroupWarningKey('');
   }, [bloodGroupMismatch.key]);
 
   const bloodGroupWarning =
-    bloodGroupMismatch.key && bloodGroupMismatch.key !== dismissedBloodGroupWarningKey
+    bloodGroupMismatch.key &&
+    (!bloodGroupMismatch.dismissible || bloodGroupMismatch.key !== dismissedBloodGroupWarningKey)
       ? bloodGroupMismatch.message
       : '';
 
   const dismissBloodGroupWarning = () => {
-    if (bloodGroupMismatch.key) {
+    if (bloodGroupMismatch.key && bloodGroupMismatch.dismissible) {
       setDismissedBloodGroupWarningKey(bloodGroupMismatch.key);
     }
   };
@@ -566,6 +565,7 @@ export const useProtocolWorkspace = () => {
     reagentWarning,
     compatibilityWarning,
     bloodGroupWarning,
+    bloodGroupWarningDismissible: bloodGroupMismatch.dismissible,
     dismissBloodGroupWarning,
     componentUnitNumberWarning,
     validateComponentUnitNumber,

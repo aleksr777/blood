@@ -11,6 +11,7 @@ const props = (): ComponentProps<typeof ProtocolToolbar> => ({
   hemaconWarning: getProtocolHemaconWarning({}),
   dangerWarning: '',
   bloodGroupWarning: '',
+  bloodGroupWarningDismissible: false,
   onDismissBloodGroupWarning: vi.fn(),
   componentUnitNumberWarning: '',
   onDismissComponentUnitNumberWarning: vi.fn(),
@@ -42,7 +43,12 @@ it.each(['Сохранить', 'Печать страницы 1', 'Печать 
     expect(screen.queryByRole('alert')).toBeNull();
     expect(button.hasAttribute('title')).toBe(false);
     fireEvent.click(button);
-    expect(screen.getByRole('alert').textContent).toBe(callbacks.hemaconWarning);
+    expect(screen.getByText(callbacks.hemaconWarning)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Закрыть предупреждение' }));
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(button.getAttribute('aria-disabled')).toBe('true');
+    fireEvent.click(button);
+    expect(screen.getByText(callbacks.hemaconWarning)).toBeTruthy();
     expect(callbacks.onSave).not.toHaveBeenCalled();
     expect(callbacks.onPrintPage).not.toHaveBeenCalled();
   },
@@ -55,7 +61,7 @@ it('unlocks save and every print page with three fields and hides the warning fo
   expect(screen.getByRole('alert')).toBeTruthy();
   const partialWarning = getProtocolHemaconWarning({ componentName: 'Эритроцитная взвесь' });
   rerender(<ProtocolToolbar {...callbacks} hemaconWarning={partialWarning} />);
-  expect(screen.getByRole('alert').textContent).toBe(partialWarning);
+  expect(screen.getByText(partialWarning)).toBeTruthy();
   const hemaconWarning = getProtocolHemaconWarning({
     componentName: 'Эритроцитная взвесь',
     componentUnitNumber: '76102200045636',

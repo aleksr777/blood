@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { WarningNotice } from '../warning-notice/warning-notice';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getReagentExpirationWarning, REAGENTS } from './reagent-defaults';
 import { updateReagentManufacturerFields } from './reagent-manufacturer-values';
@@ -99,25 +100,16 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
                 />
               </div>
 
-              {expirationWarning && (
-                <div className={styles.reagentWarning} role="alert">
-                  <strong>Внимание:</strong> срок годности истёк{' '}
-                  {values[reagent.expiration] && (
-                    <span>{values[reagent.expiration].split('-').reverse().join('.')}</span>
-                  )}
-                  .
-                </div>
-              )}
+              <WarningNotice
+                className={styles.reagentWarning}
+                message={expirationWarning ? `Внимание: ${expirationWarning}.` : ''}
+              />
             </fieldset>
           );
         })}
       </div>
 
-      {compatibilityDangerWarning && (
-        <div className={styles.dangerWarning} role="alert">
-          {compatibilityDangerWarning}
-        </div>
-      )}
+      <WarningNotice message={compatibilityDangerWarning} danger />
 
       <div className={styles.results}>
         {RADIO_GROUPS.map((group) => {

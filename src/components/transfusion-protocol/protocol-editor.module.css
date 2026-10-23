@@ -420,12 +420,6 @@
   margin-top: 0.45rem;
 }
 
-.fieldWarningDismiss {
-  composes: ui-icon-button from global;
-  flex: 0 0 auto;
-  --icon-button-size: 1.75rem;
-}
-
 .historyEdit {
   composes: ui-icon-button from global;
 }

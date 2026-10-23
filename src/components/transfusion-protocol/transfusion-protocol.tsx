@@ -207,6 +207,7 @@ export const TransfusionProtocol = () => {
         hemaconWarning={workspace.hemaconWarning}
         dangerWarning={workspace.compatibilityWarning}
         bloodGroupWarning={workspace.bloodGroupWarning}
+        bloodGroupWarningDismissible={workspace.bloodGroupWarningDismissible}
         onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
         componentUnitNumberWarning={workspace.componentUnitNumberWarning}
         onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}
@@ -269,6 +270,7 @@ export const TransfusionProtocol = () => {
           blockId={workspace.activeBlock}
           values={workspace.values}
           bloodGroupWarning={workspace.bloodGroupWarning}
+          bloodGroupWarningDismissible={workspace.bloodGroupWarningDismissible}
           onDismissBloodGroupWarning={workspace.dismissBloodGroupWarning}
           componentUnitNumberWarning={workspace.componentUnitNumberWarning}
           onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}

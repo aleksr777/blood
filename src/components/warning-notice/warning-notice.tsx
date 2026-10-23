@@ -28,7 +28,22 @@ export const WarningNotice = ({
       className={`${danger ? ui.dangerNotice : ui.warningNotice} ${styles.notice} ${className}`}
       role="alert"
     >
-      <span className={styles.message}>{message}</span>
+      <div className={styles.message}>
+        {message.split('\n\n').map((paragraph, index) => {
+          const lines = paragraph.split('\n');
+          return lines.every((line) => line.startsWith('• ')) ? (
+            <ul key={index} className={styles.list}>
+              {lines.map((line, lineIndex) => (
+                <li key={lineIndex}>{line.slice(2)}</li>
+              ))}
+            </ul>
+          ) : (
+            <p key={index} className={index === 0 ? styles.title : undefined}>
+              {paragraph}
+            </p>
+          );
+        })}
+      </div>
       {dismissible && (
         <button
           type="button"

@@ -9,6 +9,6 @@ export const getProtocolHemaconWarning = (values: Record<string, string>) => {
   if (!values.donorAbo?.trim()) missing.push('группу крови гемакона');
 
   return missing.length
-    ? `Сохранение и печать протокола недоступны. Заполните данные гемакона: ${missing.join(', ')}.`
+    ? `Сохранение и печать протокола недоступны.\n\nЗаполните данные гемакона:\n\n${missing.map((field) => `• ${field}`).join('\n')}.`
     : '';
 };

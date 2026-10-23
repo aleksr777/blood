@@ -39,7 +39,6 @@
 }
 
 .reagentWarning {
-  composes: ui-notice ui-warning-notice from global;
   margin-top: 0.7rem;
 }
 

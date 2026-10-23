@@ -1,5 +1,6 @@
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
+import { WarningNotice } from '../warning-notice/warning-notice';
 import { Choice } from '../transfusion-protocol/indication-controls';
 import {
   ABO_OPTIONS,
@@ -134,18 +135,12 @@ export const IndividualSelectionComponentModal = ({
   return (
     <Modal title="Выбор компонента и показания" onClose={handleClose} className={styles.modal}>
       <div className={styles.root}>
-        {bloodGroupWarning && showRequestOptions && (
-          <div className={editorStyles.bloodGroupWarning} role="alert">
-            <span>{bloodGroupWarning}</span>
-            <button
-              type="button"
-              className={editorStyles.bloodGroupWarningDismiss}
-              aria-label="Закрыть предупреждение"
-              onClick={onDismissBloodGroupWarning}
-            >
-              ×
-            </button>
-          </div>
+        {showRequestOptions && (
+          <WarningNotice
+            className={editorStyles.bloodGroupWarning}
+            message={bloodGroupWarning}
+            onDismiss={onDismissBloodGroupWarning}
+          />
         )}
 
         <BloodComponentSelector

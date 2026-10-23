@@ -6,7 +6,30 @@
 }
 
 .message {
+  display: grid;
+  gap: 0.45rem;
   min-width: 0;
+  max-width: 85ch;
+  font-weight: 400;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.message p {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.list {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding-left: 1.2em;
 }
 
 .dismiss {

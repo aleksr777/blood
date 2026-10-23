@@ -543,7 +543,7 @@ export const useProtocolWorkspace = () => {
   const hemaconExpirationWarning = getHemaconExpirationWarning(values.expirationDate);
   const expirationWarnings = [hemaconExpirationWarning, ...expiredReagents].filter(Boolean);
   const reagentWarning = expirationWarnings.length
-    ? `Внимание: ${expirationWarnings.join('; ')}.`
+    ? `Внимание: истёк срок годности.\n\n${expirationWarnings.map((warning) => `• ${warning}`).join('\n')}.`
     : '';
   const compatibilityWarning = getCompatibilityDangerWarning(values);
 

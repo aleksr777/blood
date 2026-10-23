@@ -1,4 +1,5 @@
 import ui from '../../styles/ui';
+import { WarningNotice } from '../warning-notice/warning-notice';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
 import {
   useCallback,
@@ -1197,19 +1198,11 @@ export const ComponentRequest = () => {
               {status}
             </div>
           )}
-          {bloodGroupWarning && (
-            <div className={`${ui.warningNotice} toolbar-blood-group-warning`} role="alert">
-              <span>{bloodGroupWarning}</span>
-              <button
-                type="button"
-                className={`${ui.iconButton} toolbar-warning-dismiss`}
-                aria-label="Закрыть предупреждение"
-                onClick={dismissBloodGroupWarning}
-              >
-                ×
-              </button>
-            </div>
-          )}
+          <WarningNotice
+            className="toolbar-blood-group-warning"
+            message={bloodGroupWarning}
+            onDismiss={dismissBloodGroupWarning}
+          />
         </div>
       </header>
 

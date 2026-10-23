@@ -7,6 +7,10 @@ import './index.css';
 import App from './app.tsx';
 import { AppStartupGate } from './components/app-startup/app-startup-gate';
 
+document.addEventListener('dragstart', (event) => {
+  event.preventDefault();
+});
+
 const rootElement = document.getElementById('root');
 
 createRoot(rootElement!).render(

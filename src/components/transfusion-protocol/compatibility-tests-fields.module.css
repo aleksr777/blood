@@ -1,30 +1,10 @@
 .root {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 1rem;
-  min-width: 0;
+  composes: ui-stack ui-full-width-stack from global;
 }
 
 .reagentList {
   display: grid;
   gap: 0.8rem;
-}
-
-.reagentGroup,
-.resultGroup {
-  min-width: 0;
-  margin: 0;
-  border: 1px solid #d8e0ec;
-  border-radius: 0.65rem;
-  padding: 0.8rem 0.9rem 0.9rem;
-}
-
-.reagentGroup legend,
-.resultGroup legend {
-  padding: 0 0.35rem;
-  color: #263552;
-  font-size: 0.9rem;
-  font-weight: 700;
 }
 
 .reagentGrid {
@@ -48,18 +28,7 @@
 }
 
 .option {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  align-items: center;
-  gap: 0.45rem !important;
-  color: #263552;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500 !important;
-}
-
-.option input[type='radio'] {
-  margin: 0;
+  composes: ui-choice-label from global;
 }
 
 @media (max-width: 720px) {
@@ -70,24 +39,12 @@
 }
 
 .reagentWarning {
+  composes: ui-notice ui-warning-notice from global;
   margin-top: 0.7rem;
-  border-left: 3px solid #f59e0b;
-  padding: 0.45rem 0.6rem;
-  background: #fffbeb;
-  color: #92400e;
-  font-size: 0.84rem;
-  line-height: 1.35;
 }
 
 .dangerWarning {
-  border: 1px solid #dc2626;
-  border-radius: 0.55rem;
-  padding: 0.65rem 0.8rem;
-  background: #fef2f2;
-  color: #991b1b;
-  font-size: 0.86rem;
-  font-weight: 700;
-  line-height: 1.4;
+  composes: ui-notice ui-danger-notice from global;
 }
 
 .dangerOptionText {
@@ -96,8 +53,16 @@
   min-height: 1.55rem;
   border-radius: 0.4rem;
   padding: 0.15rem 0.45rem;
-  background: #fef2f2;
-  color: #b91c1c;
+  background: var(--ui-danger-soft);
+  color: var(--ui-danger-text);
   font-weight: 700;
   line-height: 1.15;
+}
+
+.reagentGroup {
+  composes: ui-fieldset from global;
+}
+
+.resultGroup {
+  composes: ui-fieldset from global;
 }

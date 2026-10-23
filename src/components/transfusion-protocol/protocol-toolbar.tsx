@@ -1,3 +1,4 @@
+import ui from '../../styles/ui';
 import { useEffect, useState } from 'react';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 
@@ -70,18 +71,30 @@ export const ProtocolToolbar = ({
           onOpenCurrentRecipient={onOpenCurrentRecipient}
         />
         <div className="print-actions" aria-label="Панель действий">
-          <button type="button" className="clear-button" onClick={onClear}>
+          <button
+            type="button"
+            className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+            onClick={onClear}
+          >
             Очистить бланк
           </button>
-          <button type="button" className="new-button" onClick={onNew}>
+          <button
+            type="button"
+            className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
+            onClick={onNew}
+          >
             Новый бланк
           </button>
-          <button type="button" className="secondary-button" onClick={onOpenRegistry}>
+          <button
+            type="button"
+            className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+            onClick={onOpenRegistry}
+          >
             Реципиенты
           </button>
           <button
             type="button"
-            className="save-button"
+            className={`${ui.successButton} ${ui.toolbarButton} save-button`}
             onClick={() => runHemaconAction(onSave)}
             aria-disabled={Boolean(hemaconWarning)}
           >
@@ -91,7 +104,7 @@ export const ProtocolToolbar = ({
             <button
               key={pageIndex}
               type="button"
-              className="print-button"
+              className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
               onClick={() => runHemaconAction(() => onPrintPage(pageIndex))}
               aria-disabled={Boolean(hemaconWarning)}
             >
@@ -100,7 +113,7 @@ export const ProtocolToolbar = ({
           ))}
         </div>
         {hemaconWarningVisible && hemaconWarning && (
-          <div className="toolbar-warning" role="alert">
+          <div className={`${ui.warningNotice} toolbar-warning`} role="alert">
             {hemaconWarning}
           </div>
         )}
@@ -110,16 +123,16 @@ export const ProtocolToolbar = ({
           </div>
         )}
         {dangerWarning && (
-          <div className="toolbar-danger-warning" role="alert">
+          <div className={`${ui.dangerNotice} toolbar-danger-warning`} role="alert">
             {dangerWarning}
           </div>
         )}
         {bloodGroupWarning && (
-          <div className="toolbar-blood-group-warning" role="alert">
+          <div className={`${ui.warningNotice} toolbar-blood-group-warning`} role="alert">
             <span>{bloodGroupWarning}</span>
             <button
               type="button"
-              className="toolbar-warning-dismiss"
+              className={`${ui.iconButton} toolbar-warning-dismiss`}
               aria-label="Закрыть предупреждение"
               onClick={onDismissBloodGroupWarning}
             >
@@ -128,11 +141,11 @@ export const ProtocolToolbar = ({
           </div>
         )}
         {componentUnitNumberWarning && (
-          <div className="toolbar-component-unit-warning" role="alert">
+          <div className={`${ui.warningNotice} toolbar-component-unit-warning`} role="alert">
             <span>{componentUnitNumberWarning}</span>
             <button
               type="button"
-              className="toolbar-warning-dismiss"
+              className={`${ui.iconButton} toolbar-warning-dismiss`}
               aria-label="Закрыть предупреждение"
               onClick={onDismissComponentUnitNumberWarning}
             >
@@ -141,7 +154,7 @@ export const ProtocolToolbar = ({
           </div>
         )}
         {warning && (
-          <div className="toolbar-warning" role="alert">
+          <div className={`${ui.warningNotice} toolbar-warning`} role="alert">
             {warning}
           </div>
         )}

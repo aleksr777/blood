@@ -1,3 +1,4 @@
+import ui from '../../styles/ui';
 import { useEffect, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
@@ -413,19 +414,39 @@ export const TransfusionRegistration = () => {
             onOpenCurrentRecipient={openCurrentRecipient}
           />
           <div className="print-actions" aria-label="Панель действий">
-            <button type="button" className="clear-button" onClick={clearBlank}>
+            <button
+              type="button"
+              className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+              onClick={clearBlank}
+            >
               Очистить бланк
             </button>
-            <button type="button" className="new-button" onClick={newBlank}>
+            <button
+              type="button"
+              className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
+              onClick={newBlank}
+            >
               Новый бланк
             </button>
-            <button type="button" className="secondary-button" onClick={openRecipients}>
+            <button
+              type="button"
+              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+              onClick={openRecipients}
+            >
               Реципиенты
             </button>
-            <button type="button" className="save-button" onClick={() => void save()}>
+            <button
+              type="button"
+              className={`${ui.successButton} ${ui.toolbarButton} save-button`}
+              onClick={() => void save()}
+            >
               Сохранить
             </button>
-            <button type="button" className="print-button" onClick={print}>
+            <button
+              type="button"
+              className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
+              onClick={print}
+            >
               Печать страницы 1
             </button>
           </div>

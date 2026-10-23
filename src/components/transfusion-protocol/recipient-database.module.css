@@ -12,15 +12,11 @@
 }
 
 .panel {
+  composes: ui-panel from global;
   display: flex;
-  min-width: 0;
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  padding: 0.9rem;
-  border: 1px solid #d8e0ec;
-  border-radius: 0.65rem;
-  background: #fff;
 }
 
 .listHeader {
@@ -34,20 +30,13 @@
 .label {
   display: block;
   margin-bottom: 0;
-  color: #263552;
+  color: var(--ui-text);
   font-size: 0.9rem;
   font-weight: 600;
 }
 
 .search {
-  width: 100%;
-  min-height: var(--control-height);
-  border: 1px solid var(--control-border);
-  border-radius: var(--control-radius);
-  padding: var(--control-padding-y) var(--control-padding-x);
-  background: #fff;
-  color: #111827;
-  font: inherit;
+  min-width: 0;
 }
 
 .list,
@@ -65,19 +54,8 @@
 }
 
 .person {
+  composes: ui-selectable-card from global;
   width: 100%;
-  border: 1px solid #d8e0ec;
-  border-radius: 0.5rem;
-  padding: 0.65rem 0.75rem;
-  background: #fff;
-  color: #17213f;
-  cursor: pointer;
-  text-align: left;
-}
-
-.person[data-selected='true'] {
-  border-color: #8ea6ff;
-  background: #eef4ff;
 }
 
 .personName {
@@ -88,43 +66,25 @@
 .meta,
 .empty {
   margin-top: 0.2rem;
-  color: #64748b;
+  color: var(--ui-text-muted);
   font-size: 0.82rem;
 }
 
 .header {
+  composes: ui-panel from global;
   display: flex;
   flex: 0 0 auto;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  border: 1px solid #cbd7f0;
-  border-radius: 0.65rem;
-  padding: 0.8rem;
-  background: #f4f7ff;
+  background: var(--ui-surface-soft);
+  flex-wrap: wrap;
 }
 
 .title {
   margin: 0;
   font-size: 1rem;
-}
-
-.action,
-.open,
-.recordDelete,
-.secondaryAction,
-.disconnectAction,
-.dangerAction,
-.createRecipient,
-.categoryBack {
-  border: 1px solid #1d4ed8;
-  border-radius: 0.45rem;
-  padding: 0.45rem 0.7rem;
-  background: #1d4ed8;
-  color: #fff;
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .headerActions {
@@ -134,36 +94,20 @@
   gap: 0.4rem;
 }
 
-.action:disabled {
-  border-color: #cbd5e1;
-  background: #e2e8f0;
-  color: #94a3b8;
-  cursor: default;
-}
-
 .createRecipient {
-  border-color: #1d4ed8;
-  background: #fff;
-  color: #1d4ed8;
-  white-space: nowrap;
+  composes: ui-button ui-secondary-button ui-compact-button from global;
 }
 
 .secondaryAction {
-  border-color: #64748b;
-  background: #fff;
-  color: #334155;
+  composes: ui-button ui-secondary-button ui-compact-button from global;
 }
 
 .disconnectAction {
-  border-color: #64748b;
-  background: #f8fafc;
-  color: #334155;
+  composes: ui-button ui-secondary-button ui-compact-button from global;
 }
 
 .dangerAction {
-  border-color: #b91c1c;
-  background: #fff;
-  color: #b91c1c;
+  composes: ui-button ui-danger-button ui-compact-button from global;
 }
 
 .categories {
@@ -174,19 +118,13 @@
 }
 
 .categoryButton {
+  composes: ui-selectable-card from global;
   display: flex;
   min-height: 6.5rem;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
   gap: 0.45rem;
-  border: 1px solid #cbd7f0;
-  border-radius: 0.65rem;
-  padding: 1rem;
-  background: #f8faff;
-  color: #17213f;
-  cursor: pointer;
-  text-align: left;
 }
 
 .categoryTitle {
@@ -196,7 +134,7 @@
 }
 
 .categoryMeta {
-  color: #64748b;
+  color: var(--ui-text-muted);
   font-size: 0.82rem;
   font-weight: 500;
 }
@@ -207,19 +145,16 @@
   gap: 0.8rem;
   margin-top: 1rem;
   padding-bottom: 0.65rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--ui-border);
 }
 
 .categoryBack {
-  border-color: #64748b;
-  background: #fff;
-  color: #334155;
-  white-space: nowrap;
+  composes: ui-button ui-secondary-button ui-compact-button from global;
 }
 
 .categoryHeading {
   min-width: 0;
-  color: #17213f;
+  color: var(--ui-text-strong);
   font-size: 0.95rem;
   font-weight: 700;
 }
@@ -233,7 +168,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--ui-border);
   padding-top: 0.6rem;
 }
 
@@ -253,9 +188,7 @@
 }
 
 .recordDelete {
-  border-color: #b91c1c;
-  background: #fff;
-  color: #b91c1c;
+  composes: ui-button ui-danger-button ui-compact-button from global;
 }
 
 @media (max-width: 760px) {
@@ -272,4 +205,12 @@
     align-items: flex-start;
     flex-direction: column;
   }
+}
+
+.action {
+  composes: ui-button ui-primary-button ui-compact-button from global;
+}
+
+.open {
+  composes: ui-button ui-primary-button ui-compact-button from global;
 }

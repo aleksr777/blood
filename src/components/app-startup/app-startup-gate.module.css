@@ -3,7 +3,7 @@
   min-height: 100dvh;
   place-items: center;
   padding: 1.5rem;
-  color: #17213f;
+  color: var(--ui-text-strong);
 }
 
 .message {

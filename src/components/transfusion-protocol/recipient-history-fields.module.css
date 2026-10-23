@@ -1,32 +1,18 @@
 .root {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 1rem;
-  min-width: 0;
+  composes: ui-stack ui-full-width-stack from global;
 }
 
 .group {
-  min-width: 0;
-  margin: 0;
-  border: 1px solid #d8e0ec;
-  border-radius: 0.65rem;
-  padding: 0.8rem 0.9rem;
+  composes: ui-fieldset from global;
 }
 
 .groupDisabled {
-  background: #f8fafc;
+  background: var(--ui-surface-soft);
   opacity: 0.58;
 }
 
 .groupDisabled .option {
   cursor: default;
-}
-
-.group legend {
-  padding: 0 0.35rem;
-  color: #263552;
-  font-size: 0.9rem;
-  font-weight: 700;
 }
 
 .options {
@@ -36,24 +22,7 @@
 }
 
 .option {
-  display: inline-flex !important;
-  flex-direction: row !important;
-  align-items: center;
-  gap: 0.45rem !important;
-  color: #263552;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500 !important;
-}
-
-.option input[type='radio'] {
-  flex: 0 0 auto;
-  width: 1rem;
-  height: 1rem;
-  min-height: 1rem;
-  margin: 0;
-  padding: 0;
-  accent-color: #1d4ed8;
+  composes: ui-choice-label from global;
 }
 
 .group textarea {
@@ -73,12 +42,9 @@
 }
 
 .suggestion {
+  composes: ui-notice ui-info-notice from global;
   display: grid;
   gap: 0.75rem;
-  border: 1px solid #bfdbfe;
-  border-radius: 0.65rem;
-  padding: 0.8rem 0.9rem;
-  background: #eff6ff;
 }
 
 .suggestionHeader {
@@ -89,14 +55,14 @@
 }
 
 .suggestionTitle {
-  color: #1e3a5f;
+  color: var(--ui-accent-hover);
   font-size: 0.9rem;
   font-weight: 700;
 }
 
 .suggestionHint {
   margin-top: 0.2rem;
-  color: #52657d;
+  color: var(--ui-text-muted);
   font-size: 0.8rem;
   font-weight: 400;
   line-height: 1.35;
@@ -105,11 +71,11 @@
 .suggestionPreview {
   max-height: 9rem;
   overflow-y: auto;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--ui-border);
   border-radius: 0.5rem;
   padding: 0.65rem 0.75rem;
-  background: #fff;
-  color: #1f2937;
+  background: var(--ui-surface);
+  color: var(--ui-text-strong);
   font-size: 0.86rem;
   font-weight: 400;
   line-height: 1.4;
@@ -117,27 +83,5 @@
 }
 
 .suggestionButton {
-  flex: 0 0 auto;
-  min-height: 2.35rem;
-  border: 1px solid #1d4ed8;
-  border-radius: 0.5rem;
-  padding: 0 0.85rem;
-  background: #1d4ed8;
-  color: #fff;
-  cursor: pointer;
-  font-size: 0.84rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.suggestionButton:disabled {
-  border-color: #94a3b8;
-  background: #e2e8f0;
-  color: #64748b;
-  cursor: default;
-}
-
-.suggestionButton:focus-visible {
-  outline: 2px solid rgb(37 99 235 / 25%);
-  outline-offset: 2px;
+  composes: ui-button ui-primary-button ui-compact-button from global;
 }

@@ -3,9 +3,7 @@
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem 1.25rem;
+  composes: ui-form-grid from global;
 }
 
 .grid > :first-child,
@@ -13,51 +11,16 @@
   grid-column: 1 / -1;
 }
 
-.grid label,
 .fieldLabel {
-  color: #263552;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.grid label {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.fieldLabel {
-  margin-bottom: 0.4rem;
+  composes: ui-field-label from global;
 }
 
 .calculatedValue {
   min-height: var(--control-height);
   padding: var(--control-padding-y) 0;
-  color: #334155;
+  color: var(--ui-text);
   font-size: 0.9rem;
   font-weight: 500;
-}
-
-.grid textarea {
-  width: 100%;
-  height: 6.5rem;
-  min-height: 6.5rem;
-  max-height: 6.5rem;
-  border: 1px solid var(--control-border);
-  border-radius: var(--control-radius);
-  padding: 0.55rem var(--control-padding-x);
-  background: #fff;
-  color: #111827;
-  font: inherit;
-  font-weight: 400;
-  resize: none;
-}
-
-.grid textarea:focus {
-  border-color: #2563eb;
-  outline: 2px solid rgb(37 99 235 / 16%);
-  outline-offset: 1px;
 }
 
 @media (max-width: 680px) {

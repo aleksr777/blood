@@ -15,33 +15,17 @@
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem 1.25rem;
-}
-
-.grid label,
-.fieldLabel {
-  color: #263552;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.grid label {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.4rem;
+  composes: ui-form-grid from global;
 }
 
 .fieldLabel {
-  margin-bottom: 0.4rem;
+  composes: ui-field-label from global;
 }
 
 .calculatedValue {
   min-height: var(--control-height);
   padding: var(--control-padding-y) 0;
-  color: #334155;
+  color: var(--ui-text);
   font-size: 0.9rem;
   font-weight: 500;
 }
@@ -51,20 +35,8 @@
 }
 
 .generalGroup {
+  composes: ui-fieldset from global;
   grid-column: 1 / -1;
-  min-width: 0;
-  margin: 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.65rem;
-  padding: 0.9rem 1rem 1rem;
-  background: rgb(255 255 255 / 42%);
-}
-
-.generalGroup legend {
-  padding: 0 0.4rem;
-  color: #334155;
-  font-size: 0.9rem;
-  font-weight: 700;
 }
 
 .generalGroupGrid {
@@ -81,45 +53,6 @@
   .generalGroupGrid .wide {
     grid-column: auto;
   }
-}
-
-.grid input:not([type='radio']):not([type='checkbox']),
-.grid select,
-.grid textarea {
-  width: 100%;
-  border: 1px solid var(--control-border);
-  border-radius: var(--control-radius);
-  background: #fff;
-  color: #111827;
-  font: inherit;
-  font-weight: 400;
-}
-
-.grid input:not([type='radio']):not([type='checkbox']),
-.grid select {
-  min-height: var(--control-height);
-  padding: var(--control-padding-y) var(--control-padding-x);
-}
-
-.grid input[readonly] {
-  background: #f8fafc;
-  color: #475569;
-}
-
-.grid textarea {
-  height: 6.5rem;
-  min-height: 6.5rem;
-  max-height: 6.5rem;
-  padding: 0.55rem var(--control-padding-x);
-  resize: none;
-}
-
-.grid input:not([type='radio']):not([type='checkbox']):focus,
-.grid select:focus,
-.grid textarea:focus {
-  border-color: #2563eb;
-  outline: 2px solid rgb(37 99 235 / 16%);
-  outline-offset: 1px;
 }
 
 .departmentField {
@@ -145,24 +78,25 @@
   border: 1px solid var(--control-border);
   border-left: 0;
   border-radius: 0 var(--control-radius) var(--control-radius) 0;
-  background: #fff;
-  color: #475569;
+  background: var(--ui-surface);
+  color: var(--ui-text-muted);
   cursor: pointer;
   font-size: 1rem;
 }
 
 .historyToggle:focus-visible {
-  background: #f8fafc;
-  color: #1d4ed8;
+  background: var(--ui-surface-soft);
+  color: var(--ui-accent);
 }
 
 .historyToggle:disabled {
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: var(--ui-disabled-background);
+  color: var(--ui-text-disabled);
   cursor: default;
 }
 
 .historyDropdown {
+  composes: ui-menu-surface from global;
   --dropdown-motion-duration: 120ms;
   --dropdown-motion-easing: cubic-bezier(0.2, 0.7, 0.2, 1);
 
@@ -175,11 +109,6 @@
   gap: 0.1rem;
   max-height: 12rem;
   overflow-y: auto;
-  padding: 0.25rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.5rem;
-  background: #fff;
-  box-shadow: 0 8px 22px rgb(15 23 42 / 14%);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-0.35rem) scale(0.985);
@@ -231,24 +160,11 @@
 }
 
 .historyValue {
-  min-width: 0;
-  min-height: 2rem;
-  border: 0;
-  border-radius: 0.35rem;
-  padding: 0.3rem 0.5rem;
+  composes: ui-menu-item from global;
   overflow: hidden;
-  background: transparent;
-  color: #334155;
-  cursor: pointer;
-  font-size: 0.84rem;
-  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.historyValue:focus-visible {
-  background: #eff6ff;
-  color: #1d4ed8;
+  display: block;
 }
 
 .historyDropdownWrap .historyValue {
@@ -257,61 +173,31 @@
 }
 
 .historyInput {
-  min-height: 2rem !important;
-  border-radius: 0.35rem !important;
-  padding: 0.3rem 0.5rem !important;
-  font-size: 0.84rem !important;
-}
-
-.historyEdit,
-.historySave,
-.historyDelete {
-  width: 1.85rem;
-  min-height: 1.85rem;
-  border: 0;
-  border-radius: 0.35rem;
-  background: transparent;
-  color: #64748b;
-  cursor: pointer;
-  font-size: 0.9rem;
-  line-height: 1;
-}
-
-.historyEdit:focus-visible {
-  background: #eff6ff;
-  color: #1d4ed8;
+  min-height: 2rem;
+  border-radius: var(--ui-radius-small);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.84rem;
 }
 
 .historySave {
-  color: #15803d;
-  font-size: 1rem;
+  composes: ui-icon-button ui-success-icon from global;
   font-weight: 700;
-}
-
-.historySave:focus-visible {
-  background: #f0fdf4;
-  color: #166534;
-}
-
-.historyDelete:focus-visible {
-  background: #fef2f2;
-  color: #b91c1c;
 }
 
 .historyEmpty {
   padding: 0.45rem 0.55rem;
-  color: #64748b;
+  color: var(--ui-text-muted);
   font-size: 0.82rem;
   font-weight: 400;
 }
 
 .customSelectControl {
-  --select-background: #fff;
+  --select-background: var(--ui-surface);
   --select-border: var(--control-border);
-  --select-text: #334155;
-  --select-hover-background: #f8fafc;
-  --select-hover-border: #8aa9c5;
-  --select-focus: #426b96;
+  --select-text: var(--ui-text);
+  --select-hover-background: var(--ui-surface-soft);
+  --select-hover-border: var(--blood-blue-hover-border);
+  --select-focus: var(--ui-accent);
 
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--control-height);
@@ -346,48 +232,48 @@
 }
 
 .customSelectControlRhPositive {
-  --select-background: #fdf2f3;
-  --select-border: #e7bdc5;
-  --select-text: #93424f;
-  --select-hover-background: #fae3e7;
-  --select-hover-border: #c56878;
-  --select-focus: #93424f;
+  --select-background: var(--blood-red-background);
+  --select-border: var(--blood-red-border);
+  --select-text: var(--blood-red-text);
+  --select-hover-background: var(--blood-red-hover);
+  --select-hover-border: var(--blood-red-hover-border);
+  --select-focus: var(--blood-red-text);
 }
 
 .customSelectControlRhNegative {
-  --select-background: #f1f6fc;
-  --select-border: #bfd0e1;
-  --select-text: #3f617f;
-  --select-hover-background: #e1edf8;
-  --select-hover-border: #8aa9c5;
-  --select-focus: #3f617f;
+  --select-background: var(--blood-blue-background);
+  --select-border: var(--blood-blue-border);
+  --select-text: var(--blood-blue-text);
+  --select-hover-background: var(--blood-blue-hover);
+  --select-hover-border: var(--blood-blue-hover-border);
+  --select-focus: var(--blood-blue-text);
 }
 
 .customSelectControlRhPositive[data-blood-group='true'] {
-  --select-background: #fff;
-  --select-border: #c5cfdd;
-  --select-text: #263552;
-  --select-hover-background: #fff;
-  --select-hover-border: #8ea2b9;
-  --select-focus: #426b96;
+  --select-background: var(--blood-rh-positive-background);
+  --select-border: var(--blood-rh-positive-border);
+  --select-text: var(--blood-rh-positive-text);
+  --select-hover-background: var(--blood-rh-positive-background);
+  --select-hover-border: var(--blood-rh-positive-hover-border);
+  --select-focus: var(--ui-accent);
 }
 
 .customSelectControlRhNegative[data-blood-group='true'] {
-  --select-background: #263552;
-  --select-border: #263552;
-  --select-divider: rgb(248 250 252 / 30%);
-  --select-text: #f8faff;
-  --select-hover-background: #1e2a43;
-  --select-hover-border: #1e2a43;
-  --select-focus: #426b96;
+  --select-background: var(--blood-rh-negative-background);
+  --select-border: var(--ui-text);
+  --select-divider: var(--blood-rh-negative-divider);
+  --select-text: var(--blood-rh-negative-text);
+  --select-hover-background: var(--blood-rh-negative-hover);
+  --select-hover-border: var(--blood-rh-negative-hover);
+  --select-focus: var(--ui-accent);
 }
 
 .customSelectControlNeutral {
-  --select-background: #f1f5f9;
-  --select-border: #cbd5e1;
-  --select-text: #52657d;
-  --select-hover-background: #e8eef5;
-  --select-hover-border: #94a3b8;
+  --select-background: var(--ui-disabled-background);
+  --select-border: var(--ui-border);
+  --select-text: var(--ui-text-muted);
+  --select-hover-background: var(--ui-surface-hover);
+  --select-hover-border: var(--ui-text-disabled);
 }
 
 .customSelectControl:hover {
@@ -414,7 +300,7 @@
 }
 
 .customSelectPlaceholder {
-  color: #52657d;
+  color: var(--ui-text-muted);
 }
 
 .customSelectPositive,
@@ -425,11 +311,11 @@
 }
 
 .customSelectPositive {
-  color: #93424f;
+  color: var(--blood-red-text);
 }
 
 .customSelectNegative {
-  color: #3f617f;
+  color: var(--blood-blue-text);
 }
 
 .customSelectArrow {
@@ -442,44 +328,18 @@
 }
 
 .customSelectOption {
+  composes: ui-menu-item from global;
   --option-background: transparent;
-  --option-text: #334155;
-  --option-hover-background: #eef4fb;
-  --option-selected-background: #e1edf8;
-  --option-accent: #426b96;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  width: 100%;
-  min-height: 2.25rem;
-  border: 1px solid transparent;
-  border-radius: 0.4rem;
-  padding: 0.3rem 0.5rem;
-  background: var(--option-background);
-  color: var(--option-text);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.84rem;
-  font-weight: 400;
-  text-align: left;
+  --option-text: var(--ui-text);
+  --option-hover-background: var(--ui-accent-soft);
+  --option-selected-background: var(--blood-blue-hover);
+  --option-accent: var(--ui-accent);
 }
 
 .customSelectOption[aria-selected='true'] {
   border-color: var(--option-accent);
   background: var(--option-selected-background);
   font-weight: 600;
-}
-
-.customSelectOption:hover,
-.customSelectOption:focus-visible {
-  background: var(--option-hover-background);
-}
-
-.customSelectOption:focus-visible {
-  outline: 2px solid var(--option-accent);
-  outline-offset: -2px;
 }
 
 .customSelectOptionPositive,
@@ -490,81 +350,61 @@
 }
 
 .customSelectOptionPositive {
-  --option-background: #fdf2f3;
-  --option-text: #93424f;
-  --option-hover-background: #fae3e7;
-  --option-selected-background: #f7d9e0;
-  --option-accent: #93424f;
+  --option-background: var(--blood-red-background);
+  --option-text: var(--blood-red-text);
+  --option-hover-background: var(--blood-red-hover);
+  --option-selected-background: var(--blood-red-option-selected);
+  --option-accent: var(--blood-red-text);
 }
 
 .customSelectOptionNegative {
-  --option-background: #f1f6fc;
-  --option-text: #3f617f;
-  --option-hover-background: #e1edf8;
-  --option-selected-background: #dce9f6;
-  --option-accent: #3f617f;
+  --option-background: var(--blood-blue-background);
+  --option-text: var(--blood-blue-text);
+  --option-hover-background: var(--blood-blue-hover);
+  --option-selected-background: var(--blood-blue-option-selected);
+  --option-accent: var(--blood-blue-text);
 }
 
 .customSelectOptionRhPositive,
 .customSelectOptionTonePositive {
-  --option-background: #fff;
-  --option-text: #263552;
-  --option-hover-background: #f8fafc;
-  --option-selected-background: #fff;
-  --option-accent: #426b96;
+  --option-background: var(--blood-rh-positive-background);
+  --option-text: var(--blood-rh-positive-text);
+  --option-hover-background: var(--blood-rh-positive-background);
+  --option-selected-background: var(--blood-rh-positive-background);
+  --option-accent: var(--ui-accent);
 }
 
 .customSelectOptionRhNegative,
 .customSelectOptionToneNegative {
-  --option-background: #263552;
-  --option-text: #f8faff;
-  --option-hover-background: #1e2a43;
-  --option-selected-background: #263552;
-  --option-accent: #8aa1bf;
+  --option-background: var(--blood-rh-negative-background);
+  --option-text: var(--blood-rh-negative-text);
+  --option-hover-background: var(--blood-rh-negative-hover);
+  --option-selected-background: var(--blood-rh-negative-background);
+  --option-accent: var(--blood-rh-negative-accent);
 }
 
 .customSelectOptionToneNeutral,
 .customSelectOptionNeutralEmpty {
-  --option-background: #f1f5f9;
-  --option-text: #52657d;
-  --option-hover-background: #e8eef5;
-  --option-selected-background: #e2e8f0;
-  --option-accent: #52657d;
+  --option-background: var(--ui-disabled-background);
+  --option-text: var(--ui-text-muted);
+  --option-hover-background: var(--ui-surface-hover);
+  --option-selected-background: var(--ui-border);
+  --option-accent: var(--ui-text-muted);
 }
 
 .bloodGroupWarning {
+  composes: ui-notice ui-warning-notice from global;
   grid-column: 1 / -1;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  border: 1px solid #d97706;
-  border-radius: 0.55rem;
-  padding: 0.65rem 0.75rem;
-  background: #fffbeb;
-  color: #92400e;
-  font-size: 0.86rem;
-  font-weight: 700;
-  line-height: 1.4;
 }
 
 .bloodGroupWarningDismiss {
+  composes: ui-icon-button from global;
   flex: 0 0 auto;
-  width: 1.75rem;
-  height: 1.75rem;
-  border: 0;
-  border-radius: 50%;
-  padding: 0;
-  background: transparent;
-  color: currentColor;
-  cursor: pointer;
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.bloodGroupWarningDismiss:focus-visible {
-  background: rgb(146 64 14 / 12%);
-  outline: none;
+  --icon-button-size: 1.75rem;
 }
 
 .componentUnitNumberField {
@@ -572,36 +412,24 @@
 }
 
 .fieldWarning {
+  composes: ui-notice ui-warning-notice from global;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.6rem;
   margin-top: 0.45rem;
-  border-left: 3px solid #d97706;
-  border-radius: 0.35rem;
-  padding: 0.45rem 0.55rem;
-  background: #fffbeb;
-  color: #92400e;
-  font-size: 0.8rem;
-  font-weight: 600;
-  line-height: 1.35;
 }
 
 .fieldWarningDismiss {
+  composes: ui-icon-button from global;
   flex: 0 0 auto;
-  width: 1.45rem;
-  height: 1.45rem;
-  border: 0;
-  border-radius: 50%;
-  padding: 0;
-  background: transparent;
-  color: currentColor;
-  cursor: pointer;
-  font-size: 1.1rem;
-  line-height: 1;
+  --icon-button-size: 1.75rem;
 }
 
-.fieldWarningDismiss:focus-visible {
-  background: rgb(146 64 14 / 12%);
-  outline: none;
+.historyEdit {
+  composes: ui-icon-button from global;
+}
+
+.historyDelete {
+  composes: ui-icon-button ui-danger-icon from global;
 }

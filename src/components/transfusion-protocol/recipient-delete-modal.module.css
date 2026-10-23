@@ -3,7 +3,7 @@
 }
 
 .text {
-  color: #17213f;
+  color: var(--ui-text-strong);
   line-height: 1.45;
 }
 
@@ -14,11 +14,11 @@
 }
 
 .warning {
-  color: #64748b;
+  color: var(--ui-text-muted);
 }
 
 .error {
-  color: #b91c1c;
+  color: var(--ui-danger-text);
 }
 
 .actions {
@@ -28,28 +28,10 @@
   margin-top: 1.3rem;
 }
 
-.secondary,
-.danger {
-  min-height: 2.5rem;
-  border-radius: 0.5rem;
-  padding: 0 0.9rem;
-  cursor: pointer;
-  font-weight: 600;
-}
-
 .secondary {
-  border: 1px solid #64748b;
-  background: #fff;
-  color: #334155;
+  composes: ui-button ui-secondary-button from global;
 }
 
 .danger {
-  border: 1px solid #b91c1c;
-  background: #b91c1c;
-  color: #fff;
-}
-
-.danger:disabled {
-  cursor: wait;
-  opacity: 0.65;
+  composes: ui-button ui-danger-primary-button from global;
 }

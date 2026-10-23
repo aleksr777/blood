@@ -1,0 +1,32 @@
+// Shared class names for JSX; CSS Modules compose the same global classes.
+const ui = {
+  button: 'ui-button',
+  iconButton: 'ui-icon-button',
+  textButton: 'ui-text-button',
+  selectableCard: 'ui-selectable-card',
+  primaryButton: 'ui-button ui-primary-button',
+  secondaryButton: 'ui-button ui-secondary-button',
+  successButton: 'ui-button ui-success-button',
+  dangerButton: 'ui-button ui-danger-button',
+  dangerPrimaryButton: 'ui-button ui-danger-primary-button',
+  compactButton: 'ui-compact-button',
+  toolbarButton: 'ui-toolbar-button',
+  dangerIcon: 'ui-icon-button ui-danger-icon',
+  successIcon: 'ui-icon-button ui-success-icon',
+  stack: 'ui-stack',
+  fullWidthStack: 'ui-stack ui-full-width-stack',
+  formGrid: 'ui-form-grid',
+  fieldLabel: 'ui-field-label',
+  fieldset: 'ui-fieldset',
+  choiceLabel: 'ui-choice-label',
+  panel: 'ui-panel',
+  selectedCard: 'ui-selected-card',
+  menuSurface: 'ui-menu-surface',
+  menuItem: 'ui-menu-item',
+  notice: 'ui-notice',
+  warningNotice: 'ui-notice ui-warning-notice',
+  dangerNotice: 'ui-notice ui-danger-notice',
+  infoNotice: 'ui-notice ui-info-notice',
+} as const;
+
+export default ui;

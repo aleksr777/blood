@@ -7,10 +7,6 @@
   margin-left: -20px;
 }
 
-.toolbar {
-  width: 262.5mm;
-}
-
 .sheetWrap {
   display: flex;
   flex-direction: column;
@@ -340,10 +336,6 @@
   .header {
     margin-right: -10px;
     margin-left: -10px;
-  }
-
-  .toolbar {
-    width: 100%;
   }
 
   .sheetWrap {

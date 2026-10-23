@@ -1209,7 +1209,7 @@ export const IndividualSelectionDirection = () => {
   return (
     <main className={styles.shell}>
       <header className={`app-header ${styles.header}`}>
-        <div className={`toolbar-wrap ${styles.toolbar}`}>
+        <div className="toolbar-wrap">
           <SiteNavigation
             current="summary-request"
             recipientName={currentRecipient?.fullName ?? ''}

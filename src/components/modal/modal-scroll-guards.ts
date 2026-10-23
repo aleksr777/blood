@@ -37,17 +37,37 @@ export const bindModalScrollGuards = (dialog: HTMLDialogElement) => {
     ) {
       return;
     }
+    const viewport = dialog.querySelector<HTMLElement>('[data-modal-scroll-viewport]');
+    const pageHeight = viewport?.clientHeight ?? dialog.clientHeight;
     const deltas: Record<string, number> = {
       ArrowDown: 40,
       ArrowUp: -40,
-      PageDown: dialog.clientHeight,
-      PageUp: -dialog.clientHeight,
+      PageDown: pageHeight,
+      PageUp: -pageHeight,
       Home: Number.NEGATIVE_INFINITY,
       End: Number.POSITIVE_INFINITY,
-      ' ': event.shiftKey ? -dialog.clientHeight : dialog.clientHeight,
+      ' ': event.shiftKey ? -pageHeight : pageHeight,
     };
     const deltaY = deltas[event.key];
     if (deltaY === undefined) return;
+
+    if (
+      viewport &&
+      target instanceof Node &&
+      dialog.contains(target) &&
+      !viewport.contains(target)
+    ) {
+      event.preventDefault();
+      const top =
+        deltaY === Number.NEGATIVE_INFINITY
+          ? 0
+          : deltaY === Number.POSITIVE_INFINITY
+            ? viewport.scrollHeight
+            : viewport.scrollTop + deltaY;
+      viewport.scrollTo({ top });
+      return;
+    }
+
     if (!canScrollWithinDialog(target, dialog, deltaY)) event.preventDefault();
   };
 

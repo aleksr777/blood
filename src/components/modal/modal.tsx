@@ -43,7 +43,8 @@ const Modal = ({
     dismissible,
   );
   const contentRef = useRef<HTMLDivElement>(null);
-  useModalAutoHeight(ref, contentRef);
+  const headerRef = useRef<HTMLDivElement>(null);
+  useModalAutoHeight(ref, contentRef, headerRef);
 
   return createPortal(
     <dialog
@@ -61,7 +62,7 @@ const Modal = ({
       }}
     >
       <ModalCloseContext.Provider value={requestClose}>
-        <div ref={contentRef} className={styles.content}>
+        <div ref={headerRef} className={styles.header}>
           {dismissible && (
             <button
               type="button"
@@ -75,7 +76,11 @@ const Modal = ({
           <h2 className={styles.title} id={label}>
             {title}
           </h2>
-          {children}
+        </div>
+        <div className={styles.viewport} data-modal-scroll-viewport>
+          <div ref={contentRef} className={styles.content}>
+            {children}
+          </div>
         </div>
       </ModalCloseContext.Provider>
     </dialog>,

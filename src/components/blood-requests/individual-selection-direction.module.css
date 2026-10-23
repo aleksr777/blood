@@ -139,13 +139,10 @@
   border-radius: 1mm;
   padding: 1.3mm 2mm;
   cursor: pointer;
-  transition:
-    border-color 140ms ease,
-    background-color 140ms ease;
+  transition: background-color var(--ui-motion-fast) ease;
 }
 
 .fillSection:focus-visible {
-  border-color: var(--ui-accent);
   background: var(--ui-accent-soft);
   outline: none;
 }
@@ -318,7 +315,6 @@
 
 @media (hover: hover) and (pointer: fine) {
   .fillSection:not(.fillSectionInactive):hover {
-    border-color: var(--ui-accent);
     background: var(--ui-accent-soft);
   }
 
@@ -400,7 +396,6 @@
   .fillSection,
   .fillSection:hover,
   .fillSection:focus-visible {
-    border-color: transparent !important;
     background: transparent !important;
     outline: none !important;
   }

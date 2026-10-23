@@ -113,8 +113,9 @@ const dispatchRequest = async (request: DatabaseRequest) => {
     case 'protocol-records:save': {
       const payload = request.payload as {
         values: Record<string, string>;
+        recordId?: number;
       };
-      return saveProtocolRecord(payload.values);
+      return saveProtocolRecord(payload.values, payload.recordId);
     }
     case 'protocol-records:remove':
       return removeProtocolRecord((request.payload as { id: number }).id);
@@ -123,8 +124,9 @@ const dispatchRequest = async (request: DatabaseRequest) => {
     case 'registration-records:save': {
       const payload = request.payload as {
         values: Record<string, string>;
+        recordId?: number;
       };
-      return saveRegistrationRecord(payload.values);
+      return saveRegistrationRecord(payload.values, payload.recordId);
     }
     case 'registration-records:remove':
       return removeRegistrationRecord((request.payload as { id: number }).id);
@@ -138,6 +140,7 @@ const dispatchRequest = async (request: DatabaseRequest) => {
     case 'blood-request-records:save': {
       const payload = request.payload as {
         recipientId: number;
+        recordId?: number;
         kind: 'individual-selection-direction' | 'component-request';
         values: Record<string, unknown>;
       };

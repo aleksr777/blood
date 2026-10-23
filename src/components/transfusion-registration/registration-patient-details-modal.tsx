@@ -6,6 +6,7 @@ import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import styles from '../transfusion-protocol/protocol-editor.module.css';
 
 type Props = {
+  savedDocument?: boolean;
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
   onOpenRecipients: () => void;
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export const RegistrationPatientDetailsModal = ({
+  savedDocument = false,
   values,
   onChange,
   onOpenRecipients,
@@ -24,11 +26,20 @@ export const RegistrationPatientDetailsModal = ({
     <div className={styles.grid}>
       <div className={styles.wide}>
         <div className={styles.fieldLabel}>Фамилия, имя, отчество (при наличии)</div>
-        <RecipientField
-          value={values.recipientName ?? ''}
-          onSelectRecipient={onSelectRecipient}
-          onOpenRecipients={onOpenRecipients}
-        />
+        {savedDocument ? (
+          <input
+            aria-label="Фамилия, имя, отчество (при наличии)"
+            name="recipientName"
+            value={values.recipientName ?? ''}
+            onChange={(event) => onChange({ recipientName: event.target.value })}
+          />
+        ) : (
+          <RecipientField
+            value={values.recipientName ?? ''}
+            onSelectRecipient={onSelectRecipient}
+            onOpenRecipients={onOpenRecipients}
+          />
+        )}
       </div>
 
       <label>
@@ -57,7 +68,8 @@ export const RegistrationPatientDetailsModal = ({
       <div>
         <div className={styles.fieldLabel}>Возраст</div>
         <div className={styles.calculatedValue}>
-          {formatRecipientAge(values.recipientBirthDate) || '—'}
+          {(savedDocument ? values.recipientAge : formatRecipientAge(values.recipientBirthDate)) ||
+            '—'}
         </div>
       </div>
 

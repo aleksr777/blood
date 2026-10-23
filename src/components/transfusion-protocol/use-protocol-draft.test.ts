@@ -31,7 +31,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('protocol draft restoration', () => {
-  it('clears stale indications and detaches the saved ID when current indications were cleared', async () => {
+  it('preserves a saved snapshot and its ID even when current indications were cleared', async () => {
     writeCurrentIndications(1, 'erythrocytes', {});
     vi.mocked(loadProtocolDraft).mockResolvedValue({
       values: {
@@ -44,8 +44,8 @@ describe('protocol draft restoration', () => {
     });
     const { result } = renderHook(useDraft);
     await waitFor(() => expect(result.current.values.recipientId).toBe('1'));
-    expect(result.current.values.indicationRbcOngoingBleeding).toBe('');
-    expect(result.current.recordId).toBeNull();
+    expect(result.current.values.indicationRbcOngoingBleeding).toBe('1');
+    expect(result.current.recordId).toBe(42);
   });
 
   it('retains the current recipient when an old draft expires', async () => {

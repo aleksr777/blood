@@ -5,6 +5,7 @@ import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 import styles from './complications-fields.module.css';
 
 type Props = {
+  applyDefaults?: boolean;
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
 };
@@ -28,15 +29,15 @@ const DETAIL_FIELDS: ProtocolFieldConfig[] = [
   },
 ];
 
-export const ComplicationsFields = ({ values, onChange }: Props) => {
+export const ComplicationsFields = ({ values, onChange, applyDefaults = true }: Props) => {
   const status = getComplicationsStatus(values);
   const changeValue = (name: string, value: string) => onChange({ [name]: value });
 
   useEffect(() => {
-    if (status === COMPLICATIONS_STATUS.had && !values.severity) {
+    if (applyDefaults && status === COMPLICATIONS_STATUS.had && !values.severity) {
       onChange({ severity: DEFAULT_SEVERITY });
     }
-  }, [onChange, status, values.severity]);
+  }, [onChange, status, values.severity, applyDefaults]);
 
   return (
     <div className={styles.root}>

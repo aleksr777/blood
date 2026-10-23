@@ -2,8 +2,11 @@ import ui from '../../styles/ui';
 import { useEffect, useState } from 'react';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { WarningNotice } from '../warning-notice/warning-notice';
+import { SavedDocumentBar } from '../saved-document/saved-document-bar';
+import type { SavedDocumentControls } from '../saved-document/use-document-state';
 
 type Props = {
+  document?: SavedDocumentControls;
   status: string;
   warning: string;
   hemaconWarning: string;
@@ -27,6 +30,7 @@ type Props = {
 };
 
 export const ProtocolToolbar = ({
+  document,
   status,
   warning,
   hemaconWarning,
@@ -73,11 +77,13 @@ export const ProtocolToolbar = ({
           currentRecipientAvailable={currentRecipientAvailable}
           onOpenCurrentRecipient={onOpenCurrentRecipient}
         />
+        {document && <SavedDocumentBar document={document} />}
         <div className="print-actions" aria-label="Панель действий">
           <button
             type="button"
             className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
             onClick={onClear}
+            disabled={Boolean(document?.record)}
           >
             Очистить бланк
           </button>
@@ -85,6 +91,7 @@ export const ProtocolToolbar = ({
             type="button"
             className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
             onClick={onNew}
+            disabled={Boolean(document?.record)}
           >
             Новый бланк
           </button>
@@ -99,9 +106,10 @@ export const ProtocolToolbar = ({
             type="button"
             className={`${ui.successButton} ${ui.toolbarButton} save-button`}
             onClick={() => runHemaconAction(onSave)}
+            disabled={document?.mode === 'view'}
             aria-disabled={Boolean(hemaconWarning)}
           >
-            Сохранить
+            {document?.mode === 'edit' ? 'Сохранить изменения' : 'Сохранить'}
           </button>
           {Array.from({ length: pageCount }, (_, pageIndex) => (
             <button

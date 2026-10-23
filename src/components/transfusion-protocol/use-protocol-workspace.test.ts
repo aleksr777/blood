@@ -12,6 +12,7 @@ vi.mock('../../storage/sqlite/database-client', () => ({
     saveProtocolDraft: vi.fn(async () => undefined),
     clearProtocolDraft: vi.fn(async () => undefined),
     saveProtocolRecord: vi.fn(),
+    updateProtocolRecord: vi.fn(),
     listProtocolRecords: vi.fn(async () => []),
   },
 }));
@@ -33,6 +34,65 @@ beforeEach(() => {
     createdAt: 1000,
     updatedAt: 1000,
   }));
+});
+
+it('opening and printing an archive never merge current data or save an archived copy', async () => {
+  const original = {
+    id: 42,
+    recipientId: 2,
+    values: {
+      recipientId: '2',
+      recipientName: 'Архивный реципиент',
+      diagnosis: 'Старый диагноз',
+      ...hemacon,
+    },
+    createdAt: 1000,
+    updatedAt: 1000,
+  };
+  const { result } = await openDraft({ ...hemacon, diagnosis: 'Рабочий диагноз' });
+  const working = structuredClone(result.current.values);
+  await act(async () => result.current.openRecord(original));
+  expect(result.current.document.mode).toBe('view');
+  expect(result.current.values).toEqual(original.values);
+  act(() => result.current.saveValues({ diagnosis: 'Автозамена' }));
+  expect(result.current.values).toEqual(original.values);
+  await act(async () => result.current.saveToDatabase(true));
+  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+  expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  act(() => result.current.document.close());
+  expect(result.current.values).toEqual(working);
+});
+
+it('explicit archive editing updates its ID and leaves the working draft untouched', async () => {
+  const original = {
+    id: 42,
+    recipientId: 2,
+    values: { recipientId: '2', recipientName: 'Архивный реципиент', ...hemacon },
+    createdAt: 1000,
+    updatedAt: 1000,
+  };
+  vi.mocked(database.updateProtocolRecord).mockImplementation(async (id, values) => ({
+    ...original,
+    id,
+    values,
+    updatedAt: 2000,
+  }));
+  const { result } = await openDraft({ ...hemacon, doctorName: 'Текущий врач' });
+  const working = structuredClone(result.current.values);
+  await act(async () => result.current.openRecord(original));
+  act(() => result.current.document.edit());
+  act(() => result.current.saveValues({ doctorName: 'Исправленный врач' }));
+  await act(async () => result.current.saveToDatabase(true));
+  expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  await act(async () => result.current.saveToDatabase());
+  expect(database.updateProtocolRecord).toHaveBeenCalledWith(42, {
+    ...original.values,
+    doctorName: 'Исправленный врач',
+  });
+  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+  expect(result.current.document.mode).toBe('view');
+  act(() => result.current.document.close());
+  expect(result.current.values).toEqual(working);
 });
 afterEach(cleanup);
 

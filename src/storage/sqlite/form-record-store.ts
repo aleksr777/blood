@@ -43,7 +43,8 @@ export const storeFormRecord = (
     kind,
     recipientId,
     values,
-  }: { kind: FormKind; recipientId: number; values: Record<string, unknown> },
+    recordId,
+  }: { kind: FormKind; recipientId: number; values: Record<string, unknown>; recordId?: number },
 ): RecordRow => {
   const table = TABLES.get(kind);
   if (!table) throw new Error('Неизвестный тип бланка.');
@@ -63,6 +64,26 @@ export const storeFormRecord = (
     const stored = readValues(row);
     return stored ? [{ row, values: stored }] : [];
   });
+  const selected =
+    recordId === undefined ? undefined : candidates.find(({ row }) => Number(row.id) === recordId);
+  if (recordId !== undefined && !selected) {
+    throw new Error('Сохранённый бланк удалён или относится к другому реципиенту.');
+  }
+  if (
+    selected &&
+    candidates.some(
+      (candidate) =>
+        Number(candidate.row.id) !== recordId &&
+        (getFormContentKey(candidate.values) === contentKey ||
+          (kind === 'protocol' &&
+            normalizeComponentUnitNumber(String(candidate.values.componentUnitNumber ?? '')) ===
+              number)),
+    )
+  ) {
+    throw new Error(
+      'У реципиента уже есть другой бланк с такими данными или номером гемакона. Изменения не сохранены.',
+    );
+  }
   const matchingUnit =
     kind === 'protocol'
       ? candidates.find(
@@ -71,17 +92,21 @@ export const storeFormRecord = (
             number,
         )
       : undefined;
-  const identical = matchingUnit
-    ? getFormContentKey(matchingUnit.values) === contentKey
-      ? matchingUnit
+  const identical = selected
+    ? getFormContentKey(selected.values) === contentKey
+      ? selected
       : undefined
-    : candidates.find((candidate) => getFormContentKey(candidate.values) === contentKey);
+    : matchingUnit
+      ? getFormContentKey(matchingUnit.values) === contentKey
+        ? matchingUnit
+        : undefined
+      : candidates.find((candidate) => getFormContentKey(candidate.values) === contentKey);
   if (identical) return identical.row;
 
   const bind = { $values: JSON.stringify(values), $now: Date.now() };
   let id: number;
-  if (matchingUnit) {
-    id = Number(matchingUnit.row.id);
+  if (selected || matchingUnit) {
+    id = Number((selected ?? matchingUnit)!.row.id);
     db.exec({
       sql: `UPDATE ${table} SET values_json = $values, updated_at = $now WHERE id = $id`,
       bind: { ...bind, $id: id },

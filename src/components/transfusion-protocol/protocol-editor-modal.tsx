@@ -22,6 +22,7 @@ import type { ProtocolBlockId, ProtocolFieldConfig, ProtocolValues } from './pro
 type Props = {
   blockId: ProtocolBlockId;
   values: ProtocolValues;
+  savedDocument?: boolean;
   bloodGroupWarning: string;
   bloodGroupWarningDismissible: boolean;
   onDismissBloodGroupWarning: () => void;
@@ -43,6 +44,7 @@ const getInitialValues = (blockId: ProtocolBlockId, values: ProtocolValues) => {
 export const ProtocolEditorModal = ({
   blockId,
   values,
+  savedDocument = false,
   bloodGroupWarning,
   bloodGroupWarningDismissible,
   onDismissBloodGroupWarning,
@@ -89,6 +91,7 @@ export const ProtocolEditorModal = ({
 
   const renderStandardField = (field: ProtocolFieldConfig) => (
     <ProtocolFieldControl
+      savedDocument={savedDocument}
       key={field.name}
       field={field}
       value={
@@ -241,6 +244,7 @@ export const ProtocolEditorModal = ({
           <IndicationsFields values={draft} onChange={changeValues} />
         ) : blockId === 'history' ? (
           <RecipientHistoryFields
+            applyDefaults={!savedDocument}
             values={draft}
             previousTransfusionSuggestion={previousTransfusionSuggestion}
             onChange={changeValues}
@@ -248,9 +252,17 @@ export const ProtocolEditorModal = ({
         ) : blockId === 'selection' ? (
           <SelectionFields values={draft} onChange={changeValues} />
         ) : blockId === 'compatibilityTests' ? (
-          <CompatibilityTestsFields values={draft} onChange={changeValues} />
+          <CompatibilityTestsFields
+            values={draft}
+            onChange={changeValues}
+            applyDefaults={!savedDocument}
+          />
         ) : blockId === 'complications' ? (
-          <ComplicationsFields values={draft} onChange={changeValues} />
+          <ComplicationsFields
+            values={draft}
+            onChange={changeValues}
+            applyDefaults={!savedDocument}
+          />
         ) : blockId === 'monitoring' ? (
           <MonitoringFields values={draft} onChange={changeValues} />
         ) : (

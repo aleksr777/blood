@@ -8,6 +8,7 @@ import type { RecipientRecord } from '../../storage/repositories/recipients';
 import type { ProtocolFieldConfig } from './protocol-types';
 
 type Props = {
+  savedDocument?: boolean;
   field: ProtocolFieldConfig;
   value: string;
   onChange: (name: string, value: string, previousOptionValue?: string) => void;
@@ -40,6 +41,7 @@ const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' 
 };
 
 export const ProtocolFieldControl = ({
+  savedDocument = false,
   field,
   value,
   onChange,
@@ -51,6 +53,14 @@ export const ProtocolFieldControl = ({
     onChange(field.name, nextValue, previousOptionValue);
 
   if (field.name === 'recipientName') {
+    if (savedDocument) {
+      return (
+        <label className={className}>
+          <span>{field.label}</span>
+          <input name={field.name} value={value} onChange={(event) => change(event.target.value)} />
+        </label>
+      );
+    }
     return (
       <div className={className}>
         <div className={styles.fieldLabel}>{field.label}</div>

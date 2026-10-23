@@ -30,9 +30,17 @@ type Props = {
   setValues: Dispatch<SetStateAction<ProtocolValues>>;
   setRecordId: Dispatch<SetStateAction<number | null>>;
   onExpire: () => void;
+  onSavedDraft?: (id: number, values: ProtocolValues) => void;
 };
 
-export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onExpire }: Props) => {
+export const useProtocolDraft = ({
+  values,
+  recordId,
+  setValues,
+  setRecordId,
+  onExpire,
+  onSavedDraft,
+}: Props) => {
   const [loaded, setLoaded] = useState(false);
   const [lastInputAt, setLastInputAt] = useState(0);
 
@@ -52,6 +60,22 @@ export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onE
     void loadProtocolDraft()
       .then((draft) => {
         if (!active) return;
+        if (draft.protocolRecordId !== null) {
+          if (onSavedDraft) {
+            onSavedDraft(draft.protocolRecordId, draft.values);
+            const recipient = readCurrentRecipient();
+            setValues({
+              ...(recipient ? recipientProfileValuesForForms(recipient) : {}),
+              ...reagentDefaultsForNewBlank({}),
+            });
+            setRecordId(null);
+            setLastInputAt(Date.now());
+          } else {
+            setValues(draft.values);
+            setRecordId(draft.protocolRecordId);
+          }
+          return;
+        }
         if (draft.updatedAt && Date.now() - draft.updatedAt >= DRAFT_TTL_MS) {
           expire();
           return;
@@ -131,7 +155,7 @@ export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onE
     return () => {
       active = false;
     };
-  }, [expire, setRecordId, setValues]);
+  }, [expire, setRecordId, setValues, onSavedDraft]);
 
   useEffect(() => {
     if (!loaded || !hasValues(values) || !lastInputAt) return;

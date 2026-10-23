@@ -52,6 +52,7 @@ export const saveBloodRequestRecord = async ({
   recipientId,
   kind,
   values,
+  recordId,
 }: SaveBloodRequestRecordInput) => {
   if (kind !== 'component-request' && kind !== 'individual-selection-direction') {
     throw new Error('Неизвестный тип заявки или направления.');
@@ -71,7 +72,7 @@ export const saveBloodRequestRecord = async ({
     if (!recipients.length) {
       throw new Error('Выбранная карточка реципиента удалена. Выберите пациента заново.');
     }
-    return mapRecord(storeFormRecord(db, { recipientId, kind, values }));
+    return mapRecord(storeFormRecord(db, { recipientId, kind, values, recordId }));
   });
 };
 

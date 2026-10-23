@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-it('opens a registration record in StrictMode without consuming it during state initialization', () => {
+it('opens a registration snapshot in StrictMode and loads the working draft separately', () => {
   window.sessionStorage.setItem(
     'blood:registration-open-record',
     JSON.stringify({
@@ -43,6 +43,8 @@ it('opens a registration record in StrictMode without consuming it during state 
     </StrictMode>,
   );
   expect(screen.getAllByText('Иванов Иван Иванович').length).toBeGreaterThan(0);
-  expect(loadRegistrationDraft).not.toHaveBeenCalled();
+  expect(loadRegistrationDraft).toHaveBeenCalled();
+  expect(screen.getByRole('button', { name: /^Редактировать$/ })).toBeDefined();
+  expect(screen.getByRole('button', { name: /^Сохранить$/ }).hasAttribute('disabled')).toBe(true);
   expect(window.sessionStorage.getItem('blood:registration-open-record')).toBeNull();
 });

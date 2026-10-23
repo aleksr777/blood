@@ -53,6 +53,7 @@ export type BloodRequestRecord = {
 };
 
 export type SaveBloodRequestRecordInput = {
+  recordId?: number;
   recipientId: number;
   kind: BloodRequestRecordKind;
   values: BloodRequestRecordValues;

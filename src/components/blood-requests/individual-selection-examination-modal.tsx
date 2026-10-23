@@ -1,4 +1,5 @@
 import Modal from '../modal/modal';
+import { WarningNotice } from '../warning-notice/warning-notice';
 import { RecipientExaminationFields } from '../transfusion-protocol/recipient-examination-fields';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import styles from '../transfusion-protocol/protocol-editor.module.css';
@@ -26,19 +27,11 @@ export const IndividualSelectionExaminationModal = ({
     className={styles.medium}
   >
     <div className={styles.grid}>
-      {bloodGroupWarning && (
-        <div className={styles.bloodGroupWarning} role="alert">
-          <span>{bloodGroupWarning}</span>
-          <button
-            type="button"
-            className={styles.bloodGroupWarningDismiss}
-            aria-label="Закрыть предупреждение"
-            onClick={onDismissBloodGroupWarning}
-          >
-            ×
-          </button>
-        </div>
-      )}
+      <WarningNotice
+        className={styles.bloodGroupWarning}
+        message={bloodGroupWarning}
+        onDismiss={onDismissBloodGroupWarning}
+      />
       <RecipientExaminationFields
         values={values}
         showAlloimmuneAntibodies={showAlloimmuneAntibodies}

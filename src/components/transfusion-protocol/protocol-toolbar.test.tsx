@@ -30,6 +30,13 @@ const props = (): ComponentProps<typeof ProtocolToolbar> => ({
 
 afterEach(cleanup);
 
+const expectWarningText = (message: string) => {
+  const text = screen.getByRole('alert').textContent;
+  for (const line of message.split('\n').filter(Boolean)) {
+    expect(text).toContain(line.replace(/^• /, ''));
+  }
+};
+
 it.each(['Сохранить', 'Печать страницы 1', 'Печать страницы 2'])(
   'shows the missing data warning only after attempting %s and prevents the action',
   (name) => {
@@ -43,12 +50,12 @@ it.each(['Сохранить', 'Печать страницы 1', 'Печать 
     expect(screen.queryByRole('alert')).toBeNull();
     expect(button.hasAttribute('title')).toBe(false);
     fireEvent.click(button);
-    expect(screen.getByText(callbacks.hemaconWarning)).toBeTruthy();
+    expectWarningText(callbacks.hemaconWarning);
     fireEvent.click(screen.getByRole('button', { name: 'Закрыть предупреждение' }));
     expect(screen.queryByRole('alert')).toBeNull();
     expect(button.getAttribute('aria-disabled')).toBe('true');
     fireEvent.click(button);
-    expect(screen.getByText(callbacks.hemaconWarning)).toBeTruthy();
+    expectWarningText(callbacks.hemaconWarning);
     expect(callbacks.onSave).not.toHaveBeenCalled();
     expect(callbacks.onPrintPage).not.toHaveBeenCalled();
   },
@@ -61,7 +68,7 @@ it('unlocks save and every print page with three fields and hides the warning fo
   expect(screen.getByRole('alert')).toBeTruthy();
   const partialWarning = getProtocolHemaconWarning({ componentName: 'Эритроцитная взвесь' });
   rerender(<ProtocolToolbar {...callbacks} hemaconWarning={partialWarning} />);
-  expect(screen.getByText(partialWarning)).toBeTruthy();
+  expectWarningText(partialWarning);
   const hemaconWarning = getProtocolHemaconWarning({
     componentName: 'Эритроцитная взвесь',
     componentUnitNumber: '76102200045636',

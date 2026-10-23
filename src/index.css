@@ -210,6 +210,9 @@ a.site-navigation__link:focus-visible {
   color: var(--ui-text-muted);
   font-size: 13px;
   text-align: right;
+  line-height: 1.5;
+  white-space: pre-line;
+  text-wrap: pretty;
 }
 
 .toolbar-warning,
@@ -217,19 +220,6 @@ a.site-navigation__link:focus-visible {
 .toolbar-blood-group-warning,
 .toolbar-component-unit-warning {
   margin-top: 0.55rem;
-}
-
-.toolbar-blood-group-warning,
-.toolbar-component-unit-warning {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.toolbar-warning-dismiss {
-  flex: 0 0 auto;
-  font-size: 1.2rem;
 }
 
 @media (prefers-reduced-motion: reduce) {

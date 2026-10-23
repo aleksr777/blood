@@ -49,7 +49,7 @@ export const getBloodGroupMismatch = (values: ProtocolValues) => {
     ].join('|'),
     dismissible: componentGroup === 'erythrocytes' && donorAbo === 'O(I)' && donorRh === 'Rh(-)',
     message:
-      `Внимание: данные реципиента и донора не совпадают — ${differences.join('; ')}. ` +
+      `Внимание: данные реципиента и донора не совпадают.\n\n${differences.map((difference) => `• ${difference}`).join('\n')}.\n\n` +
       'Проверьте правильность введённых данных и допустимость трансфузии.',
   };
 };

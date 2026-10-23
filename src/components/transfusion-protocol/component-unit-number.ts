@@ -21,7 +21,7 @@ export const getComponentUnitNumberWarning = (values: ProtocolValues) => {
   return {
     key: digits,
     message:
-      `Номер единицы компонента крови введён не полностью: ${digits.length} из ${COMPONENT_UNIT_DIGITS} цифр. ` +
-      'Проверьте номер на этикетке гемакона. Ожидаемый формат: 761022 000456 36.',
+      `Номер единицы компонента крови введён не полностью.\n\nВведено: ${digits.length} из ${COMPONENT_UNIT_DIGITS} цифр.\n` +
+      'Проверьте номер на этикетке гемакона.\nОжидаемый формат: 761022 000456 36.',
   };
 };

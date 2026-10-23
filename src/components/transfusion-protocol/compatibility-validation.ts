@@ -29,7 +29,9 @@ export const getCompatibilityDangerWarning = (values: ProtocolValues) => {
   const failures = getFailedCompatibilityChecks(values);
   if (!failures.length) return '';
 
-  return `Внимание: пробы на совместимость не пройдены: ${failures.join(
-    '; ',
-  )}. Трансфузия данного компонента недопустима до получения совместимых результатов всех обязательных проб и подтверждения групп крови.`;
+  return `Внимание: пробы на совместимость не пройдены.\n\n${failures
+    .map((failure) => `• ${failure}`)
+    .join(
+      '\n',
+    )}.\n\nТрансфузия данного компонента недопустима до получения совместимых результатов всех обязательных проб и подтверждения групп крови.`;
 };

@@ -300,62 +300,14 @@ a.site-navigation__link:focus-visible {
   .fill-block > tr > td,
   .fill-block .monitor-table th,
   .fill-block .monitor-table td {
-    transition:
-      background-color 140ms ease,
-      border-color 140ms ease;
+    transition: background-color var(--ui-motion-fast) ease;
   }
 
-  .fill-block:hover > tr > th,
-  .fill-block:hover > tr > td,
-  .fill-block:hover .monitor-table th,
-  .fill-block:hover .monitor-table td {
-    border-color: var(--ui-accent);
+  .fill-block:is(:hover, .is-logical-hovered) > tr > th,
+  .fill-block:is(:hover, .is-logical-hovered) > tr > td,
+  .fill-block:is(:hover, .is-logical-hovered) .monitor-table th,
+  .fill-block:is(:hover, .is-logical-hovered) .monitor-table td {
     background: var(--ui-accent-soft);
-  }
-
-  .fill-block:hover > tr:first-child > * {
-    border-top-color: var(--ui-accent) !important;
-  }
-
-  .protocol-table > tbody:has(+ .fill-block:hover) > tr:last-child > *,
-  .protocol-table > tbody:has(+ .fill-block.is-logical-hovered) > tr:last-child > * {
-    border-bottom-color: var(--ui-accent) !important;
-  }
-
-  .fill-block:hover > tr:last-child > * {
-    border-bottom-color: var(--ui-accent);
-  }
-
-  .fill-block:hover > tr > :first-child {
-    border-left-color: var(--ui-accent);
-  }
-
-  .fill-block:hover > tr > :last-child {
-    border-right-color: var(--ui-accent);
-  }
-
-  .fill-block.is-logical-hovered > tr > th,
-  .fill-block.is-logical-hovered > tr > td,
-  .fill-block.is-logical-hovered .monitor-table th,
-  .fill-block.is-logical-hovered .monitor-table td {
-    border-color: var(--ui-accent);
-    background: var(--ui-accent-soft);
-  }
-
-  .fill-block.is-logical-hovered > tr:first-child > * {
-    border-top-color: var(--ui-accent) !important;
-  }
-
-  .fill-block.is-logical-hovered > tr:last-child > * {
-    border-bottom-color: var(--ui-accent);
-  }
-
-  .fill-block.is-logical-hovered > tr > :first-child {
-    border-left-color: var(--ui-accent);
-  }
-
-  .fill-block.is-logical-hovered > tr > :last-child {
-    border-right-color: var(--ui-accent);
   }
 }
 
@@ -698,14 +650,11 @@ a.site-navigation__link:focus-visible {
   position: absolute;
   z-index: -1;
   inset: -2.5mm -3mm;
-  border: 1px solid transparent;
   border-radius: 4px;
   background: transparent;
   content: '';
   pointer-events: none;
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease;
+  transition: background-color var(--ui-motion-fast) ease;
 }
 
 .registration-patient-details:focus-visible {
@@ -713,13 +662,11 @@ a.site-navigation__link:focus-visible {
 }
 
 .registration-patient-details:focus-visible::before {
-  border-color: var(--ui-accent);
   background: var(--ui-accent-soft);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .registration-patient-details:hover::before {
-    border-color: var(--ui-accent);
     background: var(--ui-accent-soft);
   }
 }
@@ -795,21 +742,17 @@ a.site-navigation__link:focus-visible {
 
 .registration-table-section .registration-table th,
 .registration-table-section .registration-table td {
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease;
+  transition: background-color var(--ui-motion-fast) ease;
 }
 
 .registration-table-section:focus-visible .registration-table th,
 .registration-table-section:focus-visible .registration-table td {
-  border-color: var(--ui-accent);
   background: var(--ui-accent-soft);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .registration-table-section:hover .registration-table th,
   .registration-table-section:hover .registration-table td {
-    border-color: var(--ui-accent);
     background: var(--ui-accent-soft);
   }
 }
@@ -1015,7 +958,6 @@ a.site-navigation__link:focus-visible {
 
   .registration-table-section .registration-table th,
   .registration-table-section .registration-table td {
-    border-color: #111 !important;
     background: transparent !important;
     transition: none !important;
   }

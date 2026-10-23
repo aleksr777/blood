@@ -19,11 +19,13 @@ const getAddedElements = (node: Node) => {
 export const useModalAutoHeight = (
   dialogRef: RefObject<HTMLDialogElement | null>,
   contentRef: RefObject<HTMLDivElement | null>,
+  headerRef: RefObject<HTMLDivElement | null>,
 ) => {
   useEffect(() => {
     const dialog = dialogRef.current;
     const content = contentRef.current;
-    if (!dialog || !content) return undefined;
+    const header = headerRef.current;
+    if (!dialog || !content || !header) return undefined;
 
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let measureFrame: number | null = null;
@@ -72,7 +74,7 @@ export const useModalAutoHeight = (
         const dialogStyle = window.getComputedStyle(dialog);
         const borderHeight =
           parsePixels(dialogStyle.borderTopWidth) + parsePixels(dialogStyle.borderBottomWidth);
-        const naturalHeight = content.offsetHeight + borderHeight;
+        const naturalHeight = header.offsetHeight + content.offsetHeight + borderHeight;
         if (naturalHeight <= 0) return;
 
         const parsedMaxHeight = Number.parseFloat(dialogStyle.maxHeight);
@@ -137,6 +139,7 @@ export const useModalAutoHeight = (
 
     const resizeObserver = new ResizeObserver(updateHeight);
     resizeObserver.observe(content);
+    resizeObserver.observe(header);
     contentMutationObserver.observe(content, { childList: true, subtree: true });
     dialog.addEventListener('transitionend', handleTransitionEnd);
     window.addEventListener('resize', updateHeight);
@@ -163,5 +166,5 @@ export const useModalAutoHeight = (
       delete dialog.dataset.sizeAnimating;
       dialog.style.removeProperty('height');
     };
-  }, [dialogRef, contentRef]);
+  }, [dialogRef, contentRef, headerRef]);
 };

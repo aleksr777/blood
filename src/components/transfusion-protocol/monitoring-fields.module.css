@@ -1,23 +1,9 @@
 .root {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 0.85rem;
-  min-width: 0;
+  composes: ui-stack ui-full-width-stack from global;
 }
 
 .group {
-  min-width: 0;
-  margin: 0;
-  border: 1px solid #d8e0ec;
-  border-radius: 0.65rem;
-  padding: 0.8rem 0.9rem 0.9rem;
-}
-
-.group legend {
-  padding: 0 0.35rem;
-  color: #263552;
-  font-size: 0.9rem;
-  font-weight: 700;
+  composes: ui-fieldset from global;
 }
 
 .fields {
@@ -47,7 +33,7 @@
 }
 
 .legacyValue {
-  color: #475569;
+  color: var(--ui-text-muted);
   font-size: 0.8rem;
   font-weight: 400;
   overflow-wrap: anywhere;

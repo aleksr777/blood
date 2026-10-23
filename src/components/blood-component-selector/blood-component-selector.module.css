@@ -1,17 +1,8 @@
 .root {
+  composes: ui-fieldset from global;
   grid-column: 1 / -1;
-  min-width: 0;
-  margin: 0;
-  border: 1px solid #d8e0ec;
-  border-radius: 0.65rem;
-  padding: 0.75rem 0.85rem;
-  color: #263552;
+  color: var(--ui-text);
   font-size: 0.9rem;
-}
-
-.root legend {
-  padding: 0 0.35rem;
-  font-weight: 700;
 }
 
 .choices {
@@ -25,14 +16,14 @@
 }
 
 .choice {
-  --component-background: #f1f6fc;
-  --component-border: #bfd0e1;
-  --component-text: #3f617f;
-  --component-hover-background: #e1edf8;
-  --component-hover-border: #8aa9c5;
-  --component-selected-background: #426b96;
-  --component-selected-text: #fff;
-  --component-selected-hover: #365d84;
+  --component-background: var(--blood-blue-background);
+  --component-border: var(--blood-blue-border);
+  --component-text: var(--blood-blue-text);
+  --component-hover-background: var(--blood-blue-hover);
+  --component-hover-border: var(--blood-blue-hover-border);
+  --component-selected-background: var(--ui-accent);
+  --component-selected-text: var(--ui-surface);
+  --component-selected-hover: var(--ui-accent-hover);
 
   min-width: 0;
   min-height: var(--control-height);
@@ -48,25 +39,25 @@
 }
 
 .choice[data-component='erythrocytes'] {
-  --component-background: #fdf2f3;
-  --component-border: #e7bdc5;
-  --component-text: #93424f;
-  --component-hover-background: #fae3e7;
-  --component-hover-border: #c56878;
-  --component-selected-background: #a7495c;
-  --component-selected-hover: #913e50;
+  --component-background: var(--blood-red-background);
+  --component-border: var(--blood-red-border);
+  --component-text: var(--blood-red-text);
+  --component-hover-background: var(--blood-red-hover);
+  --component-hover-border: var(--blood-red-hover-border);
+  --component-selected-background: var(--blood-red-selected);
+  --component-selected-hover: var(--blood-red-selected-hover);
 }
 
 .choice[data-component='plasma-cryo'] {
-  --component-background: #fff9e6;
-  --component-border: #e3cf8f;
-  --component-text: #76591f;
-  --component-hover-background: #fff0ba;
-  --component-hover-border: #c7a040;
-  --component-selected-background: #f3d780;
-  --component-selected-border: #b9902f;
-  --component-selected-text: #5c4618;
-  --component-selected-hover: #ebc968;
+  --component-background: var(--blood-yellow-background);
+  --component-border: var(--blood-yellow-border);
+  --component-text: var(--blood-yellow-text);
+  --component-hover-background: var(--blood-yellow-hover);
+  --component-hover-border: var(--blood-yellow-hover-border);
+  --component-selected-background: var(--blood-yellow-selected);
+  --component-selected-border: var(--blood-yellow-selected-border);
+  --component-selected-text: var(--blood-yellow-selected-text);
+  --component-selected-hover: var(--blood-yellow-selected-hover);
 }
 
 .choice:hover:enabled {
@@ -105,8 +96,8 @@
 }
 
 .name input:disabled {
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--ui-disabled-background);
+  color: var(--ui-text-muted);
 }
 
 @media (max-width: 560px) {

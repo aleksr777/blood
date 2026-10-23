@@ -1,0 +1,357 @@
+@layer blood-ui {
+  .ui-button {
+    display: inline-flex;
+    min-width: 0;
+    min-height: var(--button-height, var(--control-height));
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid var(--button-border, var(--ui-border-strong));
+    border-radius: var(--control-radius);
+    padding: var(--button-padding, 0.45rem 0.9rem);
+    background: var(--button-background, var(--ui-surface));
+    color: var(--button-text, var(--ui-text));
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--button-font-size, var(--ui-font-control));
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: var(--ui-shadow-control);
+    transition:
+      border-color var(--ui-motion-fast) ease,
+      background-color var(--ui-motion-fast) ease,
+      box-shadow var(--ui-motion-fast) ease;
+  }
+
+  .ui-button:hover {
+    border-color: var(--button-hover-border, var(--ui-accent));
+    background: var(--button-hover-background, var(--ui-surface-hover));
+  }
+
+  .ui-button:active {
+    box-shadow: none;
+  }
+
+  .ui-button:focus-visible,
+  .ui-icon-button:focus-visible,
+  .ui-text-button:focus-visible,
+  .ui-selectable-card:focus-visible {
+    outline: 2px solid var(--ui-accent);
+    outline-offset: 2px;
+  }
+
+  .ui-button:disabled,
+  .ui-button[aria-disabled='true'] {
+    border-color: var(--ui-border);
+    background: var(--ui-disabled-background);
+    color: var(--ui-text-disabled);
+    box-shadow: none;
+    cursor: default;
+  }
+
+  .ui-primary-button {
+    --button-background: var(--ui-accent);
+    --button-border: var(--ui-accent);
+    --button-text: var(--ui-on-accent);
+    --button-hover-background: var(--ui-accent-hover);
+    --button-hover-border: var(--ui-accent-hover);
+  }
+
+  .ui-secondary-button {
+    --button-background: var(--ui-surface);
+    --button-text: var(--ui-accent-hover);
+    --button-hover-background: var(--ui-accent-soft);
+  }
+
+  .ui-success-button {
+    --button-background: var(--ui-success);
+    --button-border: var(--ui-success);
+    --button-text: var(--ui-on-accent);
+    --button-hover-background: var(--ui-success-hover);
+    --button-hover-border: var(--ui-success-hover);
+  }
+
+  .ui-danger-button {
+    --button-background: var(--ui-danger-soft);
+    --button-border: var(--ui-danger-border);
+    --button-text: var(--ui-danger-text);
+    --button-hover-background: var(--ui-danger-soft-hover);
+    --button-hover-border: var(--ui-danger);
+  }
+
+  .ui-danger-primary-button {
+    --button-background: var(--ui-danger);
+    --button-border: var(--ui-danger);
+    --button-text: var(--ui-on-accent);
+    --button-hover-background: var(--ui-danger-hover);
+    --button-hover-border: var(--ui-danger-hover);
+  }
+
+  .ui-compact-button {
+    --button-height: 2rem;
+    --button-padding: 0.35rem 0.65rem;
+    --button-font-size: var(--ui-font-small);
+  }
+
+  .ui-toolbar-button {
+    --button-height: 2.25rem;
+    --button-padding: 0.4rem 0.75rem;
+    --button-font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .ui-icon-button {
+    display: inline-flex;
+    width: var(--icon-button-size, 1.85rem);
+    min-height: var(--icon-button-size, 1.85rem);
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: var(--ui-radius-small);
+    padding: 0;
+    background: transparent;
+    color: var(--ui-text-muted);
+    cursor: pointer;
+    font: inherit;
+    line-height: 1;
+  }
+
+  .ui-icon-button:hover,
+  .ui-icon-button:focus-visible {
+    background: var(--ui-accent-soft);
+    color: var(--ui-accent-hover);
+  }
+
+  .ui-danger-icon {
+    color: var(--ui-danger-text);
+  }
+
+  .ui-danger-icon:hover,
+  .ui-danger-icon:focus-visible {
+    background: var(--ui-danger-soft);
+    color: var(--ui-danger-text);
+  }
+
+  .ui-success-icon {
+    color: var(--ui-success-text);
+  }
+
+  .ui-success-icon:hover,
+  .ui-success-icon:focus-visible {
+    background: var(--ui-success-soft);
+    color: var(--ui-success-text);
+  }
+
+  .ui-text-button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--ui-accent-hover);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--ui-font-small);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.2rem;
+  }
+
+  .ui-text-button:hover {
+    color: var(--ui-text-strong);
+  }
+
+  .ui-stack {
+    display: grid;
+    min-width: 0;
+    gap: 1rem;
+  }
+
+  .ui-full-width-stack {
+    grid-column: 1 / -1;
+  }
+
+  .ui-form-grid {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 1.25rem;
+  }
+
+  :where(.ui-form-grid) label,
+  .ui-field-label {
+    color: var(--ui-text);
+    font-size: var(--ui-font-control);
+    font-weight: 600;
+  }
+
+  :where(.ui-form-grid) label {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .ui-field-label {
+    margin-bottom: 0.4rem;
+  }
+
+  .ui-fieldset {
+    min-width: 0;
+    margin: 0;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-large);
+    padding: 0.8rem 0.9rem 0.9rem;
+    background: var(--ui-surface);
+  }
+
+  .ui-fieldset legend {
+    padding: 0 0.35rem;
+    color: var(--ui-text);
+    font-size: var(--ui-font-control);
+    font-weight: 700;
+  }
+
+  .ui-choice-label {
+    display: inline-flex;
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--ui-text);
+    cursor: pointer;
+    font-size: var(--ui-font-control);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .ui-choice-label input {
+    flex: 0 0 auto;
+  }
+
+  .ui-choice-label:has(input:disabled) {
+    color: var(--ui-text-muted);
+    cursor: default;
+  }
+
+  .ui-panel {
+    min-width: 0;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-large);
+    padding: 0.9rem;
+    background: var(--ui-surface);
+  }
+
+  .ui-selectable-card {
+    min-width: 0;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-large);
+    padding: 0.75rem 0.85rem;
+    background: var(--ui-surface);
+    color: var(--ui-text);
+    cursor: pointer;
+    text-align: left;
+    transition:
+      border-color var(--ui-motion-fast) ease,
+      background-color var(--ui-motion-fast) ease;
+  }
+
+  .ui-selectable-card:hover {
+    border-color: var(--ui-border-strong);
+    background: var(--ui-surface-soft);
+  }
+
+  .ui-selected-card,
+  .ui-selectable-card[data-selected='true'] {
+    border-color: var(--ui-accent);
+    background: var(--ui-surface-selected);
+    box-shadow: inset 3px 0 0 var(--ui-accent);
+  }
+
+  .ui-selected-card:hover,
+  .ui-selectable-card[data-selected='true']:hover {
+    background: var(--ui-surface-selected);
+  }
+
+  .ui-menu-surface {
+    border: 1px solid var(--ui-border-strong);
+    border-radius: var(--ui-radius);
+    padding: 0.3rem;
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow-menu);
+  }
+
+  .ui-menu-item {
+    display: flex;
+    min-width: 0;
+    min-height: 2.25rem;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--ui-radius-small);
+    padding: 0.3rem 0.5rem;
+    background: var(--option-background, transparent);
+    color: var(--option-text, var(--ui-text));
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 400;
+    text-align: left;
+  }
+
+  .ui-menu-item:hover,
+  .ui-menu-item:focus-visible {
+    background: var(--option-hover-background, var(--ui-accent-soft));
+  }
+
+  .ui-menu-item:focus-visible {
+    outline: 2px solid var(--option-accent, var(--ui-accent));
+    outline-offset: -2px;
+  }
+
+  .ui-notice {
+    min-width: 0;
+    border: 1px solid var(--notice-border, var(--ui-border));
+    border-left-width: 3px;
+    border-radius: var(--ui-radius);
+    padding: 0.65rem 0.85rem;
+    background: var(--notice-background, var(--ui-surface-soft));
+    color: var(--notice-text, var(--ui-text));
+    font-size: 0.86rem;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .ui-warning-notice {
+    --notice-border: var(--ui-warning-border);
+    --notice-background: var(--ui-warning-soft);
+    --notice-text: var(--ui-warning-text);
+  }
+
+  .ui-danger-notice {
+    --notice-border: var(--ui-danger-border);
+    --notice-background: var(--ui-danger-soft);
+    --notice-text: var(--ui-danger-text);
+  }
+
+  .ui-info-notice {
+    --notice-border: var(--ui-border-strong);
+    --notice-background: var(--ui-accent-soft);
+    --notice-text: var(--ui-text);
+  }
+
+  @media (max-width: 680px) {
+    .ui-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-button,
+    .ui-selectable-card {
+      transition: none;
+    }
+  }
+}

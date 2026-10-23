@@ -1,0 +1,137 @@
+@layer blood-ui {
+  button {
+    font: inherit;
+  }
+
+  :where(input:not([type='radio']):not([type='checkbox']), select, textarea) {
+    box-sizing: border-box;
+    min-width: 0;
+    width: 100%;
+    border: 1px solid var(--control-border);
+    border-radius: var(--control-radius);
+    background: var(--ui-surface);
+    color: var(--ui-text-strong);
+    font: inherit;
+    font-weight: 400;
+    transition:
+      border-color var(--ui-motion-fast) ease,
+      background-color var(--ui-motion-fast) ease;
+  }
+
+  :where(input:not([type='radio']):not([type='checkbox']), select) {
+    min-height: var(--control-height);
+    padding: var(--control-padding-y) var(--control-padding-x);
+  }
+
+  textarea {
+    height: 6.5rem;
+    min-height: 6.5rem;
+    max-height: 6.5rem;
+    max-width: 100%;
+    padding: 0.55rem var(--control-padding-x);
+    resize: none;
+  }
+
+  :where(input:not([type='radio']):not([type='checkbox']), select, textarea):hover:not(
+      :disabled
+    ):not([readonly]) {
+    border-color: var(--ui-accent);
+  }
+
+  :where(input:not([type='radio']):not([type='checkbox']), select, textarea):focus {
+    border-color: var(--ui-accent);
+    outline: 2px solid var(--ui-focus-ring);
+    outline-offset: 1px;
+  }
+
+  :where(input:not([type='radio']):not([type='checkbox']), select, textarea):focus-visible {
+    outline-color: var(--ui-accent);
+  }
+
+  :where(input:not([type='radio']):not([type='checkbox']), textarea)[readonly] {
+    background: var(--ui-surface-soft);
+    color: var(--ui-text-muted);
+  }
+
+  :where(input:not([type='radio']):not([type='checkbox']), select, textarea):disabled {
+    background: var(--ui-disabled-background);
+    color: var(--ui-text-disabled);
+    cursor: default;
+  }
+
+  :where(input, textarea)::placeholder {
+    color: var(--ui-text-muted);
+    opacity: 1;
+  }
+
+  input[type='checkbox'] {
+    width: 1rem;
+    height: 1rem;
+    min-height: 1rem;
+    margin: 0;
+    padding: 0;
+    accent-color: var(--ui-accent);
+    cursor: pointer;
+  }
+
+  input[type='radio'] {
+    appearance: none;
+    flex: 0 0 1rem;
+    width: 1rem;
+    min-width: 1rem;
+    height: 1rem;
+    min-height: 1rem;
+    margin: 0;
+    border: 1.5px solid var(--ui-border-strong);
+    border-radius: 50%;
+    padding: 0;
+    background: var(--ui-surface);
+    box-shadow: inset 0 0 0 0.5rem var(--ui-surface);
+    cursor: pointer;
+    vertical-align: middle;
+    transition:
+      border-color var(--ui-motion-fast) ease,
+      background-color var(--ui-motion-fast) ease,
+      box-shadow var(--ui-motion-fast) ease;
+  }
+
+  input[type='radio']:checked {
+    border-color: var(--ui-accent);
+    background: var(--ui-accent);
+    box-shadow: inset 0 0 0 0.22rem var(--ui-surface);
+  }
+
+  input[type='radio']:hover:not(:disabled) {
+    border-color: var(--ui-accent);
+  }
+
+  :where(input[type='radio'], input[type='checkbox']):focus-visible {
+    outline: 2px solid var(--ui-accent);
+    outline-offset: 2px;
+  }
+
+  input[type='radio']:disabled {
+    border-color: var(--ui-border);
+    background: var(--ui-disabled-background);
+    box-shadow: inset 0 0 0 0.5rem var(--ui-disabled-background);
+    cursor: default;
+  }
+
+  input[type='radio']:checked:disabled {
+    border-color: var(--ui-text-disabled);
+    background: var(--ui-text-disabled);
+    box-shadow: inset 0 0 0 0.22rem var(--ui-disabled-background);
+  }
+
+  input[type='checkbox']:disabled {
+    cursor: default;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    input,
+    select,
+    textarea {
+      transition: none;
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import ui from '../../styles/ui';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
 import {
   useCallback,
@@ -1148,26 +1149,46 @@ export const ComponentRequest = () => {
             onOpenCurrentRecipient={() => setRegistryOpen(true)}
           />
           <div className="print-actions" aria-label="Панель действий">
-            <button type="button" className="clear-button" onClick={() => void clear()}>
+            <button
+              type="button"
+              className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+              onClick={() => void clear()}
+            >
               Очистить бланк
             </button>
-            <button type="button" className="new-button" onClick={() => void newBlank()}>
+            <button
+              type="button"
+              className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
+              onClick={() => void newBlank()}
+            >
               Новый бланк
             </button>
             <button
               type="button"
-              className="secondary-button"
+              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
               onClick={() => setRegistryOpen(true)}
             >
               Реципиенты
             </button>
-            <button type="button" className="save-button" onClick={() => void save()}>
+            <button
+              type="button"
+              className={`${ui.successButton} ${ui.toolbarButton} save-button`}
+              onClick={() => void save()}
+            >
               Сохранить
             </button>
-            <button type="button" className="print-button" onClick={() => printPage(1)}>
+            <button
+              type="button"
+              className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
+              onClick={() => printPage(1)}
+            >
               Печать страницы 1
             </button>
-            <button type="button" className="print-button" onClick={() => printPage(2)}>
+            <button
+              type="button"
+              className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
+              onClick={() => printPage(2)}
+            >
               Печать страницы 2
             </button>
           </div>
@@ -1177,11 +1198,11 @@ export const ComponentRequest = () => {
             </div>
           )}
           {bloodGroupWarning && (
-            <div className="toolbar-blood-group-warning" role="alert">
+            <div className={`${ui.warningNotice} toolbar-blood-group-warning`} role="alert">
               <span>{bloodGroupWarning}</span>
               <button
                 type="button"
-                className="toolbar-warning-dismiss"
+                className={`${ui.iconButton} toolbar-warning-dismiss`}
                 aria-label="Закрыть предупреждение"
                 onClick={dismissBloodGroupWarning}
               >

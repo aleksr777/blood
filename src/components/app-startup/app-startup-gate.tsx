@@ -1,3 +1,4 @@
+import ui from '../../styles/ui';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import { initializeDatabase } from '../../storage/sqlite/database-client';
 import { DatabaseError } from '../../storage/sqlite/database-errors';
@@ -80,7 +81,7 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
                 <div className={styles.actions} aria-busy={state.retrying}>
                   <button
                     type="button"
-                    className="secondary-button"
+                    className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
                     disabled={state.retrying}
                     onClick={retry}
                   >

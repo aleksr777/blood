@@ -8,7 +8,7 @@
 }
 
 .summary {
-  color: #475569;
+  color: var(--ui-text-muted);
   font-size: 0.84rem;
   font-weight: 600;
 }
@@ -22,30 +22,15 @@
 }
 
 .item {
+  composes: ui-selectable-card from global;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: 0.75rem;
-  border: 1px solid #d5deea;
-  border-radius: 0.65rem;
-  padding: 0.75rem 0.85rem;
-  background: #fff;
-  cursor: pointer;
-  transition:
-    border-color 140ms ease,
-    background-color 140ms ease,
-    box-shadow 140ms ease;
-}
-
-.item:hover {
-  border-color: #9fb4cc;
-  background: #f8fbff;
 }
 
 .itemSelected {
-  border-color: #7f9fbe;
-  background: #f0f6fc;
-  box-shadow: inset 3px 0 0 #426b96;
+  composes: ui-selected-card from global;
 }
 
 .itemDisabled {
@@ -57,7 +42,7 @@
   width: 1rem;
   height: 1rem;
   margin: 0.15rem 0 0;
-  accent-color: #1d4ed8;
+  accent-color: var(--ui-accent);
 }
 
 .itemContent {
@@ -70,33 +55,33 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  color: #334155;
+  color: var(--ui-text);
   font-size: 0.9rem;
 }
 
 .itemTopLine strong {
   min-width: 0;
   overflow: hidden;
-  color: #1e293b;
+  color: var(--ui-text-strong);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .itemTopLine > span {
   flex: 0 0 auto;
-  color: #475569;
+  color: var(--ui-text-muted);
 }
 
 .itemDetails {
-  color: #64748b;
+  color: var(--ui-text-muted);
   font-size: 0.82rem;
 }
 
 .empty {
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed var(--ui-border);
   border-radius: 0.65rem;
   padding: 1.25rem;
-  color: #64748b;
+  color: var(--ui-text-muted);
   font-size: 0.88rem;
   text-align: center;
 }
@@ -108,37 +93,12 @@
   padding-top: 0.2rem;
 }
 
-.cancelButton,
-.applyButton {
-  min-height: 2.2rem;
-  border: 1px solid;
-  border-radius: 0.45rem;
-  padding: 0 0.9rem;
-  font: inherit;
-  font-size: 0.86rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
 .cancelButton {
-  border-color: #b8c4d6;
-  background: #fff;
-  color: #475569;
+  composes: ui-button ui-secondary-button from global;
 }
 
 .applyButton {
-  border-color: #426b96;
-  background: #426b96;
-  color: #fff;
-}
-
-.cancelButton:hover {
-  background: #f8fafc;
-}
-
-.applyButton:hover {
-  border-color: #365d84;
-  background: #365d84;
+  composes: ui-button ui-primary-button from global;
 }
 
 @media (max-width: 700px) {

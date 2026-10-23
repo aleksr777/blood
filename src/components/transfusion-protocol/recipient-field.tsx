@@ -1,3 +1,4 @@
+import ui from '../../styles/ui';
 import { useState } from 'react';
 import { createRecipient, type RecipientRecord } from '../../storage/repositories/recipients';
 import { RecipientNewModal } from './recipient-new-modal';
@@ -30,7 +31,11 @@ export const RecipientField = ({ value, onSelectRecipient, onOpenRecipients }: P
           {value || 'Реципиент не выбран'}
         </div>
         <div className={styles.actions}>
-          <button type="button" className="secondary-button" onClick={onOpenRecipients}>
+          <button
+            type="button"
+            className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+            onClick={onOpenRecipients}
+          >
             Реципиенты
           </button>
           <button

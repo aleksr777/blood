@@ -1,8 +1,8 @@
 .modal {
   --modal-gap: clamp(0.5rem, 2vw, 2rem);
 
-  border: 1px solid #8ea6ff;
-  border-radius: 0.875rem;
+  border: 1px solid var(--ui-border-strong);
+  border-radius: var(--ui-radius-dialog);
   padding: 0;
   width: var(--modal-width, 32rem);
   height: fit-content;
@@ -11,9 +11,9 @@
     100dvh - 2 * var(--modal-gap) - env(safe-area-inset-top) - env(safe-area-inset-bottom)
   );
   overflow: visible;
-  background: #f8faff;
-  color: #17213f;
-  box-shadow: 0 24px 70px rgb(23 33 63 / 22%);
+  background: var(--ui-surface-soft);
+  color: var(--ui-text-strong);
+  box-shadow: var(--ui-shadow-dialog);
   opacity: 0;
   transition: opacity 160ms ease;
 }
@@ -62,7 +62,7 @@
 }
 
 .modal::backdrop {
-  background: rgb(23 33 63 / 42%);
+  background: var(--ui-backdrop);
   opacity: 0;
   transition: opacity 160ms ease;
 }
@@ -88,25 +88,13 @@
 }
 
 .close {
+  composes: ui-icon-button from global;
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--control-height);
-  height: var(--control-height);
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: #17213f;
-  cursor: pointer;
   font-size: 1.75rem;
-  line-height: 1;
-}
-
-.close:focus-visible {
-  background: rgb(142 166 255 / 18%);
+  --icon-button-size: var(--control-height);
+  border-radius: 50%;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Modal from '../modal/modal';
+import { WarningNotice } from '../warning-notice/warning-notice';
 import { getProtocolBlockConfig } from './editor-config';
 import { CompatibilityTestsFields } from './compatibility-tests-fields';
 import { ComplicationsFields } from './complications-fields';
@@ -22,6 +23,7 @@ type Props = {
   blockId: ProtocolBlockId;
   values: ProtocolValues;
   bloodGroupWarning: string;
+  bloodGroupWarningDismissible: boolean;
   onDismissBloodGroupWarning: () => void;
   componentUnitNumberWarning: string;
   onDismissComponentUnitNumberWarning: () => void;
@@ -42,6 +44,7 @@ export const ProtocolEditorModal = ({
   blockId,
   values,
   bloodGroupWarning,
+  bloodGroupWarningDismissible,
   onDismissBloodGroupWarning,
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
@@ -131,18 +134,13 @@ export const ProtocolEditorModal = ({
           .filter(Boolean)
           .join(' ')}
       >
-        {bloodGroupWarning && (blockId === 'examination' || blockId === 'donor') && (
-          <div className={styles.bloodGroupWarning} role="alert">
-            <span>{bloodGroupWarning}</span>
-            <button
-              type="button"
-              className={styles.bloodGroupWarningDismiss}
-              aria-label="Закрыть предупреждение"
-              onClick={onDismissBloodGroupWarning}
-            >
-              ×
-            </button>
-          </div>
+        {(blockId === 'examination' || blockId === 'donor') && (
+          <WarningNotice
+            className={styles.bloodGroupWarning}
+            message={bloodGroupWarning}
+            dismissible={bloodGroupWarningDismissible}
+            onDismiss={onDismissBloodGroupWarning}
+          />
         )}
 
         {blockId === 'general' ? (
@@ -186,19 +184,11 @@ export const ProtocolEditorModal = ({
                     />
                   </label>
 
-                  {componentUnitNumberWarning && (
-                    <div className={styles.fieldWarning} role="alert">
-                      <span>{componentUnitNumberWarning}</span>
-                      <button
-                        type="button"
-                        className={styles.fieldWarningDismiss}
-                        aria-label="Закрыть предупреждение"
-                        onClick={onDismissComponentUnitNumberWarning}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  )}
+                  <WarningNotice
+                    className={styles.fieldWarning}
+                    message={componentUnitNumberWarning}
+                    onDismiss={onDismissComponentUnitNumberWarning}
+                  />
                 </div>
               ))}
 
@@ -227,11 +217,10 @@ export const ProtocolEditorModal = ({
                     onSelectRecipient={onSelectRecipient}
                   />
 
-                  {hemaconExpirationWarning && (
-                    <div className={styles.fieldWarning} role="alert">
-                      <span>{hemaconExpirationWarning}.</span>
-                    </div>
-                  )}
+                  <WarningNotice
+                    className={styles.fieldWarning}
+                    message={hemaconExpirationWarning ? `${hemaconExpirationWarning}.` : ''}
+                  />
                 </div>
               ))}
 

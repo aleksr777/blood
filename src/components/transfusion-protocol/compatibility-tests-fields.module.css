@@ -43,10 +43,6 @@
   margin-top: 0.7rem;
 }
 
-.dangerWarning {
-  composes: ui-notice ui-danger-notice from global;
-}
-
 .dangerOptionText {
   display: inline-flex;
   align-items: center;

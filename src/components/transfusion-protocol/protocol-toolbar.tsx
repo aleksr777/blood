@@ -1,6 +1,7 @@
 import ui from '../../styles/ui';
 import { useEffect, useState } from 'react';
 import { SiteNavigation } from '../site-navigation/site-navigation';
+import { WarningNotice } from '../warning-notice/warning-notice';
 
 type Props = {
   status: string;
@@ -8,6 +9,7 @@ type Props = {
   hemaconWarning: string;
   dangerWarning: string;
   bloodGroupWarning: string;
+  bloodGroupWarningDismissible: boolean;
   onDismissBloodGroupWarning: () => void;
   componentUnitNumberWarning: string;
   onDismissComponentUnitNumberWarning: () => void;
@@ -30,6 +32,7 @@ export const ProtocolToolbar = ({
   hemaconWarning,
   dangerWarning,
   bloodGroupWarning,
+  bloodGroupWarningDismissible,
   onDismissBloodGroupWarning,
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
@@ -113,51 +116,30 @@ export const ProtocolToolbar = ({
           ))}
         </div>
         {hemaconWarningVisible && hemaconWarning && (
-          <div className={`${ui.warningNotice} toolbar-warning`} role="alert">
-            {hemaconWarning}
-          </div>
+          <WarningNotice
+            className="toolbar-warning"
+            message={hemaconWarning}
+            onDismiss={() => setHemaconWarningVisible(false)}
+          />
         )}
         {status && (
           <div className="toolbar-status" role="status">
             {status}
           </div>
         )}
-        {dangerWarning && (
-          <div className={`${ui.dangerNotice} toolbar-danger-warning`} role="alert">
-            {dangerWarning}
-          </div>
-        )}
-        {bloodGroupWarning && (
-          <div className={`${ui.warningNotice} toolbar-blood-group-warning`} role="alert">
-            <span>{bloodGroupWarning}</span>
-            <button
-              type="button"
-              className={`${ui.iconButton} toolbar-warning-dismiss`}
-              aria-label="Закрыть предупреждение"
-              onClick={onDismissBloodGroupWarning}
-            >
-              ×
-            </button>
-          </div>
-        )}
-        {componentUnitNumberWarning && (
-          <div className={`${ui.warningNotice} toolbar-component-unit-warning`} role="alert">
-            <span>{componentUnitNumberWarning}</span>
-            <button
-              type="button"
-              className={`${ui.iconButton} toolbar-warning-dismiss`}
-              aria-label="Закрыть предупреждение"
-              onClick={onDismissComponentUnitNumberWarning}
-            >
-              ×
-            </button>
-          </div>
-        )}
-        {warning && (
-          <div className={`${ui.warningNotice} toolbar-warning`} role="alert">
-            {warning}
-          </div>
-        )}
+        <WarningNotice className="toolbar-danger-warning" message={dangerWarning} danger />
+        <WarningNotice
+          className="toolbar-blood-group-warning"
+          message={bloodGroupWarning}
+          dismissible={bloodGroupWarningDismissible}
+          onDismiss={onDismissBloodGroupWarning}
+        />
+        <WarningNotice
+          className="toolbar-component-unit-warning"
+          message={componentUnitNumberWarning}
+          onDismiss={onDismissComponentUnitNumberWarning}
+        />
+        <WarningNotice className="toolbar-warning" message={warning} />
       </div>
     </header>
   );

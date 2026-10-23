@@ -122,3 +122,22 @@ it('retains every period when a shared color edit updates several fields in one 
     });
   }
 });
+
+it('keeps mismatch warnings mandatory except for known O(I) Rh-negative erythrocytes', async () => {
+  const { result } = await openDraft({ componentGroup: 'erythrocytes', donorAbo: 'B(III)' });
+  await act(async () => result.current.saveValues({ recipientAbo: 'A(II)' }));
+  expect(result.current.bloodGroupWarning).toContain('группа крови:');
+  expect(result.current.bloodGroupWarningDismissible).toBe(false);
+  act(() => result.current.dismissBloodGroupWarning());
+  expect(result.current.bloodGroupWarning).toContain('не совпадают');
+  await act(async () => result.current.saveValues({ donorAbo: 'O(I)', donorRh: 'Rh(-)' }));
+  expect(result.current.bloodGroupWarningDismissible).toBe(true);
+  act(() => result.current.dismissBloodGroupWarning());
+  expect(result.current.bloodGroupWarning).toBe('');
+  await act(async () => result.current.saveValues({ componentGroup: 'plasma-cryo' }));
+  expect(result.current.bloodGroupWarningDismissible).toBe(false);
+  expect(result.current.bloodGroupWarning).toContain('не совпадают');
+  await act(async () => result.current.saveValues({ componentGroup: 'erythrocytes' }));
+  expect(result.current.bloodGroupWarningDismissible).toBe(true);
+  expect(result.current.bloodGroupWarning).toContain('не совпадают');
+});

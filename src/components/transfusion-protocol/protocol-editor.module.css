@@ -363,6 +363,25 @@
   --select-focus: #3f617f;
 }
 
+.customSelectControlRhPositive[data-blood-group='true'] {
+  --select-background: #fff;
+  --select-border: #c5cfdd;
+  --select-text: #263552;
+  --select-hover-background: #fff;
+  --select-hover-border: #8ea2b9;
+  --select-focus: #426b96;
+}
+
+.customSelectControlRhNegative[data-blood-group='true'] {
+  --select-background: #263552;
+  --select-border: #263552;
+  --select-divider: rgb(248 250 252 / 30%);
+  --select-text: #f8faff;
+  --select-hover-background: #1e2a43;
+  --select-hover-border: #1e2a43;
+  --select-focus: #426b96;
+}
+
 .customSelectControlNeutral {
   --select-background: #f1f5f9;
   --select-border: #cbd5e1;
@@ -418,7 +437,7 @@
   align-self: stretch;
   align-items: center;
   justify-content: center;
-  border-left: 1px solid var(--select-border);
+  border-left: 1px solid var(--select-divider, var(--select-border));
   color: inherit;
 }
 
@@ -470,9 +489,7 @@
   line-height: 1;
 }
 
-.customSelectOptionPositive,
-.customSelectOptionRhPositive,
-.customSelectOptionTonePositive {
+.customSelectOptionPositive {
   --option-background: #fdf2f3;
   --option-text: #93424f;
   --option-hover-background: #fae3e7;
@@ -480,14 +497,30 @@
   --option-accent: #93424f;
 }
 
-.customSelectOptionNegative,
-.customSelectOptionRhNegative,
-.customSelectOptionToneNegative {
+.customSelectOptionNegative {
   --option-background: #f1f6fc;
   --option-text: #3f617f;
   --option-hover-background: #e1edf8;
   --option-selected-background: #dce9f6;
   --option-accent: #3f617f;
+}
+
+.customSelectOptionRhPositive,
+.customSelectOptionTonePositive {
+  --option-background: #fff;
+  --option-text: #263552;
+  --option-hover-background: #f8fafc;
+  --option-selected-background: #fff;
+  --option-accent: #426b96;
+}
+
+.customSelectOptionRhNegative,
+.customSelectOptionToneNegative {
+  --option-background: #263552;
+  --option-text: #f8faff;
+  --option-hover-background: #1e2a43;
+  --option-selected-background: #263552;
+  --option-accent: #8aa1bf;
 }
 
 .customSelectOptionToneNeutral,

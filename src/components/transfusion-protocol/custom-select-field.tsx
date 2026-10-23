@@ -44,6 +44,7 @@ export const CustomSelectField = ({
       <button
         type="button"
         name={name}
+        data-blood-group={isBloodGroupField || undefined}
         className={[
           styles.customSelectControl,
           compact ? styles.customSelectControlCompact : '',

@@ -404,7 +404,7 @@ export const TransfusionRegistration = () => {
   return (
     <main className="registration-app-shell">
       <header className="app-header registration-header">
-        <div className="toolbar-wrap registration-toolbar-wrap">
+        <div className="toolbar-wrap">
           <SiteNavigation
             current="registration"
             recipientName={currentRecipientAvailable ? (values.recipientName ?? '') : ''}

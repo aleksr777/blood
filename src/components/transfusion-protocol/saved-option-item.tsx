@@ -3,6 +3,7 @@ import type { SavedOptionRecord } from '../../storage/repositories/saved-options
 import styles from './protocol-editor.module.css';
 
 type Props = {
+  editable?: boolean;
   item: SavedOptionRecord;
   label: string;
   onSelect: (item: SavedOptionRecord) => void;
@@ -10,12 +11,19 @@ type Props = {
   onRemove: (item: SavedOptionRecord) => void;
 };
 
-export const SavedOptionItem = ({ item, label, onSelect, onRename, onRemove }: Props) => {
+export const SavedOptionItem = ({
+  editable = true,
+  item,
+  label,
+  onSelect,
+  onRename,
+  onRemove,
+}: Props) => {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.value);
 
   const save = () => {
-    if (!editing) return;
+    if (!editable || !editing) return;
     const nextValue = draft.trim();
     setEditing(false);
     if (nextValue !== item.value) onRename(item, nextValue);
@@ -58,39 +66,43 @@ export const SavedOptionItem = ({ item, label, onSelect, onRename, onRemove }: P
           {item.value}
         </button>
       )}
-      {editing ? (
-        <button
-          type="button"
-          className={styles.historySave}
-          aria-label="Сохранить изменение"
-          title="Сохранить"
-          onClick={save}
-        >
-          ✓
-        </button>
-      ) : (
-        <button
-          type="button"
-          className={styles.historyEdit}
-          aria-label="Изменить значение"
-          title="Изменить"
-          onClick={() => {
-            setDraft(item.value);
-            setEditing(true);
-          }}
-        >
-          ✎
-        </button>
+      {editable && (
+        <>
+          {editing ? (
+            <button
+              type="button"
+              className={styles.historySave}
+              aria-label="Сохранить изменение"
+              title="Сохранить"
+              onClick={save}
+            >
+              ✓
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={styles.historyEdit}
+              aria-label="Изменить значение"
+              title="Изменить"
+              onClick={() => {
+                setDraft(item.value);
+                setEditing(true);
+              }}
+            >
+              ✎
+            </button>
+          )}
+          <button
+            type="button"
+            className={styles.historyDelete}
+            aria-label="Удалить значение"
+            title="Удалить"
+            onClick={() => onRemove(item)}
+          >
+            ×
+          </button>
+        </>
       )}
-      <button
-        type="button"
-        className={styles.historyDelete}
-        aria-label="Удалить значение"
-        title="Удалить"
-        onClick={() => onRemove(item)}
-      >
-        ×
-      </button>
     </div>
   );
 };

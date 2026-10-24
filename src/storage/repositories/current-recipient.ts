@@ -276,6 +276,7 @@ const syncRecipientProfile = async (
   changes: ProtocolValuesRecord,
   activeDraft: ActiveDraftOverride,
 ): Promise<RecipientProfileSyncResult | null> => {
+  if (activeDraft.recordId !== null) return null;
   const hasGeneratedTransfusionHistory = Boolean(
     changes.previousTransfusionsAutoText?.trim() ||
     activeDraft.values.previousTransfusionsAutoText?.trim(),
@@ -337,6 +338,11 @@ const syncRecipientProfile = async (
     recipientId: String(recipientId),
     recipientName: fullName,
   });
+
+  if (protocolDraft.protocolRecordId !== null)
+    protocolDraft = { values: {}, protocolRecordId: null, updatedAt: Date.now() };
+  if (registrationDraft.registrationRecordId !== null)
+    registrationDraft = { values: {}, registrationRecordId: null, updatedAt: Date.now() };
 
   const sharedValues: ProtocolValuesRecord = {
     ...recipientProfileValuesForForms(recipient),
@@ -430,6 +436,11 @@ const switchRecipient = async (
   }
 
   const storedRecipient = readCurrentRecipient();
+
+  if (protocolDraft.protocolRecordId !== null)
+    protocolDraft = { values: {}, protocolRecordId: null, updatedAt: Date.now() };
+  if (registrationDraft.registrationRecordId !== null)
+    registrationDraft = { values: {}, registrationRecordId: null, updatedAt: Date.now() };
 
   await savePreviousRequestDrafts(recipient.id);
 

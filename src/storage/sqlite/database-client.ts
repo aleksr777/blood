@@ -69,6 +69,7 @@ export const database = {
     withDatabase<SavedOptionRecord[]>('saved-options:rename', { category, id, value }),
   removeSavedOption: (category: string, id: number) =>
     withDatabase<SavedOptionRecord[]>('saved-options:remove', { category, id }),
+  resetWorkingDrafts: () => withDatabase<void>('working-drafts:reset'),
   loadProtocolDraft: () => withDatabase<ProtocolDraftState>('protocol-draft:load'),
   saveProtocolDraft: (state: ProtocolDraftState) =>
     withDatabase<void>('protocol-draft:save', { state }),
@@ -91,11 +92,15 @@ export const database = {
     withDatabase<ProtocolRecord[]>('protocol-records:list', { recipientId }),
   saveProtocolRecord: (values: ProtocolValuesRecord) =>
     withDatabase<ProtocolRecord>('protocol-records:save', { values }),
+  updateProtocolRecord: (recordId: number, values: ProtocolValuesRecord) =>
+    withDatabase<ProtocolRecord>('protocol-records:save', { recordId, values }),
   removeProtocolRecord: (id: number) => withDatabase<void>('protocol-records:remove', { id }),
   listRegistrationRecords: (recipientId: number) =>
     withDatabase<RegistrationRecord[]>('registration-records:list', { recipientId }),
   saveRegistrationRecord: (values: ProtocolValuesRecord) =>
     withDatabase<RegistrationRecord>('registration-records:save', { values }),
+  updateRegistrationRecord: (recordId: number, values: ProtocolValuesRecord) =>
+    withDatabase<RegistrationRecord>('registration-records:save', { recordId, values }),
   removeRegistrationRecord: (id: number) =>
     withDatabase<void>('registration-records:remove', { id }),
   listBloodRequestRecords: (recipientId: number, kind: BloodRequestRecordKind) =>

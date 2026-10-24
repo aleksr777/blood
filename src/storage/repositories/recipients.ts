@@ -21,12 +21,16 @@ export const removeProtocolRecord = (id: number) => database.removeProtocolRecor
 
 export const saveProtocolRecord = (values: ProtocolValuesRecord) =>
   database.saveProtocolRecord(values);
+export const updateProtocolRecord = (id: number, values: ProtocolValuesRecord) =>
+  database.updateProtocolRecord(id, values);
 
 export const listRegistrationRecords = (recipientId: number) =>
   database.listRegistrationRecords(recipientId);
 
 export const saveRegistrationRecord = (values: ProtocolValuesRecord) =>
   database.saveRegistrationRecord(values);
+export const updateRegistrationRecord = (id: number, values: ProtocolValuesRecord) =>
+  database.updateRegistrationRecord(id, values);
 
 export const removeRegistrationRecord = (id: number) => database.removeRegistrationRecord(id);
 

@@ -1,3 +1,5 @@
+import { formatDate } from './protocol-types';
+import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useEffect, useState } from 'react';
 import type {
   BloodRequestRecord,
@@ -5,8 +7,10 @@ import type {
   RecipientRecord,
   RegistrationRecord,
 } from '../../storage/repositories/recipients';
+import type { SavedRecordOpener } from '../saved-document/saved-document-navigation';
+import type { SavedDocumentMode } from '../saved-document/use-document-state';
+import { RecipientRecordList } from './recipient-record-list';
 import { formatRecipientAge } from './recipient-demographics';
-import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
 type Props = {
@@ -15,13 +19,10 @@ type Props = {
   registrationRecords: RegistrationRecord[];
   individualSelectionDirectionRecords: BloodRequestRecord[];
   componentRequestRecords: BloodRequestRecord[];
-  onOpenRecord?: (record: ProtocolRecord, recipient: RecipientRecord) => void;
-  onOpenRegistrationRecord?: (record: RegistrationRecord, recipient: RecipientRecord) => void;
-  onOpenIndividualSelectionDirectionRecord?: (
-    record: BloodRequestRecord,
-    recipient: RecipientRecord,
-  ) => void;
-  onOpenComponentRequestRecord?: (record: BloodRequestRecord, recipient: RecipientRecord) => void;
+  onOpenRecord: SavedRecordOpener<ProtocolRecord>;
+  onOpenRegistrationRecord: SavedRecordOpener<RegistrationRecord>;
+  onOpenIndividualSelectionDirectionRecord: SavedRecordOpener<BloodRequestRecord>;
+  onOpenComponentRequestRecord: SavedRecordOpener<BloodRequestRecord>;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   onDisconnectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
   currentRecipientId?: number | null;
@@ -34,24 +35,6 @@ type Props = {
 
 type RecordCategory =
   'protocols' | 'registrations' | 'individual-selection-directions' | 'component-requests';
-
-const formatUpdated = (value: number) =>
-  new Intl.DateTimeFormat('ru-RU', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-  }).format(new Date(value));
-
-const stringValue = (record: BloodRequestRecord, name: string) => {
-  const value = record.values[name];
-  return typeof value === 'string' ? value : '';
-};
-
-const requestRecordTitle = (record: BloodRequestRecord) => {
-  const date = formatDate(stringValue(record, 'directionDate'));
-  const component = stringValue(record, 'requiredComponent').trim();
-
-  return [date || 'дата не указана', component].filter(Boolean).join(' · ');
-};
 
 export const RecipientHistoryPanel = ({
   recipient,
@@ -216,114 +199,39 @@ export const RecipientHistoryPanel = ({
                 <div className={styles.categoryHeading}>{categoryHeading}</div>
               </div>
 
-              {category === 'protocols' ? (
-                <div className={styles.records}>
-                  {records.length === 0 && (
-                    <div className={styles.empty}>Сохранённых протоколов пока нет.</div>
-                  )}
-                  {records.map((record) => (
-                    <div key={record.id} className={styles.record}>
-                      <div>
-                        <div className={styles.recordTitle}>
-                          Трансфузия:{' '}
-                          {formatDate(record.values.transfusionDate) || 'дата не указана'}
-                        </div>
-                        <div className={styles.meta}>
-                          Изменён: {formatUpdated(record.updatedAt)}
-                        </div>
-                      </div>
-                      <div className={styles.recordActions}>
-                        {onOpenRecord && (
-                          <button
-                            type="button"
-                            className={styles.open}
-                            onClick={() => onOpenRecord(record, recipient)}
-                          >
-                            Открыть
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          className={styles.recordDelete}
-                          onClick={() => onDeleteRecord(record)}
-                        >
-                          Удалить
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : category === 'registrations' ? (
-                <div className={styles.records}>
-                  {registrationRecords.length === 0 && (
-                    <div className={styles.empty}>
-                      Сохранённых листов регистрации трансфузий пока нет.
-                    </div>
-                  )}
-                  {registrationRecords.map((record) => (
-                    <div key={record.id} className={styles.record}>
-                      <div>
-                        <div className={styles.recordTitle}>Лист регистрации</div>
-                        <div className={styles.meta}>
-                          Изменён: {formatUpdated(record.updatedAt)}
-                        </div>
-                      </div>
-                      <div className={styles.recordActions}>
-                        {onOpenRegistrationRecord && (
-                          <button
-                            type="button"
-                            className={styles.open}
-                            onClick={() => onOpenRegistrationRecord(record, recipient)}
-                          >
-                            Открыть
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          className={styles.recordDelete}
-                          onClick={() => onDeleteRegistrationRecord(record)}
-                        >
-                          Удалить
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className={styles.records}>
-                  {requestRecords.length === 0 && (
-                    <div className={styles.empty}>Сохранённых бланков пока нет.</div>
-                  )}
-                  {requestRecords.map((record) => (
-                    <div key={record.id} className={styles.record}>
-                      <div>
-                        <div className={styles.recordTitle}>{requestRecordTitle(record)}</div>
-                        <div className={styles.meta}>
-                          Изменён: {formatUpdated(record.updatedAt)}
-                        </div>
-                      </div>
-                      <div className={styles.recordActions}>
-                        {requestOpen && (
-                          <button
-                            type="button"
-                            className={styles.open}
-                            onClick={() => requestOpen(record, recipient)}
-                          >
-                            Открыть
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          className={styles.recordDelete}
-                          onClick={() => onDeleteBloodRequestRecord(record)}
-                        >
-                          Удалить
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <RecipientRecordList
+                key={`${recipient.id}:${category}`}
+                emptyMessage={
+                  category === 'protocols'
+                    ? 'Сохранённых протоколов пока нет.'
+                    : category === 'registrations'
+                      ? 'Сохранённых листов регистрации трансфузий пока нет.'
+                      : 'Сохранённых бланков пока нет.'
+                }
+                records={
+                  category === 'protocols'
+                    ? records.map((record) => ({
+                        id: record.id,
+                        title: savedDocumentTitle('protocol', record.values),
+                        onOpen: (mode: SavedDocumentMode) => onOpenRecord(record, recipient, mode),
+                        onDelete: () => onDeleteRecord(record),
+                      }))
+                    : category === 'registrations'
+                      ? registrationRecords.map((record) => ({
+                          id: record.id,
+                          title: savedDocumentTitle('registration', record.values),
+                          onOpen: (mode: SavedDocumentMode) =>
+                            onOpenRegistrationRecord(record, recipient, mode),
+                          onDelete: () => onDeleteRegistrationRecord(record),
+                        }))
+                      : requestRecords.map((record) => ({
+                          id: record.id,
+                          title: savedDocumentTitle(record.kind, record.values),
+                          onOpen: (mode: SavedDocumentMode) => requestOpen(record, recipient, mode),
+                          onDelete: () => onDeleteBloodRequestRecord(record),
+                        }))
+                }
+              />
             </>
           )}
         </>

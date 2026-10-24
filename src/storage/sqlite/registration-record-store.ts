@@ -22,17 +22,19 @@ export const listRegistrationRecords = async (recipientId: number) => {
   return rows.map(mapRegistration);
 };
 
-export const saveRegistrationRecord = async (values: ProtocolValuesRecord) => {
+export const saveRegistrationRecord = async (values: ProtocolValuesRecord, recordId?: number) => {
   const selectedId = Number(values.recipientId);
   if (!Number.isSafeInteger(selectedId) || selectedId <= 0) {
     throw new Error('Выберите реципиента перед сохранением листа регистрации.');
   }
   const db = await getDatabase();
   return withFormRecordTransaction(db, () => {
-    const recipientId = upsertRecipient(db, values, selectedId);
+    const recipientId =
+      recordId === undefined ? upsertRecipient(db, values, selectedId) : selectedId;
     return mapRegistration(
       storeFormRecord(db, {
         kind: 'registration',
+        recordId,
         recipientId,
         values: { ...values, recipientId: String(recipientId) },
       }),

@@ -37,6 +37,7 @@ const DIAGNOSIS_FIELD: ProtocolFieldConfig = {
 };
 
 type Props = {
+  savedDocument?: boolean;
   values: ProtocolValues;
   onRecipientChange: (values: ProtocolValues) => void | Promise<void>;
   onOpenRecipients: () => void;
@@ -45,6 +46,7 @@ type Props = {
 };
 
 export const IndividualSelectionRecipientModal = ({
+  savedDocument = false,
   values,
   onRecipientChange,
   onOpenRecipients,
@@ -59,6 +61,7 @@ export const IndividualSelectionRecipientModal = ({
     <Modal title="Данные реципиента" onClose={onClose} className={styles.modal}>
       <div className={styles.grid}>
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={RECIPIENT_NAME_FIELD}
           value={values.recipientName ?? ''}
           onChange={changeValue}
@@ -67,12 +70,14 @@ export const IndividualSelectionRecipientModal = ({
         />
 
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={BIRTH_DATE_FIELD}
           value={values.recipientBirthDate ?? ''}
           onChange={changeValue}
         />
 
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={SEX_FIELD}
           value={values.recipientSex ?? ''}
           onChange={changeValue}
@@ -81,17 +86,21 @@ export const IndividualSelectionRecipientModal = ({
         <div>
           <div className={styles.fieldLabel}>Возраст</div>
           <div className={styles.calculatedValue}>
-            {formatRecipientAge(values.recipientBirthDate) || '—'}
+            {(savedDocument
+              ? values.recipientAge
+              : formatRecipientAge(values.recipientBirthDate)) || '—'}
           </div>
         </div>
 
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={MEDICAL_RECORD_FIELD}
           value={values.medicalRecordNumber ?? ''}
           onChange={changeValue}
         />
 
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={DIAGNOSIS_FIELD}
           value={values.diagnosis ?? ''}
           onChange={changeValue}

@@ -1,3 +1,4 @@
+import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
 import { rememberDepartment } from '../../storage/repositories/departments';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export const RequestEditorModal = ({ title, fields, values, onChange, onClose }: Props) => {
+  const isolated = useSavedDocumentScope();
   const [draft, setDraft] = useState<Record<string, string>>(() =>
     Object.fromEntries(fields.map(({ name }) => [name, values[name] ?? ''])),
   );
@@ -38,6 +40,10 @@ export const RequestEditorModal = ({ title, fields, values, onChange, onClose }:
   };
 
   const handleClose = () => {
+    if (isolated) {
+      onClose();
+      return;
+    }
     fields.forEach((field) => {
       const value = draft[field.name]?.trim();
       if (!value) return;

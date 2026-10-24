@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
-  mergeRecipientProfileValues,
   readCurrentRecipient,
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
 import {
-  hasStoredCurrentIndications,
   readCurrentIndications,
   writeCurrentIndications,
 } from '../../storage/repositories/current-indications';
@@ -16,6 +14,7 @@ import { clearRecipientLinkedValues } from '../../storage/repositories/recipient
 import {
   listProtocolRecords,
   saveProtocolRecord,
+  updateProtocolRecord,
   type ProtocolRecord,
   type RecipientRecord,
 } from '../../storage/repositories/recipients';
@@ -43,6 +42,8 @@ import {
 import { currentRecipientValues } from './recipient-profile-values';
 import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
+import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
+import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 
 const OPEN_WINDOW_STORAGE_KEY = 'blood:protocol-open-window';
 
@@ -91,8 +92,10 @@ const getInitialActiveBlock = () => {
 const getInitialRegistryOpen = () => readStoredOpenWindow()?.type === 'registry';
 
 export const useProtocolWorkspace = () => {
-  const [values, setValues] = useState<ProtocolValues>({});
-  const [recordId, setRecordId] = useState<number | null>(null);
+  const document = useDocumentState<ProtocolValues>(() => ({}));
+  const { values, setValues, open: openSavedDocument, isActive: hasSavedDocument } = document;
+  const [workingRecordId, setRecordId] = useState<number | null>(null);
+  const recordId = document.record?.id ?? workingRecordId;
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(getInitialActiveBlock);
   const [registryOpen, setRegistryOpen] = useState(getInitialRegistryOpen);
   const [status, setStatus] = useState('');
@@ -126,20 +129,32 @@ export const useProtocolWorkspace = () => {
     }
   }, [activeBlock, registryOpen]);
 
-  const handleDraftExpire = useCallback(() => {
-    setActiveBlock(null);
-    setStatus('Бланк автоматически очищен: с последнего изменения прошло 24 часа.');
-  }, []);
+  const openSavedDraft = useCallback(
+    (id: number, savedValues: ProtocolValues) => {
+      if (hasSavedDocument()) return;
+      openSavedDocument({ id, recipientId: Number(savedValues.recipientId) }, savedValues);
+      setActiveBlock(null);
+    },
+    [openSavedDocument, hasSavedDocument],
+  );
 
   const draft = useProtocolDraft({
-    values,
-    recordId,
-    setValues,
+    values: document.workingValues,
+    recordId: workingRecordId,
+    setValues: document.setWorkingValues,
     setRecordId,
-    onExpire: handleDraftExpire,
+    onSavedDraft: openSavedDraft,
+  });
+
+  usePendingSavedDocument('protocol', (record, mode) => {
+    void openRecord(record, mode);
   });
 
   useEffect(() => {
+    if (document.active) {
+      setPreviousTransfusionSuggestion('');
+      return;
+    }
     const recipientId = Number(values.recipientId);
     if (!Number.isFinite(recipientId) || recipientId <= 0) {
       setPreviousTransfusionSuggestion('');
@@ -197,9 +212,14 @@ export const useProtocolWorkspace = () => {
     values.recipientId,
     values.transfusionDate,
     values.componentUnitNumber,
+    document.active,
   ]);
 
   const saveValues = (nextValues: ProtocolValues) => {
+    if (document.isActive()) {
+      setValues((current) => ({ ...current, ...nextValues }));
+      return;
+    }
     if (!Object.entries(nextValues).some(([key, value]) => (values[key] ?? '') !== value)) return;
     draft.touch();
 
@@ -252,10 +272,11 @@ export const useProtocolWorkspace = () => {
   const selectRecipient = async (recipient: RecipientRecord) => {
     previousBlankIndicationsRef.current = null;
     try {
+      document.close();
       const result = await switchCurrentRecipient(recipient, {
         kind: 'protocol',
-        values,
-        recordId,
+        values: document.workingValues,
+        recordId: workingRecordId,
       });
 
       draft.touch();
@@ -292,6 +313,21 @@ export const useProtocolWorkspace = () => {
   };
 
   const saveToDatabase = async (afterPrint = false) => {
+    if (document.active) {
+      if (afterPrint || !document.editing || !document.record) return true;
+      if (!validateHemacon()) return false;
+      try {
+        const savedValues = { ...values, recipientId: String(document.record.recipientId) };
+        const record = await updateProtocolRecord(document.record.id, savedValues);
+        document.open(record, record.values);
+        setActiveBlock(null);
+        setStatus('Изменения сохранены в исходном бланке.');
+        return true;
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : 'Не удалось сохранить изменения.');
+        return false;
+      }
+    }
     if (!validateHemacon()) return false;
     if (!values.recipientName?.trim()) {
       setStatus('Для сохранения укажите ФИО реципиента.');
@@ -305,6 +341,12 @@ export const useProtocolWorkspace = () => {
       const savedValues = { ...values, recipientId: String(record.recipientId) };
       setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
+      document.open(record, savedValues);
+      document.setWorkingValues({
+        ...currentRecipientValues(savedValues),
+        ...reagentDefaultsForNewBlank({}),
+      });
+      setRecordId(null);
       setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
       return true;
     } catch (error) {
@@ -315,6 +357,10 @@ export const useProtocolWorkspace = () => {
   };
 
   const newBlank = async () => {
+    if (document.active) {
+      document.close();
+      return;
+    }
     const openedFromDatabase = recordId !== null;
     let sourceValues = values;
     let previousBlankSaved = false;
@@ -398,6 +444,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const clearForm = () => {
+    if (document.active) return;
     previousBlankIndicationsRef.current = null;
     const currentRecipient = readCurrentRecipient();
     const nextValues = currentRecipient
@@ -426,39 +473,15 @@ export const useProtocolWorkspace = () => {
       .catch((error: unknown) => console.error('Не удалось очистить сохранённый бланк:', error));
   };
 
-  const openRecord = async (record: ProtocolRecord, recipient: RecipientRecord) => {
+  const openRecord = async (record: ProtocolRecord, mode: SavedDocumentMode = 'view') => {
     previousBlankIndicationsRef.current = null;
-    const switched = await selectRecipient(recipient);
-    if (!switched) return;
-
-    draft.touch();
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
     setActiveBlock(null);
 
-    const currentRecipient = readCurrentRecipient();
-    const mergedValues = currentRecipient
-      ? mergeRecipientProfileValues(record.values, currentRecipient)
-      : { ...record.values, recipientId: String(record.recipientId) };
-    const component = getIndicationComponent(mergedValues);
-    if (
-      currentRecipient &&
-      component &&
-      hasStoredCurrentIndications(currentRecipient.id, component)
-    ) {
-      Object.assign(mergedValues, readCurrentIndications(currentRecipient.id, component));
-    }
-    const currentDataChanged = Object.entries(mergedValues).some(
-      ([field, value]) => (record.values[field] ?? '') !== value,
-    );
-    setRecordId(currentDataChanged ? null : record.id);
-    setValues(mergedValues);
+    document.open(record, record.values, mode);
     setRegistryOpen(false);
-    setStatus(
-      currentDataChanged
-        ? 'Бланк открыт с актуальными данными текущего реципиента. При сохранении запись с тем же номером гемакона будет обновлена.'
-        : 'Сохранённый бланк открыт для просмотра и редактирования.',
-    );
+    setStatus('');
   };
 
   const bloodGroupMismatch = getBloodGroupMismatch(values);
@@ -512,12 +535,13 @@ export const useProtocolWorkspace = () => {
   };
 
   const handleRecipientDeleted = (recipientId: number) => {
-    if (Number(values.recipientId) !== recipientId) return;
+    if (document.record?.recipientId === recipientId) document.close();
+    if (Number(document.workingValues.recipientId) !== recipientId) return;
 
     previousBlankIndicationsRef.current = null;
     draft.touch();
     setRecordId(null);
-    setValues(clearRecipientLinkedValues(values, recipientId));
+    document.setWorkingValues(clearRecipientLinkedValues(document.workingValues, recipientId));
     setPreviousTransfusionSuggestion('');
     setHistoryRefreshToken((current) => current + 1);
     setComponentUnitNumberChecked(false);
@@ -526,12 +550,12 @@ export const useProtocolWorkspace = () => {
   };
 
   const handleRecipientDisconnected = (recipientId: number) => {
-    if (Number(values.recipientId) !== recipientId) return;
+    if (Number(document.workingValues.recipientId) !== recipientId) return;
 
     previousBlankIndicationsRef.current = null;
     draft.touch();
     setRecordId(null);
-    setValues(clearRecipientLinkedValues(values, recipientId));
+    document.setWorkingValues(clearRecipientLinkedValues(document.workingValues, recipientId));
     setPreviousTransfusionSuggestion('');
     setHistoryRefreshToken((current) => current + 1);
     setComponentUnitNumberChecked(false);
@@ -539,8 +563,10 @@ export const useProtocolWorkspace = () => {
     setStatus('Текущий реципиент отключён. Связанные с ним данные удалены из текущего бланка.');
   };
 
-  const expiredReagents = getExpiredReagentWarnings(values);
-  const hemaconExpirationWarning = getHemaconExpirationWarning(values.expirationDate);
+  const expiredReagents = document.active ? [] : getExpiredReagentWarnings(values);
+  const hemaconExpirationWarning = document.active
+    ? ''
+    : getHemaconExpirationWarning(values.expirationDate);
   const expirationWarnings = [hemaconExpirationWarning, ...expiredReagents].filter(Boolean);
   const reagentWarning = expirationWarnings.length
     ? `Внимание: истёк срок годности.\n\n${expirationWarnings.map((warning) => `• ${warning}`).join('\n')}.`
@@ -548,6 +574,7 @@ export const useProtocolWorkspace = () => {
   const compatibilityWarning = getCompatibilityDangerWarning(values);
 
   return {
+    document,
     values,
     recordId,
     activeBlock,

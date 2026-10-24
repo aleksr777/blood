@@ -53,6 +53,7 @@ export type BloodRequestRecord = {
 };
 
 export type SaveBloodRequestRecordInput = {
+  recordId?: number;
   recipientId: number;
   kind: BloodRequestRecordKind;
   values: BloodRequestRecordValues;
@@ -81,6 +82,7 @@ export type DatabaseAction =
   | 'saved-options:remember'
   | 'saved-options:rename'
   | 'saved-options:remove'
+  | 'working-drafts:reset'
   | 'protocol-draft:load'
   | 'protocol-draft:save'
   | 'protocol-draft:clear'

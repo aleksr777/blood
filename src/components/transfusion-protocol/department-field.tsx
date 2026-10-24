@@ -1,3 +1,4 @@
+import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
 import {
   loadDepartments,
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export const DepartmentField = ({ value, onChange }: Props) => {
+  const isolated = useSavedDocumentScope();
   const [history, setHistory] = useState<DepartmentRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,7 @@ export const DepartmentField = ({ value, onChange }: Props) => {
     };
   }, []);
   const rename = async (item: DepartmentRecord, name: string) => {
+    if (isolated) return;
     try {
       const nextName = name.trim();
       const items = await renameDepartment(item.id, nextName);
@@ -52,6 +55,7 @@ export const DepartmentField = ({ value, onChange }: Props) => {
     }
   };
   const remove = async (item: DepartmentRecord) => {
+    if (isolated) return;
     const previousHistory = history;
     setHistory((current) => current.filter(({ id }) => id !== item.id));
     if (value === item.name) onChange('');
@@ -104,6 +108,7 @@ export const DepartmentField = ({ value, onChange }: Props) => {
         ) : (
           history.map((item) => (
             <DepartmentHistoryItem
+              editable={!isolated}
               key={item.id}
               item={item}
               onSelect={select}

@@ -5,6 +5,7 @@ import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 import styles from './recipient-history-fields.module.css';
 
 type Props = {
+  applyDefaults?: boolean;
   values: ProtocolValues;
   previousTransfusionSuggestion?: string;
   showObstetricHistory?: boolean;
@@ -64,6 +65,7 @@ const OBSTETRIC_FIELDS: ProtocolFieldConfig[] = [
 ];
 
 export const RecipientHistoryFields = ({
+  applyDefaults = true,
   values,
   previousTransfusionSuggestion = '',
   showObstetricHistory = true,
@@ -83,7 +85,7 @@ export const RecipientHistoryFields = ({
     values.previousTransfusions === suggestion;
 
   useEffect(() => {
-    if (!showTransfusionHistory || !dependentHistoryDisabled) return;
+    if (!applyDefaults || !showTransfusionHistory || !dependentHistoryDisabled) return;
 
     if (values.previousReactionsStatus || values.individualSelectionHistoryStatus) {
       onChange({
@@ -92,6 +94,7 @@ export const RecipientHistoryFields = ({
       });
     }
   }, [
+    applyDefaults,
     dependentHistoryDisabled,
     onChange,
     showTransfusionHistory,

@@ -1,3 +1,4 @@
+import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
 import {
   loadSavedOptions,
@@ -37,6 +38,7 @@ export const SavedOptionsField = ({
   wrapOptions = false,
   onChange,
 }: Props) => {
+  const isolated = useSavedDocumentScope();
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
@@ -67,14 +69,15 @@ export const SavedOptionsField = ({
       subscribeSavedOptions(category, ({ items: nextItems, edit }) => {
         setItems(nextItems);
         setStatus('ready');
-        if (edit && normalizeValue(value) === normalizeValue(edit.previousValue)) {
+        if (!isolated && edit && normalizeValue(value) === normalizeValue(edit.previousValue)) {
           onChange(edit.value, edit.previousValue);
         }
       }),
-    [category, value, onChange],
+    [category, value, onChange, isolated],
   );
 
   const rename = async (item: SavedOptionRecord, nextValue: string) => {
+    if (isolated) return;
     try {
       await renameSavedOption(category, item.id, nextValue.trim());
     } catch (error) {
@@ -83,6 +86,7 @@ export const SavedOptionsField = ({
   };
 
   const remove = async (item: SavedOptionRecord) => {
+    if (isolated) return;
     try {
       await removeSavedOption(category, item.id);
     } catch (error) {
@@ -116,7 +120,7 @@ export const SavedOptionsField = ({
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
           onBlur={() => {
-            if (rememberOnBlur && value.trim()) {
+            if (!isolated && rememberOnBlur && value.trim()) {
               void rememberSavedOption(category, value).catch((error: unknown) =>
                 console.error(`Не удалось сохранить значение ${category}:`, error),
               );
@@ -161,6 +165,7 @@ export const SavedOptionsField = ({
         ) : (
           editableItems.map((item) => (
             <SavedOptionItem
+              editable={!isolated}
               key={item.id}
               item={item}
               label={label}

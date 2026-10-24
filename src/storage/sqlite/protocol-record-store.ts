@@ -30,21 +30,28 @@ export const listProtocolRecords = async (recipientId: number) => {
   return rows.map(mapProtocol);
 };
 
-export const saveProtocolRecord = async (values: ProtocolValuesRecord) => {
+export const saveProtocolRecord = async (values: ProtocolValuesRecord, recordId?: number) => {
   const warning = getProtocolHemaconWarning(values);
   if (warning) throw new Error(warning);
 
   const db = await getDatabase();
   const selectedId = Number(values.recipientId);
   return withFormRecordTransaction(db, () => {
-    const recipientId = upsertRecipient(
-      db,
-      values,
-      Number.isSafeInteger(selectedId) && selectedId > 0 ? selectedId : null,
-    );
+    if (recordId !== undefined && (!Number.isSafeInteger(selectedId) || selectedId <= 0)) {
+      throw new Error('Не указан реципиент сохранённого бланка.');
+    }
+    const recipientId =
+      recordId !== undefined
+        ? selectedId
+        : upsertRecipient(
+            db,
+            values,
+            Number.isSafeInteger(selectedId) && selectedId > 0 ? selectedId : null,
+          );
     return mapProtocol(
       storeFormRecord(db, {
         kind: 'protocol',
+        recordId,
         recipientId,
         values: { ...values, recipientId: String(recipientId) },
       }),

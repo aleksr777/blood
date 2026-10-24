@@ -88,3 +88,38 @@ it('unlocks save and every print page with three fields and hides the warning fo
   rerender(<ProtocolToolbar {...callbacks} />);
   expect(screen.queryByRole('alert')).toBeNull();
 });
+
+it.each(['view', 'edit'] as const)(
+  'keeps the %s archive header free of current-patient, draft and expiration controls',
+  (mode) => {
+    const handlers = props();
+    render(
+      <ProtocolToolbar
+        {...handlers}
+        document={{
+          mode,
+          record: { id: 42, recipientId: 2 },
+          edit: vi.fn(),
+          cancel: vi.fn(),
+          close: vi.fn(),
+        }}
+        documentTitle="Протокол трансфузии · 21.10.2020"
+        currentRecipientName="Текущий реципиент"
+        currentRecipientAvailable
+        warning="Внимание: истёк срок годности."
+        hemaconWarning=""
+      />,
+    );
+    expect(screen.queryByText('Текущий реципиент:')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Очистить бланк' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Новый бланк' })).toBeNull();
+    expect(screen.queryByText(/истёк срок годности/)).toBeNull();
+    expect(screen.getByText('Протокол трансфузии · 21.10.2020')).toBeDefined();
+    expect(screen.queryByText(/№ 42/)).toBeNull();
+    expect(
+      screen.getByRole('button', {
+        name: mode === 'edit' ? 'Закрыть без сохранения' : 'Вернуться к текущему бланку',
+      }).className,
+    ).not.toContain('text-button');
+  },
+);

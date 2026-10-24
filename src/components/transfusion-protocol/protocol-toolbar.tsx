@@ -1,9 +1,14 @@
+import { AnimatedMessage } from '../animated-reveal/animated-message';
 import ui from '../../styles/ui';
 import { useEffect, useState } from 'react';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { WarningNotice } from '../warning-notice/warning-notice';
+import { SavedDocumentBar } from '../saved-document/saved-document-bar';
+import type { SavedDocumentControls } from '../saved-document/use-document-state';
 
 type Props = {
+  document?: SavedDocumentControls;
+  documentTitle?: string;
   status: string;
   warning: string;
   hemaconWarning: string;
@@ -27,6 +32,8 @@ type Props = {
 };
 
 export const ProtocolToolbar = ({
+  document,
+  documentTitle = 'Протокол трансфузии',
   status,
   warning,
   hemaconWarning,
@@ -67,27 +74,33 @@ export const ProtocolToolbar = ({
       <div className="toolbar-wrap">
         <SiteNavigation
           current="protocol"
+          showRecipient={!document?.record}
           recipientName={currentRecipientName}
           recipientAbo={currentRecipientAbo}
           recipientRh={currentRecipientRh}
           currentRecipientAvailable={currentRecipientAvailable}
           onOpenCurrentRecipient={onOpenCurrentRecipient}
         />
+        {document && <SavedDocumentBar document={document} title={documentTitle} />}
         <div className="print-actions" aria-label="Панель действий">
-          <button
-            type="button"
-            className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-            onClick={onClear}
-          >
-            Очистить бланк
-          </button>
-          <button
-            type="button"
-            className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-            onClick={onNew}
-          >
-            Новый бланк
-          </button>
+          {!document?.record && (
+            <>
+              <button
+                type="button"
+                className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+                onClick={onClear}
+              >
+                Очистить бланк
+              </button>
+              <button
+                type="button"
+                className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
+                onClick={onNew}
+              >
+                Новый бланк
+              </button>
+            </>
+          )}
           <button
             type="button"
             className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
@@ -99,9 +112,10 @@ export const ProtocolToolbar = ({
             type="button"
             className={`${ui.successButton} ${ui.toolbarButton} save-button`}
             onClick={() => runHemaconAction(onSave)}
+            disabled={document?.mode === 'view'}
             aria-disabled={Boolean(hemaconWarning)}
           >
-            Сохранить
+            {document?.mode === 'edit' ? 'Сохранить изменения' : 'Сохранить'}
           </button>
           {Array.from({ length: pageCount }, (_, pageIndex) => (
             <button
@@ -115,18 +129,12 @@ export const ProtocolToolbar = ({
             </button>
           ))}
         </div>
-        {hemaconWarningVisible && hemaconWarning && (
-          <WarningNotice
-            className="toolbar-warning"
-            message={hemaconWarning}
-            onDismiss={() => setHemaconWarningVisible(false)}
-          />
-        )}
-        {status && (
-          <div className="toolbar-status" role="status">
-            {status}
-          </div>
-        )}
+        <WarningNotice
+          className="toolbar-warning"
+          message={hemaconWarningVisible ? hemaconWarning : ''}
+          onDismiss={() => setHemaconWarningVisible(false)}
+        />
+        <AnimatedMessage message={status} className="toolbar-status" />
         <WarningNotice className="toolbar-danger-warning" message={dangerWarning} danger />
         <WarningNotice
           className="toolbar-blood-group-warning"
@@ -139,7 +147,7 @@ export const ProtocolToolbar = ({
           message={componentUnitNumberWarning}
           onDismiss={onDismissComponentUnitNumberWarning}
         />
-        <WarningNotice className="toolbar-warning" message={warning} />
+        <WarningNotice className="toolbar-warning" message={document?.record ? '' : warning} />
       </div>
     </header>
   );

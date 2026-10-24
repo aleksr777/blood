@@ -118,7 +118,7 @@ describe('current recipient profile', () => {
     );
   });
 
-  it('preserves generated history and the saved record ID when reselecting the same recipient', async () => {
+  it('keeps a legacy saved snapshot out of the working draft when reselecting the recipient', async () => {
     const values = { ...recipientProfileValuesForForms(recipient), ...generatedHistory };
     adoptCurrentRecipientFromValues(values);
     vi.mocked(loadProtocolDraft).mockResolvedValue({
@@ -138,8 +138,12 @@ describe('current recipient profile', () => {
       componentRequestCount: 0,
       individualSelectionDirectionCount: 0,
     });
-    expect(result.protocolValues).toMatchObject(generatedHistory);
-    expect(result.protocolRecordId).toBe(42);
+    expect(result.protocolValues).toMatchObject({
+      previousTransfusions: '',
+      previousTransfusionsStatus: '',
+    });
+    expect(result.protocolRecordId).toBeNull();
+    expect(database.saveProtocolRecord).not.toHaveBeenCalled();
     expect(saveProtocolDraft).toHaveBeenCalled();
     expect(saveRegistrationDraft).toHaveBeenCalled();
   });

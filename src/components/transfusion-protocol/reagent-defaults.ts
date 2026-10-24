@@ -1,40 +1,10 @@
 import type { ProtocolValues } from './protocol-types';
 import { formatDate } from './protocol-types';
+import { REAGENTS, REAGENT_DEFAULT_FIELDS } from '../../domain/reagents';
+
+export { REAGENTS, REAGENT_DEFAULT_FIELDS } from '../../domain/reagents';
 
 const STORAGE_KEY = 'blood:reagent-defaults';
-
-export const REAGENTS = [
-  {
-    title: 'Цоликлон "анти-A"',
-    series: 'reagentAntiASeries',
-    expiration: 'reagentAntiAExpiration',
-    manufacturer: 'reagentAntiAManufacturer',
-  },
-  {
-    title: 'Цоликлон "анти-B"',
-    series: 'reagentAntiBSeries',
-    expiration: 'reagentAntiBExpiration',
-    manufacturer: 'reagentAntiBManufacturer',
-  },
-  {
-    title: 'Цоликлон "анти-AB"',
-    series: 'reagentAntiABSeries',
-    expiration: 'reagentAntiABExpiration',
-    manufacturer: 'reagentAntiABManufacturer',
-  },
-  {
-    title: 'Цоликлон "анти-D"',
-    series: 'reagentAntiDSeries',
-    expiration: 'reagentAntiDExpiration',
-    manufacturer: 'reagentAntiDManufacturer',
-  },
-] as const;
-
-export const REAGENT_DEFAULT_FIELDS = REAGENTS.flatMap(({ series, expiration, manufacturer }) => [
-  series,
-  expiration,
-  manufacturer,
-]);
 
 const fieldSet = new Set<string>(REAGENT_DEFAULT_FIELDS);
 

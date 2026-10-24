@@ -1,3 +1,4 @@
+import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { useState } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal, { ModalDismissButton } from '../modal/modal';
@@ -78,7 +79,7 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
           <RecipientHistoryFields values={values} onChange={changeValues} />
         </div>
       </div>
-      {error && <div className={styles.error}>{error}</div>}
+      <AnimatedMessage message={error} className={styles.error} role="alert" />
       <div className={styles.actions}>
         <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>
         <button

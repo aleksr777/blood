@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getReagentExpirationWarning, REAGENTS } from './reagent-defaults';
@@ -8,6 +9,7 @@ import type { ProtocolValues } from './protocol-types';
 import styles from './compatibility-tests-fields.module.css';
 
 type Props = {
+  applyDefaults?: boolean;
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
 };
@@ -42,7 +44,8 @@ const RADIO_GROUPS = [
   },
 ] as const;
 
-export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
+export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = true }: Props) => {
+  const savedDocument = useSavedDocumentScope();
   const change = (name: string, value: string, previousOptionValue?: string) => {
     const sharedOptionEdit =
       previousOptionValue !== undefined &&
@@ -57,6 +60,7 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
   const showDonorAboConfirmation = values.componentGroup === 'erythrocytes';
 
   useEffect(() => {
+    if (!applyDefaults) return;
     const missingDefaults = Object.fromEntries(
       Object.entries(DEFAULT_RESULTS).filter(([name]) => !values[name]),
     );
@@ -64,16 +68,15 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
     if (Object.keys(missingDefaults).length > 0) {
       onChange(missingDefaults);
     }
-  }, [onChange, values]);
+  }, [onChange, values, applyDefaults]);
 
   return (
     <div className={styles.root}>
       <div className={styles.reagentList}>
         {REAGENTS.map((reagent) => {
-          const expirationWarning = getReagentExpirationWarning(
-            reagent.title,
-            values[reagent.expiration],
-          );
+          const expirationWarning = savedDocument
+            ? ''
+            : getReagentExpirationWarning(reagent.title, values[reagent.expiration]);
 
           return (
             <fieldset key={reagent.series} className={styles.reagentGroup}>
@@ -114,7 +117,8 @@ export const CompatibilityTestsFields = ({ values, onChange }: Props) => {
       <div className={styles.results}>
         {RADIO_GROUPS.map((group) => {
           const selected =
-            values[group.name] || DEFAULT_RESULTS[group.name as keyof typeof DEFAULT_RESULTS];
+            values[group.name] ||
+            (applyDefaults ? DEFAULT_RESULTS[group.name as keyof typeof DEFAULT_RESULTS] : '');
           const disabled = group.name === 'confirmedDonorAboResult' && !showDonorAboConfirmation;
 
           return (

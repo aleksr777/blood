@@ -1,3 +1,4 @@
+import { AnimatedReveal } from '../animated-reveal/animated-reveal';
 import { ModalDismissButton } from '../modal/modal';
 import styles from './recipient-field.module.css';
 
@@ -39,7 +40,7 @@ export const RecipientNewForm = ({
       />
     </label>
     <div className={styles.hint}>{hint}</div>
-    {checked && matchesCount > 0 && (
+    <AnimatedReveal open={checked && matchesCount > 0} contentKey={matchesCount}>
       <div className={styles.duplicateNotice} role="status">
         <div>
           В базе есть {matchesCount}{' '}
@@ -57,7 +58,7 @@ export const RecipientNewForm = ({
         </button>
         <div className={styles.hint}>Можно также создать отдельную карточку.</div>
       </div>
-    )}
+    </AnimatedReveal>
     <div className={styles.footer}>
       <ModalDismissButton className={styles.secondary} disabled={checking}>
         Отмена

@@ -1,6 +1,8 @@
+import { formatRecipientAge } from './recipient-demographics';
+import { SavedDocumentPage } from '../saved-document/saved-document-page';
+import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
-import type { RecipientRecord, RegistrationRecord } from '../../storage/repositories/recipients';
 import { FirstPage } from './first-page';
 import { PROTOCOL_CHUNK_ORDER, type ProtocolChunkId } from './protocol-pagination';
 import { ProtocolEditorModal } from './protocol-editor-modal';
@@ -15,7 +17,6 @@ const INITIAL_PAGES: ProtocolChunkId[][] = [
 ];
 
 const PAGE_FIT_TOLERANCE_PX = 2;
-const PENDING_REGISTRATION_RECORD_KEY = 'blood:registration-open-record';
 
 const samePages = (left: ProtocolChunkId[][], right: ProtocolChunkId[][]) =>
   left.length === right.length &&
@@ -27,6 +28,15 @@ const samePages = (left: ProtocolChunkId[][], right: ProtocolChunkId[][]) =>
 
 export const TransfusionProtocol = () => {
   const workspace = useProtocolWorkspace();
+  const original = workspace.document.originalValues;
+  const savedDate =
+    original?.transfusionDate ||
+    (workspace.document.record?.createdAt
+      ? new Date(workspace.document.record.createdAt).toISOString().slice(0, 10)
+      : '');
+  const archivedRecipientAge =
+    original?.recipientAge ||
+    (savedDate ? formatRecipientAge(original?.recipientBirthDate, savedDate) : '');
   const sheetsRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<ProtocolChunkId[][]>(INITIAL_PAGES);
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
@@ -150,31 +160,6 @@ export const TransfusionProtocol = () => {
     clearHoveredBlock();
   };
 
-  const openRegistrationRecord = async (record: RegistrationRecord, recipient: RecipientRecord) => {
-    const switched = await workspace.selectRecipient(recipient);
-    if (!switched) return;
-
-    try {
-      window.sessionStorage.setItem(
-        PENDING_REGISTRATION_RECORD_KEY,
-        JSON.stringify({
-          ...record,
-          values: {
-            ...record.values,
-            recipientId: String(record.recipientId),
-          },
-        }),
-      );
-    } catch (error) {
-      console.error('Не удалось подготовить лист регистрации к открытию:', error);
-      return;
-    }
-
-    setRegistryRecipientId(null);
-    workspace.setRegistryOpen(false);
-    window.location.hash = '#/registration';
-  };
-
   const printPage = (pageIndex: number) => {
     if (!workspace.validateHemacon()) return;
     const root = document.documentElement;
@@ -197,11 +182,14 @@ export const TransfusionProtocol = () => {
   };
 
   return (
-    <main
+    <SavedDocumentPage
       className="app-shell protocol-app-shell"
       data-print-blocked={Boolean(workspace.hemaconWarning)}
+      mode={workspace.document.mode}
     >
       <ProtocolToolbar
+        document={workspace.document}
+        documentTitle={savedDocumentTitle('protocol', workspace.values)}
         status={workspace.status}
         warning={workspace.reagentWarning}
         hemaconWarning={workspace.hemaconWarning}
@@ -222,17 +210,14 @@ export const TransfusionProtocol = () => {
           );
           workspace.setRegistryOpen(true);
         }}
-        currentRecipientName={workspace.values.recipientName ?? ''}
-        currentRecipientAbo={workspace.values.recipientAbo ?? ''}
-        currentRecipientRh={workspace.values.recipientRh ?? ''}
-        currentRecipientAvailable={
-          Number.isFinite(Number(workspace.values.recipientId)) &&
-          Number(workspace.values.recipientId) > 0
-        }
+        currentRecipientName={readCurrentRecipient()?.fullName ?? ''}
+        currentRecipientAbo={readCurrentRecipient()?.profile.recipientAbo ?? ''}
+        currentRecipientRh={readCurrentRecipient()?.profile.recipientRh ?? ''}
+        currentRecipientAvailable={Boolean(readCurrentRecipient())}
         onOpenCurrentRecipient={() => {
-          const recipientId = Number(workspace.values.recipientId);
-          if (!Number.isFinite(recipientId) || recipientId <= 0) return;
-          setRegistryRecipientId(recipientId);
+          const recipient = readCurrentRecipient();
+          if (!recipient) return;
+          setRegistryRecipientId(recipient.id);
           workspace.setRegistryOpen(true);
         }}
         onSave={() => void workspace.saveToDatabase()}
@@ -245,12 +230,13 @@ export const TransfusionProtocol = () => {
       <div
         ref={sheetsRef}
         className="sheets"
+        data-document-paper
         onMouseMove={handleSheetsMouseMove}
         onMouseLeave={clearHoveredBlock}
       >
         <FirstPage
           values={workspace.values}
-          onOpenBlock={workspace.setActiveBlock}
+          onOpenBlock={(block) => !workspace.document.readOnly && workspace.setActiveBlock(block)}
           chunkIds={pages[0] ?? []}
         />
         {pages.slice(1).map((chunkIds, index) => (
@@ -258,16 +244,18 @@ export const TransfusionProtocol = () => {
             key={index + 2}
             pageNumber={index + 2}
             values={workspace.values}
-            onOpenBlock={workspace.setActiveBlock}
+            onOpenBlock={(block) => !workspace.document.readOnly && workspace.setActiveBlock(block)}
             chunkIds={chunkIds}
           />
         ))}
       </div>
 
-      {workspace.activeBlock && (
+      {workspace.activeBlock && !workspace.document.readOnly && (
         <ProtocolEditorModal
           key={workspace.activeBlock}
           blockId={workspace.activeBlock}
+          savedDocument={workspace.document.active}
+          archivedRecipientAge={archivedRecipientAge}
           values={workspace.values}
           bloodGroupWarning={workspace.bloodGroupWarning}
           bloodGroupWarningDismissible={workspace.bloodGroupWarningDismissible}
@@ -286,7 +274,7 @@ export const TransfusionProtocol = () => {
             workspace.setActiveBlock(null);
             workspace.setRegistryOpen(true);
           }}
-          onSelectRecipient={workspace.selectRecipient}
+          onSelectRecipient={workspace.document.active ? () => false : workspace.selectRecipient}
           onSave={workspace.saveValues}
           onClose={(draftValues) => {
             if (workspace.activeBlock === 'donor') {
@@ -307,15 +295,12 @@ export const TransfusionProtocol = () => {
             setRegistryRecipientId(null);
             workspace.setRegistryOpen(false);
           }}
-          onOpenRecord={workspace.openRecord}
-          onOpenRegistrationRecord={(record, recipient) =>
-            void openRegistrationRecord(record, recipient)
-          }
+          onOpenRecord={(record, _recipient, mode) => void workspace.openRecord(record, mode)}
           onUseRecipient={workspace.selectRecipient}
           onRecipientDeleted={workspace.handleRecipientDeleted}
           onRecipientDisconnected={workspace.handleRecipientDisconnected}
         />
       )}
-    </main>
+    </SavedDocumentPage>
   );
 };

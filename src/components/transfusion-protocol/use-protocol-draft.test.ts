@@ -15,11 +15,10 @@ vi.mock('../../storage/repositories/protocol-draft', () => ({
   clearProtocolDraft: vi.fn(async () => undefined),
 }));
 
-const onExpire = vi.fn();
 const useDraft = () => {
   const [values, setValues] = useState<ProtocolValues>({});
   const [recordId, setRecordId] = useState<number | null>(null);
-  useProtocolDraft({ values, recordId, setValues, setRecordId, onExpire });
+  useProtocolDraft({ values, recordId, setValues, setRecordId });
   return { values, recordId };
 };
 const recipientValues = { recipientId: '1', recipientName: 'Тестовый Реципиент' };
@@ -31,7 +30,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('protocol draft restoration', () => {
-  it('clears stale indications and detaches the saved ID when current indications were cleared', async () => {
+  it('preserves a saved snapshot and its ID even when current indications were cleared', async () => {
     writeCurrentIndications(1, 'erythrocytes', {});
     vi.mocked(loadProtocolDraft).mockResolvedValue({
       values: {
@@ -44,19 +43,19 @@ describe('protocol draft restoration', () => {
     });
     const { result } = renderHook(useDraft);
     await waitFor(() => expect(result.current.values.recipientId).toBe('1'));
-    expect(result.current.values.indicationRbcOngoingBleeding).toBe('');
-    expect(result.current.recordId).toBeNull();
+    expect(result.current.values.indicationRbcOngoingBleeding).toBe('1');
+    expect(result.current.recordId).toBe(42);
   });
 
-  it('retains the current recipient when an old draft expires', async () => {
+  it('leaves inactivity expiry to the shared session even if this draft has not been edited', async () => {
     vi.mocked(loadProtocolDraft).mockResolvedValue({
       values: { ...recipientValues, componentUnitNumber: '12345678901234' },
       protocolRecordId: null,
       updatedAt: Date.now() - 25 * 60 * 60 * 1000,
     });
     const { result } = renderHook(useDraft);
-    await waitFor(() => expect(onExpire).toHaveBeenCalled());
+    await waitFor(() => expect(result.current.values.recipientId).toBe('1'));
     expect(result.current.values.recipientId).toBe('1');
-    expect(result.current.values.componentUnitNumber).toBeUndefined();
+    expect(result.current.values.componentUnitNumber).toBe('12345678901234');
   });
 });

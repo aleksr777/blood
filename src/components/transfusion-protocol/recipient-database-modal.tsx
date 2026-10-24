@@ -1,3 +1,4 @@
+import { SavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
 import { runRecipientOperation } from '../../storage/repositories/recipient-operation-queue';
@@ -24,6 +25,10 @@ import {
   type RegistrationRecord,
 } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
+import {
+  navigateToSavedDocument,
+  type SavedRecordOpener,
+} from '../saved-document/saved-document-navigation';
 import { RecipientDatabaseDialogs } from './recipient-database-dialogs';
 import { RecipientHistoryPanel } from './recipient-history-panel';
 import { RecipientListPanel } from './recipient-list-panel';
@@ -32,13 +37,10 @@ import styles from './recipient-database.module.css';
 
 type Props = {
   onClose: () => void;
-  onOpenRecord?: (record: ProtocolRecord, recipient: RecipientRecord) => void;
-  onOpenRegistrationRecord?: (record: RegistrationRecord, recipient: RecipientRecord) => void;
-  onOpenIndividualSelectionDirectionRecord?: (
-    record: BloodRequestRecord,
-    recipient: RecipientRecord,
-  ) => void;
-  onOpenComponentRequestRecord?: (record: BloodRequestRecord, recipient: RecipientRecord) => void;
+  onOpenRecord?: SavedRecordOpener<ProtocolRecord>;
+  onOpenRegistrationRecord?: SavedRecordOpener<RegistrationRecord>;
+  onOpenIndividualSelectionDirectionRecord?: SavedRecordOpener<BloodRequestRecord>;
+  onOpenComponentRequestRecord?: SavedRecordOpener<BloodRequestRecord>;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   onRecipientDeleted?: (recipientId: number) => void | Promise<void>;
   onRecipientDisconnected?: (recipientId: number) => void | Promise<void>;
@@ -46,7 +48,7 @@ type Props = {
   initialRecipientName?: string;
 };
 
-export const RecipientDatabaseModal = ({
+const RecipientDatabaseContent = ({
   onClose,
   onOpenRecord,
   onOpenRegistrationRecord,
@@ -351,10 +353,35 @@ export const RecipientDatabaseModal = ({
           registrationRecords={registrationRecords}
           individualSelectionDirectionRecords={individualSelectionDirectionRecords}
           componentRequestRecords={componentRequestRecords}
-          onOpenRecord={onOpenRecord}
-          onOpenRegistrationRecord={onOpenRegistrationRecord}
-          onOpenIndividualSelectionDirectionRecord={onOpenIndividualSelectionDirectionRecord}
-          onOpenComponentRequestRecord={onOpenComponentRequestRecord}
+          onOpenRecord={(record, recipient, mode) => {
+            if (onOpenRecord) onOpenRecord(record, recipient, mode);
+            else {
+              navigateToSavedDocument('protocol', record, mode);
+              onClose();
+            }
+          }}
+          onOpenRegistrationRecord={(record, recipient, mode) => {
+            if (onOpenRegistrationRecord) onOpenRegistrationRecord(record, recipient, mode);
+            else {
+              navigateToSavedDocument('registration', record, mode);
+              onClose();
+            }
+          }}
+          onOpenIndividualSelectionDirectionRecord={(record, recipient, mode) => {
+            if (onOpenIndividualSelectionDirectionRecord)
+              onOpenIndividualSelectionDirectionRecord(record, recipient, mode);
+            else {
+              navigateToSavedDocument('individual-selection-direction', record, mode);
+              onClose();
+            }
+          }}
+          onOpenComponentRequestRecord={(record, recipient, mode) => {
+            if (onOpenComponentRequestRecord) onOpenComponentRequestRecord(record, recipient, mode);
+            else {
+              navigateToSavedDocument('component-request', record, mode);
+              onClose();
+            }
+          }}
           onUseRecipient={
             onUseRecipient
               ? async (recipient) => {
@@ -397,3 +424,9 @@ export const RecipientDatabaseModal = ({
     </Modal>
   );
 };
+
+export const RecipientDatabaseModal = (props: Props) => (
+  <SavedDocumentScope value={false}>
+    <RecipientDatabaseContent {...props} />
+  </SavedDocumentScope>
+);

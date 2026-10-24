@@ -51,6 +51,10 @@ body {
   padding: 0 20px 48px;
 }
 
+[data-document-mode='view'] [data-document-paper] {
+  pointer-events: none;
+}
+
 .app-header {
   position: sticky;
   z-index: 100;

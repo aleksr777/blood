@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import {
   adoptCurrentRecipientFromValues,
   hasRecipientProfileDifference,
@@ -11,17 +11,12 @@ import {
   readCurrentIndications,
   writeCurrentIndications,
 } from '../../storage/repositories/current-indications';
-import {
-  clearProtocolDraft,
-  loadProtocolDraft,
-  saveProtocolDraft,
-} from '../../storage/repositories/protocol-draft';
+import { loadProtocolDraft, saveProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import { getIndicationComponent } from './indications-model';
 import { reagentDefaultsForNewBlank } from './reagent-defaults';
 import type { ProtocolValues } from './protocol-types';
 
-const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 const hasValues = (values: ProtocolValues) => Object.keys(values).length > 0;
 
 type Props = {
@@ -29,31 +24,38 @@ type Props = {
   recordId: number | null;
   setValues: Dispatch<SetStateAction<ProtocolValues>>;
   setRecordId: Dispatch<SetStateAction<number | null>>;
-  onExpire: () => void;
+  onSavedDraft?: (id: number, values: ProtocolValues) => void;
 };
 
-export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onExpire }: Props) => {
+export const useProtocolDraft = ({
+  values,
+  recordId,
+  setValues,
+  setRecordId,
+  onSavedDraft,
+}: Props) => {
   const [loaded, setLoaded] = useState(false);
   const [lastInputAt, setLastInputAt] = useState(0);
-
-  const expire = useCallback(() => {
-    setLastInputAt(0);
-    const currentRecipient = readCurrentRecipient();
-    setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
-    setRecordId(null);
-    onExpire();
-    void clearProtocolDraft().catch((error: unknown) =>
-      console.error('Не удалось очистить просроченный черновик:', error),
-    );
-  }, [onExpire, setRecordId, setValues]);
 
   useEffect(() => {
     let active = true;
     void loadProtocolDraft()
       .then((draft) => {
         if (!active) return;
-        if (draft.updatedAt && Date.now() - draft.updatedAt >= DRAFT_TTL_MS) {
-          expire();
+        if (draft.protocolRecordId !== null) {
+          if (onSavedDraft) {
+            onSavedDraft(draft.protocolRecordId, draft.values);
+            const recipient = readCurrentRecipient();
+            setValues({
+              ...(recipient ? recipientProfileValuesForForms(recipient) : {}),
+              ...reagentDefaultsForNewBlank({}),
+            });
+            setRecordId(null);
+            setLastInputAt(Date.now());
+          } else {
+            setValues(draft.values);
+            setRecordId(draft.protocolRecordId);
+          }
           return;
         }
         if (Object.keys(draft.values).length > 0) {
@@ -131,7 +133,7 @@ export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onE
     return () => {
       active = false;
     };
-  }, [expire, setRecordId, setValues]);
+  }, [setRecordId, setValues, onSavedDraft]);
 
   useEffect(() => {
     if (!loaded || !hasValues(values) || !lastInputAt) return;
@@ -141,17 +143,6 @@ export const useProtocolDraft = ({ values, recordId, setValues, setRecordId, onE
       updatedAt: lastInputAt,
     }).catch((error: unknown) => console.error('Не удалось сохранить черновик:', error));
   }, [lastInputAt, loaded, recordId, values]);
-
-  useEffect(() => {
-    if (!loaded || !hasValues(values) || !lastInputAt) return;
-    const remaining = DRAFT_TTL_MS - (Date.now() - lastInputAt);
-    if (remaining <= 0) {
-      expire();
-      return;
-    }
-    const timer = window.setTimeout(expire, remaining);
-    return () => window.clearTimeout(timer);
-  }, [expire, lastInputAt, loaded, values]);
 
   return {
     touch: () => setLastInputAt(Date.now()),

@@ -82,6 +82,7 @@ export type DatabaseAction =
   | 'saved-options:remember'
   | 'saved-options:rename'
   | 'saved-options:remove'
+  | 'working-drafts:reset'
   | 'protocol-draft:load'
   | 'protocol-draft:save'
   | 'protocol-draft:clear'

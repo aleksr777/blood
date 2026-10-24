@@ -129,11 +129,6 @@ export const useProtocolWorkspace = () => {
     }
   }, [activeBlock, registryOpen]);
 
-  const handleDraftExpire = useCallback(() => {
-    setActiveBlock(null);
-    setStatus('Бланк автоматически очищен: с последнего изменения прошло 24 часа.');
-  }, []);
-
   const openSavedDraft = useCallback(
     (id: number, savedValues: ProtocolValues) => {
       if (hasSavedDocument()) return;
@@ -148,7 +143,6 @@ export const useProtocolWorkspace = () => {
     recordId: workingRecordId,
     setValues: document.setWorkingValues,
     setRecordId,
-    onExpire: handleDraftExpire,
     onSavedDraft: openSavedDraft,
   });
 

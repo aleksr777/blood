@@ -15,6 +15,7 @@ import {
   renameSavedOption,
 } from './saved-option-store';
 import { clearProtocolDraft, loadProtocolDraft, saveProtocolDraft } from './protocol-draft-store';
+import { resetWorkingDrafts } from './working-draft-store';
 import {
   listProtocolRecords,
   removeProtocolRecord,
@@ -75,6 +76,8 @@ const dispatchRequest = async (request: DatabaseRequest) => {
       const payload = request.payload as { category: string; id: number };
       return removeSavedOption(payload.category, payload.id);
     }
+    case 'working-drafts:reset':
+      return resetWorkingDrafts();
     case 'protocol-draft:load':
       return loadProtocolDraft();
     case 'protocol-draft:save':

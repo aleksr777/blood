@@ -69,6 +69,7 @@ export const database = {
     withDatabase<SavedOptionRecord[]>('saved-options:rename', { category, id, value }),
   removeSavedOption: (category: string, id: number) =>
     withDatabase<SavedOptionRecord[]>('saved-options:remove', { category, id }),
+  resetWorkingDrafts: () => withDatabase<void>('working-drafts:reset'),
   loadProtocolDraft: () => withDatabase<ProtocolDraftState>('protocol-draft:load'),
   saveProtocolDraft: (state: ProtocolDraftState) =>
     withDatabase<void>('protocol-draft:save', { state }),

@@ -15,11 +15,10 @@ vi.mock('../../storage/repositories/protocol-draft', () => ({
   clearProtocolDraft: vi.fn(async () => undefined),
 }));
 
-const onExpire = vi.fn();
 const useDraft = () => {
   const [values, setValues] = useState<ProtocolValues>({});
   const [recordId, setRecordId] = useState<number | null>(null);
-  useProtocolDraft({ values, recordId, setValues, setRecordId, onExpire });
+  useProtocolDraft({ values, recordId, setValues, setRecordId });
   return { values, recordId };
 };
 const recipientValues = { recipientId: '1', recipientName: 'Тестовый Реципиент' };
@@ -48,15 +47,15 @@ describe('protocol draft restoration', () => {
     expect(result.current.recordId).toBe(42);
   });
 
-  it('retains the current recipient when an old draft expires', async () => {
+  it('leaves inactivity expiry to the shared session even if this draft has not been edited', async () => {
     vi.mocked(loadProtocolDraft).mockResolvedValue({
       values: { ...recipientValues, componentUnitNumber: '12345678901234' },
       protocolRecordId: null,
       updatedAt: Date.now() - 25 * 60 * 60 * 1000,
     });
     const { result } = renderHook(useDraft);
-    await waitFor(() => expect(onExpire).toHaveBeenCalled());
+    await waitFor(() => expect(result.current.values.recipientId).toBe('1'));
     expect(result.current.values.recipientId).toBe('1');
-    expect(result.current.values.componentUnitNumber).toBeUndefined();
+    expect(result.current.values.componentUnitNumber).toBe('12345678901234');
   });
 });

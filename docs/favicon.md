@@ -1,6 +1,6 @@
 # Иконка приложения
 
-Бордовая капля крови с белой окантовкой на синем фоне со скруглёнными углами. Палитра соответствует `--ui-accent` (`#426b96`) и `--blood-red-selected` (`#a7495c`). Изображение создано встроенным генератором изображений; PNG и ICO получены уменьшением с сохранением прозрачности.
+Иконка подготовлена из присланного пользователем изображения `1967.jpg`: две красные фигуры образуют сердце с каплей в центре. Изображение адаптировано встроенным редактором изображений под квадратный формат с белым фоном и уменьшенными внешними полями. PNG и ICO получены уменьшением подготовленного изображения.
 
 Файлы в `public/`:
 
@@ -10,10 +10,8 @@
 - `apple-touch-icon.png`: 180 px для закладок Apple.
 - `site.webmanifest`: описание и относительные пути значков.
 
-Ссылки в `index.html` используют `%BASE_URL%`, чтобы значки загружались при публикации в `/blood/`. Печатные бланки не содержат иконку.
+Ссылки в `index.html` используют `%BASE_URL%`, чтобы значки загружались при публикации в `/blood/`. Параметр `v=2` у иконок и манифеста обновляет адреса ресурсов в браузерном кэше. Печатные бланки не содержат иконку.
 
-Запрос генерации:
+Запрос обработки исходного изображения:
 
-> A production browser favicon for a transfusion protocol application: one large upright burgundy blood droplet (#a7495c) with a bold white outline, centered on a rounded-square slate-blue tile (#426b96). Restrained professional medical interface, simple strong silhouette recognizable at 16 and 32 pixels. Real transparency outside the rounded tile. No text, extra symbols or watermark.
-
-Уточнение при генерации: сохранить композицию, сделать заливки ровнее и убрать артефакты внутри синего фона.
+> Prepare a square browser icon from the supplied 1967.jpg. Preserve the provided red emblem: two separate oval heads, the taller left figure, the smaller right figure, their intertwined heart-shaped bodies and the white teardrop-shaped gap. Remove excess outer whitespace, center the complete emblem on a pure white square canvas, enlarge it to about 92% of the height, and clean JPEG blur into smooth edges. Keep the original red color and the whole symbol visible without clipping or stretching. No text, additional symbols, border, shadow or watermark.

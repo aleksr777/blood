@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState, type SetStateAction } from 'react';
 
+export type SavedDocumentMode = 'view' | 'edit';
 export type SavedDocumentReference = {
   id: number;
   recipientId: number;
@@ -16,7 +17,7 @@ export type SavedDocumentControls = {
 
 type SavedState<T> = {
   record: SavedDocumentReference;
-  mode: 'view' | 'edit';
+  mode: SavedDocumentMode;
   original: T;
   values: T;
 };
@@ -30,9 +31,9 @@ export const useDocumentState = <T>(initial: () => T) => {
     setSaved(next);
   }, []);
   const open = useCallback(
-    (record: SavedDocumentReference, values: T) => {
+    (record: SavedDocumentReference, values: T, mode: SavedDocumentMode = 'view') => {
       const snapshot = structuredClone(values);
-      publish({ record, mode: 'view', original: snapshot, values: snapshot });
+      publish({ record, mode, original: snapshot, values: snapshot });
     },
     [publish],
   );

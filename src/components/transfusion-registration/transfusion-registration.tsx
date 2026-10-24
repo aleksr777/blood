@@ -17,11 +17,11 @@ import { clearRecipientLinkedValues } from '../../storage/repositories/recipient
 import {
   saveRegistrationRecord,
   updateRegistrationRecord,
-  type ProtocolRecord,
   type RecipientRecord,
   type RegistrationRecord,
 } from '../../storage/repositories/recipients';
-import { useDocumentState } from '../saved-document/use-document-state';
+import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
+import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
@@ -32,33 +32,7 @@ import { parseRegistrationTransfusionRows } from './registration-transfusion-tab
 import { RegistrationTransfusionsModal } from './registration-transfusions-modal';
 
 const ROW_COUNT = 14;
-const PENDING_REGISTRATION_RECORD_KEY = 'blood:registration-open-record';
-
-const readPendingRegistrationRecord = (): RegistrationRecord | null => {
-  try {
-    const raw = window.sessionStorage.getItem(PENDING_REGISTRATION_RECORD_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw) as Partial<RegistrationRecord>;
-
-    if (
-      typeof parsed.id !== 'number' ||
-      typeof parsed.recipientId !== 'number' ||
-      !parsed.values ||
-      typeof parsed.values !== 'object'
-    ) {
-      return null;
-    }
-
-    return parsed as RegistrationRecord;
-  } catch (error) {
-    console.error('Не удалось восстановить лист регистрации:', error);
-    return null;
-  }
-};
-
 export const TransfusionRegistration = () => {
-  const [initialRecord] = useState<RegistrationRecord | null>(readPendingRegistrationRecord);
   const documentState = useDocumentState<ProtocolValues>(() => ({}));
   const {
     values,
@@ -87,19 +61,18 @@ export const TransfusionRegistration = () => {
     : formatRecipientAge(values.recipientBirthDate);
   const registrationRows = parseRegistrationTransfusionRows(values);
 
-  useEffect(() => {
-    if (initialRecord) {
-      window.sessionStorage.removeItem(PENDING_REGISTRATION_RECORD_KEY);
-      openSavedDocument(initialRecord, initialRecord.values);
-    }
+  usePendingSavedDocument('registration', (record, mode) => {
+    void openRegistrationRecord(record, mode);
+  });
 
+  useEffect(() => {
     let active = true;
     void loadRegistrationDraft()
       .then((draft) => {
         if (!active) return;
 
         if (draft.registrationRecordId !== null) {
-          if (!initialRecord && !hasSavedDocument())
+          if (!hasSavedDocument())
             openSavedDocument(
               { id: draft.registrationRecordId, recipientId: Number(draft.values.recipientId) },
               draft.values,
@@ -157,7 +130,7 @@ export const TransfusionRegistration = () => {
     return () => {
       active = false;
     };
-  }, [initialRecord, openSavedDocument, setWorkingValues, hasSavedDocument]);
+  }, [openSavedDocument, setWorkingValues, hasSavedDocument]);
 
   useEffect(() => {
     if (!draftLoaded) return;
@@ -208,19 +181,20 @@ export const TransfusionRegistration = () => {
     }
   };
 
-  const openRegistrationRecord = async (record: RegistrationRecord) => {
-    documentState.open(record, record.values);
+  const openRegistrationRecord = async (
+    record: RegistrationRecord,
+    mode: SavedDocumentMode = 'view',
+  ) => {
+    documentState.open(record, record.values, mode);
     setPatientDetailsOpen(false);
     setTableEditorOpen(false);
     setRegistryRecipientId(null);
     setRegistryOpen(false);
-    setStatus('Сохранённый лист регистрации открыт для просмотра.');
-  };
-
-  const openProtocolRecord = async (record: ProtocolRecord) => {
-    window.sessionStorage.setItem('blood:protocol-open-record', JSON.stringify(record));
-    setRegistryOpen(false);
-    window.location.hash = '#/protocol';
+    setStatus(
+      mode === 'edit'
+        ? 'Сохранённый лист регистрации открыт для редактирования.'
+        : 'Сохранённый лист регистрации открыт для просмотра.',
+    );
   };
 
   const save = async (afterPrint = false) => {
@@ -630,8 +604,9 @@ export const TransfusionRegistration = () => {
           initialRecipientId={registryRecipientId}
           initialRecipientName={readCurrentRecipient()?.fullName ?? values.recipientName ?? ''}
           onUseRecipient={selectRecipient}
-          onOpenRecord={(record) => void openProtocolRecord(record)}
-          onOpenRegistrationRecord={(record) => void openRegistrationRecord(record)}
+          onOpenRegistrationRecord={(record, _recipient, mode) =>
+            void openRegistrationRecord(record, mode)
+          }
           onRecipientDeleted={handleRecipientDeleted}
           onRecipientDisconnected={handleRecipientDisconnected}
           onClose={() => {

@@ -1,5 +1,6 @@
 import ui from '../../styles/ui';
-import { useDocumentState } from '../saved-document/use-document-state';
+import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
+import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
@@ -543,6 +544,10 @@ export const IndividualSelectionDirection = () => {
     window.localStorage.removeItem(SAVED_RECORD_ID_STORAGE_KEY);
   }, [initialStored, openSavedDocument]);
 
+  usePendingSavedDocument('individual-selection-direction', (record, mode) => {
+    void openSavedDirection(record, mode);
+  });
+
   const refreshCurrentData = useCallback(
     async (recipient = readCurrentRecipient(), baseDraft?: DirectionDraft) => {
       if (hasSavedDocument()) return;
@@ -887,13 +892,20 @@ export const IndividualSelectionDirection = () => {
     }
   };
 
-  const openSavedDirection = async (record: BloodRequestRecord) => {
+  const openSavedDirection = async (
+    record: BloodRequestRecord,
+    mode: SavedDocumentMode = 'view',
+  ) => {
     ++refreshVersionRef.current;
     ++profileEditVersionRef.current;
-    documentState.open(record, draftFromRecord(record.values));
+    documentState.open(record, draftFromRecord(record.values), mode);
     setEditor(null);
     setRegistryOpen(false);
-    setStatus('Сохранённый бланк открыт для просмотра.');
+    setStatus(
+      mode === 'edit'
+        ? 'Сохранённый бланк открыт для редактирования.'
+        : 'Сохранённый бланк открыт для просмотра.',
+    );
   };
 
   const handleRecipientDeleted = (recipientId: number) => {
@@ -1374,8 +1386,8 @@ export const IndividualSelectionDirection = () => {
           initialRecipientId={currentRecipient?.id ?? null}
           initialRecipientName={currentRecipient?.fullName ?? ''}
           onUseRecipient={selectRecipient}
-          onOpenIndividualSelectionDirectionRecord={(record) => {
-            void openSavedDirection(record);
+          onOpenIndividualSelectionDirectionRecord={(record, _recipient, mode) => {
+            void openSavedDirection(record, mode);
           }}
           onRecipientDeleted={handleRecipientDeleted}
           onRecipientDisconnected={handleRecipientDisconnected}

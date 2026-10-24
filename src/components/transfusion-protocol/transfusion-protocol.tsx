@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
-import type { RecipientRecord, RegistrationRecord } from '../../storage/repositories/recipients';
 import { FirstPage } from './first-page';
 import { PROTOCOL_CHUNK_ORDER, type ProtocolChunkId } from './protocol-pagination';
 import { ProtocolEditorModal } from './protocol-editor-modal';
@@ -15,7 +14,6 @@ const INITIAL_PAGES: ProtocolChunkId[][] = [
 ];
 
 const PAGE_FIT_TOLERANCE_PX = 2;
-const PENDING_REGISTRATION_RECORD_KEY = 'blood:registration-open-record';
 
 const samePages = (left: ProtocolChunkId[][], right: ProtocolChunkId[][]) =>
   left.length === right.length &&
@@ -148,29 +146,6 @@ export const TransfusionProtocol = () => {
     }
 
     clearHoveredBlock();
-  };
-
-  const openRegistrationRecord = async (record: RegistrationRecord, recipient: RecipientRecord) => {
-    void recipient;
-    try {
-      window.sessionStorage.setItem(
-        PENDING_REGISTRATION_RECORD_KEY,
-        JSON.stringify({
-          ...record,
-          values: {
-            ...record.values,
-            recipientId: String(record.recipientId),
-          },
-        }),
-      );
-    } catch (error) {
-      console.error('Не удалось подготовить лист регистрации к открытию:', error);
-      return;
-    }
-
-    setRegistryRecipientId(null);
-    workspace.setRegistryOpen(false);
-    window.location.hash = '#/registration';
   };
 
   const printPage = (pageIndex: number) => {
@@ -306,10 +281,7 @@ export const TransfusionProtocol = () => {
             setRegistryRecipientId(null);
             workspace.setRegistryOpen(false);
           }}
-          onOpenRecord={workspace.openRecord}
-          onOpenRegistrationRecord={(record, recipient) =>
-            void openRegistrationRecord(record, recipient)
-          }
+          onOpenRecord={(record, _recipient, mode) => void workspace.openRecord(record, mode)}
           onUseRecipient={workspace.selectRecipient}
           onRecipientDeleted={workspace.handleRecipientDeleted}
           onRecipientDisconnected={workspace.handleRecipientDisconnected}

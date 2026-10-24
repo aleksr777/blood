@@ -42,7 +42,8 @@ import {
 import { currentRecipientValues } from './recipient-profile-values';
 import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
-import { useDocumentState } from '../saved-document/use-document-state';
+import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
+import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 
 const OPEN_WINDOW_STORAGE_KEY = 'blood:protocol-open-window';
 
@@ -151,21 +152,9 @@ export const useProtocolWorkspace = () => {
     onSavedDraft: openSavedDraft,
   });
 
-  useEffect(() => {
-    const key = 'blood:protocol-open-record';
-    const raw = window.sessionStorage.getItem(key);
-    if (!raw) return;
-    window.sessionStorage.removeItem(key);
-    try {
-      const record = JSON.parse(raw) as ProtocolRecord;
-      if (Number.isSafeInteger(record.id) && record.values) {
-        openSavedDocument(record, record.values);
-        setActiveBlock(null);
-      }
-    } catch (error) {
-      console.error('Не удалось открыть сохранённый протокол:', error);
-    }
-  }, [openSavedDocument]);
+  usePendingSavedDocument('protocol', (record, mode) => {
+    void openRecord(record, mode);
+  });
 
   useEffect(() => {
     if (document.active) {
@@ -490,15 +479,19 @@ export const useProtocolWorkspace = () => {
       .catch((error: unknown) => console.error('Не удалось очистить сохранённый бланк:', error));
   };
 
-  const openRecord = async (record: ProtocolRecord) => {
+  const openRecord = async (record: ProtocolRecord, mode: SavedDocumentMode = 'view') => {
     previousBlankIndicationsRef.current = null;
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
     setActiveBlock(null);
 
-    document.open(record, record.values);
+    document.open(record, record.values, mode);
     setRegistryOpen(false);
-    setStatus('Сохранённый бланк открыт для просмотра.');
+    setStatus(
+      mode === 'edit'
+        ? 'Сохранённый бланк открыт для редактирования.'
+        : 'Сохранённый бланк открыт для просмотра.',
+    );
   };
 
   const bloodGroupMismatch = getBloodGroupMismatch(values);

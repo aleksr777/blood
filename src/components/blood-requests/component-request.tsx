@@ -1,5 +1,6 @@
 import ui from '../../styles/ui';
-import { useDocumentState } from '../saved-document/use-document-state';
+import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
+import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { WarningNotice } from '../warning-notice/warning-notice';
@@ -503,6 +504,10 @@ export const ComponentRequest = () => {
     window.localStorage.removeItem(SAVED_RECORD_ID_STORAGE_KEY);
   }, [initialStored, openSavedDocument]);
 
+  usePendingSavedDocument('component-request', (record, mode) => {
+    void openSavedRequest(record, mode);
+  });
+
   const refreshCurrentData = useCallback(
     async (recipient = readCurrentRecipient(), baseDraft?: DirectionDraft) => {
       if (hasSavedDocument()) return;
@@ -836,13 +841,17 @@ export const ComponentRequest = () => {
     }
   };
 
-  const openSavedRequest = async (record: BloodRequestRecord) => {
+  const openSavedRequest = async (record: BloodRequestRecord, mode: SavedDocumentMode = 'view') => {
     ++refreshVersionRef.current;
     ++profileEditVersionRef.current;
-    documentState.open(record, draftFromRecord(record.values));
+    documentState.open(record, draftFromRecord(record.values), mode);
     setEditor(null);
     setRegistryOpen(false);
-    setStatus('Сохранённый бланк открыт для просмотра.');
+    setStatus(
+      mode === 'edit'
+        ? 'Сохранённый бланк открыт для редактирования.'
+        : 'Сохранённый бланк открыт для просмотра.',
+    );
   };
 
   const handleRecipientDeleted = (recipientId: number) => {
@@ -1352,8 +1361,8 @@ export const ComponentRequest = () => {
           initialRecipientId={currentRecipient?.id ?? null}
           initialRecipientName={currentRecipient?.fullName ?? ''}
           onUseRecipient={selectRecipient}
-          onOpenComponentRequestRecord={(record) => {
-            void openSavedRequest(record);
+          onOpenComponentRequestRecord={(record, _recipient, mode) => {
+            void openSavedRequest(record, mode);
           }}
           onRecipientDeleted={handleRecipientDeleted}
           onRecipientDisconnected={handleRecipientDisconnected}

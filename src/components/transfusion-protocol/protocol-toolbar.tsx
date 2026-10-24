@@ -1,3 +1,4 @@
+import { AnimatedMessage } from '../animated-reveal/animated-message';
 import ui from '../../styles/ui';
 import { useEffect, useState } from 'react';
 import { SiteNavigation } from '../site-navigation/site-navigation';
@@ -128,18 +129,12 @@ export const ProtocolToolbar = ({
             </button>
           ))}
         </div>
-        {hemaconWarningVisible && hemaconWarning && (
-          <WarningNotice
-            className="toolbar-warning"
-            message={hemaconWarning}
-            onDismiss={() => setHemaconWarningVisible(false)}
-          />
-        )}
-        {status && (
-          <div className="toolbar-status" role="status">
-            {status}
-          </div>
-        )}
+        <WarningNotice
+          className="toolbar-warning"
+          message={hemaconWarningVisible ? hemaconWarning : ''}
+          onDismiss={() => setHemaconWarningVisible(false)}
+        />
+        <AnimatedMessage message={status} className="toolbar-status" />
         <WarningNotice className="toolbar-danger-warning" message={dangerWarning} danger />
         <WarningNotice
           className="toolbar-blood-group-warning"

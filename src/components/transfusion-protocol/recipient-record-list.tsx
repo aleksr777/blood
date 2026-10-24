@@ -1,3 +1,4 @@
+import { AnimatedReveal } from '../animated-reveal/animated-reveal';
 import { useId, useState } from 'react';
 import type { SavedDocumentMode } from '../saved-document/use-document-state';
 import styles from './recipient-database.module.css';
@@ -31,7 +32,7 @@ export const RecipientRecordList = ({
               role="button"
               tabIndex={0}
               aria-expanded={selected}
-              aria-controls={selected ? actionsId : undefined}
+              aria-controls={selected ? `${actionsId}-${record.id}` : undefined}
               data-selected={selected}
               onClick={() => toggle(record.id)}
               onKeyDown={(event) => {
@@ -43,9 +44,9 @@ export const RecipientRecordList = ({
             >
               <div className={styles.recordTitle}>{record.title}</div>
             </div>
-            {selected && (
+            <AnimatedReveal open={selected}>
               <div
-                id={actionsId}
+                id={`${actionsId}-${record.id}`}
                 className={styles.recordActions}
                 role="group"
                 aria-label="Действия с бланком"
@@ -64,7 +65,7 @@ export const RecipientRecordList = ({
                   Удалить
                 </button>
               </div>
-            )}
+            </AnimatedReveal>
           </div>
         );
       })}

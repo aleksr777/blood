@@ -10,6 +10,7 @@ const parsePixels = (value: string) => {
 
 const getAddedElements = (node: Node) => {
   if (!(node instanceof HTMLElement)) return [];
+  if (node.closest('[data-animated-reveal]')) return [];
 
   // Fade the highest newly-added node only. Its descendants remain hidden with it
   // and participate in layout, so the modal can measure the final height first.
@@ -85,6 +86,9 @@ export const useModalAutoHeight = (
         const heightChanged =
           previousHeight !== null && Math.abs(targetHeight - previousHeight) > SIZE_TOLERANCE_PX;
         const hasEnteringContent = Boolean(content.querySelector('[data-modal-content-entering]'));
+        dialog.dataset.contentRevealing = String(
+          Boolean(content.querySelector('[data-animated-reveal][data-animating="true"]')),
+        );
         const sizeAnimating = dialog.dataset.sizeAnimating === 'true';
 
         dialog.dataset.sizeScrollable = String(naturalHeight > maximumHeight + SIZE_TOLERANCE_PX);
@@ -164,6 +168,7 @@ export const useModalAutoHeight = (
       delete dialog.dataset.sizeReady;
       delete dialog.dataset.sizeScrollable;
       delete dialog.dataset.sizeAnimating;
+      delete dialog.dataset.contentRevealing;
       dialog.style.removeProperty('height');
     };
   }, [dialogRef, contentRef, headerRef]);

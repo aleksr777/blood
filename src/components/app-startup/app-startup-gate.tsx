@@ -1,3 +1,4 @@
+import { AnimatedReveal } from '../animated-reveal/animated-reveal';
 import ui from '../../styles/ui';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import { initializeDatabase } from '../../storage/sqlite/database-client';
@@ -88,7 +89,9 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
                     {state.retrying ? 'Проверяем…' : 'Повторить'}
                   </button>
                 </div>
-                {state.retrying && <p role="status">{databaseStartupMessages[startupStage]}…</p>}
+                <AnimatedReveal open={state.retrying} contentKey={startupStage}>
+                  <p role="status">{databaseStartupMessages[startupStage]}…</p>
+                </AnimatedReveal>
               </>
             )}
           </div>

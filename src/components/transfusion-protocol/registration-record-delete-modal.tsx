@@ -1,3 +1,4 @@
+import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { useState } from 'react';
 import type { RegistrationRecord } from '../../storage/repositories/recipients';
 import Modal, { ModalDismissButton } from '../modal/modal';
@@ -48,7 +49,7 @@ export const RegistrationRecordDeleteModal = ({
         Последнее изменение: <strong>{formatUpdated(record.updatedAt)}</strong>.
       </div>
       <div className={styles.warning}>Отменить это действие после удаления будет нельзя.</div>
-      {error && <div className={styles.error}>{error}</div>}
+      <AnimatedMessage message={error} className={styles.error} role="alert" />
       <div className={styles.actions}>
         <ModalDismissButton className={styles.secondary} disabled={deleting}>
           Отмена

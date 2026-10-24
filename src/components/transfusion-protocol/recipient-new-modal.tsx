@@ -1,3 +1,4 @@
+import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { useState } from 'react';
 import { findRecipientsByName, type RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
@@ -104,11 +105,7 @@ export const RecipientNewModal = ({
           onView={() => setViewing(true)}
         />
       )}
-      {error && (
-        <div className={styles.error} role="alert">
-          {error}
-        </div>
-      )}
+      <AnimatedMessage message={error} className={styles.error} role="alert" />
     </Modal>
   );
 };

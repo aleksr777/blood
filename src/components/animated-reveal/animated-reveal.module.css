@@ -1,0 +1,39 @@
+.reveal {
+  --reveal-duration: var(--ui-motion-normal, 180ms);
+  grid-column: 1 / -1;
+  min-width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.reveal[aria-hidden='true'] {
+  pointer-events: none;
+}
+
+.reveal[data-animating='true'] {
+  will-change: height, opacity;
+}
+
+.content {
+  display: flow-root;
+  min-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    --reveal-duration: 0ms;
+  }
+}
+
+@media print {
+  .reveal {
+    height: auto !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+  }
+
+  .reveal[aria-hidden='true'] {
+    display: none !important;
+  }
+}

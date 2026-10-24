@@ -55,6 +55,10 @@
     height 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
+.modal[data-content-revealing='true'] {
+  transition: opacity 160ms ease;
+}
+
 .modal[data-size-scrollable='true'] .viewport {
   overflow-x: hidden;
   overflow-y: auto;
@@ -153,6 +157,7 @@
 @media (prefers-reduced-motion: reduce) {
   .modal,
   .modal[data-size-ready='true'],
+  .modal[data-content-revealing='true'],
   .modal::backdrop {
     transition: none;
   }

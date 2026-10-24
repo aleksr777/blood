@@ -1,3 +1,4 @@
+import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
 import { WarningNotice } from '../warning-notice/warning-notice';
@@ -59,6 +60,7 @@ export const IndividualSelectionComponentModal = ({
   onIndicationsChange,
   onClose,
 }: Props) => {
+  const isolated = useSavedDocumentScope();
   const component =
     fixedIndicationComponent ||
     indicationValues.componentGroup ||
@@ -119,6 +121,10 @@ export const IndividualSelectionComponentModal = ({
   };
 
   const handleClose = () => {
+    if (isolated) {
+      onClose();
+      return;
+    }
     const value = requiredComponent.trim();
     const isFixedOption = requiredComponentFixedOptions.some(
       (option) => option.toLocaleLowerCase('ru-RU') === value.toLocaleLowerCase('ru-RU'),

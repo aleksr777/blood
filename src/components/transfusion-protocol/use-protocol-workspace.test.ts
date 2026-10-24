@@ -201,3 +201,27 @@ it('keeps mismatch warnings mandatory except for known O(I) Rh-negative erythroc
   expect(result.current.bloodGroupWarningDismissible).toBe(true);
   expect(result.current.bloodGroupWarning).toContain('не совпадают');
 });
+
+it('hides expiration notices in both saved modes and restores notices for the working draft', async () => {
+  const expired = {
+    ...hemacon,
+    expirationDate: '2000-01-01',
+    reagentAntiAExpiration: '2000-01-01',
+  };
+  const { result } = await openDraft(expired);
+  expect(result.current.reagentWarning).toContain('истёк срок годности');
+  await act(async () =>
+    result.current.openRecord({
+      id: 42,
+      recipientId: 2,
+      values: { ...recipient, ...expired },
+      createdAt: 1000,
+      updatedAt: 1000,
+    }),
+  );
+  expect(result.current.reagentWarning).toBe('');
+  act(() => result.current.document.edit());
+  expect(result.current.reagentWarning).toBe('');
+  act(() => result.current.document.close());
+  expect(result.current.reagentWarning).toContain('истёк срок годности');
+});

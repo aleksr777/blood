@@ -5,15 +5,9 @@ import styles from './recipient-database.module.css';
 export type RecipientArchiveItem = {
   id: number;
   title: string;
-  updatedAt: number;
   onOpen: (mode: SavedDocumentMode) => void;
   onDelete: () => void;
 };
-
-const formatUpdated = (value: number) =>
-  new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short', timeStyle: 'short' }).format(
-    new Date(value),
-  );
 
 export const RecipientRecordList = ({
   records,
@@ -48,7 +42,6 @@ export const RecipientRecordList = ({
               }}
             >
               <div className={styles.recordTitle}>{record.title}</div>
-              <div className={styles.meta}>Изменён: {formatUpdated(record.updatedAt)}</div>
             </div>
             {selected && (
               <div

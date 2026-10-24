@@ -1,3 +1,5 @@
+import { isSavedRecipientIdentityField } from '../../domain/saved-recipient-identity';
+import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { CustomSelectField } from './custom-select-field';
 import { DepartmentField } from './department-field';
 import { getSavedOptionCategory, isSharedSavedOptionCategory } from './saved-field-config';
@@ -48,19 +50,26 @@ export const ProtocolFieldControl = ({
   onOpenRecipients,
   onSelectRecipient,
 }: Props) => {
+  const isolated = useSavedDocumentScope();
   const className = field.wide ? styles.wide : undefined;
   const change = (nextValue: string, previousOptionValue?: string) =>
     onChange(field.name, nextValue, previousOptionValue);
 
+  if ((savedDocument || isolated) && isSavedRecipientIdentityField(field.name)) {
+    return (
+      <label className={className}>
+        <span>{field.label}</span>
+        <input
+          name={field.name}
+          type={field.type === 'date' ? 'date' : 'text'}
+          value={value}
+          readOnly
+        />
+      </label>
+    );
+  }
+
   if (field.name === 'recipientName') {
-    if (savedDocument) {
-      return (
-        <label className={className}>
-          <span>{field.label}</span>
-          <input name={field.name} value={value} onChange={(event) => change(event.target.value)} />
-        </label>
-      );
-    }
     return (
       <div className={className}>
         <div className={styles.fieldLabel}>{field.label}</div>

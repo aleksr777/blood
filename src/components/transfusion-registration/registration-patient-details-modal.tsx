@@ -30,6 +30,7 @@ export const RegistrationPatientDetailsModal = ({
           <input
             aria-label="Фамилия, имя, отчество (при наличии)"
             name="recipientName"
+            readOnly={savedDocument}
             value={values.recipientName ?? ''}
             onChange={(event) => onChange({ recipientName: event.target.value })}
           />
@@ -46,6 +47,7 @@ export const RegistrationPatientDetailsModal = ({
         <span>Дата рождения</span>
         <input
           name="recipientBirthDate"
+          readOnly={savedDocument}
           type="date"
           value={values.recipientBirthDate ?? ''}
           onChange={(event) => onChange({ recipientBirthDate: event.target.value })}
@@ -77,6 +79,7 @@ export const RegistrationPatientDetailsModal = ({
         <span>№ медицинской карты</span>
         <input
           name="medicalRecordNumber"
+          readOnly={savedDocument}
           type="text"
           value={values.medicalRecordNumber ?? ''}
           onChange={(event) => onChange({ medicalRecordNumber: event.target.value })}

@@ -487,11 +487,7 @@ export const useProtocolWorkspace = () => {
 
     document.open(record, record.values, mode);
     setRegistryOpen(false);
-    setStatus(
-      mode === 'edit'
-        ? 'Сохранённый бланк открыт для редактирования.'
-        : 'Сохранённый бланк открыт для просмотра.',
-    );
+    setStatus('');
   };
 
   const bloodGroupMismatch = getBloodGroupMismatch(values);
@@ -573,8 +569,10 @@ export const useProtocolWorkspace = () => {
     setStatus('Текущий реципиент отключён. Связанные с ним данные удалены из текущего бланка.');
   };
 
-  const expiredReagents = getExpiredReagentWarnings(values);
-  const hemaconExpirationWarning = getHemaconExpirationWarning(values.expirationDate);
+  const expiredReagents = document.active ? [] : getExpiredReagentWarnings(values);
+  const hemaconExpirationWarning = document.active
+    ? ''
+    : getHemaconExpirationWarning(values.expirationDate);
   const expirationWarnings = [hemaconExpirationWarning, ...expiredReagents].filter(Boolean);
   const reagentWarning = expirationWarnings.length
     ? `Внимание: истёк срок годности.\n\n${expirationWarnings.map((warning) => `• ${warning}`).join('\n')}.`

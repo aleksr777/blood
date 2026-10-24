@@ -1,3 +1,4 @@
+import { SavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
 import { runRecipientOperation } from '../../storage/repositories/recipient-operation-queue';
@@ -47,7 +48,7 @@ type Props = {
   initialRecipientName?: string;
 };
 
-export const RecipientDatabaseModal = ({
+const RecipientDatabaseContent = ({
   onClose,
   onOpenRecord,
   onOpenRegistrationRecord,
@@ -423,3 +424,9 @@ export const RecipientDatabaseModal = ({
     </Modal>
   );
 };
+
+export const RecipientDatabaseModal = (props: Props) => (
+  <SavedDocumentScope value={false}>
+    <RecipientDatabaseContent {...props} />
+  </SavedDocumentScope>
+);

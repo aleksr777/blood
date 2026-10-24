@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getReagentExpirationWarning, REAGENTS } from './reagent-defaults';
@@ -44,6 +45,7 @@ const RADIO_GROUPS = [
 ] as const;
 
 export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = true }: Props) => {
+  const savedDocument = useSavedDocumentScope();
   const change = (name: string, value: string, previousOptionValue?: string) => {
     const sharedOptionEdit =
       previousOptionValue !== undefined &&
@@ -72,10 +74,9 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
     <div className={styles.root}>
       <div className={styles.reagentList}>
         {REAGENTS.map((reagent) => {
-          const expirationWarning = getReagentExpirationWarning(
-            reagent.title,
-            values[reagent.expiration],
-          );
+          const expirationWarning = savedDocument
+            ? ''
+            : getReagentExpirationWarning(reagent.title, values[reagent.expiration]);
 
           return (
             <fieldset key={reagent.series} className={styles.reagentGroup}>

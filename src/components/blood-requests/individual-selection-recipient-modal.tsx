@@ -70,12 +70,14 @@ export const IndividualSelectionRecipientModal = ({
         />
 
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={BIRTH_DATE_FIELD}
           value={values.recipientBirthDate ?? ''}
           onChange={changeValue}
         />
 
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={SEX_FIELD}
           value={values.recipientSex ?? ''}
           onChange={changeValue}
@@ -91,12 +93,14 @@ export const IndividualSelectionRecipientModal = ({
         </div>
 
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={MEDICAL_RECORD_FIELD}
           value={values.medicalRecordNumber ?? ''}
           onChange={changeValue}
         />
 
         <ProtocolFieldControl
+          savedDocument={savedDocument}
           field={DIAGNOSIS_FIELD}
           value={values.diagnosis ?? ''}
           onChange={changeValue}

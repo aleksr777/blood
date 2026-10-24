@@ -53,3 +53,31 @@ it('returns to view after a committed update while preserving the draft and reco
   act(() => result.current.close());
   expect(result.current.values).toEqual(working);
 });
+
+it('locks saved recipient identity while keeping clinical edits in this document', () => {
+  const initial = {
+    recipientName: 'Рабочее имя',
+    medicalRecordNumber: 'Рабочая карта',
+    recipientAge: '30 лет',
+    diagnosis: 'Рабочий диагноз',
+  };
+  const original = {
+    recipientName: 'Сохранённое имя',
+    medicalRecordNumber: 'Сохранённая карта',
+    recipientAge: '40 лет',
+    diagnosis: 'Старый диагноз',
+  };
+  const { result } = renderHook(() => useDocumentState(() => initial));
+  act(() => result.current.open(record, original, 'edit'));
+  act(() =>
+    result.current.setValues({
+      recipientName: 'Другое имя',
+      medicalRecordNumber: 'Другая карта',
+      recipientAge: '50 лет',
+      diagnosis: 'Правка',
+    }),
+  );
+  expect(result.current.values).toEqual({ ...original, diagnosis: 'Правка' });
+  expect(result.current.originalValues).toEqual(original);
+  expect(result.current.workingValues).toEqual(initial);
+});

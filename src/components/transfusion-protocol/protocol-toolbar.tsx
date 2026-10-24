@@ -7,6 +7,7 @@ import type { SavedDocumentControls } from '../saved-document/use-document-state
 
 type Props = {
   document?: SavedDocumentControls;
+  documentTitle?: string;
   status: string;
   warning: string;
   hemaconWarning: string;
@@ -31,6 +32,7 @@ type Props = {
 
 export const ProtocolToolbar = ({
   document,
+  documentTitle = 'Протокол трансфузии',
   status,
   warning,
   hemaconWarning,
@@ -71,30 +73,33 @@ export const ProtocolToolbar = ({
       <div className="toolbar-wrap">
         <SiteNavigation
           current="protocol"
+          showRecipient={!document?.record}
           recipientName={currentRecipientName}
           recipientAbo={currentRecipientAbo}
           recipientRh={currentRecipientRh}
           currentRecipientAvailable={currentRecipientAvailable}
           onOpenCurrentRecipient={onOpenCurrentRecipient}
         />
-        {document && <SavedDocumentBar document={document} />}
+        {document && <SavedDocumentBar document={document} title={documentTitle} />}
         <div className="print-actions" aria-label="Панель действий">
-          <button
-            type="button"
-            className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-            onClick={onClear}
-            disabled={Boolean(document?.record)}
-          >
-            Очистить бланк
-          </button>
-          <button
-            type="button"
-            className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-            onClick={onNew}
-            disabled={Boolean(document?.record)}
-          >
-            Новый бланк
-          </button>
+          {!document?.record && (
+            <>
+              <button
+                type="button"
+                className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+                onClick={onClear}
+              >
+                Очистить бланк
+              </button>
+              <button
+                type="button"
+                className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
+                onClick={onNew}
+              >
+                Новый бланк
+              </button>
+            </>
+          )}
           <button
             type="button"
             className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
@@ -147,7 +152,7 @@ export const ProtocolToolbar = ({
           message={componentUnitNumberWarning}
           onDismiss={onDismissComponentUnitNumberWarning}
         />
-        <WarningNotice className="toolbar-warning" message={warning} />
+        <WarningNotice className="toolbar-warning" message={document?.record ? '' : warning} />
       </div>
     </header>
   );

@@ -1,5 +1,6 @@
 import { getFormContentKey } from '../../domain/form-content';
 import { normalizeComponentUnitNumber } from '../../domain/protocol-hemacon';
+import { preserveSavedRecipientIdentity } from '../../domain/saved-recipient-identity';
 import type { SqliteDatabase } from './database';
 import type { BloodRequestRecordKind } from './database-types';
 
@@ -58,8 +59,6 @@ export const storeFormRecord = (
     rowMode: 'object',
     returnValue: 'resultRows',
   }) as RecordRow[];
-  const contentKey = getFormContentKey(values);
-  const number = normalizeComponentUnitNumber(String(values.componentUnitNumber ?? ''));
   const candidates = rows.flatMap((row) => {
     const stored = readValues(row);
     return stored ? [{ row, values: stored }] : [];
@@ -69,6 +68,9 @@ export const storeFormRecord = (
   if (recordId !== undefined && !selected) {
     throw new Error('Сохранённый бланк удалён или относится к другому реципиенту.');
   }
+  if (selected) values = preserveSavedRecipientIdentity(selected.values, values);
+  const contentKey = getFormContentKey(values);
+  const number = normalizeComponentUnitNumber(String(values.componentUnitNumber ?? ''));
   if (
     selected &&
     candidates.some(

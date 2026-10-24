@@ -1,3 +1,5 @@
+import { formatDate } from './protocol-types';
+import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useEffect, useState } from 'react';
 import type {
   BloodRequestRecord,
@@ -9,7 +11,6 @@ import type { SavedRecordOpener } from '../saved-document/saved-document-navigat
 import type { SavedDocumentMode } from '../saved-document/use-document-state';
 import { RecipientRecordList } from './recipient-record-list';
 import { formatRecipientAge } from './recipient-demographics';
-import { formatDate } from './protocol-types';
 import styles from './recipient-database.module.css';
 
 type Props = {
@@ -34,18 +35,6 @@ type Props = {
 
 type RecordCategory =
   'protocols' | 'registrations' | 'individual-selection-directions' | 'component-requests';
-
-const stringValue = (record: BloodRequestRecord, name: string) => {
-  const value = record.values[name];
-  return typeof value === 'string' ? value : '';
-};
-
-const requestRecordTitle = (record: BloodRequestRecord) => {
-  const date = formatDate(stringValue(record, 'directionDate'));
-  const component = stringValue(record, 'requiredComponent').trim();
-
-  return [date || 'дата не указана', component].filter(Boolean).join(' · ');
-};
 
 export const RecipientHistoryPanel = ({
   recipient,
@@ -223,24 +212,21 @@ export const RecipientHistoryPanel = ({
                   category === 'protocols'
                     ? records.map((record) => ({
                         id: record.id,
-                        updatedAt: record.updatedAt,
-                        title: `Трансфузия: ${formatDate(record.values.transfusionDate) || 'дата не указана'}`,
+                        title: savedDocumentTitle('protocol', record.values),
                         onOpen: (mode: SavedDocumentMode) => onOpenRecord(record, recipient, mode),
                         onDelete: () => onDeleteRecord(record),
                       }))
                     : category === 'registrations'
                       ? registrationRecords.map((record) => ({
                           id: record.id,
-                          updatedAt: record.updatedAt,
-                          title: 'Лист регистрации',
+                          title: savedDocumentTitle('registration', record.values),
                           onOpen: (mode: SavedDocumentMode) =>
                             onOpenRegistrationRecord(record, recipient, mode),
                           onDelete: () => onDeleteRegistrationRecord(record),
                         }))
                       : requestRecords.map((record) => ({
                           id: record.id,
-                          updatedAt: record.updatedAt,
-                          title: requestRecordTitle(record),
+                          title: savedDocumentTitle(record.kind, record.values),
                           onOpen: (mode: SavedDocumentMode) => requestOpen(record, recipient, mode),
                           onDelete: () => onDeleteBloodRequestRecord(record),
                         }))

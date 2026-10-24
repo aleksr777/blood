@@ -23,6 +23,7 @@ type Props = {
   blockId: ProtocolBlockId;
   values: ProtocolValues;
   savedDocument?: boolean;
+  archivedRecipientAge?: string;
   bloodGroupWarning: string;
   bloodGroupWarningDismissible: boolean;
   onDismissBloodGroupWarning: () => void;
@@ -45,6 +46,7 @@ export const ProtocolEditorModal = ({
   blockId,
   values,
   savedDocument = false,
+  archivedRecipientAge = '',
   bloodGroupWarning,
   bloodGroupWarningDismissible,
   onDismissBloodGroupWarning,
@@ -59,7 +61,12 @@ export const ProtocolEditorModal = ({
 }: Props) => {
   const config = getProtocolBlockConfig(blockId);
   const [draft, setDraft] = useState<ProtocolValues>(() => getInitialValues(blockId, values));
-  const hemaconExpirationWarning = getHemaconExpirationWarning(draft.expirationDate);
+  const displayedAge = savedDocument
+    ? archivedRecipientAge
+    : formatRecipientAge(draft.recipientBirthDate, draft.transfusionDate);
+  const hemaconExpirationWarning = savedDocument
+    ? ''
+    : getHemaconExpirationWarning(draft.expirationDate);
 
   useEffect(() => {
     setDraft(getInitialValues(blockId, values));
@@ -75,14 +82,14 @@ export const ProtocolEditorModal = ({
   };
 
   const handleClose = () => {
-    if (persistReusableOptions) {
+    if (persistReusableOptions && !savedDocument) {
       persistProtocolOptions(draft);
     }
     onClose(draft);
   };
 
   const handleOpenRecipients = () => {
-    if (persistReusableOptions) {
+    if (persistReusableOptions && !savedDocument) {
       persistProtocolOptions(draft);
     }
     onClose(draft);
@@ -94,11 +101,7 @@ export const ProtocolEditorModal = ({
       savedDocument={savedDocument}
       key={field.name}
       field={field}
-      value={
-        field.name === 'recipientAge'
-          ? formatRecipientAge(draft.recipientBirthDate, draft.transfusionDate)
-          : (draft[field.name] ?? '')
-      }
+      value={field.name === 'recipientAge' ? displayedAge : (draft[field.name] ?? '')}
       onChange={changeValue}
       onOpenRecipients={handleOpenRecipients}
       onSelectRecipient={onSelectRecipient}
@@ -117,9 +120,7 @@ export const ProtocolEditorModal = ({
             return [
               <div key={field.name}>
                 <div className={styles.fieldLabel}>{field.label}</div>
-                <div className={styles.calculatedValue}>
-                  {formatRecipientAge(draft.recipientBirthDate, draft.transfusionDate) || '—'}
-                </div>
+                <div className={styles.calculatedValue}>{displayedAge || '—'}</div>
               </div>,
             ];
           }

@@ -24,6 +24,8 @@ vi.mock('./database', () => ({ getDatabase: async () => state.db }));
 const values = {
   recipientName: 'Реципиент',
   medicalRecordNumber: 'Исходная карта',
+  recipientBirthDate: '1980-01-02',
+  recipientAge: '40 лет',
   componentName: 'Эритроцитная взвесь',
   componentUnitNumber: '76102200045636',
   donorAbo: 'A(II)',
@@ -78,6 +80,9 @@ it.each(forms)(
         ...values,
         recipientName: 'Историческое имя',
         medicalRecordNumber: 'Исправленная карта',
+        recipientBirthDate: '1990-01-02',
+        recipientAge: '50 лет',
+        diagnosis: 'Правка только в этом бланке',
         componentUnitNumber: '76102200045736',
       },
       original.id,
@@ -87,6 +92,13 @@ it.each(forms)(
       recipientId: recipient.id,
       createdAt: 1000,
       updatedAt: 2000,
+      values: {
+        recipientName: values.recipientName,
+        medicalRecordNumber: values.medicalRecordNumber,
+        recipientBirthDate: values.recipientBirthDate,
+        recipientAge: values.recipientAge,
+        diagnosis: 'Правка только в этом бланке',
+      },
     });
     expect(await form.list(recipient.id)).toEqual([edited]);
     expect(await getRecipientById(recipient.id)).toEqual(profile);

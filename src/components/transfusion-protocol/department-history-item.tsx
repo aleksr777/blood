@@ -3,13 +3,20 @@ import type { DepartmentRecord } from '../../storage/repositories/departments';
 import styles from './protocol-editor.module.css';
 
 type Props = {
+  editable?: boolean;
   item: DepartmentRecord;
   onSelect: (item: DepartmentRecord) => void;
   onRename: (item: DepartmentRecord, newValue: string) => void;
   onRemove: (item: DepartmentRecord) => void;
 };
 
-export const DepartmentHistoryItem = ({ item, onSelect, onRename, onRemove }: Props) => {
+export const DepartmentHistoryItem = ({
+  editable = true,
+  item,
+  onSelect,
+  onRename,
+  onRemove,
+}: Props) => {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(item.name);
 
@@ -19,7 +26,7 @@ export const DepartmentHistoryItem = ({ item, onSelect, onRename, onRemove }: Pr
   };
 
   const saveEditing = () => {
-    if (!editing) return;
+    if (!editable || !editing) return;
 
     const nextValue = draft.trim();
     setEditing(false);
@@ -66,37 +73,41 @@ export const DepartmentHistoryItem = ({ item, onSelect, onRename, onRemove }: Pr
         </button>
       )}
 
-      {editing ? (
-        <button
-          type="button"
-          className={styles.historySave}
-          aria-label={`Сохранить отделение: ${draft}`}
-          title="Сохранить"
-          onClick={saveEditing}
-        >
-          ✓
-        </button>
-      ) : (
-        <button
-          type="button"
-          className={styles.historyEdit}
-          aria-label={`Изменить отделение: ${item.name}`}
-          title="Изменить"
-          onClick={startEditing}
-        >
-          ✎
-        </button>
-      )}
+      {editable && (
+        <>
+          {editing ? (
+            <button
+              type="button"
+              className={styles.historySave}
+              aria-label={`Сохранить отделение: ${draft}`}
+              title="Сохранить"
+              onClick={saveEditing}
+            >
+              ✓
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={styles.historyEdit}
+              aria-label={`Изменить отделение: ${item.name}`}
+              title="Изменить"
+              onClick={startEditing}
+            >
+              ✎
+            </button>
+          )}
 
-      <button
-        type="button"
-        className={styles.historyDelete}
-        aria-label={`Удалить отделение: ${item.name}`}
-        title="Удалить"
-        onClick={() => onRemove(item)}
-      >
-        ×
-      </button>
+          <button
+            type="button"
+            className={styles.historyDelete}
+            aria-label={`Удалить отделение: ${item.name}`}
+            title="Удалить"
+            onClick={() => onRemove(item)}
+          >
+            ×
+          </button>
+        </>
+      )}
     </div>
   );
 };

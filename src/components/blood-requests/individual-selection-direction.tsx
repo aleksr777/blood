@@ -1,3 +1,5 @@
+import { SavedDocumentPage } from '../saved-document/saved-document-page';
+import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import ui from '../../styles/ui';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
@@ -901,11 +903,7 @@ export const IndividualSelectionDirection = () => {
     documentState.open(record, draftFromRecord(record.values), mode);
     setEditor(null);
     setRegistryOpen(false);
-    setStatus(
-      mode === 'edit'
-        ? 'Сохранённый бланк открыт для редактирования.'
-        : 'Сохранённый бланк открыт для просмотра.',
-    );
+    setStatus('');
   };
 
   const handleRecipientDeleted = (recipientId: number) => {
@@ -1216,35 +1214,41 @@ export const IndividualSelectionDirection = () => {
   };
 
   return (
-    <main className={styles.shell} data-document-mode={documentState.mode}>
+    <SavedDocumentPage className={styles.shell} mode={documentState.mode}>
       <header className={`app-header ${styles.header}`}>
         <div className="toolbar-wrap">
           <SiteNavigation
             current="summary-request"
+            showRecipient={!documentState.active}
             recipientName={currentRecipient?.fullName ?? ''}
             recipientAbo={currentRecipient?.profile.recipientAbo ?? ''}
             recipientRh={currentRecipient?.profile.recipientRh ?? ''}
             currentRecipientAvailable={Boolean(currentRecipient)}
             onOpenCurrentRecipient={() => setRegistryOpen(true)}
           />
-          <SavedDocumentBar document={documentState} />
+          <SavedDocumentBar
+            document={documentState}
+            title={savedDocumentTitle('individual-selection-direction', draft)}
+          />
           <div className="print-actions" aria-label="Панель действий">
-            <button
-              type="button"
-              className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-              onClick={() => void clear()}
-              disabled={documentState.active}
-            >
-              Очистить бланк
-            </button>
-            <button
-              type="button"
-              className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-              onClick={() => void newBlank()}
-              disabled={documentState.active}
-            >
-              Новый бланк
-            </button>
+            {!documentState.active && (
+              <>
+                <button
+                  type="button"
+                  className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+                  onClick={() => void clear()}
+                >
+                  Очистить бланк
+                </button>
+                <button
+                  type="button"
+                  className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
+                  onClick={() => void newBlank()}
+                >
+                  Новый бланк
+                </button>
+              </>
+            )}
             <button
               type="button"
               className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
@@ -1394,6 +1398,6 @@ export const IndividualSelectionDirection = () => {
           onClose={() => setRegistryOpen(false)}
         />
       )}
-    </main>
+    </SavedDocumentPage>
   );
 };

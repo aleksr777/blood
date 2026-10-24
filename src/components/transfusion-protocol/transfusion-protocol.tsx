@@ -1,3 +1,6 @@
+import { formatRecipientAge } from './recipient-demographics';
+import { SavedDocumentPage } from '../saved-document/saved-document-page';
+import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
 import { FirstPage } from './first-page';
@@ -25,6 +28,15 @@ const samePages = (left: ProtocolChunkId[][], right: ProtocolChunkId[][]) =>
 
 export const TransfusionProtocol = () => {
   const workspace = useProtocolWorkspace();
+  const original = workspace.document.originalValues;
+  const savedDate =
+    original?.transfusionDate ||
+    (workspace.document.record?.createdAt
+      ? new Date(workspace.document.record.createdAt).toISOString().slice(0, 10)
+      : '');
+  const archivedRecipientAge =
+    original?.recipientAge ||
+    (savedDate ? formatRecipientAge(original?.recipientBirthDate, savedDate) : '');
   const sheetsRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<ProtocolChunkId[][]>(INITIAL_PAGES);
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
@@ -170,13 +182,14 @@ export const TransfusionProtocol = () => {
   };
 
   return (
-    <main
+    <SavedDocumentPage
       className="app-shell protocol-app-shell"
       data-print-blocked={Boolean(workspace.hemaconWarning)}
-      data-document-mode={workspace.document.mode}
+      mode={workspace.document.mode}
     >
       <ProtocolToolbar
         document={workspace.document}
+        documentTitle={savedDocumentTitle('protocol', workspace.values)}
         status={workspace.status}
         warning={workspace.reagentWarning}
         hemaconWarning={workspace.hemaconWarning}
@@ -242,6 +255,7 @@ export const TransfusionProtocol = () => {
           key={workspace.activeBlock}
           blockId={workspace.activeBlock}
           savedDocument={workspace.document.active}
+          archivedRecipientAge={archivedRecipientAge}
           values={workspace.values}
           bloodGroupWarning={workspace.bloodGroupWarning}
           bloodGroupWarningDismissible={workspace.bloodGroupWarningDismissible}
@@ -287,6 +301,6 @@ export const TransfusionProtocol = () => {
           onRecipientDisconnected={workspace.handleRecipientDisconnected}
         />
       )}
-    </main>
+    </SavedDocumentPage>
   );
 };

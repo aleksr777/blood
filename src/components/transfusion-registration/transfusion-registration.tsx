@@ -1,3 +1,5 @@
+import { SavedDocumentPage } from '../saved-document/saved-document-page';
+import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import ui from '../../styles/ui';
 import { useEffect, useState } from 'react';
 import {
@@ -190,11 +192,7 @@ export const TransfusionRegistration = () => {
     setTableEditorOpen(false);
     setRegistryRecipientId(null);
     setRegistryOpen(false);
-    setStatus(
-      mode === 'edit'
-        ? 'Сохранённый лист регистрации открыт для редактирования.'
-        : 'Сохранённый лист регистрации открыт для просмотра.',
-    );
+    setStatus('');
   };
 
   const save = async (afterPrint = false) => {
@@ -377,35 +375,41 @@ export const TransfusionRegistration = () => {
   };
 
   return (
-    <main className="registration-app-shell" data-document-mode={documentState.mode}>
+    <SavedDocumentPage className="registration-app-shell" mode={documentState.mode}>
       <header className="app-header registration-header">
         <div className="toolbar-wrap">
           <SiteNavigation
             current="registration"
+            showRecipient={!documentState.active}
             recipientName={storedCurrentRecipient?.fullName ?? ''}
             recipientAbo={storedCurrentRecipient?.profile.recipientAbo ?? ''}
             recipientRh={storedCurrentRecipient?.profile.recipientRh ?? ''}
             currentRecipientAvailable={Boolean(storedCurrentRecipient)}
             onOpenCurrentRecipient={openCurrentRecipient}
           />
-          <SavedDocumentBar document={documentState} />
+          <SavedDocumentBar
+            document={documentState}
+            title={savedDocumentTitle('registration', values)}
+          />
           <div className="print-actions" aria-label="Панель действий">
-            <button
-              type="button"
-              className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-              onClick={clearBlank}
-              disabled={documentState.active}
-            >
-              Очистить бланк
-            </button>
-            <button
-              type="button"
-              className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-              onClick={newBlank}
-              disabled={documentState.active}
-            >
-              Новый бланк
-            </button>
+            {!documentState.active && (
+              <>
+                <button
+                  type="button"
+                  className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+                  onClick={clearBlank}
+                >
+                  Очистить бланк
+                </button>
+                <button
+                  type="button"
+                  className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
+                  onClick={newBlank}
+                >
+                  Новый бланк
+                </button>
+              </>
+            )}
             <button
               type="button"
               className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
@@ -615,6 +619,6 @@ export const TransfusionRegistration = () => {
           }}
         />
       )}
-    </main>
+    </SavedDocumentPage>
   );
 };

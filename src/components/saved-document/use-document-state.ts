@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState, type SetStateAction } from 'react';
+import { preserveSavedRecipientIdentity } from '../../domain/saved-recipient-identity';
 
 export type SavedDocumentMode = 'view' | 'edit';
 export type SavedDocumentReference = {
@@ -22,7 +23,7 @@ type SavedState<T> = {
   values: T;
 };
 
-export const useDocumentState = <T>(initial: () => T) => {
+export const useDocumentState = <T extends Record<string, unknown>>(initial: () => T) => {
   const [workingValues, setWorkingValues] = useState<T>(initial);
   const [saved, setSaved] = useState<SavedState<T> | null>(null);
   const savedRef = useRef(saved);
@@ -45,7 +46,7 @@ export const useDocumentState = <T>(initial: () => T) => {
       } else if (current.mode === 'edit') {
         const values =
           typeof update === 'function' ? (update as (previous: T) => T)(current.values) : update;
-        publish({ ...current, values });
+        publish({ ...current, values: preserveSavedRecipientIdentity(current.original, values) });
       }
     },
     [publish],
@@ -70,6 +71,7 @@ export const useDocumentState = <T>(initial: () => T) => {
     setWorkingValues,
     mode,
     record: saved?.record ?? null,
+    originalValues: saved?.original ?? null,
     active: saved !== null,
     readOnly: saved?.mode === 'view',
     editing: saved?.mode === 'edit',

@@ -99,13 +99,13 @@ it('keeps actions under one record, supports keyboard selection and resets on ca
   fireEvent.keyDown(within(rows[1]).getByRole('button'), { key: ' ' });
   expect(within(rows[0]).queryByRole('group')).toBeNull();
   expect(within(rows[1]).getByRole('group')).toBeDefined();
-  fireEvent.click(within(rows[1]).getByRole('button', { name: /Трансфузия:/ }));
+  fireEvent.click(within(rows[1]).getByRole('button', { name: /^Протокол трансфузии/ }));
   expect(screen.queryByRole('group')).toBeNull();
   fireEvent.click(within(rows[0]).getByRole('button'));
   fireEvent.click(screen.getByRole('button', { name: '← К категориям' }));
   fireEvent.click(screen.getByRole('button', { name: /^Листы регистрации трансфузий/ }));
   expect(screen.queryByRole('group')).toBeNull();
-  fireEvent.click(screen.getByRole('button', { name: /^Лист регистрации Изменён:/ }));
+  fireEvent.click(screen.getByRole('button', { name: /^Лист регистрации трансфузий$/ }));
   rerender(<RecipientHistoryPanel {...handlers} recipient={{ ...recipient, id: 2 }} />);
   expect(screen.queryByRole('group')).toBeNull();
   chooseProtocols();

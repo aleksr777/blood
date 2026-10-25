@@ -196,7 +196,7 @@
 .historySave {
   border: 1px solid currentColor;
   border-radius: var(--ui-radius-small);
-  background: var(--ui-surface-soft);
+  background: var(--ui-surface);
   transition:
     background-color var(--ui-motion-fast) ease,
     color var(--ui-motion-fast) ease;
@@ -204,13 +204,14 @@
 
 .historySave {
   composes: ui-icon-button ui-success-icon from global;
-  background: var(--ui-success-soft);
+  color: color-mix(in srgb, var(--ui-success-text) 75%, var(--ui-surface));
   font-weight: 700;
 }
 
 .historySave:hover,
 .historySave:focus-visible {
-  color: var(--ui-success-hover);
+  background: var(--ui-success-soft);
+  color: var(--ui-success-text);
 }
 
 .historyEmpty {
@@ -435,22 +436,22 @@
 
 .historyEdit {
   composes: ui-icon-button from global;
-  color: var(--ui-accent);
+  color: color-mix(in srgb, var(--ui-accent) 75%, var(--ui-surface));
 }
 
 .historyEdit:hover,
 .historyEdit:focus-visible {
-  background: var(--ui-accent-soft);
-  color: var(--ui-accent-hover);
+  background: var(--ui-surface-soft);
+  color: var(--ui-accent);
 }
 
 .historyDelete {
   composes: ui-icon-button ui-danger-icon from global;
-  background: var(--ui-danger-soft);
+  color: color-mix(in srgb, var(--ui-danger-text) 75%, var(--ui-surface));
 }
 
 .historyDelete:hover,
 .historyDelete:focus-visible {
-  background: var(--ui-danger-soft-hover);
-  color: var(--ui-danger-hover);
+  background: var(--ui-danger-soft);
+  color: var(--ui-danger-text);
 }

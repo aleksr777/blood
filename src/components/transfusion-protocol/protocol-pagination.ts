@@ -5,8 +5,8 @@ export type ProtocolChunkId =
   | 'general:times'
   | 'examination:main'
   | 'examination:antigens'
-  | 'indications:main'
   | 'history:main'
+  | 'donor:indications'
   | 'donor:main'
   | 'donor:blood'
   | 'donor:dates'
@@ -27,8 +27,8 @@ export const PROTOCOL_CHUNK_ORDER: ProtocolChunkId[] = [
   'general:times',
   'examination:main',
   'examination:antigens',
-  'indications:main',
   'history:main',
+  'donor:indications',
   'donor:main',
   'donor:blood',
   'donor:dates',

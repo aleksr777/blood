@@ -136,6 +136,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       },
       { name: 'previousTransfusionsStatus', label: 'previousTransfusionsStatus' },
       { name: 'previousTransfusionsAutoText', label: 'previousTransfusionsAutoText' },
+      { name: 'previousTransfusionsSuggestedText', label: 'previousTransfusionsSuggestedText' },
       {
         name: 'previousTransfusions',
         label: 'Трансфузии компонентов крови в анамнезе',

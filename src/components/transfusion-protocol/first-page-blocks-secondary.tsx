@@ -1,6 +1,7 @@
 import { formatComponentUnitNumber } from './component-unit-number';
 import { formatDonorAntigens } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
+import { formatIndications } from './indications-model';
 import { formatHistoryValue, getHistoryStatus, HISTORY_STATUS } from './recipient-history-model';
 import { getSelectionStatus, SELECTION_STATUS } from './selection-model';
 import type { ProtocolPageProps } from './protocol-types';
@@ -88,6 +89,19 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
     data-protocol-chunk={`donor:${part}`}
     onClick={() => onOpenBlock('donor')}
   >
+    {part === 'indications' && (
+      <>
+        <SectionTitle>Показания к трансфузии</SectionTitle>
+        <tr className="row-large-blank">
+          <td colSpan={6}>
+            {formatIndications(values) && (
+              <div className="cell-value cell-value--multiline">{formatIndications(values)}</div>
+            )}
+          </td>
+        </tr>
+      </>
+    )}
+
     {part === 'main' && (
       <>
         <SectionTitle>Данные о донорской крови или ее компоненте</SectionTitle>

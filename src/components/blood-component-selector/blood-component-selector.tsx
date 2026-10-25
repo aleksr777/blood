@@ -7,6 +7,7 @@ export type BloodComponentSelection = { group: string; name: string };
 type Props = BloodComponentSelection & {
   inputName?: string;
   fixedGroup?: string;
+  showName?: boolean;
   onChange: (selection: BloodComponentSelection) => void;
 };
 
@@ -15,6 +16,7 @@ export const BloodComponentSelector = ({
   name,
   inputName = 'componentName',
   fixedGroup,
+  showName = true,
   onChange,
 }: Props) => {
   const selectedGroup = fixedGroup || group;
@@ -42,21 +44,23 @@ export const BloodComponentSelector = ({
           </button>
         ))}
       </div>
-      <div className={styles.name}>
-        <div className={styles.label}>Наименование компонента донорской крови</div>
-        <SavedOptionsField
-          key={category}
-          name={inputName}
-          label="Наименование компонента донорской крови"
-          category={category ?? 'componentName:unselected'}
-          fixedOptions={selected ? [...selected.names] : []}
-          value={name}
-          disabled={!category}
-          rememberOnBlur
-          wrapOptions
-          onChange={(nextName) => onChange({ group: selectedGroup, name: nextName })}
-        />
-      </div>
+      {showName && (
+        <div className={styles.name}>
+          <div className={styles.label}>Наименование компонента донорской крови</div>
+          <SavedOptionsField
+            key={category}
+            name={inputName}
+            label="Наименование компонента донорской крови"
+            category={category ?? 'componentName:unselected'}
+            fixedOptions={selected ? [...selected.names] : []}
+            value={name}
+            disabled={!category}
+            rememberOnBlur
+            wrapOptions
+            onChange={(nextName) => onChange({ group: selectedGroup, name: nextName })}
+          />
+        </div>
+      )}
     </fieldset>
   );
 };

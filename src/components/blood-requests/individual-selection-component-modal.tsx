@@ -1,5 +1,3 @@
-import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
-import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { Choice } from '../transfusion-protocol/indication-controls';
@@ -15,11 +13,7 @@ import {
   BloodComponentSelector,
   type BloodComponentSelection,
 } from '../blood-component-selector/blood-component-selector';
-import {
-  BLOOD_COMPONENTS,
-  getBloodComponentNameCategory,
-  inferBloodComponentGroup,
-} from '../../domain/blood-components';
+import { inferBloodComponentGroup } from '../../domain/blood-components';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { sanitizeDoseQuantity } from './dose-quantity';
 import editorStyles from '../transfusion-protocol/protocol-editor.module.css';
@@ -35,7 +29,6 @@ type Props = {
   transfusionOrder?: string;
   componentSelectionRequirement?: string;
   showRequestOptions?: boolean;
-  fixedIndicationComponent?: string;
   bloodGroupWarning?: string;
   onDismissBloodGroupWarning?: () => void;
   onLocalChange: (values: Record<string, string>) => void;
@@ -53,16 +46,13 @@ export const IndividualSelectionComponentModal = ({
   transfusionOrder = '',
   componentSelectionRequirement = '',
   showRequestOptions = false,
-  fixedIndicationComponent,
   bloodGroupWarning = '',
   onDismissBloodGroupWarning,
   onLocalChange,
   onIndicationsChange,
   onClose,
 }: Props) => {
-  const isolated = useSavedDocumentScope();
   const component =
-    fixedIndicationComponent ||
     indicationValues.componentGroup ||
     indicationValues.indicationComponent ||
     inferBloodComponentGroup(requiredComponent);
@@ -76,9 +66,6 @@ export const IndividualSelectionComponentModal = ({
   const isErythrocytes = component === 'erythrocytes';
   const requiresIndividualSelection =
     isErythrocytes && componentSelectionRequirement === 'individual';
-  const requiredComponentCategory = getBloodComponentNameCategory(component);
-  const requiredComponentFixedOptions =
-    BLOOD_COMPONENTS.find(({ value }) => value === component)?.names ?? [];
 
   const handleIndicationsChange = (changes: ProtocolValues) => {
     onIndicationsChange({
@@ -120,26 +107,8 @@ export const IndividualSelectionComponentModal = ({
     });
   };
 
-  const handleClose = () => {
-    if (isolated) {
-      onClose();
-      return;
-    }
-    const value = requiredComponent.trim();
-    const isFixedOption = requiredComponentFixedOptions.some(
-      (option) => option.toLocaleLowerCase('ru-RU') === value.toLocaleLowerCase('ru-RU'),
-    );
-    if (value && !isFixedOption && requiredComponentCategory) {
-      void rememberSavedOption(requiredComponentCategory, value).catch((error: unknown) => {
-        console.error('Не удалось сохранить вариант наименования требуемого компонента:', error);
-      });
-    }
-
-    onClose();
-  };
-
   return (
-    <Modal title="Выбор компонента и показания" onClose={handleClose} className={styles.modal}>
+    <Modal title="Выбор компонента и показания" onClose={onClose} className={styles.modal}>
       <div className={styles.root}>
         {showRequestOptions && (
           <WarningNotice
@@ -153,7 +122,6 @@ export const IndividualSelectionComponentModal = ({
           group={component ?? ''}
           name={requiredComponent}
           inputName="requiredComponent"
-          fixedGroup={fixedIndicationComponent}
           onChange={handleComponentChange}
         />
 

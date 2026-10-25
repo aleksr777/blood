@@ -268,18 +268,6 @@ export const TransfusionRegistration = () => {
     setStatus('');
   };
 
-  const newBlank = () => {
-    if (documentState.active) return;
-    const currentRecipient = readCurrentRecipient();
-    setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
-    setRecordId(null);
-    setStatus(
-      currentRecipient
-        ? 'Создан новый лист регистрации для текущего реципиента.'
-        : 'Создан новый лист регистрации.',
-    );
-  };
-
   const openRecipients = () => {
     const storedRecipient = readCurrentRecipient();
     setRegistryRecipientId(
@@ -394,22 +382,13 @@ export const TransfusionRegistration = () => {
           />
           <div className="print-actions" aria-label="Панель действий">
             {!documentState.active && (
-              <>
-                <button
-                  type="button"
-                  className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-                  onClick={clearBlank}
-                >
-                  Очистить бланк
-                </button>
-                <button
-                  type="button"
-                  className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-                  onClick={newBlank}
-                >
-                  Новый бланк
-                </button>
-              </>
+              <button
+                type="button"
+                className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+                onClick={clearBlank}
+              >
+                Очистить бланк
+              </button>
             )}
             <button
               type="button"

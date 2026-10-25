@@ -6,6 +6,7 @@ import { readCurrentRecipient } from '../../storage/repositories/current-recipie
 import { FirstPage } from './first-page';
 import { PROTOCOL_CHUNK_ORDER, type ProtocolChunkId } from './protocol-pagination';
 import { ProtocolEditorModal } from './protocol-editor-modal';
+import { isDonorComponentBlock } from './editor-config';
 import { ProtocolToolbar } from './protocol-toolbar';
 import { RecipientDatabaseModal } from './recipient-database-modal';
 import { ContinuationPage } from './second-page';
@@ -193,6 +194,7 @@ export const TransfusionProtocol = () => {
         status={workspace.status}
         warning={workspace.reagentWarning}
         hemaconWarning={workspace.hemaconWarning}
+        newBlankWarning={workspace.newBlankWarning}
         dangerWarning={workspace.compatibilityWarning}
         bloodGroupWarning={workspace.bloodGroupWarning}
         bloodGroupWarningDismissible={workspace.bloodGroupWarningDismissible}
@@ -277,7 +279,7 @@ export const TransfusionProtocol = () => {
           onSelectRecipient={workspace.document.active ? () => false : workspace.selectRecipient}
           onSave={workspace.saveValues}
           onClose={(draftValues) => {
-            if (workspace.activeBlock === 'donor') {
+            if (isDonorComponentBlock(workspace.activeBlock)) {
               workspace.validateComponentUnitNumber(draftValues);
             }
             workspace.setActiveBlock(null);

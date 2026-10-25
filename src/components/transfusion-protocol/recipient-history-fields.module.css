@@ -2,6 +2,10 @@
   composes: ui-stack ui-full-width-stack from global;
 }
 
+.historySection {
+  min-width: 0;
+}
+
 .group {
   composes: ui-fieldset from global;
 }
@@ -25,7 +29,7 @@
   composes: ui-choice-label from global;
 }
 
-.group textarea {
+.group > textarea {
   margin-top: 0.75rem;
 }
 
@@ -45,6 +49,7 @@
   composes: ui-notice ui-info-notice from global;
   display: grid;
   gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .suggestionHeader {
@@ -82,6 +87,28 @@
   white-space: pre-wrap;
 }
 
-.suggestionButton {
-  composes: ui-button ui-primary-button ui-compact-button from global;
+.suggestionActions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.suggestionAccept {
+  composes: ui-button ui-success-button ui-compact-button from global;
+}
+
+.suggestionDecline {
+  composes: ui-button ui-danger-button ui-compact-button from global;
+}
+
+@media (max-width: 680px) {
+  .suggestionHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .suggestionActions > button {
+    flex: 1;
+  }
 }

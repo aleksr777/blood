@@ -34,6 +34,14 @@
   grid-column: 1 / -1;
 }
 
+.sectionTitle {
+  margin: 0 0 0.75rem;
+  color: var(--ui-text);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .generalGroup {
   composes: ui-fieldset from global;
   grid-column: 1 / -1;

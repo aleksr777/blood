@@ -16,6 +16,7 @@
 
 .sheet {
   --form-line-width: 0.8px;
+  --form-line-height: 7mm;
 
   box-sizing: border-box;
   width: 210mm;
@@ -30,7 +31,7 @@
   font-family: 'Times New Roman', Times, serif;
   font-size: 11pt;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: var(--form-line-height);
   page: individual-selection-direction-page;
 }
 
@@ -38,7 +39,7 @@
   margin: 0 0 7mm;
   font-size: 16pt;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: var(--form-line-height);
   text-align: center;
 }
 
@@ -63,7 +64,7 @@
   margin: 0 0 1.5mm;
   font-size: 16pt;
   font-weight: 700;
-  line-height: 1.05;
+  line-height: var(--form-line-height);
   text-align: center;
 }
 
@@ -73,7 +74,7 @@
   table-layout: fixed;
   font-size: 7.5pt;
   font-weight: 400;
-  line-height: 1;
+  line-height: var(--form-line-height);
 }
 
 .issuedTable th,
@@ -98,10 +99,10 @@
 
 .issuedFooter {
   display: grid;
-  gap: 4mm;
-  margin-top: 6mm;
+  gap: 0;
+  margin-top: var(--form-line-height);
   font-size: 11pt;
-  line-height: 1.1;
+  line-height: var(--form-line-height);
 }
 
 .issuedFooterRow {
@@ -109,6 +110,7 @@
   min-width: 0;
   align-items: flex-end;
   gap: 1.5mm;
+  min-height: var(--form-line-height);
 }
 
 .issuedFooterLabel {
@@ -135,9 +137,9 @@
 .fillSection {
   position: relative;
   margin: 0 -2mm;
-  border: 0.3mm solid transparent;
+  border: 0;
   border-radius: 1mm;
-  padding: 1.3mm 2mm;
+  padding: 0 2mm;
   cursor: pointer;
   transition: background-color var(--ui-motion-fast) ease;
 }
@@ -151,36 +153,43 @@
   cursor: default;
 }
 
-.fieldBlock {
-  display: grid;
+.footerSection {
+  --form-line-height: 14mm;
+  --form-rule-offset: 3.5mm;
+
+  line-height: var(--form-line-height);
 }
 
-.singleLine {
-  display: flex;
-  align-items: baseline;
-  min-height: 7mm;
-  gap: 1mm;
+.footerSection .adaptiveSingleValue {
+  position: relative;
+  border-bottom: 0;
 }
 
-.valueLine {
-  flex: 1 1 auto;
-  min-width: 20mm;
-  min-height: 6mm;
+.footerSection .adaptiveSingleValue::after {
+  position: absolute;
+  right: 0;
+  bottom: var(--form-rule-offset);
+  left: 0;
   border-bottom: var(--form-line-width) solid #111;
-  padding: 0 0.8mm 0.6mm;
-  overflow: hidden;
-  font-weight: 400;
-  white-space: pre-wrap;
+  content: '';
 }
 
-.extraLine {
-  min-height: 6mm;
-  border-bottom: var(--form-line-width) solid #111;
+.footerSection .adaptiveRules {
+  top: calc(0mm - var(--form-rule-offset));
 }
 
-.staticLine {
-  min-height: 7mm;
-  padding-top: 0.5mm;
+.historySection {
+  border-radius: 0;
+}
+
+.historySection[data-history-position='first'] {
+  border-top-left-radius: 1mm;
+  border-top-right-radius: 1mm;
+}
+
+.historySection[data-history-position='last'] {
+  border-bottom-left-radius: 1mm;
+  border-bottom-right-radius: 1mm;
 }
 
 .adaptiveField {
@@ -190,8 +199,8 @@
 
 .adaptiveSingleLine {
   display: flex;
-  min-height: 7mm;
-  align-items: baseline;
+  min-height: var(--form-line-height);
+  align-items: flex-start;
   gap: 1mm;
 }
 
@@ -203,19 +212,18 @@
 .adaptiveSingleValue {
   flex: 1 1 auto;
   min-width: 20mm;
-  min-height: 6mm;
+  height: var(--form-line-height);
   border-bottom: var(--form-line-width) solid #111;
-  padding: 0 0.8mm 0.6mm;
+  padding: 0 0.8mm;
   overflow: hidden;
   font-weight: 400;
   white-space: pre-wrap;
 }
 
 .adaptiveMultilineLabel {
-  min-height: 7mm;
-  padding: 0 0.8mm;
+  min-height: var(--form-line-height);
   font-weight: 700;
-  line-height: 7mm;
+  line-height: var(--form-line-height);
 }
 
 .adaptiveMultilineValueArea {
@@ -231,7 +239,7 @@
   width: 100%;
   padding: 0 0.8mm;
   font-weight: 400;
-  line-height: 7mm;
+  line-height: var(--form-line-height);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
@@ -250,26 +258,20 @@
 
 .adaptiveRules > span {
   display: block;
-  height: 7mm;
+  box-sizing: border-box;
+  height: var(--form-line-height);
   border-bottom: var(--form-line-width) solid #111;
 }
 
-.adaptiveContent,
 .adaptiveMeasure,
 .adaptiveInlineMeasure {
   box-sizing: border-box;
   width: 100%;
   padding: 0 0.8mm;
   font-weight: 700;
-  line-height: 7mm;
+  line-height: var(--form-line-height);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
-}
-
-.adaptiveContent {
-  position: absolute;
-  z-index: 1;
-  inset: 0;
 }
 
 .adaptiveMeasure,
@@ -290,27 +292,8 @@
   font-weight: 700;
 }
 
-.adaptiveText,
-.enteredValue {
+.adaptiveText {
   font-weight: 400;
-}
-
-.adaptiveTextNewLine {
-  display: block;
-}
-
-.directionDate {
-  min-height: 13mm;
-  padding-top: 4mm;
-}
-
-.doctorLine {
-  margin-bottom: 3mm;
-}
-
-.transfusionHead {
-  min-height: 14mm;
-  padding-top: 5mm;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -319,6 +302,11 @@
   }
 
   .fillSection:not(.fillSectionInactive):hover .adaptiveLabel {
+    background: var(--ui-accent-soft);
+  }
+
+  .sheetWrap[data-history-hovered='true'] .historySection,
+  .sheetWrap[data-history-hovered='true'] .historySection .adaptiveLabel {
     background: var(--ui-accent-soft);
   }
 }
@@ -389,6 +377,15 @@
   }
 
   :global(body.print-individual-selection-page-2) .pageTwo {
+    page-break-before: auto !important;
+    break-before: auto !important;
+  }
+
+  :global(body.print-individual-direction) .sheet:not([data-print-active]) {
+    display: none !important;
+  }
+
+  :global(body.print-individual-direction) .sheet[data-print-active] {
     page-break-before: auto !important;
     break-before: auto !important;
   }

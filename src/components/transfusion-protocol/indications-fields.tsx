@@ -28,6 +28,7 @@ export const IndicationsFields = ({
           <BloodComponentSelector
             group={component}
             name={values.componentName ?? ''}
+            showName={false}
             onChange={({ group, name }) =>
               onChange({ componentGroup: group, indicationComponent: group, componentName: name })
             }

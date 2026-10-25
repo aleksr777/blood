@@ -1,6 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { PreviousTransfusionInput } from './previous-transfusion-input';
+import { PreviousTransfusionNotice } from './previous-transfusion-notice';
+import {
+  combinePreviousTransfusionText,
+  splitPreviousTransfusionText,
+} from './previous-transfusion-text';
 import { ProtocolFieldControl } from './protocol-field-control';
-import { HISTORY_STATUS, getHistoryStatus } from './recipient-history-model';
+import {
+  HISTORY_STATUS,
+  getHistoryStatus,
+  TRANSFUSION_HISTORY_FIELDS,
+} from './recipient-history-model';
 import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 import styles from './recipient-history-fields.module.css';
 
@@ -12,24 +22,6 @@ type Props = {
   showTransfusionHistory?: boolean;
   onChange: (values: ProtocolValues) => void;
 };
-
-const HISTORY_FIELDS = [
-  {
-    statusName: 'previousTransfusionsStatus',
-    textName: 'previousTransfusions',
-    label: 'Трансфузии компонентов крови в анамнезе',
-  },
-  {
-    statusName: 'previousReactionsStatus',
-    textName: 'previousReactions',
-    label: 'Реакции и осложнения на трансфузии в анамнезе',
-  },
-  {
-    statusName: 'individualSelectionHistoryStatus',
-    textName: 'individualSelectionHistory',
-    label: 'Трансфузии по индивидуальному подбору',
-  },
-] as const;
 
 const STATUS_OPTIONS = [
   [HISTORY_STATUS.none, 'Не было'],
@@ -72,7 +64,13 @@ export const RecipientHistoryFields = ({
   showTransfusionHistory = true,
   onChange,
 }: Props) => {
-  const suggestion = previousTransfusionSuggestion.trim();
+  const [dismissedSuggestion, setDismissedSuggestion] = useState('');
+  const { generated, manual } = splitPreviousTransfusionText(values);
+  const suggestion =
+    previousTransfusionSuggestion.trim() ||
+    generated ||
+    values.previousTransfusionsSuggestedText?.trim() ||
+    '';
   const previousTransfusionsStatus = getHistoryStatus(
     values.previousTransfusionsStatus,
     values.previousTransfusions,
@@ -81,8 +79,7 @@ export const RecipientHistoryFields = ({
   const suggestionApplied =
     Boolean(suggestion) &&
     values.previousTransfusionsStatus === HISTORY_STATUS.had &&
-    values.previousTransfusionsAutoText === suggestion &&
-    values.previousTransfusions === suggestion;
+    generated === suggestion;
 
   useEffect(() => {
     if (!applyDefaults || !showTransfusionHistory || !dependentHistoryDisabled) return;
@@ -120,8 +117,23 @@ export const RecipientHistoryFields = ({
 
     onChange({
       previousTransfusionsStatus: HISTORY_STATUS.had,
-      previousTransfusions: suggestion,
+      previousTransfusions: combinePreviousTransfusionText(
+        suggestion,
+        manual.trim() === suggestion ? '' : manual,
+      ),
       previousTransfusionsAutoText: suggestion,
+      previousTransfusionsSuggestedText: suggestion,
+    });
+    setDismissedSuggestion(suggestion);
+  };
+
+  const removeSuggestion = () => {
+    setDismissedSuggestion('');
+    onChange({
+      previousTransfusionsStatus: HISTORY_STATUS.had,
+      previousTransfusions: manual,
+      previousTransfusionsAutoText: '',
+      previousTransfusionsSuggestedText: generated,
     });
   };
 
@@ -143,69 +155,70 @@ export const RecipientHistoryFields = ({
         </fieldset>
       )}
 
-      {showTransfusionHistory && suggestion && (
-        <div className={styles.suggestion}>
-          <div className={styles.suggestionHeader}>
-            <div>
-              <div className={styles.suggestionTitle}>Найдены предыдущие трансфузии</div>
-              <div className={styles.suggestionHint}>
-                Текст сформирован по предыдущим протоколам и не будет внесён без подтверждения.
-              </div>
-            </div>
-            <button
-              type="button"
-              className={styles.suggestionButton}
-              disabled={suggestionApplied}
-              onClick={applySuggestion}
-            >
-              {suggestionApplied ? 'Внесено' : 'Внести в анамнез'}
-            </button>
-          </div>
-
-          <div className={styles.suggestionPreview} aria-label="Предварительный просмотр">
-            {suggestion}
-          </div>
-        </div>
-      )}
-
       {showTransfusionHistory &&
-        HISTORY_FIELDS.map(({ statusName, textName, label }, index) => {
+        TRANSFUSION_HISTORY_FIELDS.map(({ statusName, textName, label }, index) => {
           const status = getHistoryStatus(values[statusName], values[textName]);
           const disabled = index > 0 && dependentHistoryDisabled;
 
           return (
-            <fieldset
-              key={statusName}
-              className={[styles.group, disabled ? styles.groupDisabled : '']
-                .filter(Boolean)
-                .join(' ')}
-              disabled={disabled}
-            >
-              <legend>{label}</legend>
-
-              <div className={styles.options}>
-                {STATUS_OPTIONS.map(([value, optionLabel]) => (
-                  <label key={value} className={styles.option}>
-                    <input
-                      type="radio"
-                      name={statusName}
-                      checked={status === value}
-                      onChange={() => changeStatus(statusName, value)}
-                    />
-                    <span>{optionLabel}</span>
-                  </label>
-                ))}
-              </div>
-
-              {status === HISTORY_STATUS.had && (
-                <textarea
-                  name={textName}
-                  rows={4}
-                  value={values[textName] ?? ''}
-                  onChange={(event) => onChange({ [textName]: event.target.value })}
+            <div key={statusName} className={styles.historySection}>
+              {index === 0 && (
+                <PreviousTransfusionNotice
+                  open={
+                    Boolean(suggestion) && !suggestionApplied && dismissedSuggestion !== suggestion
+                  }
+                  suggestion={suggestion}
+                  onAccept={applySuggestion}
+                  onDecline={() => setDismissedSuggestion(suggestion)}
                 />
               )}
-            </fieldset>
+              <fieldset
+                key={statusName}
+                className={[styles.group, disabled ? styles.groupDisabled : '']
+                  .filter(Boolean)
+                  .join(' ')}
+                disabled={disabled}
+              >
+                <legend>{label}</legend>
+
+                <div className={styles.options}>
+                  {STATUS_OPTIONS.map(([value, optionLabel]) => (
+                    <label key={value} className={styles.option}>
+                      <input
+                        type="radio"
+                        name={statusName}
+                        checked={status === value}
+                        onChange={() => changeStatus(statusName, value)}
+                      />
+                      <span>{optionLabel}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {status === HISTORY_STATUS.had &&
+                  (index === 0 ? (
+                    <PreviousTransfusionInput
+                      generated={generated}
+                      manual={manual}
+                      label={label}
+                      onRemove={removeSuggestion}
+                      onChange={(text) =>
+                        onChange({
+                          previousTransfusions: combinePreviousTransfusionText(generated, text),
+                        })
+                      }
+                    />
+                  ) : (
+                    <textarea
+                      name={textName}
+                      aria-label={label}
+                      rows={4}
+                      value={values[textName] ?? ''}
+                      onChange={(event) => onChange({ [textName]: event.target.value })}
+                    />
+                  ))}
+              </fieldset>
+            </div>
           );
         })}
     </div>

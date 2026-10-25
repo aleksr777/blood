@@ -1,4 +1,4 @@
-import { ExaminationBlock, GeneralBlock, IndicationsBlock } from './first-page-blocks-primary';
+import { ExaminationBlock, GeneralBlock } from './first-page-blocks-primary';
 import { DonorBlock, HistoryBlock, SelectionBlock } from './first-page-blocks-secondary';
 import {
   CompatibilityTestsBlock,
@@ -25,8 +25,6 @@ export const ProtocolBlocks = ({ chunkIds, values, onOpenBlock }: Props) => (
           return <GeneralBlock key={chunkId} {...props} />;
         case 'examination':
           return <ExaminationBlock key={chunkId} {...props} />;
-        case 'indications':
-          return <IndicationsBlock key={chunkId} {...props} />;
         case 'history':
           return <HistoryBlock key={chunkId} {...props} />;
         case 'donor':

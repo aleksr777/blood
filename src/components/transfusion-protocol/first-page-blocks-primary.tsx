@@ -1,5 +1,4 @@
 import { LabeledCell, SectionTitle } from './form-controls';
-import { formatIndications } from './indications-model';
 import { formatAlloimmuneAntibodies, formatRecipientAntigens } from './recipient-examination-model';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate, formatDateTime } from './protocol-types';
@@ -108,23 +107,5 @@ export const ExaminationBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
         />
       </tr>
     )}
-  </tbody>
-);
-
-export const IndicationsBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
-  <tbody
-    className="fill-block"
-    data-protocol-block="indications"
-    data-protocol-chunk={`indications:${part}`}
-    onClick={() => onOpenBlock('indications')}
-  >
-    <SectionTitle>Показания к трансфузии</SectionTitle>
-    <tr className="row-large-blank">
-      <td colSpan={6}>
-        {formatIndications(values) && (
-          <div className="cell-value cell-value--multiline">{formatIndications(values)}</div>
-        )}
-      </td>
-    </tr>
   </tbody>
 );

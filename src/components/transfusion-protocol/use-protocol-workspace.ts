@@ -12,7 +12,6 @@ import {
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import {
-  listProtocolRecords,
   saveProtocolRecord,
   updateProtocolRecord,
   type ProtocolRecord,
@@ -21,10 +20,9 @@ import {
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
-import { hasHemaconData } from './donor-model';
 import {
   getProtocolHemaconWarning,
-  normalizeComponentUnitNumber,
+  getProtocolNewBlankWarning,
 } from '../../domain/protocol-hemacon';
 import { getIndicationComponent, indicationValuesForComponent } from './indications-model';
 import {
@@ -34,11 +32,7 @@ import {
   reagentDefaultsForNewBlank,
   saveReagentDefaults,
 } from './reagent-defaults';
-import {
-  buildPreviousTransfusionHistory,
-  getLocalDateKey,
-  getNextPreviousTransfusionEligibilityTime,
-} from './previous-transfusion-history';
+import { usePreviousTransfusionSuggestion } from './use-previous-transfusion-suggestion';
 import { currentRecipientValues } from './recipient-profile-values';
 import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
@@ -103,7 +97,14 @@ export const useProtocolWorkspace = () => {
   const [componentUnitNumberChecked, setComponentUnitNumberChecked] = useState(false);
   const [dismissedComponentUnitWarningKey, setDismissedComponentUnitWarningKey] = useState('');
   const [historyRefreshToken, setHistoryRefreshToken] = useState(0);
-  const [previousTransfusionSuggestion, setPreviousTransfusionSuggestion] = useState('');
+  const previousTransfusionSuggestion = usePreviousTransfusionSuggestion({
+    recipientId: values.recipientId,
+    savedDocument: document.active,
+    recordId,
+    transfusionDate: values.transfusionDate,
+    componentUnitNumber: values.componentUnitNumber,
+    refreshVersion: historyRefreshToken,
+  });
   const previousBlankIndicationsRef = useRef<{
     component: string;
     values: ProtocolValues;
@@ -149,71 +150,6 @@ export const useProtocolWorkspace = () => {
   usePendingSavedDocument('protocol', (record, mode) => {
     void openRecord(record, mode);
   });
-
-  useEffect(() => {
-    if (document.active) {
-      setPreviousTransfusionSuggestion('');
-      return;
-    }
-    const recipientId = Number(values.recipientId);
-    if (!Number.isFinite(recipientId) || recipientId <= 0) {
-      setPreviousTransfusionSuggestion('');
-      return undefined;
-    }
-
-    const today = getLocalDateKey();
-    if (recordId !== null && values.transfusionDate && values.transfusionDate !== today) {
-      setPreviousTransfusionSuggestion('');
-      return undefined;
-    }
-
-    let active = true;
-    let refreshTimer: number | null = null;
-
-    void listProtocolRecords(recipientId)
-      .then((records) => {
-        if (!active) return;
-
-        const currentNumber = normalizeComponentUnitNumber(values.componentUnitNumber);
-        const previousRecords = records.filter(
-          (record) =>
-            record.id !== recordId &&
-            (!currentNumber ||
-              normalizeComponentUnitNumber(record.values.componentUnitNumber) !== currentNumber),
-        );
-        const now = new Date();
-
-        setPreviousTransfusionSuggestion(buildPreviousTransfusionHistory(previousRecords, now));
-
-        const nextEligibleAt = getNextPreviousTransfusionEligibilityTime(previousRecords, now);
-        if (nextEligibleAt !== null) {
-          const delay = Math.max(0, nextEligibleAt - Date.now() + 1000);
-          refreshTimer = window.setTimeout(
-            () => setHistoryRefreshToken((current) => current + 1),
-            Math.min(delay, 2_147_483_647),
-          );
-        }
-      })
-      .catch((error: unknown) => {
-        if (!active) return;
-        setPreviousTransfusionSuggestion('');
-        console.error('Не удалось сформировать предложение по предыдущим трансфузиям:', error);
-      });
-
-    return () => {
-      active = false;
-      if (refreshTimer !== null) {
-        window.clearTimeout(refreshTimer);
-      }
-    };
-  }, [
-    historyRefreshToken,
-    recordId,
-    values.recipientId,
-    values.transfusionDate,
-    values.componentUnitNumber,
-    document.active,
-  ]);
 
   const saveValues = (nextValues: ProtocolValues) => {
     if (document.isActive()) {
@@ -361,20 +297,16 @@ export const useProtocolWorkspace = () => {
       document.close();
       return;
     }
+    const warning = getProtocolNewBlankWarning(values);
+    if (warning) {
+      setStatus(warning);
+      return;
+    }
     const openedFromDatabase = recordId !== null;
     let sourceValues = values;
     let previousBlankSaved = false;
 
-    if (hasHemaconData(values) && !openedFromDatabase) {
-      if (!validateHemacon()) return;
-      if (!values.recipientName?.trim()) {
-        setStatus(
-          'Новый бланк не создан: для сохранения предыдущего бланка укажите ФИО реципиента.',
-        );
-        setActiveBlock('general');
-        return;
-      }
-
+    if (!openedFromDatabase) {
       try {
         const record = await saveProtocolRecord(values);
         sourceValues = {
@@ -427,7 +359,6 @@ export const useProtocolWorkspace = () => {
     setRegistryOpen(false);
     setRecordId(null);
     setValues(nextValues);
-    setPreviousTransfusionSuggestion('');
     setHistoryRefreshToken((current) => current + 1);
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
@@ -463,7 +394,6 @@ export const useProtocolWorkspace = () => {
     setRecordId(null);
     setStatus('');
     setValues(nextValues);
-    setPreviousTransfusionSuggestion('');
     setHistoryRefreshToken((current) => current + 1);
 
     void clearProtocolDraft()
@@ -542,7 +472,6 @@ export const useProtocolWorkspace = () => {
     draft.touch();
     setRecordId(null);
     document.setWorkingValues(clearRecipientLinkedValues(document.workingValues, recipientId));
-    setPreviousTransfusionSuggestion('');
     setHistoryRefreshToken((current) => current + 1);
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
@@ -556,7 +485,6 @@ export const useProtocolWorkspace = () => {
     draft.touch();
     setRecordId(null);
     document.setWorkingValues(clearRecipientLinkedValues(document.workingValues, recipientId));
-    setPreviousTransfusionSuggestion('');
     setHistoryRefreshToken((current) => current + 1);
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
@@ -588,6 +516,7 @@ export const useProtocolWorkspace = () => {
     saveToDatabase,
     validateHemacon,
     hemaconWarning: getProtocolHemaconWarning(values),
+    newBlankWarning: document.active ? '' : getProtocolNewBlankWarning(values),
     newBlank,
     reagentWarning,
     compatibilityWarning,

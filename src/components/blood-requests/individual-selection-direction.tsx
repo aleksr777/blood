@@ -7,14 +7,15 @@ import { usePendingSavedDocument } from '../saved-document/saved-document-naviga
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
+import { RECIPIENT_PROFILE_FIELDS } from '../../storage/sqlite/recipient-data';
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type KeyboardEvent,
+  type MouseEvent,
 } from 'react';
 import {
   readCurrentRecipient,
@@ -46,16 +47,31 @@ import {
   formatAlloimmuneAntibodies,
   formatRecipientAntigens,
 } from '../transfusion-protocol/recipient-examination-model';
-import { HISTORY_STATUS, getHistoryStatus } from '../transfusion-protocol/recipient-history-model';
-import { formatIndications } from '../transfusion-protocol/indications-model';
+import {
+  formatHistoryValue,
+  TRANSFUSION_HISTORY_FIELDS,
+} from '../transfusion-protocol/recipient-history-model';
+import { RecipientHistoryModal } from '../transfusion-protocol/recipient-history-modal';
+import { usePreviousTransfusionSuggestion } from '../transfusion-protocol/use-previous-transfusion-suggestion';
+import {
+  generatedDirectionHistory,
+  hasStructuredDirectionHistory,
+  hasStructuredObstetricHistory,
+  restoreDirectionHistory,
+} from './direction-history';
+import {
+  formatIndications,
+  getIndicationComponent,
+} from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
-import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
-import { IndividualSelectionTransfusionHistoryModal } from './individual-selection-transfusion-history-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
+import { normalizeDirectionIndications } from './direction-indications';
+import { useFormPages } from './use-form-pages';
+import { AdaptiveRuledField } from './adaptive-ruled-field';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:individual-selection-direction-draft';
@@ -81,12 +97,12 @@ type AutoField =
   | 'department'
   | 'medicalRecordNumber'
   | 'diagnosis'
-  | 'transfusionHistory'
   | 'obstetricHistory'
   | 'recipientSex';
 
 type DirectionDraft = Record<AutoField, string> & {
   sourceRecipientId: string;
+  transfusionHistory: string;
   requiredComponent: string;
   quantity: string;
   individualSelectionIndications: string;
@@ -100,14 +116,7 @@ type DirectionDraft = Record<AutoField, string> & {
 };
 
 type Editor =
-  | 'organization'
-  | 'component'
-  | 'examination'
-  | 'recipient'
-  | 'transfusion'
-  | 'obstetric'
-  | 'footer'
-  | null;
+  'organization' | 'component' | 'examination' | 'recipient' | 'history' | 'footer' | null;
 
 const AUTO_FIELDS: AutoField[] = [
   'recipientAboRh',
@@ -117,7 +126,6 @@ const AUTO_FIELDS: AutoField[] = [
   'department',
   'medicalRecordNumber',
   'diagnosis',
-  'transfusionHistory',
   'obstetricHistory',
   'recipientSex',
 ];
@@ -167,7 +175,7 @@ const emptyDraft = (): DirectionDraft => ({
   directionDate: '',
   doctorName: '',
   doctorPhone: '',
-  indicationValues: { indicationComponent: 'erythrocytes' },
+  indicationValues: normalizeDirectionIndications(),
   recipientProfileSnapshot: {},
   autoValues: {},
 });
@@ -227,11 +235,15 @@ const loadDraft = (): DirectionDraft => {
           : {},
     } as DirectionDraft;
 
+    next.recipientProfileSnapshot = restoreDirectionHistory(
+      next.recipientProfileSnapshot,
+      next.transfusionHistory,
+    );
     next.quantity = sanitizeDoseQuantity(next.quantity);
-    next.indicationValues = {
-      ...next.indicationValues,
-      indicationComponent: 'erythrocytes',
-    };
+    next.indicationValues = normalizeDirectionIndications(
+      next.indicationValues,
+      next.requiredComponent,
+    );
     return next;
   } catch {
     return emptyDraft();
@@ -277,10 +289,10 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
   const next = {
     ...blank,
     ...savedValues,
-    indicationValues: {
-      ...indicationValues,
-      indicationComponent: 'erythrocytes',
-    },
+    indicationValues: normalizeDirectionIndications(
+      indicationValues,
+      savedValues.requiredComponent,
+    ),
     recipientProfileSnapshot:
       values.recipientProfileSnapshot &&
       typeof values.recipientProfileSnapshot === 'object' &&
@@ -294,6 +306,10 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
     autoValues,
   } as DirectionDraft;
 
+  next.recipientProfileSnapshot = restoreDirectionHistory(
+    next.recipientProfileSnapshot,
+    next.transfusionHistory,
+  );
   next.quantity = sanitizeDoseQuantity(next.quantity);
   return next;
 };
@@ -312,52 +328,13 @@ const formatObstetricHistory = (values: ProtocolValues) => {
     .join('; ');
 };
 
-const formatTransfusionHistory = (values: ProtocolValues) => {
-  const parts: string[] = [];
-
-  const previousStatus = getHistoryStatus(
-    values.previousTransfusionsStatus,
-    values.previousTransfusions,
-  );
-  if (previousStatus === HISTORY_STATUS.none) {
-    parts.push('Трансфузий не было.');
-  } else if (previousStatus === HISTORY_STATUS.unknown) {
-    parts.push('Не известно.');
-  } else if (previousStatus === HISTORY_STATUS.had && values.previousTransfusions?.trim()) {
-    parts.push(`Трансфузии: ${values.previousTransfusions.trim()}`);
-  }
-
-  const reactionsStatus = getHistoryStatus(
-    values.previousReactionsStatus,
-    values.previousReactions,
-  );
-  if (reactionsStatus === HISTORY_STATUS.none) {
-    parts.push('Реакции и осложнения: не было');
-  } else if (reactionsStatus === HISTORY_STATUS.unknown) {
-    parts.push('Реакции и осложнения: не известно');
-  } else if (reactionsStatus === HISTORY_STATUS.had && values.previousReactions?.trim()) {
-    parts.push(`Реакции и осложнения: ${values.previousReactions.trim()}`);
-  }
-
-  const selectionStatus = getHistoryStatus(
-    values.individualSelectionHistoryStatus,
-    values.individualSelectionHistory,
-  );
-  if (selectionStatus === HISTORY_STATUS.none) {
-    parts.push('Индивидуальный подбор: не проводился');
-  } else if (selectionStatus === HISTORY_STATUS.unknown) {
-    parts.push('Индивидуальный подбор: не известно');
-  } else if (selectionStatus === HISTORY_STATUS.had && values.individualSelectionHistory?.trim()) {
-    parts.push(`Индивидуальный подбор: ${values.individualSelectionHistory.trim()}`);
-  }
-
-  return parts.join('; ');
-};
-
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
-): Promise<Partial<Record<AutoField, string>>> => {
-  if (!recipient) return {};
+): Promise<{
+  autoValues: Partial<Record<AutoField, string>>;
+  recipientProfileSnapshot: ProtocolValues;
+}> => {
+  if (!recipient) return { autoValues: {}, recipientProfileSnapshot: {} };
 
   const protocolDraft = await loadProtocolDraft();
   const sameRecipient = Number(protocolDraft.values.recipientId) === recipient.id;
@@ -371,34 +348,43 @@ const currentAutoValues = async (
   };
 
   return {
-    recipientAboRh: [values.recipientAbo, values.recipientRh].filter(Boolean).join(' '),
-    recipientPhenotype: formatRecipientAntigens(values),
-    recipientName: recipient.fullName,
-    recipientAge: formatRecipientAge(values.recipientBirthDate),
-    department: values.department?.trim() ?? '',
-    medicalRecordNumber: values.medicalRecordNumber?.trim() ?? '',
-    diagnosis: values.diagnosis?.trim() ?? '',
-    transfusionHistory: formatTransfusionHistory(values),
-    obstetricHistory: values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '',
-    recipientSex: values.recipientSex?.trim() ?? '',
+    autoValues: {
+      recipientAboRh: [values.recipientAbo, values.recipientRh].filter(Boolean).join(' '),
+      recipientPhenotype: formatRecipientAntigens(values),
+      recipientName: recipient.fullName,
+      recipientAge: formatRecipientAge(values.recipientBirthDate),
+      department: values.department?.trim() ?? '',
+      medicalRecordNumber: values.medicalRecordNumber?.trim() ?? '',
+      diagnosis: values.diagnosis?.trim() ?? '',
+      obstetricHistory: values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '',
+      recipientSex: values.recipientSex?.trim() ?? '',
+    },
+    recipientProfileSnapshot: {
+      ...Object.fromEntries(
+        [
+          ...RECIPIENT_PROFILE_FIELDS,
+          'previousTransfusionsAutoText',
+          'previousTransfusionsSuggestedText',
+        ].flatMap((field) => (values[field] !== undefined ? [[field, values[field]]] : [])),
+      ),
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    },
   };
 };
 
 const mergeAutoValues = (
   current: DirectionDraft,
   recipient: CurrentRecipient | null,
-  autoValues: Partial<Record<AutoField, string>>,
+  currentData: Awaited<ReturnType<typeof currentAutoValues>>,
 ): DirectionDraft => {
   if (!recipient) return current;
+  const { autoValues, recipientProfileSnapshot } = currentData;
 
   const next: DirectionDraft = {
     ...current,
     sourceRecipientId: String(recipient.id),
-    recipientProfileSnapshot: {
-      ...recipient.profile,
-      recipientId: String(recipient.id),
-      recipientName: recipient.fullName,
-    },
+    recipientProfileSnapshot,
     autoValues: { ...autoValues },
   };
 
@@ -414,92 +400,6 @@ const activateOnKeyboard = (event: KeyboardEvent<HTMLElement>, action: () => voi
     event.preventDefault();
     action();
   }
-};
-
-const displayValue = (value?: string) => value?.trim() || ' ';
-
-type AdaptiveRuledFieldProps = {
-  label: string;
-  value: string;
-  minRows?: number;
-};
-
-const AdaptiveRuledField = ({ label, value, minRows = 1 }: AdaptiveRuledFieldProps) => {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const inlineMeasureRef = useRef<HTMLDivElement>(null);
-  const measureRef = useRef<HTMLDivElement>(null);
-  const [breakBeforeValue, setBreakBeforeValue] = useState(false);
-  const [rowCount, setRowCount] = useState(minRows);
-
-  const updateLayout = useCallback(() => {
-    const inlineMeasure = inlineMeasureRef.current;
-    const measure = measureRef.current;
-    if (!inlineMeasure || !measure) return;
-
-    const lineHeight = Number.parseFloat(window.getComputedStyle(inlineMeasure).lineHeight);
-    if (!Number.isFinite(lineHeight) || lineHeight <= 0) return;
-
-    const inlineHeight = inlineMeasure.scrollHeight;
-    const shouldBreakBeforeValue = Boolean(value) && inlineHeight > lineHeight + 0.5;
-
-    setBreakBeforeValue((current) =>
-      current === shouldBreakBeforeValue ? current : shouldBreakBeforeValue,
-    );
-
-    const measuredHeight = measure.scrollHeight;
-    const measuredRows = Math.ceil((measuredHeight - 0.5) / lineHeight);
-    const nextRowCount = Math.max(minRows, measuredRows);
-    setRowCount((current) => (current === nextRowCount ? current : nextRowCount));
-  }, [minRows, value]);
-
-  useLayoutEffect(() => {
-    updateLayout();
-
-    const root = rootRef.current;
-    if (!root || typeof ResizeObserver === 'undefined') return undefined;
-
-    const observer = new ResizeObserver(updateLayout);
-    observer.observe(root);
-
-    return () => observer.disconnect();
-  }, [breakBeforeValue, label, updateLayout, value]);
-
-  const inlineContent = (
-    <>
-      <span className={styles.adaptiveLabel}>{label}</span>
-      {value && <span className={styles.adaptiveText}> {value}</span>}
-    </>
-  );
-
-  return (
-    <div ref={rootRef} className={styles.adaptiveField}>
-      {breakBeforeValue ? (
-        <div className={styles.adaptiveMultiline}>
-          <div className={styles.adaptiveMultilineLabel}>{label}</div>
-          <div className={styles.adaptiveMultilineValueArea}>
-            <span className={styles.adaptiveRules} aria-hidden="true">
-              {Array.from({ length: rowCount }, (_, index) => (
-                <span key={index} />
-              ))}
-            </span>
-            <div className={styles.adaptiveMultilineValue}>{value}</div>
-          </div>
-        </div>
-      ) : (
-        <div className={styles.adaptiveSingleLine}>
-          <span className={styles.adaptiveSingleLabel}>{label}</span>
-          <span className={styles.adaptiveSingleValue}>{value || ' '}</span>
-        </div>
-      )}
-
-      <div ref={measureRef} className={styles.adaptiveMeasure} aria-hidden="true">
-        <span className={styles.adaptiveMeasureValue}>{value || ' '}</span>
-      </div>
-      <div ref={inlineMeasureRef} className={styles.adaptiveInlineMeasure} aria-hidden="true">
-        {inlineContent}
-      </div>
-    </div>
-  );
 };
 
 const formatDirectionDate = (value: string) => {
@@ -531,9 +431,6 @@ export const IndividualSelectionDirection = () => {
   const pendingProfileUpdateRef = useRef<Promise<void>>(Promise.resolve());
   const draftRef = useRef(draft);
   draftRef.current = draft;
-  const [page2StartIndex, setPage2StartIndex] = useState(7);
-  const page1Ref = useRef<HTMLElement>(null);
-  const page1ContentRef = useRef<HTMLDivElement>(null);
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
@@ -583,6 +480,11 @@ export const IndividualSelectionDirection = () => {
             }
           : current;
       let next = mergeAutoValues(base, recipient, autoValues);
+      next.recipientProfileSnapshot = {
+        ...next.recipientProfileSnapshot,
+        ...generatedDirectionHistory(base.recipientProfileSnapshot),
+      };
+      const component = getIndicationComponent(next.indicationValues);
       if (recipient) {
         if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
           next = {
@@ -601,40 +503,42 @@ export const IndividualSelectionDirection = () => {
           );
         }
 
-        if (hasStoredCurrentIndications(recipient.id, 'erythrocytes')) {
+        if (hasStoredCurrentIndications(recipient.id, component)) {
           next = {
             ...next,
             indicationValues: {
               ...(recipientChanged ? {} : next.indicationValues),
-              ...readCurrentIndications(recipient.id, 'erythrocytes'),
-              indicationComponent: 'erythrocytes',
+              ...readCurrentIndications(recipient.id, component),
+              componentGroup: component,
+              indicationComponent: component,
             },
           };
         } else {
           const protocolIndications = currentIndicationsForComponent(
             currentProtocolValues,
-            'erythrocytes',
+            component,
           );
           const hasProtocolIndications = Object.entries(protocolIndications).some(
             ([key, value]) => key !== 'indicationComponent' && value.trim() !== '',
           );
 
           if (hasProtocolIndications) {
-            writeCurrentIndications(recipient.id, 'erythrocytes', protocolIndications);
+            writeCurrentIndications(recipient.id, component, protocolIndications);
             next = {
               ...next,
               indicationValues: {
                 ...(recipientChanged ? {} : next.indicationValues),
                 ...protocolIndications,
-                indicationComponent: 'erythrocytes',
+                componentGroup: component,
+                indicationComponent: component,
               },
             };
           } else if (!hasSavedDocument() && !recipientChanged) {
-            writeCurrentIndications(recipient.id, 'erythrocytes', next.indicationValues);
+            writeCurrentIndications(recipient.id, component, next.indicationValues);
           } else if (recipientChanged) {
             next = {
               ...next,
-              indicationValues: { indicationComponent: 'erythrocytes' },
+              indicationValues: normalizeDirectionIndications({ indicationComponent: component }),
             };
           }
         }
@@ -752,14 +656,22 @@ export const IndividualSelectionDirection = () => {
     if (documentState.isReadOnly()) return;
 
     setDraft((current) => {
+      const currentComponent = getIndicationComponent(current.indicationValues);
+      const component = changes.componentGroup || changes.indicationComponent || currentComponent;
+      const sharedIndications =
+        !documentState.isActive() && currentRecipient && component !== currentComponent
+          ? readCurrentIndications(currentRecipient.id, component)
+          : {};
       const indicationValues = {
         ...current.indicationValues,
+        ...sharedIndications,
         ...changes,
-        indicationComponent: 'erythrocytes',
+        componentGroup: component,
+        indicationComponent: component,
       };
 
       if (!documentState.isActive() && currentRecipient) {
-        writeCurrentIndications(currentRecipient.id, 'erythrocytes', indicationValues);
+        writeCurrentIndications(currentRecipient.id, component, indicationValues);
       }
 
       const next = {
@@ -787,6 +699,7 @@ export const IndividualSelectionDirection = () => {
             ...next,
             indicationValues: {
               ...readCurrentIndications(recipient.id, 'erythrocytes'),
+              componentGroup: 'erythrocytes',
               indicationComponent: 'erythrocytes',
             },
           }
@@ -794,31 +707,6 @@ export const IndividualSelectionDirection = () => {
       individualSelectionIndications: sharedIndividualSelectionIndications,
     });
     setStatus('');
-  };
-
-  const newBlank = async () => {
-    if (documentState.isActive()) return;
-    const recipient = readCurrentRecipient();
-    const autoValues = await currentAutoValues(recipient);
-    const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
-    const sharedIndividualSelectionIndications =
-      recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
-        ? readCurrentIndividualSelectionIndications(recipient.id)
-        : '';
-
-    setDraft({
-      ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
-        ? {
-            ...next,
-            indicationValues: {
-              ...readCurrentIndications(recipient.id, 'erythrocytes'),
-              indicationComponent: 'erythrocytes',
-            },
-          }
-        : next),
-      individualSelectionIndications: sharedIndividualSelectionIndications,
-    });
-    setStatus(recipient ? 'Создан новый бланк для текущего реципиента.' : 'Создан новый бланк.');
   };
 
   const save = async (afterPrint = false) => {
@@ -852,7 +740,9 @@ export const IndividualSelectionDirection = () => {
         ...draftRef.current,
         sourceRecipientId: String(recipient.id),
         recipientProfileSnapshot: {
+          ...draftRef.current.recipientProfileSnapshot,
           ...recipient.profile,
+          ...generatedDirectionHistory(draftRef.current.recipientProfileSnapshot),
           recipientId: String(recipient.id),
           recipientName: recipient.fullName,
         },
@@ -939,7 +829,9 @@ export const IndividualSelectionDirection = () => {
   const examinationValues = useMemo<ProtocolValues>(() => {
     if (currentRecipient && !documentState.active) {
       return {
+        ...draft.recipientProfileSnapshot,
         ...currentRecipient.profile,
+        ...generatedDirectionHistory(draft.recipientProfileSnapshot),
         recipientId: String(currentRecipient.id),
         recipientName: currentRecipient.fullName,
       };
@@ -957,6 +849,11 @@ export const IndividualSelectionDirection = () => {
     };
   }, [currentRecipient, draft, documentState.active]);
 
+  const previousTransfusionSuggestion = usePreviousTransfusionSuggestion({
+    recipientId: examinationValues.recipientId,
+    savedDocument: documentState.active,
+  });
+
   const updateExamination = (changes: ProtocolValues) => {
     if (documentState.isActive()) {
       setDraft((current) =>
@@ -965,7 +862,10 @@ export const IndividualSelectionDirection = () => {
       return Promise.resolve();
     }
     const recipient = readCurrentRecipient();
-    if (!recipient) return Promise.resolve();
+    if (!recipient) {
+      setDraft((current) => updateSavedRequestProfile(current, changes));
+      return Promise.resolve();
+    }
     const version = ++profileEditVersionRef.current;
     setCurrentRecipient((current) =>
       current?.id === recipient.id
@@ -990,6 +890,46 @@ export const IndividualSelectionDirection = () => {
     })();
     pendingProfileUpdateRef.current = operation;
     return operation;
+  };
+
+  const updateHistory = (changes: ProtocolValues) => {
+    const snapshot = draftRef.current.recipientProfileSnapshot;
+    if (!documentState.isActive() && changes.previousTransfusionsAutoText === '') {
+      const next = updateSavedRequestProfile(draftRef.current, changes);
+      draftRef.current = next;
+      setDraft(next);
+      return updateExamination(changes);
+    }
+    if (
+      documentState.isActive() ||
+      !(changes.previousTransfusionsAutoText || snapshot.previousTransfusionsAutoText)
+    ) {
+      return updateExamination(changes);
+    }
+    const next = updateSavedRequestProfile(draftRef.current, changes);
+    draftRef.current = next;
+    setDraft(next);
+    const shared = Object.fromEntries(
+      Object.entries(changes).filter(
+        ([field]) =>
+          ![
+            'previousTransfusions',
+            'previousTransfusionsStatus',
+            'previousTransfusionsAutoText',
+            'previousTransfusionsSuggestedText',
+          ].includes(field),
+      ),
+    );
+    return Object.keys(shared).length > 0 ? updateExamination(shared) : Promise.resolve();
+  };
+
+  const handleHistoryHover = (event: MouseEvent<HTMLDivElement>) => {
+    const hovered =
+      !documentState.readOnly &&
+      event.target instanceof Element &&
+      event.target.closest('[data-history-group]');
+    if (hovered) event.currentTarget.dataset.historyHovered = 'true';
+    else delete event.currentTarget.dataset.historyHovered;
   };
 
   const editorConfig = useMemo(() => {
@@ -1025,6 +965,7 @@ export const IndividualSelectionDirection = () => {
     <div
       key="organization"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('organization')}
@@ -1037,35 +978,31 @@ export const IndividualSelectionDirection = () => {
     <div
       key="recipient"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('recipient')}
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
     >
       <AdaptiveRuledField label="Ф.И.О. реципиента:" value={draft.recipientName} />
-      <div className={styles.singleLine}>
-        <span>Возраст:</span>
-        <span className={styles.valueLine}>{displayValue(draft.recipientAge)}</span>
-      </div>
-      <div className={styles.singleLine}>
-        <span>№ медицинской карты:</span>
-        <span className={styles.valueLine}>{displayValue(draft.medicalRecordNumber)}</span>
-      </div>
+      <AdaptiveRuledField label="Возраст:" value={draft.recipientAge} />
+      <AdaptiveRuledField label="№ медицинской карты:" value={draft.medicalRecordNumber} />
       <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
     </div>,
 
     <div
       key="examination"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('examination')}
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('examination'))}
     >
-      <div className={styles.singleLine}>
-        <span>Группа крови и резус-фактор реципиента:</span>
-        <span className={styles.valueLine}>{displayValue(draft.recipientAboRh)}</span>
-      </div>
+      <AdaptiveRuledField
+        label="Группа крови и резус-фактор реципиента:"
+        value={draft.recipientAboRh}
+      />
       <AdaptiveRuledField label="Фенотип реципиента:" value={draft.recipientPhenotype} />
       <AdaptiveRuledField
         label="Аллоиммунные антитела:"
@@ -1073,30 +1010,54 @@ export const IndividualSelectionDirection = () => {
       />
     </div>,
 
-    <div
-      key="transfusion"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('transfusion')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('transfusion'))}
-    >
-      <AdaptiveRuledField label="Гемотрансфузионный анамнез:" value={draft.transfusionHistory} />
-    </div>,
+    ...TRANSFUSION_HISTORY_FIELDS.map(({ label, statusName, textName }, index) => (
+      <div
+        key={statusName}
+        className={`${styles.fillSection} ${styles.historySection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
+        data-form-section
+        data-history-group
+        data-history-position={
+          index === 0
+            ? 'first'
+            : index === TRANSFUSION_HISTORY_FIELDS.length - 1
+              ? 'last'
+              : 'middle'
+        }
+        role={documentState.readOnly ? undefined : 'button'}
+        tabIndex={documentState.readOnly || index > 0 ? -1 : 0}
+        onClick={() => setEditor('history')}
+        onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('history'))}
+      >
+        <AdaptiveRuledField
+          label={`${label}:`}
+          value={
+            formatHistoryValue(examinationValues, statusName, textName) ||
+            (index === 0 && !hasStructuredDirectionHistory(examinationValues)
+              ? draft.transfusionHistory
+              : '')
+          }
+        />
+      </div>
+    )),
 
     ...(draft.recipientSex === 'Женский'
       ? [
           <div
             key="obstetric"
             className={styles.fillSection}
+            data-form-section
             role={documentState.readOnly ? undefined : 'button'}
             tabIndex={documentState.readOnly ? -1 : 0}
-            onClick={() => setEditor('obstetric')}
-            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('obstetric'))}
+            onClick={() => setEditor('history')}
+            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('history'))}
           >
             <AdaptiveRuledField
               label="Акушерский анамнез у женщин:"
-              value={draft.obstetricHistory}
+              value={
+                hasStructuredObstetricHistory(examinationValues)
+                  ? formatObstetricHistory(examinationValues)
+                  : draft.obstetricHistory
+              }
             />
           </div>,
         ]
@@ -1105,6 +1066,7 @@ export const IndividualSelectionDirection = () => {
     <div
       key="component"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('component')}
@@ -1114,10 +1076,7 @@ export const IndividualSelectionDirection = () => {
         label="Наименование требуемого компонента:"
         value={draft.requiredComponent}
       />
-      <div className={styles.singleLine}>
-        <span>Количество:</span>
-        <span className={styles.valueLine}>{displayValue(formatDoseQuantity(draft.quantity))}</span>
-      </div>
+      <AdaptiveRuledField label="Количество:" value={formatDoseQuantity(draft.quantity)} />
       <AdaptiveRuledField
         label="Показания к трансфузии:"
         value={formatIndications(draft.indicationValues)}
@@ -1130,25 +1089,20 @@ export const IndividualSelectionDirection = () => {
 
     <div
       key="footer"
-      className={styles.fillSection}
+      className={`${styles.fillSection} ${styles.footerSection}`}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('footer')}
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('footer'))}
     >
-      <div className={styles.directionDate}>
-        <span>Дата направления:</span>{' '}
-        <span className={styles.enteredValue}>{formatDirectionDate(draft.directionDate)}</span>
-      </div>
+      <AdaptiveRuledField
+        label="Дата направления:"
+        value={formatDirectionDate(draft.directionDate)}
+      />
 
-      <div className={`${styles.singleLine} ${styles.doctorLine}`}>
-        <span>Врач, назначивший трансфузию:</span>
-        <span className={styles.valueLine}>{displayValue(draft.doctorName)}</span>
-      </div>
-      <div className={styles.singleLine}>
-        <span>Контактный телефон:</span>
-        <span className={styles.valueLine}>{displayValue(draft.doctorPhone)}</span>
-      </div>
+      <AdaptiveRuledField label="Врач, назначивший трансфузию:" value={draft.doctorName} />
+      <AdaptiveRuledField label="Контактный телефон:" value={draft.doctorPhone} />
     </div>,
   ];
 
@@ -1163,8 +1117,12 @@ export const IndividualSelectionDirection = () => {
     draft.recipientPhenotype,
     formatAlloimmuneAntibodies(examinationValues),
     formatIndications(draft.indicationValues),
+    ...TRANSFUSION_HISTORY_FIELDS.map(({ statusName, textName }) =>
+      formatHistoryValue(examinationValues, statusName, textName),
+    ),
     draft.transfusionHistory,
     draft.recipientSex,
+    formatObstetricHistory(examinationValues),
     draft.obstetricHistory,
     draft.requiredComponent,
     draft.quantity,
@@ -1174,42 +1132,19 @@ export const IndividualSelectionDirection = () => {
     draft.doctorPhone,
   ].join('\u0001');
 
-  const splitIndex = Math.min(page2StartIndex, formSections.length);
-  const hasSecondPage = splitIndex < formSections.length;
+  const { pageStarts, pageRefs } = useFormPages(formSections.length, paginationKey);
 
-  useLayoutEffect(() => {
-    setPage2StartIndex(formSections.length);
-  }, [formSections.length, paginationKey]);
-
-  useLayoutEffect(() => {
-    const page = page1Ref.current;
-    const content = page1ContentRef.current;
-    if (!page || !content) return undefined;
-
-    const fitPage = () => {
-      if (page.scrollHeight > page.clientHeight + 1 && page2StartIndex > 0) {
-        setPage2StartIndex((current) => Math.max(0, Math.min(current, formSections.length) - 1));
-      }
-    };
-
-    fitPage();
-
-    if (typeof ResizeObserver === 'undefined') return undefined;
-
-    const observer = new ResizeObserver(fitPage);
-    observer.observe(content);
-
-    return () => observer.disconnect();
-  }, [formSections.length, page2StartIndex, paginationKey]);
-
-  const printPage = (page: 1 | 2) => {
-    const className = `print-individual-selection-page-${page}`;
-    document.body.classList.add(className);
+  const printPage = (page: number) => {
+    const sheet = pageRefs.current[page - 1];
+    if (!sheet) return;
+    document.body.classList.add('print-individual-direction');
+    sheet.setAttribute('data-print-active', '');
 
     try {
       window.print();
     } finally {
-      document.body.classList.remove(className);
+      sheet.removeAttribute('data-print-active');
+      document.body.classList.remove('print-individual-direction');
       if (!documentState.active) void save(true);
     }
   };
@@ -1233,22 +1168,13 @@ export const IndividualSelectionDirection = () => {
           />
           <div className="print-actions" aria-label="Панель действий">
             {!documentState.active && (
-              <>
-                <button
-                  type="button"
-                  className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-                  onClick={() => void clear()}
-                >
-                  Очистить бланк
-                </button>
-                <button
-                  type="button"
-                  className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-                  onClick={() => void newBlank()}
-                >
-                  Новый бланк
-                </button>
-              </>
+              <button
+                type="button"
+                className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+                onClick={() => void clear()}
+              >
+                Очистить бланк
+              </button>
             )}
             <button
               type="button"
@@ -1265,60 +1191,48 @@ export const IndividualSelectionDirection = () => {
             >
               {documentState.editing ? 'Сохранить изменения' : 'Сохранить'}
             </button>
-            {hasSecondPage ? (
-              <>
-                <button
-                  type="button"
-                  className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-                  onClick={() => printPage(1)}
-                >
-                  Печать страницы 1
-                </button>
-                <button
-                  type="button"
-                  className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-                  onClick={() => printPage(2)}
-                >
-                  Печать страницы 2
-                </button>
-              </>
-            ) : (
+            {pageStarts.map((_, index) => (
               <button
+                key={index}
                 type="button"
                 className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-                onClick={() => printPage(1)}
+                onClick={() => printPage(index + 1)}
               >
-                Печать страницы
+                {pageStarts.length > 1 ? `Печать страницы ${index + 1}` : 'Печать страницы'}
               </button>
-            )}
+            ))}
           </div>
           <AnimatedMessage message={status} className="toolbar-status" />
         </div>
       </header>
 
-      <div className={styles.sheetWrap} data-document-paper>
-        <section
-          ref={page1Ref}
-          className={`${styles.sheet} ${styles.pageOne}`}
-          aria-label="Направление на индивидуальный подбор, страница 1"
-        >
-          <div ref={page1ContentRef} className={styles.pageContent}>
-            <h1 className={styles.title}>
-              Направление на индивидуальный подбор компонентов крови.
-            </h1>
-
-            {formSections.slice(0, splitIndex)}
-          </div>
-        </section>
-
-        {hasSecondPage && (
+      <div
+        className={styles.sheetWrap}
+        data-document-paper
+        onMouseMove={handleHistoryHover}
+        onMouseLeave={(event) => {
+          delete event.currentTarget.dataset.historyHovered;
+        }}
+      >
+        {pageStarts.map((start, index) => (
           <section
-            className={`${styles.sheet} ${styles.pageTwo}`}
-            aria-label="Направление на индивидуальный подбор, страница 2"
+            key={index}
+            ref={(element) => {
+              pageRefs.current[index] = element;
+            }}
+            className={`${styles.sheet} ${index === 0 ? styles.pageOne : styles.pageTwo}`}
+            aria-label={`Направление на индивидуальный подбор, страница ${index + 1}`}
           >
-            <div className={styles.pageContent}>{formSections.slice(splitIndex)}</div>
+            <div className={styles.pageContent}>
+              {index === 0 && (
+                <h1 className={styles.title}>
+                  Направление на индивидуальный подбор компонентов крови.
+                </h1>
+              )}
+              {formSections.slice(start, pageStarts[index + 1] ?? formSections.length)}
+            </div>
           </section>
-        )}
+        ))}
       </div>
 
       {editor === 'recipient' && (
@@ -1335,18 +1249,12 @@ export const IndividualSelectionDirection = () => {
         />
       )}
 
-      {editor === 'obstetric' && draft.recipientSex === 'Женский' && (
-        <IndividualSelectionObstetricHistoryModal
+      {editor === 'history' && (
+        <RecipientHistoryModal
           values={examinationValues}
-          onChange={updateExamination}
-          onClose={() => setEditor(null)}
-        />
-      )}
-
-      {editor === 'transfusion' && (
-        <IndividualSelectionTransfusionHistoryModal
-          values={examinationValues}
-          onChange={updateExamination}
+          savedDocument={documentState.active}
+          previousTransfusionSuggestion={previousTransfusionSuggestion}
+          onChange={updateHistory}
           onClose={() => setEditor(null)}
         />
       )}
@@ -1357,7 +1265,6 @@ export const IndividualSelectionDirection = () => {
           quantity={draft.quantity}
           individualSelectionIndications={draft.individualSelectionIndications}
           indicationValues={draft.indicationValues}
-          fixedIndicationComponent="erythrocytes"
           onLocalChange={updateFields}
           onIndicationsChange={updateIndications}
           onClose={() => setEditor(null)}

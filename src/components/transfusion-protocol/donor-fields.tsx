@@ -15,9 +15,10 @@ import styles from './recipient-examination-fields.module.css';
 type Props = {
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
+  showComponentSelector?: boolean;
 };
 
-export const DonorFields = ({ values, onChange }: Props) => {
+export const DonorFields = ({ values, onChange, showComponentSelector = true }: Props) => {
   const selectedComponent =
     values.componentGroup ||
     values.indicationComponent ||
@@ -27,13 +28,15 @@ export const DonorFields = ({ values, onChange }: Props) => {
 
   return (
     <div className={styles.root}>
-      <BloodComponentSelector
-        group={selectedComponent}
-        name={values.componentName ?? ''}
-        onChange={({ group, name }) =>
-          onChange({ componentGroup: group, indicationComponent: group, componentName: name })
-        }
-      />
+      {showComponentSelector && (
+        <BloodComponentSelector
+          group={selectedComponent}
+          name={values.componentName ?? ''}
+          onChange={({ group, name }) =>
+            onChange({ componentGroup: group, indicationComponent: group, componentName: name })
+          }
+        />
+      )}
 
       <div className={styles.topGrid}>
         <BloodGroupSelectField

@@ -1,4 +1,5 @@
 import type { ProtocolValues } from './protocol-types';
+import { splitPreviousTransfusionText } from './previous-transfusion-text';
 
 export const HISTORY_STATUS = {
   none: 'none',
@@ -50,7 +51,16 @@ export const formatHistoryValue = (
 
   if (status === HISTORY_STATUS.none) return 'Не было';
   if (status === HISTORY_STATUS.unknown) return 'Не известно';
-  if (status === HISTORY_STATUS.had) return values[textName]?.trim() ?? '';
+  if (status === HISTORY_STATUS.had) {
+    if (textName === 'previousTransfusions') {
+      const { generated, manual } = splitPreviousTransfusionText(values);
+      if (generated) {
+        const continuation = manual.replace(/^(?:[\t ]*\r?\n)+/u, '');
+        return `${generated}${continuation ? `\n${continuation}` : ''}`.trim();
+      }
+    }
+    return values[textName]?.trim() ?? '';
+  }
 
   return '';
 };

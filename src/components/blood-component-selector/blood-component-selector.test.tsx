@@ -105,14 +105,12 @@ it('retains a legacy request name when its missing group is inferred and selecte
       onClose={() => undefined}
     />,
   );
-  expect(
-    screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }),
-  ).toBeNull();
+  expect(nameInput().value).toBe('Отмытые эритроциты');
   fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));
   expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: 'Отмытые эритроциты' });
   expect(onIndicationsChange).toHaveBeenCalledWith({
     componentGroup: 'erythrocytes',
     indicationComponent: 'erythrocytes',
   });
-  expect(loadSavedOptions).not.toHaveBeenCalled();
+  await waitFor(() => expect(loadSavedOptions).toHaveBeenCalledWith('componentName:erythrocytes'));
 });

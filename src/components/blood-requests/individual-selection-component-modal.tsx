@@ -126,7 +126,6 @@ export const IndividualSelectionComponentModal = ({
           name={requiredComponent}
           inputName="requiredComponent"
           fixedGroup={fixedIndicationComponent}
-          showName={false}
           onChange={handleComponentChange}
         />
 

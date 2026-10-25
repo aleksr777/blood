@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { loadSavedOptions } from '../../storage/repositories/saved-options';
 import { IndicationsFields } from './indications-fields';
@@ -57,8 +57,8 @@ it('selects protocol indications by group while preserving an existing name for 
 });
 
 it.each([true, false])(
-  'keeps request indications editable without a name field (request options: %s)',
-  (showRequestOptions) => {
+  'keeps the component name and indications editable in both directions (request options: %s)',
+  async (showRequestOptions) => {
     const onLocalChange = vi.fn();
     const onIndicationsChange = vi.fn();
     render(
@@ -74,7 +74,9 @@ it.each([true, false])(
         onClose={() => undefined}
       />,
     );
-    expect(screen.queryByText(nameLabel)).toBeNull();
+    const nameInput = screen.getByRole('textbox', { name: nameLabel }) as HTMLInputElement;
+    expect(nameInput.value).toBe('Отмытые эритроциты');
+    expect(nameInput.disabled).toBe(false);
     expect(screen.getByRole('button', { name: 'Эритроциты' }).getAttribute('aria-pressed')).toBe(
       'true',
     );
@@ -85,6 +87,17 @@ it.each([true, false])(
       indicationRbcHemicHypoxia: '1',
     });
     expect(onLocalChange).not.toHaveBeenCalled();
-    expect(loadSavedOptions).not.toHaveBeenCalled();
+    fireEvent.change(nameInput, { target: { value: 'Эритроцитная взвесь, лейкоредуцированная' } });
+    expect(onLocalChange).toHaveBeenLastCalledWith({
+      requiredComponent: 'Эритроцитная взвесь, лейкоредуцированная',
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: `Показать сохранённые варианты: ${nameLabel}` }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Эритроцитная взвесь' }));
+    expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: 'Эритроцитная взвесь' });
+    await waitFor(() =>
+      expect(loadSavedOptions).toHaveBeenCalledWith('componentName:erythrocytes'),
+    );
   },
 );

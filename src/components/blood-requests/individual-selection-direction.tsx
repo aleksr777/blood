@@ -49,6 +49,7 @@ import {
 } from '../transfusion-protocol/recipient-examination-model';
 import {
   formatHistoryValue,
+  formatObstetricHistory,
   TRANSFUSION_HISTORY_FIELDS,
 } from '../transfusion-protocol/recipient-history-model';
 import { RecipientHistoryModal } from '../transfusion-protocol/recipient-history-modal';
@@ -312,20 +313,6 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
   );
   next.quantity = sanitizeDoseQuantity(next.quantity);
   return next;
-};
-
-const formatObstetricHistory = (values: ProtocolValues) => {
-  const items = [
-    ['беременности', values.recipientPregnanciesCount],
-    ['роды', values.recipientBirthsCount],
-    ['самопроизвольные аборты', values.recipientSpontaneousAbortionsCount],
-    ['гемолитическая болезнь новорождённого', values.recipientHemolyticDiseaseNewbornHistory],
-  ] as const;
-
-  return items
-    .filter(([, value]) => Boolean(value?.trim()))
-    .map(([label, value]) => `${label}: ${value?.trim()}`)
-    .join('; ');
 };
 
 const currentAutoValues = async (

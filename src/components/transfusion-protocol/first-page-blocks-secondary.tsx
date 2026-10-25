@@ -2,7 +2,12 @@ import { formatComponentUnitNumber } from './component-unit-number';
 import { formatDonorAntigens } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatIndications } from './indications-model';
-import { formatHistoryValue, getHistoryStatus, HISTORY_STATUS } from './recipient-history-model';
+import {
+  formatHistoryValue,
+  formatObstetricHistory,
+  getHistoryStatus,
+  HISTORY_STATUS,
+} from './recipient-history-model';
 import { getSelectionStatus, SELECTION_STATUS } from './selection-model';
 import type { ProtocolPageProps } from './protocol-types';
 import { formatDate } from './protocol-types';
@@ -15,23 +20,6 @@ const formatRh = (value?: string) => {
   if (value === 'Rh(D)+' || value === 'Rh(+)') return 'Rh(+)';
   if (value === 'Rh(D)-' || value === 'Rh(-)') return 'Rh(-)';
   return value ?? '';
-};
-
-const formatObstetricHistory = (values: ProtocolPageProps['values']) => {
-  const items = [
-    ['Количество беременностей', values.recipientPregnanciesCount],
-    ['Количество родов', values.recipientBirthsCount],
-    ['Самопроизвольные аборты в анамнезе', values.recipientSpontaneousAbortionsCount],
-    [
-      'Гемолитическая болезнь новорождённого в анамнезе',
-      values.recipientHemolyticDiseaseNewbornHistory,
-    ],
-  ] as const;
-
-  return items
-    .filter(([, value]) => Boolean(value?.trim()))
-    .map(([label, value]) => `${label}: ${value?.trim()}`)
-    .join('; ');
 };
 
 export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {

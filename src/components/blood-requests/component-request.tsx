@@ -36,6 +36,7 @@ import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import { getBloodGroupMismatch } from '../transfusion-protocol/blood-group-validation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
+import { formatObstetricHistory } from '../transfusion-protocol/recipient-history-model';
 import {
   formatAlloimmuneAntibodies,
   formatRecipientAntigens,
@@ -52,6 +53,7 @@ import { IndividualSelectionRecipientModal } from './individual-selection-recipi
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { AdaptiveRuledField } from './adaptive-ruled-field';
+import { hasStructuredObstetricHistory } from './direction-history';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:component-request-direction-draft';
@@ -294,20 +296,6 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
 
   next.quantity = sanitizeDoseQuantity(next.quantity);
   return next;
-};
-
-const formatObstetricHistory = (values: ProtocolValues) => {
-  const items = [
-    ['беременности', values.recipientPregnanciesCount],
-    ['роды', values.recipientBirthsCount],
-    ['самопроизвольные аборты', values.recipientSpontaneousAbortionsCount],
-    ['гемолитическая болезнь новорождённого', values.recipientHemolyticDiseaseNewbornHistory],
-  ] as const;
-
-  return items
-    .filter(([, value]) => Boolean(value?.trim()))
-    .map(([label, value]) => `${label}: ${value?.trim()}`)
-    .join('; ');
 };
 
 const currentAutoValues = async (
@@ -946,7 +934,11 @@ export const ComponentRequest = () => {
           >
             <AdaptiveRuledField
               label="Акушерский анамнез у женщин:"
-              value={draft.obstetricHistory}
+              value={
+                hasStructuredObstetricHistory(examinationValues)
+                  ? formatObstetricHistory(examinationValues)
+                  : draft.obstetricHistory
+              }
             />
           </div>,
         ]

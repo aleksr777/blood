@@ -64,3 +64,28 @@ export const formatHistoryValue = (
 
   return '';
 };
+
+export const formatObstetricHistory = (values: ProtocolValues) => {
+  const fields = [
+    ['recipientPregnanciesCount', 'Количество беременностей', 'Беременностей не было'],
+    ['recipientBirthsCount', 'Количество родов', 'Родов не было'],
+    [
+      'recipientSpontaneousAbortionsCount',
+      'Самопроизвольные аборты в анамнезе',
+      'Самопроизвольных абортов в анамнезе не было',
+    ],
+    [
+      'recipientHemolyticDiseaseNewbornHistory',
+      'Гемолитическая болезнь новорождённого в анамнезе',
+      '',
+    ],
+  ] as const;
+
+  return fields
+    .flatMap(([name, label, zeroText]) => {
+      const value = values[name]?.trim();
+      if (!value) return [];
+      return [zeroText && /^0+$/.test(value) ? zeroText : `${label}: ${value}`];
+    })
+    .join('; ');
+};

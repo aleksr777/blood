@@ -155,8 +155,27 @@
 
 .footerSection {
   --form-line-height: 14mm;
+  --form-rule-offset: 3.5mm;
 
   line-height: var(--form-line-height);
+}
+
+.footerSection .adaptiveSingleValue {
+  position: relative;
+  border-bottom: 0;
+}
+
+.footerSection .adaptiveSingleValue::after {
+  position: absolute;
+  right: 0;
+  bottom: var(--form-rule-offset);
+  left: 0;
+  border-bottom: var(--form-line-width) solid #111;
+  content: '';
+}
+
+.footerSection .adaptiveRules {
+  top: calc(0mm - var(--form-rule-offset));
 }
 
 .historySection {

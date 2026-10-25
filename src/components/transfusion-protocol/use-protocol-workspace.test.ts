@@ -3,7 +3,7 @@ import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { database } from '../../storage/sqlite/database-client';
 import { adoptCurrentRecipientFromValues } from '../../storage/repositories/current-recipient';
-import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
+import { getProtocolNewBlankWarning } from '../../domain/protocol-hemacon';
 import { useProtocolWorkspace } from './use-protocol-workspace';
 
 vi.mock('../../storage/sqlite/database-client', () => ({
@@ -53,6 +53,7 @@ it('opening and printing an archive never merge current data or save an archived
   const working = structuredClone(result.current.values);
   await act(async () => result.current.openRecord(original));
   expect(result.current.document.mode).toBe('view');
+  expect(result.current.newBlankWarning).toBe('');
   expect(result.current.values).toEqual(original.values);
   act(() => result.current.saveValues({ diagnosis: 'Автозамена' }));
   expect(result.current.values).toEqual(original.values);
@@ -118,16 +119,29 @@ it.each<Record<string, string>>([
   await act(async () => result.current.newBlank());
   expect(database.saveProtocolRecord).not.toHaveBeenCalled();
   expect(result.current.values).toMatchObject({ ...recipient, ...values });
-  expect(result.current.status).toBe(getProtocolHemaconWarning(values));
-  expect(result.current.activeBlock).toBe('donor');
+  expect(result.current.status).toBe(getProtocolNewBlankWarning({ ...recipient, ...values }));
+  expect(result.current.activeBlock).toBeNull();
 });
 
-it('creates an empty New blank without archiving a recipient-only draft', async () => {
+it('keeps a recipient-only draft unchanged when New blank is blocked', async () => {
   const { result } = await openDraft({});
+  const original = structuredClone(result.current.values);
   await act(async () => result.current.newBlank());
   expect(database.saveProtocolRecord).not.toHaveBeenCalled();
   expect(result.current.activeBlock).toBeNull();
-  expect(result.current.values).toMatchObject(recipient);
+  expect(result.current.values).toEqual(original);
+  expect(result.current.status).toBe(getProtocolNewBlankWarning(original));
+});
+
+it('does not save or reset a complete hemacon without the recipient name', async () => {
+  window.localStorage.clear();
+  const { result } = await openDraft({ ...hemacon, recipientName: '' });
+  const original = structuredClone(result.current.values);
+  expect(original.recipientName).toBe('');
+  await act(async () => result.current.newBlank());
+  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+  expect(result.current.values).toEqual(original);
+  expect(result.current.status).toContain('ФИО реципиента');
 });
 
 it('autosaves a complete hemacon on New blank without requiring volume or expiration', async () => {

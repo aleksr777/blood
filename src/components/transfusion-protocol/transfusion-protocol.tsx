@@ -194,6 +194,7 @@ export const TransfusionProtocol = () => {
         status={workspace.status}
         warning={workspace.reagentWarning}
         hemaconWarning={workspace.hemaconWarning}
+        newBlankWarning={workspace.newBlankWarning}
         dangerWarning={workspace.compatibilityWarning}
         bloodGroupWarning={workspace.bloodGroupWarning}
         bloodGroupWarningDismissible={workspace.bloodGroupWarningDismissible}

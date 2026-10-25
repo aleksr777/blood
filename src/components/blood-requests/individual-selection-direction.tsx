@@ -709,32 +709,6 @@ export const IndividualSelectionDirection = () => {
     setStatus('');
   };
 
-  const newBlank = async () => {
-    if (documentState.isActive()) return;
-    const recipient = readCurrentRecipient();
-    const autoValues = await currentAutoValues(recipient);
-    const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
-    const sharedIndividualSelectionIndications =
-      recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
-        ? readCurrentIndividualSelectionIndications(recipient.id)
-        : '';
-
-    setDraft({
-      ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
-        ? {
-            ...next,
-            indicationValues: {
-              ...readCurrentIndications(recipient.id, 'erythrocytes'),
-              componentGroup: 'erythrocytes',
-              indicationComponent: 'erythrocytes',
-            },
-          }
-        : next),
-      individualSelectionIndications: sharedIndividualSelectionIndications,
-    });
-    setStatus(recipient ? 'Создан новый бланк для текущего реципиента.' : 'Создан новый бланк.');
-  };
-
   const save = async (afterPrint = false) => {
     if (documentState.active) {
       if (afterPrint || !documentState.editing || !documentState.record) return true;
@@ -1194,22 +1168,13 @@ export const IndividualSelectionDirection = () => {
           />
           <div className="print-actions" aria-label="Панель действий">
             {!documentState.active && (
-              <>
-                <button
-                  type="button"
-                  className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-                  onClick={() => void clear()}
-                >
-                  Очистить бланк
-                </button>
-                <button
-                  type="button"
-                  className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-                  onClick={() => void newBlank()}
-                >
-                  Новый бланк
-                </button>
-              </>
+              <button
+                type="button"
+                className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+                onClick={() => void clear()}
+              >
+                Очистить бланк
+              </button>
             )}
             <button
               type="button"

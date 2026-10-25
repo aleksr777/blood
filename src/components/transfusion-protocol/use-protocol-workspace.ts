@@ -20,8 +20,10 @@ import {
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
-import { hasHemaconData } from './donor-model';
-import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
+import {
+  getProtocolHemaconWarning,
+  getProtocolNewBlankWarning,
+} from '../../domain/protocol-hemacon';
 import { getIndicationComponent, indicationValuesForComponent } from './indications-model';
 import {
   getExpiredReagentWarnings,
@@ -295,20 +297,16 @@ export const useProtocolWorkspace = () => {
       document.close();
       return;
     }
+    const warning = getProtocolNewBlankWarning(values);
+    if (warning) {
+      setStatus(warning);
+      return;
+    }
     const openedFromDatabase = recordId !== null;
     let sourceValues = values;
     let previousBlankSaved = false;
 
-    if (hasHemaconData(values) && !openedFromDatabase) {
-      if (!validateHemacon()) return;
-      if (!values.recipientName?.trim()) {
-        setStatus(
-          'Новый бланк не создан: для сохранения предыдущего бланка укажите ФИО реципиента.',
-        );
-        setActiveBlock('general');
-        return;
-      }
-
+    if (!openedFromDatabase) {
       try {
         const record = await saveProtocolRecord(values);
         sourceValues = {
@@ -518,6 +516,7 @@ export const useProtocolWorkspace = () => {
     saveToDatabase,
     validateHemacon,
     hemaconWarning: getProtocolHemaconWarning(values),
+    newBlankWarning: document.active ? '' : getProtocolNewBlankWarning(values),
     newBlank,
     reagentWarning,
     compatibilityWarning,

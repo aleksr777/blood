@@ -12,6 +12,7 @@ type Props = {
   status: string;
   warning: string;
   hemaconWarning: string;
+  newBlankWarning: string;
   dangerWarning: string;
   bloodGroupWarning: string;
   bloodGroupWarningDismissible: boolean;
@@ -37,6 +38,7 @@ export const ProtocolToolbar = ({
   status,
   warning,
   hemaconWarning,
+  newBlankWarning,
   dangerWarning,
   bloodGroupWarning,
   bloodGroupWarningDismissible,
@@ -55,17 +57,21 @@ export const ProtocolToolbar = ({
   pageCount,
   onPrintPage,
 }: Props) => {
-  const [hemaconWarningVisible, setHemaconWarningVisible] = useState(false);
+  const [warningAction, setWarningAction] = useState<'hemacon' | 'new' | null>(null);
+  const visibleWarning =
+    warningAction === 'new' ? newBlankWarning : warningAction === 'hemacon' ? hemaconWarning : '';
 
   useEffect(() => {
-    if (!hemaconWarning) setHemaconWarningVisible(false);
-  }, [hemaconWarning]);
+    if (!visibleWarning) setWarningAction(null);
+  }, [visibleWarning]);
 
-  const runHemaconAction = (action: () => void) => {
-    if (hemaconWarning) {
-      setHemaconWarningVisible(true);
+  const runValidatedAction = (action: () => void, kind: 'hemacon' | 'new' = 'hemacon') => {
+    const warning = kind === 'new' ? newBlankWarning : hemaconWarning;
+    if (warning) {
+      setWarningAction(kind);
       return;
     }
+    setWarningAction(null);
     action();
   };
 
@@ -95,7 +101,8 @@ export const ProtocolToolbar = ({
               <button
                 type="button"
                 className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-                onClick={onNew}
+                onClick={() => runValidatedAction(onNew, 'new')}
+                aria-disabled={Boolean(newBlankWarning)}
               >
                 Новый бланк
               </button>
@@ -111,7 +118,7 @@ export const ProtocolToolbar = ({
           <button
             type="button"
             className={`${ui.successButton} ${ui.toolbarButton} save-button`}
-            onClick={() => runHemaconAction(onSave)}
+            onClick={() => runValidatedAction(onSave)}
             disabled={document?.mode === 'view'}
             aria-disabled={Boolean(hemaconWarning)}
           >
@@ -122,7 +129,7 @@ export const ProtocolToolbar = ({
               key={pageIndex}
               type="button"
               className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-              onClick={() => runHemaconAction(() => onPrintPage(pageIndex))}
+              onClick={() => runValidatedAction(() => onPrintPage(pageIndex))}
               aria-disabled={Boolean(hemaconWarning)}
             >
               Печать страницы {pageIndex + 1}
@@ -131,8 +138,8 @@ export const ProtocolToolbar = ({
         </div>
         <WarningNotice
           className="toolbar-warning"
-          message={hemaconWarningVisible ? hemaconWarning : ''}
-          onDismiss={() => setHemaconWarningVisible(false)}
+          message={visibleWarning}
+          onDismiss={() => setWarningAction(null)}
         />
         <AnimatedMessage message={status} className="toolbar-status" />
         <WarningNotice className="toolbar-danger-warning" message={dangerWarning} danger />

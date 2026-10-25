@@ -662,21 +662,6 @@ export const ComponentRequest = () => {
     setStatus('');
   };
 
-  const newBlank = async () => {
-    if (documentState.isActive()) return;
-    const recipient = readCurrentRecipient();
-    const autoValues = await currentAutoValues(recipient);
-    const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
-    setDraft({
-      ...next,
-      individualSelectionIndications:
-        recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
-          ? readCurrentIndividualSelectionIndications(recipient.id)
-          : '',
-    });
-    setStatus(recipient ? 'Создан новый бланк для текущего реципиента.' : 'Создан новый бланк.');
-  };
-
   const save = async (afterPrint = false) => {
     if (documentState.active) {
       if (afterPrint || !documentState.editing || !documentState.record) return true;
@@ -1049,22 +1034,13 @@ export const ComponentRequest = () => {
           />
           <div className="print-actions" aria-label="Панель действий">
             {!documentState.active && (
-              <>
-                <button
-                  type="button"
-                  className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-                  onClick={() => void clear()}
-                >
-                  Очистить бланк
-                </button>
-                <button
-                  type="button"
-                  className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-                  onClick={() => void newBlank()}
-                >
-                  Новый бланк
-                </button>
-              </>
+              <button
+                type="button"
+                className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+                onClick={() => void clear()}
+              >
+                Очистить бланк
+              </button>
             )}
             <button
               type="button"

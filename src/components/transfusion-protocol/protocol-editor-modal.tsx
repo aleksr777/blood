@@ -1,18 +1,15 @@
 import { useEffect, useState } from 'react';
 import Modal from '../modal/modal';
 import { WarningNotice } from '../warning-notice/warning-notice';
-import { getProtocolBlockConfig } from './editor-config';
+import { getProtocolBlockConfig, isDonorComponentBlock } from './editor-config';
 import { CompatibilityTestsFields } from './compatibility-tests-fields';
 import { ComplicationsFields } from './complications-fields';
-import { formatComponentUnitNumber } from './component-unit-number';
-import { DonorFields } from './donor-fields';
-import { IndicationsFields } from './indications-fields';
+import { DonorComponentFields } from './donor-component-fields';
 import { MonitoringFields } from './monitoring-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { formatRecipientAge } from './recipient-demographics';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { RecipientHistoryFields } from './recipient-history-fields';
-import { getHemaconExpirationWarning } from './reagent-defaults';
 import { SelectionFields } from './selection-fields';
 import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
@@ -64,9 +61,6 @@ export const ProtocolEditorModal = ({
   const displayedAge = savedDocument
     ? archivedRecipientAge
     : formatRecipientAge(draft.recipientBirthDate, draft.transfusionDate);
-  const hemaconExpirationWarning = savedDocument
-    ? ''
-    : getHemaconExpirationWarning(draft.expirationDate);
 
   useEffect(() => {
     setDraft(getInitialValues(blockId, values));
@@ -138,7 +132,7 @@ export const ProtocolEditorModal = ({
           .filter(Boolean)
           .join(' ')}
       >
-        {(blockId === 'examination' || blockId === 'donor') && (
+        {(blockId === 'examination' || isDonorComponentBlock(blockId)) && (
           <WarningNotice
             className={styles.bloodGroupWarning}
             message={bloodGroupWarning}
@@ -165,84 +159,15 @@ export const ProtocolEditorModal = ({
           </>
         ) : blockId === 'examination' ? (
           <RecipientExaminationFields values={draft} onChange={changeValues} />
-        ) : blockId === 'donor' ? (
-          <>
-            <DonorFields values={draft} onChange={changeValues} />
-
-            {config.fields
-              .filter((field) => field.name === 'componentUnitNumber')
-              .map((field) => (
-                <div key={field.name} className={styles.componentUnitNumberField}>
-                  <label>
-                    <span>{field.label}</span>
-                    <input
-                      name={field.name}
-                      type="text"
-                      inputMode="numeric"
-                      autoComplete="off"
-                      maxLength={16}
-                      value={formatComponentUnitNumber(draft[field.name])}
-                      onChange={(event) =>
-                        changeValue(field.name, formatComponentUnitNumber(event.target.value))
-                      }
-                    />
-                  </label>
-
-                  <WarningNotice
-                    className={styles.fieldWarning}
-                    message={componentUnitNumberWarning}
-                    onDismiss={onDismissComponentUnitNumberWarning}
-                  />
-                </div>
-              ))}
-
-            {config.fields
-              .filter((field) => ['amountMl', 'collectionDate'].includes(field.name))
-              .map((field) => (
-                <ProtocolFieldControl
-                  key={field.name}
-                  field={field}
-                  value={draft[field.name] ?? ''}
-                  onChange={changeValue}
-                  onOpenRecipients={handleOpenRecipients}
-                  onSelectRecipient={onSelectRecipient}
-                />
-              ))}
-
-            {config.fields
-              .filter((field) => field.name === 'expirationDate')
-              .map((field) => (
-                <div key={field.name} className={styles.componentUnitNumberField}>
-                  <ProtocolFieldControl
-                    field={field}
-                    value={draft[field.name] ?? ''}
-                    onChange={changeValue}
-                    onOpenRecipients={handleOpenRecipients}
-                    onSelectRecipient={onSelectRecipient}
-                  />
-
-                  <WarningNotice
-                    className={styles.fieldWarning}
-                    message={hemaconExpirationWarning ? `${hemaconExpirationWarning}.` : ''}
-                  />
-                </div>
-              ))}
-
-            {config.fields
-              .filter((field) => field.name === 'collectionOrganization')
-              .map((field) => (
-                <ProtocolFieldControl
-                  key={field.name}
-                  field={field}
-                  value={draft[field.name] ?? ''}
-                  onChange={changeValue}
-                  onOpenRecipients={handleOpenRecipients}
-                  onSelectRecipient={onSelectRecipient}
-                />
-              ))}
-          </>
-        ) : blockId === 'indications' ? (
-          <IndicationsFields values={draft} onChange={changeValues} />
+        ) : isDonorComponentBlock(blockId) ? (
+          <DonorComponentFields
+            fields={config.fields}
+            values={draft}
+            onChange={changeValues}
+            savedDocument={savedDocument}
+            componentUnitNumberWarning={componentUnitNumberWarning}
+            onDismissComponentUnitNumberWarning={onDismissComponentUnitNumberWarning}
+          />
         ) : blockId === 'history' ? (
           <RecipientHistoryFields
             applyDefaults={!savedDocument}

@@ -36,7 +36,18 @@
 .obstetricGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: end;
   gap: 0.9rem 1.1rem;
+}
+
+.obstetricGrid input {
+  width: 6rem;
+  max-width: 100%;
+}
+
+.obstetricGrid [aria-haspopup='listbox'] {
+  width: 10rem;
+  max-width: 100%;
 }
 
 @media (max-width: 680px) {

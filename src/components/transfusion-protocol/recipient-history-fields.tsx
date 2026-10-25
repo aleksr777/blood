@@ -35,18 +35,24 @@ const OBSTETRIC_FIELDS: ProtocolFieldConfig[] = [
     label: 'Количество беременностей',
     type: 'number',
     step: '1',
+    min: '0',
+    max: '99',
   },
   {
     name: 'recipientBirthsCount',
     label: 'Количество родов',
     type: 'number',
     step: '1',
+    min: '0',
+    max: '99',
   },
   {
     name: 'recipientSpontaneousAbortionsCount',
     label: 'Самопроизвольные аборты в анамнезе',
     type: 'number',
     step: '1',
+    min: '0',
+    max: '99',
   },
   {
     name: 'recipientHemolyticDiseaseNewbornHistory',
@@ -148,7 +154,10 @@ export const RecipientHistoryFields = ({
                 key={field.name}
                 field={field}
                 value={values[field.name] ?? ''}
-                onChange={(name, value) => onChange({ [name]: value })}
+                onChange={(name, value) => {
+                  if (field.type === 'number' && !/^\d{0,2}$/.test(value)) return;
+                  onChange({ [name]: value });
+                }}
               />
             ))}
           </div>

@@ -1,6 +1,10 @@
 import { useEffect } from 'react';
 import { ProtocolFieldControl } from './protocol-field-control';
-import { HISTORY_STATUS, getHistoryStatus } from './recipient-history-model';
+import {
+  HISTORY_STATUS,
+  getHistoryStatus,
+  TRANSFUSION_HISTORY_FIELDS,
+} from './recipient-history-model';
 import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 import styles from './recipient-history-fields.module.css';
 
@@ -12,24 +16,6 @@ type Props = {
   showTransfusionHistory?: boolean;
   onChange: (values: ProtocolValues) => void;
 };
-
-const HISTORY_FIELDS = [
-  {
-    statusName: 'previousTransfusionsStatus',
-    textName: 'previousTransfusions',
-    label: 'Трансфузии компонентов крови в анамнезе',
-  },
-  {
-    statusName: 'previousReactionsStatus',
-    textName: 'previousReactions',
-    label: 'Реакции и осложнения на трансфузии в анамнезе',
-  },
-  {
-    statusName: 'individualSelectionHistoryStatus',
-    textName: 'individualSelectionHistory',
-    label: 'Трансфузии по индивидуальному подбору',
-  },
-] as const;
 
 const STATUS_OPTIONS = [
   [HISTORY_STATUS.none, 'Не было'],
@@ -169,7 +155,7 @@ export const RecipientHistoryFields = ({
       )}
 
       {showTransfusionHistory &&
-        HISTORY_FIELDS.map(({ statusName, textName, label }, index) => {
+        TRANSFUSION_HISTORY_FIELDS.map(({ statusName, textName, label }, index) => {
           const status = getHistoryStatus(values[statusName], values[textName]);
           const disabled = index > 0 && dependentHistoryDisabled;
 
@@ -200,6 +186,7 @@ export const RecipientHistoryFields = ({
               {status === HISTORY_STATUS.had && (
                 <textarea
                   name={textName}
+                  aria-label={label}
                   rows={4}
                   value={values[textName] ?? ''}
                   onChange={(event) => onChange({ [textName]: event.target.value })}

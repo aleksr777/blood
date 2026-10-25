@@ -7,7 +7,7 @@ import { usePendingSavedDocument } from '../saved-document/saved-document-naviga
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
-import { formatBloodComponentName } from '../../domain/blood-components';
+import { RECIPIENT_PROFILE_FIELDS } from '../../storage/sqlite/recipient-data';
 import {
   useCallback,
   useEffect,
@@ -47,7 +47,16 @@ import {
   formatAlloimmuneAntibodies,
   formatRecipientAntigens,
 } from '../transfusion-protocol/recipient-examination-model';
-import { HISTORY_STATUS, getHistoryStatus } from '../transfusion-protocol/recipient-history-model';
+import {
+  formatHistoryValue,
+  TRANSFUSION_HISTORY_FIELDS,
+} from '../transfusion-protocol/recipient-history-model';
+import { RecipientHistoryModal } from '../transfusion-protocol/recipient-history-modal';
+import {
+  hasStructuredDirectionHistory,
+  hasStructuredObstetricHistory,
+  restoreDirectionHistory,
+} from './direction-history';
 import {
   formatIndications,
   getIndicationComponent,
@@ -55,12 +64,11 @@ import {
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
-import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
-import { IndividualSelectionTransfusionHistoryModal } from './individual-selection-transfusion-history-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { normalizeDirectionIndications } from './direction-indications';
+import { useFormPages } from './use-form-pages';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:individual-selection-direction-draft';
@@ -86,12 +94,12 @@ type AutoField =
   | 'department'
   | 'medicalRecordNumber'
   | 'diagnosis'
-  | 'transfusionHistory'
   | 'obstetricHistory'
   | 'recipientSex';
 
 type DirectionDraft = Record<AutoField, string> & {
   sourceRecipientId: string;
+  transfusionHistory: string;
   requiredComponent: string;
   quantity: string;
   individualSelectionIndications: string;
@@ -105,14 +113,7 @@ type DirectionDraft = Record<AutoField, string> & {
 };
 
 type Editor =
-  | 'organization'
-  | 'component'
-  | 'examination'
-  | 'recipient'
-  | 'transfusion'
-  | 'obstetric'
-  | 'footer'
-  | null;
+  'organization' | 'component' | 'examination' | 'recipient' | 'history' | 'footer' | null;
 
 const AUTO_FIELDS: AutoField[] = [
   'recipientAboRh',
@@ -122,7 +123,6 @@ const AUTO_FIELDS: AutoField[] = [
   'department',
   'medicalRecordNumber',
   'diagnosis',
-  'transfusionHistory',
   'obstetricHistory',
   'recipientSex',
 ];
@@ -232,6 +232,10 @@ const loadDraft = (): DirectionDraft => {
           : {},
     } as DirectionDraft;
 
+    next.recipientProfileSnapshot = restoreDirectionHistory(
+      next.recipientProfileSnapshot,
+      next.transfusionHistory,
+    );
     next.quantity = sanitizeDoseQuantity(next.quantity);
     next.indicationValues = normalizeDirectionIndications(
       next.indicationValues,
@@ -299,6 +303,10 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
     autoValues,
   } as DirectionDraft;
 
+  next.recipientProfileSnapshot = restoreDirectionHistory(
+    next.recipientProfileSnapshot,
+    next.transfusionHistory,
+  );
   next.quantity = sanitizeDoseQuantity(next.quantity);
   return next;
 };
@@ -317,52 +325,13 @@ const formatObstetricHistory = (values: ProtocolValues) => {
     .join('; ');
 };
 
-const formatTransfusionHistory = (values: ProtocolValues) => {
-  const parts: string[] = [];
-
-  const previousStatus = getHistoryStatus(
-    values.previousTransfusionsStatus,
-    values.previousTransfusions,
-  );
-  if (previousStatus === HISTORY_STATUS.none) {
-    parts.push('Трансфузий не было.');
-  } else if (previousStatus === HISTORY_STATUS.unknown) {
-    parts.push('Не известно.');
-  } else if (previousStatus === HISTORY_STATUS.had && values.previousTransfusions?.trim()) {
-    parts.push(`Трансфузии: ${values.previousTransfusions.trim()}`);
-  }
-
-  const reactionsStatus = getHistoryStatus(
-    values.previousReactionsStatus,
-    values.previousReactions,
-  );
-  if (reactionsStatus === HISTORY_STATUS.none) {
-    parts.push('Реакции и осложнения: не было');
-  } else if (reactionsStatus === HISTORY_STATUS.unknown) {
-    parts.push('Реакции и осложнения: не известно');
-  } else if (reactionsStatus === HISTORY_STATUS.had && values.previousReactions?.trim()) {
-    parts.push(`Реакции и осложнения: ${values.previousReactions.trim()}`);
-  }
-
-  const selectionStatus = getHistoryStatus(
-    values.individualSelectionHistoryStatus,
-    values.individualSelectionHistory,
-  );
-  if (selectionStatus === HISTORY_STATUS.none) {
-    parts.push('Индивидуальный подбор: не проводился');
-  } else if (selectionStatus === HISTORY_STATUS.unknown) {
-    parts.push('Индивидуальный подбор: не известно');
-  } else if (selectionStatus === HISTORY_STATUS.had && values.individualSelectionHistory?.trim()) {
-    parts.push(`Индивидуальный подбор: ${values.individualSelectionHistory.trim()}`);
-  }
-
-  return parts.join('; ');
-};
-
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
-): Promise<Partial<Record<AutoField, string>>> => {
-  if (!recipient) return {};
+): Promise<{
+  autoValues: Partial<Record<AutoField, string>>;
+  recipientProfileSnapshot: ProtocolValues;
+}> => {
+  if (!recipient) return { autoValues: {}, recipientProfileSnapshot: {} };
 
   const protocolDraft = await loadProtocolDraft();
   const sameRecipient = Number(protocolDraft.values.recipientId) === recipient.id;
@@ -376,34 +345,41 @@ const currentAutoValues = async (
   };
 
   return {
-    recipientAboRh: [values.recipientAbo, values.recipientRh].filter(Boolean).join(' '),
-    recipientPhenotype: formatRecipientAntigens(values),
-    recipientName: recipient.fullName,
-    recipientAge: formatRecipientAge(values.recipientBirthDate),
-    department: values.department?.trim() ?? '',
-    medicalRecordNumber: values.medicalRecordNumber?.trim() ?? '',
-    diagnosis: values.diagnosis?.trim() ?? '',
-    transfusionHistory: formatTransfusionHistory(values),
-    obstetricHistory: values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '',
-    recipientSex: values.recipientSex?.trim() ?? '',
+    autoValues: {
+      recipientAboRh: [values.recipientAbo, values.recipientRh].filter(Boolean).join(' '),
+      recipientPhenotype: formatRecipientAntigens(values),
+      recipientName: recipient.fullName,
+      recipientAge: formatRecipientAge(values.recipientBirthDate),
+      department: values.department?.trim() ?? '',
+      medicalRecordNumber: values.medicalRecordNumber?.trim() ?? '',
+      diagnosis: values.diagnosis?.trim() ?? '',
+      obstetricHistory: values.recipientSex === 'Женский' ? formatObstetricHistory(values) : '',
+      recipientSex: values.recipientSex?.trim() ?? '',
+    },
+    recipientProfileSnapshot: {
+      ...Object.fromEntries(
+        [...RECIPIENT_PROFILE_FIELDS, 'previousTransfusionsAutoText'].flatMap((field) =>
+          values[field] !== undefined ? [[field, values[field]]] : [],
+        ),
+      ),
+      recipientId: String(recipient.id),
+      recipientName: recipient.fullName,
+    },
   };
 };
 
 const mergeAutoValues = (
   current: DirectionDraft,
   recipient: CurrentRecipient | null,
-  autoValues: Partial<Record<AutoField, string>>,
+  currentData: Awaited<ReturnType<typeof currentAutoValues>>,
 ): DirectionDraft => {
   if (!recipient) return current;
+  const { autoValues, recipientProfileSnapshot } = currentData;
 
   const next: DirectionDraft = {
     ...current,
     sourceRecipientId: String(recipient.id),
-    recipientProfileSnapshot: {
-      ...recipient.profile,
-      recipientId: String(recipient.id),
-      recipientName: recipient.fullName,
-    },
+    recipientProfileSnapshot,
     autoValues: { ...autoValues },
   };
 
@@ -525,7 +501,6 @@ export const IndividualSelectionDirection = () => {
     open: openSavedDocument,
     isActive: hasSavedDocument,
   } = documentState;
-  const selectedComponent = getIndicationComponent(draft.indicationValues);
   const [editor, setEditorState] = useState<Editor>(null);
   const setEditor = (next: Editor) => {
     if (next === null || !documentState.isReadOnly()) setEditorState(next);
@@ -537,9 +512,6 @@ export const IndividualSelectionDirection = () => {
   const pendingProfileUpdateRef = useRef<Promise<void>>(Promise.resolve());
   const draftRef = useRef(draft);
   draftRef.current = draft;
-  const [page2StartIndex, setPage2StartIndex] = useState(7);
-  const page1Ref = useRef<HTMLElement>(null);
-  const page1ContentRef = useRef<HTMLDivElement>(null);
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
@@ -871,6 +843,7 @@ export const IndividualSelectionDirection = () => {
         ...draftRef.current,
         sourceRecipientId: String(recipient.id),
         recipientProfileSnapshot: {
+          ...draftRef.current.recipientProfileSnapshot,
           ...recipient.profile,
           recipientId: String(recipient.id),
           recipientName: recipient.fullName,
@@ -958,6 +931,7 @@ export const IndividualSelectionDirection = () => {
   const examinationValues = useMemo<ProtocolValues>(() => {
     if (currentRecipient && !documentState.active) {
       return {
+        ...draft.recipientProfileSnapshot,
         ...currentRecipient.profile,
         recipientId: String(currentRecipient.id),
         recipientName: currentRecipient.fullName,
@@ -984,7 +958,10 @@ export const IndividualSelectionDirection = () => {
       return Promise.resolve();
     }
     const recipient = readCurrentRecipient();
-    if (!recipient) return Promise.resolve();
+    if (!recipient) {
+      setDraft((current) => updateSavedRequestProfile(current, changes));
+      return Promise.resolve();
+    }
     const version = ++profileEditVersionRef.current;
     setCurrentRecipient((current) =>
       current?.id === recipient.id
@@ -1044,6 +1021,7 @@ export const IndividualSelectionDirection = () => {
     <div
       key="organization"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('organization')}
@@ -1056,6 +1034,7 @@ export const IndividualSelectionDirection = () => {
     <div
       key="recipient"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('recipient')}
@@ -1076,6 +1055,7 @@ export const IndividualSelectionDirection = () => {
     <div
       key="examination"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('examination')}
@@ -1092,30 +1072,46 @@ export const IndividualSelectionDirection = () => {
       />
     </div>,
 
-    <div
-      key="transfusion"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('transfusion')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('transfusion'))}
-    >
-      <AdaptiveRuledField label="Гемотрансфузионный анамнез:" value={draft.transfusionHistory} />
-    </div>,
+    ...TRANSFUSION_HISTORY_FIELDS.map(({ label, statusName, textName }, index) => (
+      <div
+        key={statusName}
+        className={styles.fillSection}
+        data-form-section
+        role={documentState.readOnly ? undefined : 'button'}
+        tabIndex={documentState.readOnly ? -1 : 0}
+        onClick={() => setEditor('history')}
+        onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('history'))}
+      >
+        <AdaptiveRuledField
+          label={`${label}:`}
+          value={
+            formatHistoryValue(examinationValues, statusName, textName) ||
+            (index === 0 && !hasStructuredDirectionHistory(examinationValues)
+              ? draft.transfusionHistory
+              : '')
+          }
+        />
+      </div>
+    )),
 
     ...(draft.recipientSex === 'Женский'
       ? [
           <div
             key="obstetric"
             className={styles.fillSection}
+            data-form-section
             role={documentState.readOnly ? undefined : 'button'}
             tabIndex={documentState.readOnly ? -1 : 0}
-            onClick={() => setEditor('obstetric')}
-            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('obstetric'))}
+            onClick={() => setEditor('history')}
+            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('history'))}
           >
             <AdaptiveRuledField
               label="Акушерский анамнез у женщин:"
-              value={draft.obstetricHistory}
+              value={
+                hasStructuredObstetricHistory(examinationValues)
+                  ? formatObstetricHistory(examinationValues)
+                  : draft.obstetricHistory
+              }
             />
           </div>,
         ]
@@ -1124,6 +1120,7 @@ export const IndividualSelectionDirection = () => {
     <div
       key="component"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('component')}
@@ -1131,7 +1128,7 @@ export const IndividualSelectionDirection = () => {
     >
       <AdaptiveRuledField
         label="Наименование требуемого компонента:"
-        value={formatBloodComponentName(draft.requiredComponent, selectedComponent)}
+        value={draft.requiredComponent}
       />
       <div className={styles.singleLine}>
         <span>Количество:</span>
@@ -1150,6 +1147,7 @@ export const IndividualSelectionDirection = () => {
     <div
       key="footer"
       className={styles.fillSection}
+      data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('footer')}
@@ -1182,10 +1180,14 @@ export const IndividualSelectionDirection = () => {
     draft.recipientPhenotype,
     formatAlloimmuneAntibodies(examinationValues),
     formatIndications(draft.indicationValues),
+    ...TRANSFUSION_HISTORY_FIELDS.map(({ statusName, textName }) =>
+      formatHistoryValue(examinationValues, statusName, textName),
+    ),
     draft.transfusionHistory,
     draft.recipientSex,
+    formatObstetricHistory(examinationValues),
     draft.obstetricHistory,
-    formatBloodComponentName(draft.requiredComponent, selectedComponent),
+    draft.requiredComponent,
     draft.quantity,
     draft.individualSelectionIndications,
     draft.directionDate,
@@ -1193,42 +1195,19 @@ export const IndividualSelectionDirection = () => {
     draft.doctorPhone,
   ].join('\u0001');
 
-  const splitIndex = Math.min(page2StartIndex, formSections.length);
-  const hasSecondPage = splitIndex < formSections.length;
+  const { pageStarts, pageRefs } = useFormPages(formSections.length, paginationKey);
 
-  useLayoutEffect(() => {
-    setPage2StartIndex(formSections.length);
-  }, [formSections.length, paginationKey]);
-
-  useLayoutEffect(() => {
-    const page = page1Ref.current;
-    const content = page1ContentRef.current;
-    if (!page || !content) return undefined;
-
-    const fitPage = () => {
-      if (page.scrollHeight > page.clientHeight + 1 && page2StartIndex > 0) {
-        setPage2StartIndex((current) => Math.max(0, Math.min(current, formSections.length) - 1));
-      }
-    };
-
-    fitPage();
-
-    if (typeof ResizeObserver === 'undefined') return undefined;
-
-    const observer = new ResizeObserver(fitPage);
-    observer.observe(content);
-
-    return () => observer.disconnect();
-  }, [formSections.length, page2StartIndex, paginationKey]);
-
-  const printPage = (page: 1 | 2) => {
-    const className = `print-individual-selection-page-${page}`;
-    document.body.classList.add(className);
+  const printPage = (page: number) => {
+    const sheet = pageRefs.current[page - 1];
+    if (!sheet) return;
+    document.body.classList.add('print-individual-direction');
+    sheet.setAttribute('data-print-active', '');
 
     try {
       window.print();
     } finally {
-      document.body.classList.remove(className);
+      sheet.removeAttribute('data-print-active');
+      document.body.classList.remove('print-individual-direction');
       if (!documentState.active) void save(true);
     }
   };
@@ -1284,60 +1263,41 @@ export const IndividualSelectionDirection = () => {
             >
               {documentState.editing ? 'Сохранить изменения' : 'Сохранить'}
             </button>
-            {hasSecondPage ? (
-              <>
-                <button
-                  type="button"
-                  className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-                  onClick={() => printPage(1)}
-                >
-                  Печать страницы 1
-                </button>
-                <button
-                  type="button"
-                  className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-                  onClick={() => printPage(2)}
-                >
-                  Печать страницы 2
-                </button>
-              </>
-            ) : (
+            {pageStarts.map((_, index) => (
               <button
+                key={index}
                 type="button"
                 className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-                onClick={() => printPage(1)}
+                onClick={() => printPage(index + 1)}
               >
-                Печать страницы
+                {pageStarts.length > 1 ? `Печать страницы ${index + 1}` : 'Печать страницы'}
               </button>
-            )}
+            ))}
           </div>
           <AnimatedMessage message={status} className="toolbar-status" />
         </div>
       </header>
 
       <div className={styles.sheetWrap} data-document-paper>
-        <section
-          ref={page1Ref}
-          className={`${styles.sheet} ${styles.pageOne}`}
-          aria-label="Направление на индивидуальный подбор, страница 1"
-        >
-          <div ref={page1ContentRef} className={styles.pageContent}>
-            <h1 className={styles.title}>
-              Направление на индивидуальный подбор компонентов крови.
-            </h1>
-
-            {formSections.slice(0, splitIndex)}
-          </div>
-        </section>
-
-        {hasSecondPage && (
+        {pageStarts.map((start, index) => (
           <section
-            className={`${styles.sheet} ${styles.pageTwo}`}
-            aria-label="Направление на индивидуальный подбор, страница 2"
+            key={index}
+            ref={(element) => {
+              pageRefs.current[index] = element;
+            }}
+            className={`${styles.sheet} ${index === 0 ? styles.pageOne : styles.pageTwo}`}
+            aria-label={`Направление на индивидуальный подбор, страница ${index + 1}`}
           >
-            <div className={styles.pageContent}>{formSections.slice(splitIndex)}</div>
+            <div className={styles.pageContent}>
+              {index === 0 && (
+                <h1 className={styles.title}>
+                  Направление на индивидуальный подбор компонентов крови.
+                </h1>
+              )}
+              {formSections.slice(start, pageStarts[index + 1] ?? formSections.length)}
+            </div>
           </section>
-        )}
+        ))}
       </div>
 
       {editor === 'recipient' && (
@@ -1354,17 +1314,10 @@ export const IndividualSelectionDirection = () => {
         />
       )}
 
-      {editor === 'obstetric' && draft.recipientSex === 'Женский' && (
-        <IndividualSelectionObstetricHistoryModal
+      {editor === 'history' && (
+        <RecipientHistoryModal
           values={examinationValues}
-          onChange={updateExamination}
-          onClose={() => setEditor(null)}
-        />
-      )}
-
-      {editor === 'transfusion' && (
-        <IndividualSelectionTransfusionHistoryModal
-          values={examinationValues}
+          savedDocument={documentState.active}
           onChange={updateExamination}
           onClose={() => setEditor(null)}
         />

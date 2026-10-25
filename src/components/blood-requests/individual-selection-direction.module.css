@@ -393,6 +393,15 @@
     break-before: auto !important;
   }
 
+  :global(body.print-individual-direction) .sheet:not([data-print-active]) {
+    display: none !important;
+  }
+
+  :global(body.print-individual-direction) .sheet[data-print-active] {
+    page-break-before: auto !important;
+    break-before: auto !important;
+  }
+
   .fillSection,
   .fillSection:hover,
   .fillSection:focus-visible {

@@ -30,9 +30,6 @@ export const BLOOD_COMPONENTS = [
 export const getBloodComponentNameCategory = (group?: string) =>
   BLOOD_COMPONENTS.some(({ value }) => value === group) ? `componentName:${group}` : null;
 
-export const formatBloodComponentName = (name: string, group?: string) =>
-  name.trim() ? name : (BLOOD_COMPONENTS.find(({ value }) => value === group)?.label ?? '');
-
 export const inferBloodComponentGroup = (name = '') => {
   const normalized = name.trim().toLocaleLowerCase('ru-RU');
   if (normalized.includes('эритроц') || normalized.includes('эритромас')) return 'erythrocytes';

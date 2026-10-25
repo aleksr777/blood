@@ -8,6 +8,24 @@ export const HISTORY_STATUS = {
 
 export type HistoryStatus = (typeof HISTORY_STATUS)[keyof typeof HISTORY_STATUS];
 
+export const TRANSFUSION_HISTORY_FIELDS = [
+  {
+    statusName: 'previousTransfusionsStatus',
+    textName: 'previousTransfusions',
+    label: 'Трансфузии компонентов крови в анамнезе',
+  },
+  {
+    statusName: 'previousReactionsStatus',
+    textName: 'previousReactions',
+    label: 'Реакции и осложнения на трансфузии в анамнезе',
+  },
+  {
+    statusName: 'individualSelectionHistoryStatus',
+    textName: 'individualSelectionHistory',
+    label: 'Трансфузии по индивидуальному подбору в анамнезе',
+  },
+] as const;
+
 export const getHistoryStatus = (status?: string, text?: string): HistoryStatus | '' => {
   if (
     status === HISTORY_STATUS.none ||

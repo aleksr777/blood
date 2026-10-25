@@ -9,7 +9,7 @@ import { MonitoringFields } from './monitoring-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { formatRecipientAge } from './recipient-demographics';
 import { RecipientExaminationFields } from './recipient-examination-fields';
-import { RecipientHistoryFields } from './recipient-history-fields';
+import { RecipientHistoryModal } from './recipient-history-modal';
 import { SelectionFields } from './selection-fields';
 import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
@@ -125,13 +125,21 @@ export const ProtocolEditorModal = ({
     </fieldset>
   );
 
+  if (blockId === 'history') {
+    return (
+      <RecipientHistoryModal
+        values={draft}
+        savedDocument={savedDocument}
+        previousTransfusionSuggestion={previousTransfusionSuggestion}
+        onChange={changeValues}
+        onClose={handleClose}
+      />
+    );
+  }
+
   return (
     <Modal title={config.title} onClose={handleClose} className={styles[config.size]}>
-      <div
-        className={[styles.grid, blockId === 'history' ? styles.historyGrid : '']
-          .filter(Boolean)
-          .join(' ')}
-      >
+      <div className={styles.grid}>
         {(blockId === 'examination' || isDonorComponentBlock(blockId)) && (
           <WarningNotice
             className={styles.bloodGroupWarning}
@@ -167,13 +175,6 @@ export const ProtocolEditorModal = ({
             savedDocument={savedDocument}
             componentUnitNumberWarning={componentUnitNumberWarning}
             onDismissComponentUnitNumberWarning={onDismissComponentUnitNumberWarning}
-          />
-        ) : blockId === 'history' ? (
-          <RecipientHistoryFields
-            applyDefaults={!savedDocument}
-            values={draft}
-            previousTransfusionSuggestion={previousTransfusionSuggestion}
-            onChange={changeValues}
           />
         ) : blockId === 'selection' ? (
           <SelectionFields values={draft} onChange={changeValues} />

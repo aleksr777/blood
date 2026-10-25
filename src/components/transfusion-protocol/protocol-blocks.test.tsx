@@ -4,6 +4,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { DONOR_COMPONENT_TITLE } from './editor-config';
 import { ProtocolBlocks } from './protocol-blocks';
 import { getChunkBlockId, PROTOCOL_CHUNK_ORDER } from './protocol-pagination';
+import { CompatibilityTestsBlock } from './second-page-blocks';
 
 afterEach(cleanup);
 const values = {
@@ -77,4 +78,30 @@ it('opens the same editor from every part even when pagination separates the sub
   for (const chunk of container.querySelectorAll('[data-protocol-block="donor"]'))
     fireEvent.click(chunk.querySelector('th,td')!);
   expect(onOpenBlock.mock.calls).toEqual([['donor'], ['donor'], ['donor'], ['donor']]);
+});
+
+it.each([
+  ['erythrocytes', true],
+  ['plasma-cryo', false],
+  ['platelets', false],
+  ['', false],
+] as const)('keeps the printed test row complete for %s', (componentGroup, showPlane) => {
+  const onOpenBlock = vi.fn();
+  const { container } = render(
+    <table>
+      <CompatibilityTestsBlock
+        values={{ componentGroup, planeTestResult: 'Несовместимо' }}
+        onOpenBlock={onOpenBlock}
+        part="tests"
+      />
+    </table>,
+  );
+  expect(Boolean(screen.queryByText('На плоскости:'))).toBe(showPlane);
+  const cells = [...container.querySelectorAll<HTMLTableCellElement>('.row-tests td')];
+  expect(cells).toHaveLength(showPlane ? 2 : 1);
+  expect(cells.reduce((total, cell) => total + cell.colSpan, 0)).toBe(6);
+  const biological = screen.getByText('Биологическая проба:').closest('td')!;
+  expect(biological.colSpan).toBe(showPlane ? 3 : 6);
+  fireEvent.click(biological);
+  expect(onOpenBlock).toHaveBeenCalledWith('compatibilityTests');
 });

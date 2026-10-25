@@ -155,10 +155,14 @@
 
 .historyRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 1.85rem 1.85rem;
+  grid-template-columns: 1.85rem 1.85rem minmax(0, 1fr);
   align-items: center;
   gap: 0.15rem;
   min-height: 2rem;
+}
+
+.historyRow > :only-child {
+  grid-column: 1 / -1;
 }
 
 .historyFixedRow {

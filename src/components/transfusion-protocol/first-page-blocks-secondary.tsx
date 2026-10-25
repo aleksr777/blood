@@ -130,14 +130,14 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             className="span-3"
             inline
             label="Группа крови донора AB0:"
-            value={[values.donorAbo, formatRh(values.donorRh)].filter(Boolean).join(' ')}
+            value={values.donorAbo}
           />
           <LabeledCell
             colSpan={3}
-            rowSpan={2}
             className="span-3"
-            label="Антигены эритроцитов донора"
-            value={formatDonorAntigens(values)}
+            inline
+            label="Резус-принадлежность"
+            value={formatRh(values.donorRh)}
           />
         </tr>
         <tr>
@@ -147,6 +147,12 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             value={formatComponentUnitNumber(values.componentUnitNumber)}
           />
           <LabeledCell colSpan={1} label="Количество (мл)" value={values.amountMl} />
+          <LabeledCell
+            colSpan={3}
+            className="span-3"
+            label="Антигены эритроцитов донора"
+            value={formatDonorAntigens(values)}
+          />
         </tr>
       </>
     )}

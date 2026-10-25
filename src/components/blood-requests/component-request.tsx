@@ -8,15 +8,7 @@ import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import {
   readCurrentRecipient,
   switchCurrentRecipient,
@@ -59,6 +51,7 @@ import { IndividualSelectionObstetricHistoryModal } from './individual-selection
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
+import { AdaptiveRuledField } from './adaptive-ruled-field';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:component-request-direction-draft';
@@ -376,92 +369,6 @@ const activateOnKeyboard = (event: KeyboardEvent<HTMLElement>, action: () => voi
     event.preventDefault();
     action();
   }
-};
-
-const displayValue = (value?: string) => value?.trim() || ' ';
-
-type AdaptiveRuledFieldProps = {
-  label: string;
-  value: string;
-  minRows?: number;
-};
-
-const AdaptiveRuledField = ({ label, value, minRows = 1 }: AdaptiveRuledFieldProps) => {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const inlineMeasureRef = useRef<HTMLDivElement>(null);
-  const measureRef = useRef<HTMLDivElement>(null);
-  const [breakBeforeValue, setBreakBeforeValue] = useState(false);
-  const [rowCount, setRowCount] = useState(minRows);
-
-  const updateLayout = useCallback(() => {
-    const inlineMeasure = inlineMeasureRef.current;
-    const measure = measureRef.current;
-    if (!inlineMeasure || !measure) return;
-
-    const lineHeight = Number.parseFloat(window.getComputedStyle(inlineMeasure).lineHeight);
-    if (!Number.isFinite(lineHeight) || lineHeight <= 0) return;
-
-    const inlineHeight = inlineMeasure.scrollHeight;
-    const shouldBreakBeforeValue = Boolean(value) && inlineHeight > lineHeight + 0.5;
-
-    setBreakBeforeValue((current) =>
-      current === shouldBreakBeforeValue ? current : shouldBreakBeforeValue,
-    );
-
-    const measuredHeight = measure.scrollHeight;
-    const measuredRows = Math.ceil((measuredHeight - 0.5) / lineHeight);
-    const nextRowCount = Math.max(minRows, measuredRows);
-    setRowCount((current) => (current === nextRowCount ? current : nextRowCount));
-  }, [minRows, value]);
-
-  useLayoutEffect(() => {
-    updateLayout();
-
-    const root = rootRef.current;
-    if (!root || typeof ResizeObserver === 'undefined') return undefined;
-
-    const observer = new ResizeObserver(updateLayout);
-    observer.observe(root);
-
-    return () => observer.disconnect();
-  }, [breakBeforeValue, label, updateLayout, value]);
-
-  const inlineContent = (
-    <>
-      <span className={styles.adaptiveLabel}>{label}</span>
-      {value && <span className={styles.adaptiveText}> {value}</span>}
-    </>
-  );
-
-  return (
-    <div ref={rootRef} className={styles.adaptiveField}>
-      {breakBeforeValue ? (
-        <div className={styles.adaptiveMultiline}>
-          <div className={styles.adaptiveMultilineLabel}>{label}</div>
-          <div className={styles.adaptiveMultilineValueArea}>
-            <span className={styles.adaptiveRules} aria-hidden="true">
-              {Array.from({ length: rowCount }, (_, index) => (
-                <span key={index} />
-              ))}
-            </span>
-            <div className={styles.adaptiveMultilineValue}>{value}</div>
-          </div>
-        </div>
-      ) : (
-        <div className={styles.adaptiveSingleLine}>
-          <span className={styles.adaptiveSingleLabel}>{label}</span>
-          <span className={styles.adaptiveSingleValue}>{value || ' '}</span>
-        </div>
-      )}
-
-      <div ref={measureRef} className={styles.adaptiveMeasure} aria-hidden="true">
-        <span className={styles.adaptiveMeasureValue}>{value || ' '}</span>
-      </div>
-      <div ref={inlineMeasureRef} className={styles.adaptiveInlineMeasure} aria-hidden="true">
-        {inlineContent}
-      </div>
-    </div>
-  );
 };
 
 const formatDirectionDate = (value: string) => {
@@ -1018,14 +925,8 @@ export const ComponentRequest = () => {
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
     >
       <AdaptiveRuledField label="Ф.И.О. реципиента:" value={draft.recipientName} />
-      <div className={styles.singleLine}>
-        <span>Возраст:</span>
-        <span className={styles.valueLine}>{displayValue(draft.recipientAge)}</span>
-      </div>
-      <div className={styles.singleLine}>
-        <span>№ медицинской карты:</span>
-        <span className={styles.valueLine}>{displayValue(draft.medicalRecordNumber)}</span>
-      </div>
+      <AdaptiveRuledField label="Возраст:" value={draft.recipientAge} />
+      <AdaptiveRuledField label="№ медицинской карты:" value={draft.medicalRecordNumber} />
       <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
     </div>,
 
@@ -1037,10 +938,10 @@ export const ComponentRequest = () => {
       onClick={() => setEditor('examination')}
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('examination'))}
     >
-      <div className={styles.singleLine}>
-        <span>Группа крови и резус-фактор реципиента:</span>
-        <span className={styles.valueLine}>{displayValue(draft.recipientAboRh)}</span>
-      </div>
+      <AdaptiveRuledField
+        label="Группа крови и резус-фактор реципиента:"
+        value={draft.recipientAboRh}
+      />
       <AdaptiveRuledField label="Фенотип реципиента:" value={draft.recipientPhenotype} />
       <AdaptiveRuledField
         label="Аллоиммунные антитела:"
@@ -1078,25 +979,18 @@ export const ComponentRequest = () => {
         label="Наименование требуемого компонента:"
         value={draft.requiredComponent}
       />
-      <div className={styles.singleLine}>
-        <span>Группа крови и резус-фактор компонента:</span>
-        <span className={styles.valueLine}>
-          {displayValue([draft.componentAbo, draft.componentRh].filter(Boolean).join(' '))}
-        </span>
-      </div>
-      <div className={styles.singleLine}>
-        <span>Количество:</span>
-        <span className={styles.valueLine}>{displayValue(formatDoseQuantity(draft.quantity))}</span>
-      </div>
+      <AdaptiveRuledField
+        label="Группа крови и резус-фактор компонента:"
+        value={[draft.componentAbo, draft.componentRh].filter(Boolean).join(' ')}
+      />
+      <AdaptiveRuledField label="Количество:" value={formatDoseQuantity(draft.quantity)} />
       <AdaptiveRuledField label="Порядок трансфузии:" value={transfusionOrderText} />
       <AdaptiveRuledField
         label="Показания к трансфузии:"
         value={formatIndications(draft.indicationValues)}
       />
       {isErythrocytes && componentSelectionRequirementText && (
-        <div className={styles.singleLine}>
-          <span className={styles.valueLine}>{componentSelectionRequirementText}</span>
-        </div>
+        <AdaptiveRuledField label="" value={componentSelectionRequirementText} />
       )}
       {requiresIndividualSelection && (
         <AdaptiveRuledField
@@ -1114,19 +1008,13 @@ export const ComponentRequest = () => {
       onClick={() => setEditor('footer')}
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('footer'))}
     >
-      <div className={styles.directionDate}>
-        <span>Дата направления:</span>{' '}
-        <span className={styles.enteredValue}>{formatDirectionDate(draft.directionDate)}</span>
-      </div>
+      <AdaptiveRuledField
+        label="Дата направления:"
+        value={formatDirectionDate(draft.directionDate)}
+      />
 
-      <div className={`${styles.singleLine} ${styles.doctorLine}`}>
-        <span>Врач, назначивший трансфузию:</span>
-        <span className={styles.valueLine}>{displayValue(draft.doctorName)}</span>
-      </div>
-      <div className={styles.singleLine}>
-        <span>Контактный телефон:</span>
-        <span className={styles.valueLine}>{displayValue(draft.doctorPhone)}</span>
-      </div>
+      <AdaptiveRuledField label="Врач, назначивший трансфузию:" value={draft.doctorName} />
+      <AdaptiveRuledField label="Контактный телефон:" value={draft.doctorPhone} />
     </div>,
   ];
 

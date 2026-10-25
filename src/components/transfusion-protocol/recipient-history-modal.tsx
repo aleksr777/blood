@@ -23,7 +23,7 @@ export const RecipientHistoryModal = ({
       <RecipientHistoryFields
         values={values}
         applyDefaults={!savedDocument}
-        previousTransfusionSuggestion={previousTransfusionSuggestion}
+        previousTransfusionSuggestion={savedDocument ? '' : previousTransfusionSuggestion}
         onChange={(changes) => void onChange(changes)}
       />
     </div>

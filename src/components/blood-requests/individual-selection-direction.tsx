@@ -16,6 +16,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type MouseEvent,
 } from 'react';
 import {
   readCurrentRecipient,
@@ -52,7 +53,9 @@ import {
   TRANSFUSION_HISTORY_FIELDS,
 } from '../transfusion-protocol/recipient-history-model';
 import { RecipientHistoryModal } from '../transfusion-protocol/recipient-history-modal';
+import { usePreviousTransfusionSuggestion } from '../transfusion-protocol/use-previous-transfusion-suggestion';
 import {
+  generatedDirectionHistory,
   hasStructuredDirectionHistory,
   hasStructuredObstetricHistory,
   restoreDirectionHistory,
@@ -561,6 +564,10 @@ export const IndividualSelectionDirection = () => {
             }
           : current;
       let next = mergeAutoValues(base, recipient, autoValues);
+      next.recipientProfileSnapshot = {
+        ...next.recipientProfileSnapshot,
+        ...generatedDirectionHistory(base.recipientProfileSnapshot),
+      };
       const component = getIndicationComponent(next.indicationValues);
       if (recipient) {
         if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
@@ -845,6 +852,7 @@ export const IndividualSelectionDirection = () => {
         recipientProfileSnapshot: {
           ...draftRef.current.recipientProfileSnapshot,
           ...recipient.profile,
+          ...generatedDirectionHistory(draftRef.current.recipientProfileSnapshot),
           recipientId: String(recipient.id),
           recipientName: recipient.fullName,
         },
@@ -933,6 +941,7 @@ export const IndividualSelectionDirection = () => {
       return {
         ...draft.recipientProfileSnapshot,
         ...currentRecipient.profile,
+        ...generatedDirectionHistory(draft.recipientProfileSnapshot),
         recipientId: String(currentRecipient.id),
         recipientName: currentRecipient.fullName,
       };
@@ -949,6 +958,11 @@ export const IndividualSelectionDirection = () => {
       recipientAge: draft.recipientAge,
     };
   }, [currentRecipient, draft, documentState.active]);
+
+  const previousTransfusionSuggestion = usePreviousTransfusionSuggestion({
+    recipientId: examinationValues.recipientId,
+    savedDocument: documentState.active,
+  });
 
   const updateExamination = (changes: ProtocolValues) => {
     if (documentState.isActive()) {
@@ -986,6 +1000,39 @@ export const IndividualSelectionDirection = () => {
     })();
     pendingProfileUpdateRef.current = operation;
     return operation;
+  };
+
+  const updateHistory = (changes: ProtocolValues) => {
+    const snapshot = draftRef.current.recipientProfileSnapshot;
+    if (
+      documentState.isActive() ||
+      !(changes.previousTransfusionsAutoText || snapshot.previousTransfusionsAutoText)
+    ) {
+      return updateExamination(changes);
+    }
+    const next = updateSavedRequestProfile(draftRef.current, changes);
+    draftRef.current = next;
+    setDraft(next);
+    const shared = Object.fromEntries(
+      Object.entries(changes).filter(
+        ([field]) =>
+          ![
+            'previousTransfusions',
+            'previousTransfusionsStatus',
+            'previousTransfusionsAutoText',
+          ].includes(field),
+      ),
+    );
+    return Object.keys(shared).length > 0 ? updateExamination(shared) : Promise.resolve();
+  };
+
+  const handleHistoryHover = (event: MouseEvent<HTMLDivElement>) => {
+    const hovered =
+      !documentState.readOnly &&
+      event.target instanceof Element &&
+      event.target.closest('[data-history-group]');
+    if (hovered) event.currentTarget.dataset.historyHovered = 'true';
+    else delete event.currentTarget.dataset.historyHovered;
   };
 
   const editorConfig = useMemo(() => {
@@ -1075,10 +1122,18 @@ export const IndividualSelectionDirection = () => {
     ...TRANSFUSION_HISTORY_FIELDS.map(({ label, statusName, textName }, index) => (
       <div
         key={statusName}
-        className={styles.fillSection}
+        className={`${styles.fillSection} ${styles.historySection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
         data-form-section
+        data-history-group
+        data-history-position={
+          index === 0
+            ? 'first'
+            : index === TRANSFUSION_HISTORY_FIELDS.length - 1
+              ? 'last'
+              : 'middle'
+        }
         role={documentState.readOnly ? undefined : 'button'}
-        tabIndex={documentState.readOnly ? -1 : 0}
+        tabIndex={documentState.readOnly || index > 0 ? -1 : 0}
         onClick={() => setEditor('history')}
         onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('history'))}
       >
@@ -1278,7 +1333,14 @@ export const IndividualSelectionDirection = () => {
         </div>
       </header>
 
-      <div className={styles.sheetWrap} data-document-paper>
+      <div
+        className={styles.sheetWrap}
+        data-document-paper
+        onMouseMove={handleHistoryHover}
+        onMouseLeave={(event) => {
+          delete event.currentTarget.dataset.historyHovered;
+        }}
+      >
         {pageStarts.map((start, index) => (
           <section
             key={index}
@@ -1318,7 +1380,8 @@ export const IndividualSelectionDirection = () => {
         <RecipientHistoryModal
           values={examinationValues}
           savedDocument={documentState.active}
-          onChange={updateExamination}
+          previousTransfusionSuggestion={previousTransfusionSuggestion}
+          onChange={updateHistory}
           onClose={() => setEditor(null)}
         />
       )}

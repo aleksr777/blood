@@ -29,6 +29,7 @@ const renderHistory = (source: string, savedDocument = false) => {
   const props = {
     values: savedDocument ? { ...values, previousTransfusionsStatus: 'none' } : values,
     savedDocument,
+    previousTransfusionSuggestion: '24.10.2026 — Отмытые эритроциты, 250 мл',
     onChange,
     onClose: vi.fn(),
   };
@@ -44,7 +45,6 @@ const renderHistory = (source: string, savedDocument = false) => {
         onDismissBloodGroupWarning={vi.fn()}
         componentUnitNumberWarning=""
         onDismissComponentUnitNumberWarning={vi.fn()}
-        previousTransfusionSuggestion=""
         persistReusableOptions={false}
         onOpenRecipients={vi.fn()}
         onSelectRecipient={vi.fn()}
@@ -74,6 +74,12 @@ it.each(['protocol', 'direction'])(
     expect(
       screen.getByRole('group', { name: 'Трансфузии по индивидуальному подбору в анамнезе' }),
     ).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Внести в анамнез' }));
+    expect(onChange).toHaveBeenLastCalledWith({
+      previousTransfusionsStatus: 'had',
+      previousTransfusions: '24.10.2026 — Отмытые эритроциты, 250 мл',
+      previousTransfusionsAutoText: '24.10.2026 — Отмытые эритроциты, 250 мл',
+    });
   },
 );
 
@@ -82,5 +88,6 @@ it.each(['protocol', 'direction'])(
   (source) => {
     const onChange = renderHistory(source, true);
     expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Внести в анамнез' })).toBeNull();
   },
 );

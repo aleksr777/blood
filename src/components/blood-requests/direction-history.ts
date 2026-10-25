@@ -4,6 +4,15 @@ import {
 } from '../transfusion-protocol/recipient-history-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 
+export const generatedDirectionHistory = (values: ProtocolValues): ProtocolValues =>
+  values.previousTransfusionsAutoText?.trim()
+    ? {
+        previousTransfusionsAutoText: values.previousTransfusionsAutoText,
+        previousTransfusionsStatus: values.previousTransfusionsStatus ?? '',
+        previousTransfusions: values.previousTransfusions ?? '',
+      }
+    : {};
+
 export const hasStructuredDirectionHistory = (values: ProtocolValues) =>
   TRANSFUSION_HISTORY_FIELDS.some(
     ({ statusName, textName }) =>

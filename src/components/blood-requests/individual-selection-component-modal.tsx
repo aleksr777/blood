@@ -29,7 +29,6 @@ type Props = {
   transfusionOrder?: string;
   componentSelectionRequirement?: string;
   showRequestOptions?: boolean;
-  fixedIndicationComponent?: string;
   bloodGroupWarning?: string;
   onDismissBloodGroupWarning?: () => void;
   onLocalChange: (values: Record<string, string>) => void;
@@ -47,7 +46,6 @@ export const IndividualSelectionComponentModal = ({
   transfusionOrder = '',
   componentSelectionRequirement = '',
   showRequestOptions = false,
-  fixedIndicationComponent,
   bloodGroupWarning = '',
   onDismissBloodGroupWarning,
   onLocalChange,
@@ -55,7 +53,6 @@ export const IndividualSelectionComponentModal = ({
   onClose,
 }: Props) => {
   const component =
-    fixedIndicationComponent ||
     indicationValues.componentGroup ||
     indicationValues.indicationComponent ||
     inferBloodComponentGroup(requiredComponent);
@@ -125,7 +122,6 @@ export const IndividualSelectionComponentModal = ({
           group={component ?? ''}
           name={requiredComponent}
           inputName="requiredComponent"
-          fixedGroup={fixedIndicationComponent}
           onChange={handleComponentChange}
         />
 

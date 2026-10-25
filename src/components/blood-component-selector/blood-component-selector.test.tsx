@@ -67,7 +67,7 @@ it('requires a group and clears an incompatible name only when the group actuall
   await waitFor(() => expect(loadSavedOptions).toHaveBeenCalledWith('componentName:plasma-cryo'));
 });
 
-it('keeps the direction restricted to erythrocytes while offering its shared names', async () => {
+it('supports a fixed component group while offering its shared names', async () => {
   render(<Harness fixedGroup="erythrocytes" />);
   expect((screen.getByRole('button', { name: 'Эритроциты' }) as HTMLButtonElement).disabled).toBe(
     true,

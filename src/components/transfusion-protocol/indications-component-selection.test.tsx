@@ -68,7 +68,6 @@ it.each([true, false])(
         individualSelectionIndications=""
         indicationValues={{ indicationComponent: 'erythrocytes' }}
         showRequestOptions={showRequestOptions}
-        fixedIndicationComponent={showRequestOptions ? undefined : 'erythrocytes'}
         onLocalChange={onLocalChange}
         onIndicationsChange={onIndicationsChange}
         onClose={() => undefined}
@@ -77,6 +76,9 @@ it.each([true, false])(
     const nameInput = screen.getByRole('textbox', { name: nameLabel }) as HTMLInputElement;
     expect(nameInput.value).toBe('Отмытые эритроциты');
     expect(nameInput.disabled).toBe(false);
+    for (const name of ['Эритроциты', 'Плазма', 'Тромбоциты']) {
+      expect((screen.getByRole('button', { name }) as HTMLButtonElement).disabled).toBe(false);
+    }
     expect(screen.getByRole('button', { name: 'Эритроциты' }).getAttribute('aria-pressed')).toBe(
       'true',
     );
@@ -99,5 +101,11 @@ it.each([true, false])(
     await waitFor(() =>
       expect(loadSavedOptions).toHaveBeenCalledWith('componentName:erythrocytes'),
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Плазма' }));
+    expect(onIndicationsChange).toHaveBeenLastCalledWith({
+      componentGroup: 'plasma-cryo',
+      indicationComponent: 'plasma-cryo',
+    });
+    expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: '' });
   },
 );

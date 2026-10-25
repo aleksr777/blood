@@ -48,7 +48,10 @@ import {
   formatRecipientAntigens,
 } from '../transfusion-protocol/recipient-examination-model';
 import { HISTORY_STATUS, getHistoryStatus } from '../transfusion-protocol/recipient-history-model';
-import { formatIndications } from '../transfusion-protocol/indications-model';
+import {
+  formatIndications,
+  getIndicationComponent,
+} from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
@@ -57,6 +60,7 @@ import { IndividualSelectionRecipientModal } from './individual-selection-recipi
 import { IndividualSelectionTransfusionHistoryModal } from './individual-selection-transfusion-history-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
+import { normalizeDirectionIndications } from './direction-indications';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:individual-selection-direction-draft';
@@ -168,7 +172,7 @@ const emptyDraft = (): DirectionDraft => ({
   directionDate: '',
   doctorName: '',
   doctorPhone: '',
-  indicationValues: { indicationComponent: 'erythrocytes' },
+  indicationValues: normalizeDirectionIndications(),
   recipientProfileSnapshot: {},
   autoValues: {},
 });
@@ -229,10 +233,10 @@ const loadDraft = (): DirectionDraft => {
     } as DirectionDraft;
 
     next.quantity = sanitizeDoseQuantity(next.quantity);
-    next.indicationValues = {
-      ...next.indicationValues,
-      indicationComponent: 'erythrocytes',
-    };
+    next.indicationValues = normalizeDirectionIndications(
+      next.indicationValues,
+      next.requiredComponent,
+    );
     return next;
   } catch {
     return emptyDraft();
@@ -278,10 +282,10 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
   const next = {
     ...blank,
     ...savedValues,
-    indicationValues: {
-      ...indicationValues,
-      indicationComponent: 'erythrocytes',
-    },
+    indicationValues: normalizeDirectionIndications(
+      indicationValues,
+      savedValues.requiredComponent,
+    ),
     recipientProfileSnapshot:
       values.recipientProfileSnapshot &&
       typeof values.recipientProfileSnapshot === 'object' &&
@@ -521,6 +525,7 @@ export const IndividualSelectionDirection = () => {
     open: openSavedDocument,
     isActive: hasSavedDocument,
   } = documentState;
+  const selectedComponent = getIndicationComponent(draft.indicationValues);
   const [editor, setEditorState] = useState<Editor>(null);
   const setEditor = (next: Editor) => {
     if (next === null || !documentState.isReadOnly()) setEditorState(next);
@@ -584,6 +589,7 @@ export const IndividualSelectionDirection = () => {
             }
           : current;
       let next = mergeAutoValues(base, recipient, autoValues);
+      const component = getIndicationComponent(next.indicationValues);
       if (recipient) {
         if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
           next = {
@@ -602,40 +608,42 @@ export const IndividualSelectionDirection = () => {
           );
         }
 
-        if (hasStoredCurrentIndications(recipient.id, 'erythrocytes')) {
+        if (hasStoredCurrentIndications(recipient.id, component)) {
           next = {
             ...next,
             indicationValues: {
               ...(recipientChanged ? {} : next.indicationValues),
-              ...readCurrentIndications(recipient.id, 'erythrocytes'),
-              indicationComponent: 'erythrocytes',
+              ...readCurrentIndications(recipient.id, component),
+              componentGroup: component,
+              indicationComponent: component,
             },
           };
         } else {
           const protocolIndications = currentIndicationsForComponent(
             currentProtocolValues,
-            'erythrocytes',
+            component,
           );
           const hasProtocolIndications = Object.entries(protocolIndications).some(
             ([key, value]) => key !== 'indicationComponent' && value.trim() !== '',
           );
 
           if (hasProtocolIndications) {
-            writeCurrentIndications(recipient.id, 'erythrocytes', protocolIndications);
+            writeCurrentIndications(recipient.id, component, protocolIndications);
             next = {
               ...next,
               indicationValues: {
                 ...(recipientChanged ? {} : next.indicationValues),
                 ...protocolIndications,
-                indicationComponent: 'erythrocytes',
+                componentGroup: component,
+                indicationComponent: component,
               },
             };
           } else if (!hasSavedDocument() && !recipientChanged) {
-            writeCurrentIndications(recipient.id, 'erythrocytes', next.indicationValues);
+            writeCurrentIndications(recipient.id, component, next.indicationValues);
           } else if (recipientChanged) {
             next = {
               ...next,
-              indicationValues: { indicationComponent: 'erythrocytes' },
+              indicationValues: normalizeDirectionIndications({ indicationComponent: component }),
             };
           }
         }
@@ -753,14 +761,22 @@ export const IndividualSelectionDirection = () => {
     if (documentState.isReadOnly()) return;
 
     setDraft((current) => {
+      const currentComponent = getIndicationComponent(current.indicationValues);
+      const component = changes.componentGroup || changes.indicationComponent || currentComponent;
+      const sharedIndications =
+        !documentState.isActive() && currentRecipient && component !== currentComponent
+          ? readCurrentIndications(currentRecipient.id, component)
+          : {};
       const indicationValues = {
         ...current.indicationValues,
+        ...sharedIndications,
         ...changes,
-        indicationComponent: 'erythrocytes',
+        componentGroup: component,
+        indicationComponent: component,
       };
 
       if (!documentState.isActive() && currentRecipient) {
-        writeCurrentIndications(currentRecipient.id, 'erythrocytes', indicationValues);
+        writeCurrentIndications(currentRecipient.id, component, indicationValues);
       }
 
       const next = {
@@ -788,6 +804,7 @@ export const IndividualSelectionDirection = () => {
             ...next,
             indicationValues: {
               ...readCurrentIndications(recipient.id, 'erythrocytes'),
+              componentGroup: 'erythrocytes',
               indicationComponent: 'erythrocytes',
             },
           }
@@ -813,6 +830,7 @@ export const IndividualSelectionDirection = () => {
             ...next,
             indicationValues: {
               ...readCurrentIndications(recipient.id, 'erythrocytes'),
+              componentGroup: 'erythrocytes',
               indicationComponent: 'erythrocytes',
             },
           }
@@ -1113,7 +1131,7 @@ export const IndividualSelectionDirection = () => {
     >
       <AdaptiveRuledField
         label="Наименование требуемого компонента:"
-        value={formatBloodComponentName(draft.requiredComponent, 'erythrocytes')}
+        value={formatBloodComponentName(draft.requiredComponent, selectedComponent)}
       />
       <div className={styles.singleLine}>
         <span>Количество:</span>
@@ -1167,7 +1185,7 @@ export const IndividualSelectionDirection = () => {
     draft.transfusionHistory,
     draft.recipientSex,
     draft.obstetricHistory,
-    draft.requiredComponent,
+    formatBloodComponentName(draft.requiredComponent, selectedComponent),
     draft.quantity,
     draft.individualSelectionIndications,
     draft.directionDate,
@@ -1358,7 +1376,6 @@ export const IndividualSelectionDirection = () => {
           quantity={draft.quantity}
           individualSelectionIndications={draft.individualSelectionIndications}
           indicationValues={draft.indicationValues}
-          fixedIndicationComponent="erythrocytes"
           onLocalChange={updateFields}
           onIndicationsChange={updateIndications}
           onClose={() => setEditor(null)}

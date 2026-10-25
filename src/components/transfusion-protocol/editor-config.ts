@@ -13,9 +13,11 @@ const findBlockConfig = (blockId: ProtocolBlockId): ProtocolBlockConfig => {
 export const isDonorComponentBlock = (blockId: ProtocolBlockId | null) =>
   blockId === 'donor' || blockId === 'indications';
 
+export const DONOR_COMPONENT_TITLE = 'Компонент крови и показания к трансфузии';
+
 const donorComponentConfig: ProtocolBlockConfig = {
   id: 'donor',
-  title: 'Компонент крови и показания к трансфузии',
+  title: DONOR_COMPONENT_TITLE,
   size: 'large',
   fields: [
     ...new Map(

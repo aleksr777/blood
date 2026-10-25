@@ -1,6 +1,8 @@
 import { formatComponentUnitNumber } from './component-unit-number';
 import { formatDonorAntigens } from './donor-model';
+import { DONOR_COMPONENT_TITLE } from './editor-config';
 import { LabeledCell, SectionTitle } from './form-controls';
+import { formatIndications } from './indications-model';
 import { formatHistoryValue, getHistoryStatus, HISTORY_STATUS } from './recipient-history-model';
 import { getSelectionStatus, SELECTION_STATUS } from './selection-model';
 import type { ProtocolPageProps } from './protocol-types';
@@ -88,24 +90,34 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
     data-protocol-chunk={`donor:${part}`}
     onClick={() => onOpenBlock('donor')}
   >
-    {part === 'main' && (
+    {part === 'indications' && (
       <>
-        <SectionTitle>Данные о донорской крови или ее компоненте</SectionTitle>
-        <tr className="row-donor-main">
+        <SectionTitle>{DONOR_COMPONENT_TITLE}</SectionTitle>
+        <tr className="row-large-blank">
           <LabeledCell
-            colSpan={3}
-            className="span-3"
-            label="Наименование компонента донорской крови"
-            value={values.componentName}
-          />
-          <LabeledCell
-            colSpan={3}
-            className="span-3"
-            label="Наименование организации, осуществившей заготовку"
-            value={values.collectionOrganization}
+            colSpan={6}
+            label="Показания к трансфузии"
+            value={formatIndications(values)}
           />
         </tr>
       </>
+    )}
+
+    {part === 'main' && (
+      <tr className="row-donor-main">
+        <LabeledCell
+          colSpan={3}
+          className="span-3"
+          label="Наименование компонента донорской крови"
+          value={values.componentName}
+        />
+        <LabeledCell
+          colSpan={3}
+          className="span-3"
+          label="Наименование организации, осуществившей заготовку"
+          value={values.collectionOrganization}
+        />
+      </tr>
     )}
 
     {part === 'blood' && (

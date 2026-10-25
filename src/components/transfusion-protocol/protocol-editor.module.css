@@ -191,9 +191,26 @@
   font-size: 0.84rem;
 }
 
+.historyEdit,
+.historyDelete,
+.historySave {
+  border: 1px solid currentColor;
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-surface-soft);
+  transition:
+    background-color var(--ui-motion-fast) ease,
+    color var(--ui-motion-fast) ease;
+}
+
 .historySave {
   composes: ui-icon-button ui-success-icon from global;
+  background: var(--ui-success-soft);
   font-weight: 700;
+}
+
+.historySave:hover,
+.historySave:focus-visible {
+  color: var(--ui-success-hover);
 }
 
 .historyEmpty {
@@ -418,8 +435,22 @@
 
 .historyEdit {
   composes: ui-icon-button from global;
+  color: var(--ui-accent);
+}
+
+.historyEdit:hover,
+.historyEdit:focus-visible {
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent-hover);
 }
 
 .historyDelete {
   composes: ui-icon-button ui-danger-icon from global;
+  background: var(--ui-danger-soft);
+}
+
+.historyDelete:hover,
+.historyDelete:focus-visible {
+  background: var(--ui-danger-soft-hover);
+  color: var(--ui-danger-hover);
 }

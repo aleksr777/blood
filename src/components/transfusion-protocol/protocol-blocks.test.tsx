@@ -21,7 +21,7 @@ const values = {
   expirationDate: '2026-12-31',
 };
 
-it('renders history before one complete component/indications subsection', () => {
+it('renders separate indication and donor headings after history with one logical editor', () => {
   const { container } = render(
     <table>
       <ProtocolBlocks chunkIds={PROTOCOL_CHUNK_ORDER} values={values} onOpenBlock={vi.fn()} />
@@ -32,11 +32,18 @@ it('renders history before one complete component/indications subsection', () =>
   expect(chunks.findIndex((chunk) => chunk.dataset.protocolBlock === 'history')).toBeLessThan(
     chunks.findIndex((chunk) => chunk.dataset.protocolBlock === 'donor'),
   );
-  expect(screen.getAllByRole('columnheader', { name: DONOR_COMPONENT_TITLE })).toHaveLength(1);
-  expect(screen.queryByRole('columnheader', { name: 'Показания к трансфузии' })).toBeNull();
+  expect(screen.queryByRole('columnheader', { name: DONOR_COMPONENT_TITLE })).toBeNull();
+  expect(screen.getAllByRole('columnheader', { name: 'Показания к трансфузии' })).toHaveLength(1);
   expect(
-    screen.queryByRole('columnheader', { name: 'Данные о донорской крови или ее компоненте' }),
-  ).toBeNull();
+    screen.getAllByRole('columnheader', { name: 'Данные о донорской крови или ее компоненте' }),
+  ).toHaveLength(1);
+  const headings = screen.getAllByRole('columnheader').map((heading) => heading.textContent);
+  expect(headings.indexOf('Анамнез реципиента')).toBeLessThan(
+    headings.indexOf('Показания к трансфузии'),
+  );
+  expect(headings.indexOf('Показания к трансфузии')).toBeLessThan(
+    headings.indexOf('Данные о донорской крови или ее компоненте'),
+  );
   for (const text of [
     'Анамнез без потери данных',
     'Признаки гемической гипоксии.',

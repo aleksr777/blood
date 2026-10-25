@@ -347,6 +347,10 @@ a.site-navigation__link:focus-visible {
   white-space: pre-wrap;
 }
 
+.cell-value--multiline {
+  min-height: 8mm;
+}
+
 .monitor-value {
   margin: 0;
   text-align: center;

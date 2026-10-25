@@ -6,6 +6,7 @@ const TRACKING_FIELDS = new Set([
   'sourceRecipientId',
   'autoValues',
   'previousTransfusionsAutoText',
+  'previousTransfusionsSuggestedText',
 ]);
 
 const normalizeValue = (value: unknown): unknown => {
@@ -19,6 +20,7 @@ const normalizeValue = (value: unknown): unknown => {
   const entries = Object.entries(value)
     .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
     .flatMap(([key, item]) => {
+      if (key === 'previousTransfusionsSuggestedText') return [];
       const normalized = normalizeValue(item);
       return normalized === undefined ? [] : [[key, normalized]];
     });

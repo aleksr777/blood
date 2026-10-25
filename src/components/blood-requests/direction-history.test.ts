@@ -62,3 +62,12 @@ it('retains only document-local generated history without overriding other share
   });
   expect(source.previousReactions).toBe('Общие сведения о реакции');
 });
+
+it('keeps a removed generated block cleared without overriding shared manual history', () => {
+  expect(
+    generatedDirectionHistory({
+      previousTransfusionsAutoText: '',
+      previousTransfusions: 'Ручной текст',
+    }),
+  ).toEqual({ previousTransfusionsAutoText: '' });
+});

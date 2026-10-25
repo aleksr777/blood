@@ -74,11 +74,13 @@ it.each(['protocol', 'direction'])(
     expect(
       screen.getByRole('group', { name: 'Трансфузии по индивидуальному подбору в анамнезе' }),
     ).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Внести в анамнез' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Внести' }));
     expect(onChange).toHaveBeenLastCalledWith({
       previousTransfusionsStatus: 'had',
-      previousTransfusions: '24.10.2026 — Отмытые эритроциты, 250 мл',
+      previousTransfusions:
+        '24.10.2026 — Отмытые эритроциты, 250 мл\n\nЭритроцитная взвесь в 2020 году',
       previousTransfusionsAutoText: '24.10.2026 — Отмытые эритроциты, 250 мл',
+      previousTransfusionsSuggestedText: '24.10.2026 — Отмытые эритроциты, 250 мл',
     });
   },
 );
@@ -88,6 +90,6 @@ it.each(['protocol', 'direction'])(
   (source) => {
     const onChange = renderHistory(source, true);
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.queryByRole('button', { name: 'Внести в анамнез' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Внести' })).toBeNull();
   },
 );

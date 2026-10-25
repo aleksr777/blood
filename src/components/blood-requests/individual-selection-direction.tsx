@@ -361,9 +361,11 @@ const currentAutoValues = async (
     },
     recipientProfileSnapshot: {
       ...Object.fromEntries(
-        [...RECIPIENT_PROFILE_FIELDS, 'previousTransfusionsAutoText'].flatMap((field) =>
-          values[field] !== undefined ? [[field, values[field]]] : [],
-        ),
+        [
+          ...RECIPIENT_PROFILE_FIELDS,
+          'previousTransfusionsAutoText',
+          'previousTransfusionsSuggestedText',
+        ].flatMap((field) => (values[field] !== undefined ? [[field, values[field]]] : [])),
       ),
       recipientId: String(recipient.id),
       recipientName: recipient.fullName,
@@ -1004,6 +1006,12 @@ export const IndividualSelectionDirection = () => {
 
   const updateHistory = (changes: ProtocolValues) => {
     const snapshot = draftRef.current.recipientProfileSnapshot;
+    if (!documentState.isActive() && changes.previousTransfusionsAutoText === '') {
+      const next = updateSavedRequestProfile(draftRef.current, changes);
+      draftRef.current = next;
+      setDraft(next);
+      return updateExamination(changes);
+    }
     if (
       documentState.isActive() ||
       !(changes.previousTransfusionsAutoText || snapshot.previousTransfusionsAutoText)
@@ -1020,6 +1028,7 @@ export const IndividualSelectionDirection = () => {
             'previousTransfusions',
             'previousTransfusionsStatus',
             'previousTransfusionsAutoText',
+            'previousTransfusionsSuggestedText',
           ].includes(field),
       ),
     );

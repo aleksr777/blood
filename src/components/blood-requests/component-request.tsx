@@ -1002,7 +1002,7 @@ export const ComponentRequest = () => {
 
     <div
       key="footer"
-      className={styles.fillSection}
+      className={`${styles.fillSection} ${styles.footerSection}`}
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('footer')}

@@ -1115,7 +1115,7 @@ export const IndividualSelectionDirection = () => {
 
     <div
       key="footer"
-      className={styles.fillSection}
+      className={`${styles.fillSection} ${styles.footerSection}`}
       data-form-section
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}

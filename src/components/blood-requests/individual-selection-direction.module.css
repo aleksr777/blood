@@ -153,6 +153,12 @@
   cursor: default;
 }
 
+.footerSection {
+  --form-line-height: 14mm;
+
+  line-height: var(--form-line-height);
+}
+
 .historySection {
   border-radius: 0;
 }

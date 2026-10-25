@@ -8,6 +8,7 @@ import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
+import { formatBloodComponentName } from '../../domain/blood-components';
 import {
   useCallback,
   useEffect,
@@ -1076,7 +1077,7 @@ export const ComponentRequest = () => {
     >
       <AdaptiveRuledField
         label="Наименование требуемого компонента:"
-        value={draft.requiredComponent}
+        value={formatBloodComponentName(draft.requiredComponent, selectedComponent)}
       />
       <div className={styles.singleLine}>
         <span>Группа крови и резус-фактор компонента:</span>

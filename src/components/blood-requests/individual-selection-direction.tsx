@@ -7,6 +7,7 @@ import { usePendingSavedDocument } from '../saved-document/saved-document-naviga
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
+import { formatBloodComponentName } from '../../domain/blood-components';
 import {
   useCallback,
   useEffect,
@@ -1112,7 +1113,7 @@ export const IndividualSelectionDirection = () => {
     >
       <AdaptiveRuledField
         label="Наименование требуемого компонента:"
-        value={draft.requiredComponent}
+        value={formatBloodComponentName(draft.requiredComponent, 'erythrocytes')}
       />
       <div className={styles.singleLine}>
         <span>Количество:</span>

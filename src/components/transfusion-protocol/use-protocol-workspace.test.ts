@@ -3,9 +3,8 @@ import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { database } from '../../storage/sqlite/database-client';
 import { adoptCurrentRecipientFromValues } from '../../storage/repositories/current-recipient';
-import { getProtocolNewBlankWarning } from '../../domain/protocol-hemacon';
 import { useProtocolWorkspace } from './use-protocol-workspace';
-import { clearProtocolHemacon } from '../saved-document/working-form-cleanup';
+import { cleanProtocolDraft } from '../saved-document/working-form-cleanup';
 
 vi.mock('../../storage/sqlite/database-client', () => ({
   database: {
@@ -54,7 +53,6 @@ it('opening and printing an archive never merge current data or save an archived
   const working = structuredClone(result.current.values);
   await act(async () => result.current.openRecord(original));
   expect(result.current.document.mode).toBe('view');
-  expect(result.current.newBlankWarning).toBe('');
   expect(result.current.values).toEqual(original.values);
   act(() => result.current.saveValues({ diagnosis: 'Автозамена' }));
   expect(result.current.values).toEqual(original.values);
@@ -63,7 +61,7 @@ it('opening and printing an archive never merge current data or save an archived
   expect(database.updateProtocolRecord).not.toHaveBeenCalled();
   expect(result.current.document.workingValues).toEqual(working);
   act(() => result.current.document.close());
-  expect(result.current.values).toEqual(clearProtocolHemacon(working));
+  expect(result.current.values).toEqual(cleanProtocolDraft(working));
 });
 
 it('archive editing updates its ID and keeps working data until returning to the draft', async () => {
@@ -87,6 +85,7 @@ it('archive editing updates its ID and keeps working data until returning to the
   act(() => result.current.saveValues({ doctorName: 'Исправленный врач' }));
   await act(async () => result.current.saveToDatabase(true));
   expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  expect(result.current.document.workingValues).toEqual(working);
   await act(async () => result.current.saveToDatabase());
   expect(database.updateProtocolRecord).toHaveBeenCalledWith(42, {
     ...original.values,
@@ -94,9 +93,9 @@ it('archive editing updates its ID and keeps working data until returning to the
   });
   expect(database.saveProtocolRecord).not.toHaveBeenCalled();
   expect(result.current.document.mode).toBe('view');
-  expect(result.current.document.workingValues).toEqual(working);
+  expect(result.current.document.workingValues).toEqual(cleanProtocolDraft(working));
   act(() => result.current.document.close());
-  expect(result.current.values).toEqual(clearProtocolHemacon(working));
+  expect(result.current.values).toEqual(cleanProtocolDraft(working));
 });
 
 it('retains non-hemacon protocol data after saving and returning to the working draft', async () => {
@@ -114,7 +113,7 @@ it('retains non-hemacon protocol data after saving and returning to the working 
   expect(result.current.document.mode).toBe('view');
   expect(result.current.values).toEqual(working);
   act(() => result.current.document.close());
-  expect(result.current.values).toEqual(clearProtocolHemacon(working));
+  expect(result.current.values).toEqual(cleanProtocolDraft(working));
   expect(database.saveProtocolRecord).toHaveBeenCalledTimes(1);
 });
 afterEach(cleanup);
@@ -129,56 +128,6 @@ const openDraft = async (values: Record<string, string>) => {
   await waitFor(() => expect(hook.result.current.values.recipientId).toBe('1'));
   return hook;
 };
-
-it.each<Record<string, string>>([
-  { componentName: '' },
-  { componentUnitNumber: '' },
-  { componentUnitNumber: '761022' },
-  { donorAbo: '' },
-])('does not autosave an incomplete hemacon on New blank: %j', async (missing) => {
-  const values = { ...hemacon, ...missing };
-  const { result } = await openDraft(values);
-  await act(async () => result.current.newBlank());
-  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
-  expect(result.current.values).toMatchObject({ ...recipient, ...values });
-  expect(result.current.status).toBe(getProtocolNewBlankWarning({ ...recipient, ...values }));
-  expect(result.current.activeBlock).toBeNull();
-});
-
-it('keeps a recipient-only draft unchanged when New blank is blocked', async () => {
-  const { result } = await openDraft({});
-  const original = structuredClone(result.current.values);
-  await act(async () => result.current.newBlank());
-  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
-  expect(result.current.activeBlock).toBeNull();
-  expect(result.current.values).toEqual(original);
-  expect(result.current.status).toBe(getProtocolNewBlankWarning(original));
-});
-
-it('does not save or reset a complete hemacon without the recipient name', async () => {
-  window.localStorage.clear();
-  const { result } = await openDraft({ ...hemacon, recipientName: '' });
-  const original = structuredClone(result.current.values);
-  expect(original.recipientName).toBe('');
-  await act(async () => result.current.newBlank());
-  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
-  expect(result.current.values).toEqual(original);
-  expect(result.current.status).toContain('ФИО реципиента');
-});
-
-it('autosaves a complete hemacon on New blank without requiring volume or expiration', async () => {
-  const { result } = await openDraft({ ...hemacon, doctorName: 'Врач', nurseName: 'Медсестра' });
-  await act(async () => result.current.newBlank());
-  expect(database.saveProtocolRecord).toHaveBeenCalledTimes(1);
-  expect(database.saveProtocolRecord).toHaveBeenCalledWith(expect.objectContaining(hemacon));
-  expect(result.current.values).toMatchObject({
-    ...recipient,
-    doctorName: 'Врач',
-    nurseName: 'Медсестра',
-  });
-  expect(result.current.values.componentUnitNumber).toBeUndefined();
-  expect(result.current.recordId).toBeNull();
-});
 
 it('does not warn about saved unit number matches but still validates an incomplete number', async () => {
   vi.mocked(database.listProtocolRecords).mockResolvedValue([

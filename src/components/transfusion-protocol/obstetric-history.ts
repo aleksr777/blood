@@ -28,7 +28,11 @@ const countWord = (count: number, forms: readonly [string, string, string]) => {
 export const hasNoPregnancies = (values: ProtocolValues) =>
   /^0+$/.test(values.recipientPregnanciesCount?.trim() ?? '');
 
+export const isObstetricHistoryUnknown = (values: ProtocolValues) =>
+  values.recipientObstetricHistoryStatus === 'unknown';
+
 export const formatObstetricHistory = (values: ProtocolValues) => {
+  if (isObstetricHistoryUnknown(values)) return 'Не известен';
   if (hasNoPregnancies(values)) return 'Беременностей не было';
 
   const parts = COUNT_FIELDS.flatMap(([name, label, zeroText, forms]) => {

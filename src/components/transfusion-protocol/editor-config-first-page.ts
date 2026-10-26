@@ -110,6 +110,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     size: 'large',
     fields: [
       { name: 'recipientSex', label: 'Пол' },
+      { name: 'recipientObstetricHistoryStatus', label: 'Акушерский анамнез' },
       {
         name: 'recipientPregnanciesCount',
         label: 'Количество беременностей',
@@ -198,7 +199,14 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
         label: 'Антигены эритроцитов донора',
       },
       { name: 'componentUnitNumber', label: '№ единицы компонента крови' },
-      { name: 'amountMl', label: 'Количество, мл', type: 'number', step: '1' },
+      {
+        name: 'amountMl',
+        label: 'Количество, мл',
+        type: 'number',
+        step: '1',
+        min: '10',
+        max: '999',
+      },
       { name: 'collectionDate', label: 'Дата заготовки', type: 'date' },
       { name: 'expirationDate', label: 'Срок годности', type: 'date' },
     ],

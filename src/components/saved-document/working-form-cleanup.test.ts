@@ -1,8 +1,8 @@
 import { expect, it } from 'vitest';
 import { parseRegistrationTransfusionRows } from '../transfusion-registration/registration-transfusion-table';
 import {
-  clearComponentRequestSelection,
-  clearProtocolHemacon,
+  cleanComponentRequestDraft,
+  cleanProtocolDraft,
   clearRegistrationTable,
 } from './working-form-cleanup';
 
@@ -12,6 +12,25 @@ it('clears the entire hemacon while retaining all other protocol sections', () =
     collectionOrganization: 'Станция крови',
     componentUnitNumber: '76102200045636',
     amountMl: '250',
+    startTime: '10:00',
+    endTime: '11:00',
+    beforePulse: '70',
+    beforeBp: '120/80',
+    beforeTemperature: '36.6',
+    beforeUrine: '100',
+    beforeUrineColor: 'Светлая',
+    hour1Bp: '120/80',
+    hour1Pulse: '70',
+    hour1Temperature: '36.6',
+    hour1Urine: '100',
+    hour1UrineColor: 'Светлая',
+    hour2Bp: '120/80',
+    hour2Pulse: '70',
+    hour2Temperature: '36.6',
+    hour2Urine: '100',
+    hour2UrineColor: 'Светлая',
+    doctorName: 'Врач',
+    nurseName: 'Медсестра',
     collectionDate: '2026-10-01',
     expirationDate: '2026-11-01',
     donorAbo: 'A(II)',
@@ -33,15 +52,12 @@ it('clears the entire hemacon while retaining all other protocol sections', () =
     indicationComponent: 'erythrocytes',
     indications: 'Рабочие показания',
     transfusionDate: '2026-10-26',
-    startTime: '10:00',
+    requestDateTime: '2026-10-26T09:00',
     planeTestResult: 'Совместимо',
-    beforePulse: '70',
     reagentAntiASeries: 'Серия цоликлона',
-    doctorName: 'Врач',
-    nurseName: 'Медсестра',
   };
   const original = { ...other, ...hemacon };
-  expect(clearProtocolHemacon(original)).toEqual({
+  expect(cleanProtocolDraft(original)).toEqual({
     ...other,
     ...Object.fromEntries(Object.keys(hemacon).map((name) => [name, ''])),
   });
@@ -78,15 +94,15 @@ it('clears requested component details while preserving indications and request 
     medicalOrganization: 'ЛПУ',
     directionDate: '2026-10-26',
     doctorName: 'Врач',
-    doctorPhone: '12345',
     recipientProfileSnapshot: { diagnosis: 'Рабочий диагноз' },
   };
-  expect(clearComponentRequestSelection(draft)).toEqual({
+  expect(cleanComponentRequestDraft(draft)).toEqual({
     ...draft,
     requiredComponent: '',
     componentAbo: '',
     componentRh: '',
     quantity: '',
+    doctorName: '',
   });
   expect(draft.requiredComponent).toBe('Эритроцитная взвесь');
 });

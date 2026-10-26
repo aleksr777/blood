@@ -74,14 +74,14 @@ const expectWorkingSelectionCleared = async () => {
       'department',
       'medicalOrganization',
       'directionDate',
-      'doctorName',
-      'doctorPhone',
       'transfusionOrder',
       'componentSelectionRequirement',
       'individualSelectionIndications',
     ] as const) {
       expect(next[field]).toEqual(working[field]);
     }
+    expect(next.doctorName).toBe('');
+    expect(next.doctorPhone).toBeUndefined();
     expect(next.indicationValues.indications).toBe(working.indicationValues.indications);
   });
   expect(readCurrentRecipient()?.id).toBe(1);

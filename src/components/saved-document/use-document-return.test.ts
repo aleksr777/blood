@@ -2,7 +2,7 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, expect, it } from 'vitest';
 import { useDocumentState } from './use-document-state';
-import { clearProtocolHemacon } from './working-form-cleanup';
+import { cleanProtocolDraft } from './working-form-cleanup';
 
 afterEach(cleanup);
 const working = {
@@ -24,7 +24,7 @@ it.each(['view', 'edit'] as const)(
   'cleans the latest working draft on returning from %s without changing the saved snapshot',
   (mode) => {
     const { result } = renderHook(() =>
-      useDocumentState(() => ({ ...working }), clearProtocolHemacon),
+      useDocumentState(() => ({ ...working }), cleanProtocolDraft),
     );
     act(() => result.current.open({ id: 42, recipientId: 2 }, archived, mode));
     act(() => result.current.setValues((values) => ({ ...values, doctorName: 'Правка архива' })));
@@ -38,6 +38,7 @@ it.each(['view', 'edit'] as const)(
     expect(result.current.values).toMatchObject({
       ...working,
       diagnosis: 'Новый диагноз',
+      doctorName: '',
       componentUnitNumber: '',
     });
     expect(archived.doctorName).toBe('Архивный врач');
@@ -50,9 +51,7 @@ it.each(['view', 'edit'] as const)(
 );
 
 it('keeps the working draft intact when editing is cancelled or another archive is opened', () => {
-  const { result } = renderHook(() =>
-    useDocumentState(() => ({ ...working }), clearProtocolHemacon),
-  );
+  const { result } = renderHook(() => useDocumentState(() => ({ ...working }), cleanProtocolDraft));
   act(() => result.current.open({ id: 42, recipientId: 2 }, archived, 'edit'));
   act(() => result.current.cancel());
   expect(result.current.workingValues).toEqual(working);

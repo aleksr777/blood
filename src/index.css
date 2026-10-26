@@ -205,10 +205,6 @@ a.site-navigation__link:focus-visible {
   gap: 7px;
 }
 
-.new-button {
-  margin-right: auto;
-}
-
 .toolbar-status {
   margin-top: 0.45rem;
   color: var(--ui-text-muted);

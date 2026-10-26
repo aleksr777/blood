@@ -213,6 +213,7 @@ export const TransfusionRegistration = () => {
           recipientId: String(documentState.record.recipientId),
         });
         documentState.open(record, record.values);
+        documentState.setWorkingValues(clearRegistrationTable);
         setPatientDetailsOpen(false);
         setTableEditorOpen(false);
         setStatus('Изменения сохранены в исходном листе регистрации.');

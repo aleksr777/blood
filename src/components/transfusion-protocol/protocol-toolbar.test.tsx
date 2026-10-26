@@ -2,17 +2,14 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
-import {
-  getProtocolHemaconWarning,
-  getProtocolNewBlankWarning,
-} from '../../domain/protocol-hemacon';
+import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { ProtocolToolbar } from './protocol-toolbar';
 
 const props = (): ComponentProps<typeof ProtocolToolbar> => ({
   status: '',
   warning: '',
   hemaconWarning: getProtocolHemaconWarning({}),
-  newBlankWarning: getProtocolNewBlankWarning({}),
+  hemaconDateWarning: '',
   dangerWarning: '',
   bloodGroupWarning: '',
   bloodGroupWarningDismissible: false,
@@ -20,7 +17,6 @@ const props = (): ComponentProps<typeof ProtocolToolbar> => ({
   componentUnitNumberWarning: '',
   onDismissComponentUnitNumberWarning: vi.fn(),
   onClear: vi.fn(),
-  onNew: vi.fn(),
   onOpenRegistry: vi.fn(),
   onOpenCurrentRecipient: vi.fn(),
   currentRecipientName: '',
@@ -34,6 +30,19 @@ const props = (): ComponentProps<typeof ProtocolToolbar> => ({
 
 afterEach(cleanup);
 
+it('has no New blank button and keeps date-order warnings non-dismissible', () => {
+  const handlers = props();
+  const message = 'Дата заготовки должна быть раньше даты окончания срока годности.';
+  const { rerender } = render(
+    <ProtocolToolbar {...handlers} hemaconWarning="" hemaconDateWarning={message} />,
+  );
+  expect(screen.queryByRole('button', { name: 'Новый бланк' })).toBeNull();
+  expect(screen.getByRole('alert').textContent).toContain(message);
+  expect(screen.queryByRole('button', { name: 'Закрыть предупреждение' })).toBeNull();
+  rerender(<ProtocolToolbar {...handlers} hemaconWarning="" hemaconDateWarning="" />);
+  expect(screen.queryByRole('alert')).toBeNull();
+});
+
 const expectWarningText = (message: string) => {
   const text = screen.getByRole('alert').textContent;
   for (const line of message.split('\n').filter(Boolean)) {
@@ -41,11 +50,11 @@ const expectWarningText = (message: string) => {
   }
 };
 
-it.each(['Новый бланк', 'Сохранить', 'Печать страницы 1', 'Печать страницы 2'])(
+it.each(['Сохранить', 'Печать страницы 1', 'Печать страницы 2'])(
   'shows the missing data warning only after attempting %s and prevents the action',
   (name) => {
     const callbacks = props();
-    const warning = name === 'Новый бланк' ? callbacks.newBlankWarning : callbacks.hemaconWarning;
+    const warning = callbacks.hemaconWarning;
     render(<ProtocolToolbar {...callbacks} />);
     expect(screen.queryByRole('alert')).toBeNull();
     const button = screen.getByRole('button', { name });
@@ -61,7 +70,6 @@ it.each(['Новый бланк', 'Сохранить', 'Печать стран
     expect(button.getAttribute('aria-disabled')).toBe('true');
     fireEvent.click(button);
     expectWarningText(warning);
-    expect(callbacks.onNew).not.toHaveBeenCalled();
     expect(callbacks.onSave).not.toHaveBeenCalled();
     expect(callbacks.onPrintPage).not.toHaveBeenCalled();
   },
@@ -81,43 +89,18 @@ it('unlocks all actions after the required fields are completed and hides the wa
     donorAbo: 'A(II)',
   });
   expect(hemaconWarning).toBe('');
-  rerender(<ProtocolToolbar {...callbacks} hemaconWarning={hemaconWarning} newBlankWarning="" />);
+  rerender(<ProtocolToolbar {...callbacks} hemaconWarning={hemaconWarning} />);
   expect(screen.queryByRole('alert')).toBeNull();
-  for (const name of ['Новый бланк', 'Сохранить', 'Печать страницы 1', 'Печать страницы 2']) {
+  for (const name of ['Сохранить', 'Печать страницы 1', 'Печать страницы 2']) {
     const button = screen.getByRole('button', { name });
     expect(button.getAttribute('aria-disabled')).toBe('false');
     fireEvent.click(button);
   }
   expect(callbacks.onSave).toHaveBeenCalledTimes(1);
-  expect(callbacks.onNew).toHaveBeenCalledTimes(1);
   expect(callbacks.onPrintPage).toHaveBeenNthCalledWith(1, 0);
   expect(callbacks.onPrintPage).toHaveBeenNthCalledWith(2, 1);
   rerender(<ProtocolToolbar {...callbacks} />);
   expect(screen.queryByRole('alert')).toBeNull();
-});
-
-it('keeps New blank blocked without a recipient name even when the hemacon is complete', () => {
-  const callbacks = props();
-  const newBlankWarning = getProtocolNewBlankWarning({
-    componentName: 'Эритроцитная взвесь',
-    componentUnitNumber: '76102200045636',
-    donorAbo: 'A(II)',
-  });
-  const { rerender } = render(
-    <ProtocolToolbar {...callbacks} hemaconWarning="" newBlankWarning={newBlankWarning} />,
-  );
-  const button = screen.getByRole('button', { name: 'Новый бланк' });
-  expect(button.getAttribute('aria-disabled')).toBe('true');
-  expect(screen.queryByRole('alert')).toBeNull();
-  fireEvent.click(button);
-  expectWarningText(newBlankWarning);
-  expect(screen.getByRole('alert').textContent).toContain('ФИО реципиента');
-  expect(callbacks.onNew).not.toHaveBeenCalled();
-  rerender(<ProtocolToolbar {...callbacks} hemaconWarning="" newBlankWarning="" />);
-  expect(screen.queryByRole('alert')).toBeNull();
-  expect(button.getAttribute('aria-disabled')).toBe('false');
-  fireEvent.click(button);
-  expect(callbacks.onNew).toHaveBeenCalledTimes(1);
 });
 
 it.each(['view', 'edit'] as const)(

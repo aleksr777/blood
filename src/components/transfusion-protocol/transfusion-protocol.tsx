@@ -202,7 +202,7 @@ export const TransfusionProtocol = () => {
         status={workspace.status}
         warning={workspace.reagentWarning}
         hemaconWarning={workspace.hemaconWarning}
-        newBlankWarning={workspace.newBlankWarning}
+        hemaconDateWarning={workspace.hemaconDateWarning}
         dangerWarning={workspace.compatibilityWarning}
         bloodGroupWarning={workspace.bloodGroupWarning}
         bloodGroupWarningDismissible={workspace.bloodGroupWarningDismissible}
@@ -210,7 +210,6 @@ export const TransfusionProtocol = () => {
         componentUnitNumberWarning={workspace.componentUnitNumberWarning}
         onDismissComponentUnitNumberWarning={workspace.dismissComponentUnitNumberWarning}
         onClear={workspace.clearForm}
-        onNew={() => void workspace.newBlank()}
         onOpenRegistry={() => {
           const currentRecipient = readCurrentRecipient();
           const formRecipientId = Number(workspace.values.recipientId);

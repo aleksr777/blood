@@ -4,7 +4,7 @@ import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
-import { clearComponentRequestSelection } from '../saved-document/working-form-cleanup';
+import { cleanComponentRequestDraft } from '../saved-document/working-form-cleanup';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
@@ -107,7 +107,6 @@ type DirectionDraft = Record<AutoField, string> & {
   medicalOrganization: string;
   directionDate: string;
   doctorName: string;
-  doctorPhone: string;
   indicationValues: ProtocolValues;
   recipientProfileSnapshot: ProtocolValues;
   autoValues: Partial<Record<AutoField, string>>;
@@ -146,12 +145,6 @@ const FOOTER_FIELDS: RequestEditorField[] = [
     savedOptionsCategory: 'individualSelectionDoctorName',
     wide: true,
   },
-  {
-    name: 'doctorPhone',
-    label: 'Контактный телефон',
-    savedOptionsCategory: 'individualSelectionContactPhone',
-    wide: true,
-  },
 ];
 
 const emptyDraft = (): DirectionDraft => ({
@@ -175,7 +168,6 @@ const emptyDraft = (): DirectionDraft => ({
   recipientSex: '',
   directionDate: '',
   doctorName: '',
-  doctorPhone: '',
   indicationValues: {},
   recipientProfileSnapshot: {},
   autoValues: {},
@@ -372,7 +364,7 @@ export const ComponentRequest = () => {
   const [initialStored] = useState(() => ({ draft: loadDraft(), id: loadSavedRecordId() }));
   const documentState = useDocumentState<DirectionDraft>(
     () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
-    clearComponentRequestSelection,
+    cleanComponentRequestDraft,
   );
   const {
     values: draft,
@@ -443,7 +435,6 @@ export const ComponentRequest = () => {
               ...emptyDraft(),
               medicalOrganization: current.medicalOrganization,
               doctorName: current.doctorName,
-              doctorPhone: current.doctorPhone,
             }
           : current;
       let next = mergeAutoValues(base, recipient, autoValues);
@@ -670,6 +661,7 @@ export const ComponentRequest = () => {
           values: { ...draftRef.current },
         });
         documentState.open(record, draftFromRecord(record.values));
+        documentState.setWorkingValues(cleanComponentRequestDraft);
         setEditor(null);
         setStatus('Изменения сохранены в исходном бланке.');
         return true;
@@ -705,7 +697,7 @@ export const ComponentRequest = () => {
       draftRef.current = draftToSave;
       setDraft(draftToSave);
       documentState.open(record, draftToSave);
-      documentState.setWorkingValues(clearComponentRequestSelection(draftToSave));
+      documentState.setWorkingValues(cleanComponentRequestDraft(draftToSave));
       setStatus(afterPrint ? 'Заявка сохранена после печати.' : 'Заявка сохранена.');
       return true;
     } catch (error) {
@@ -995,7 +987,6 @@ export const ComponentRequest = () => {
       />
 
       <AdaptiveRuledField label="Врач, назначивший трансфузию:" value={draft.doctorName} />
-      <AdaptiveRuledField label="Контактный телефон:" value={draft.doctorPhone} />
     </div>,
   ];
 

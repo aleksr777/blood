@@ -3,6 +3,7 @@ import { formatComponentUnitNumber } from './component-unit-number';
 import { DonorFields } from './donor-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { getHemaconExpirationWarning } from './reagent-defaults';
+import { getHemaconDateOrderWarning } from '../../domain/hemacon-dates';
 import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 import styles from './protocol-editor.module.css';
 
@@ -24,6 +25,7 @@ export const DonorDetailsFields = ({
   onDismissComponentUnitNumberWarning,
 }: Props) => {
   const expirationWarning = savedDocument ? '' : getHemaconExpirationWarning(values.expirationDate);
+  const dateOrderWarning = getHemaconDateOrderWarning(values);
   const renderField = (field: ProtocolFieldConfig) => (
     <ProtocolFieldControl
       key={field.name}
@@ -69,6 +71,11 @@ export const DonorDetailsFields = ({
           return name === 'expirationDate' ? (
             <div key={name} className={styles.componentUnitNumberField}>
               {renderField(field)}
+              <WarningNotice
+                className={styles.fieldWarning}
+                message={dateOrderWarning}
+                dismissible={false}
+              />
               <WarningNotice
                 className={styles.fieldWarning}
                 message={expirationWarning ? `${expirationWarning}.` : ''}

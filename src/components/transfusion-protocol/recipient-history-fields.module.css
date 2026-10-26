@@ -40,6 +40,24 @@
   gap: 0.9rem 1.1rem;
 }
 
+.obstetricField {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.obstetricField:disabled {
+  opacity: 0.58;
+}
+
+.obstetricField:disabled [aria-haspopup='listbox'] {
+  border-color: var(--ui-border);
+  background: var(--ui-disabled-background);
+  color: var(--ui-text-disabled);
+  cursor: default;
+}
+
 .obstetricGrid input {
   width: 6rem;
   max-width: 100%;

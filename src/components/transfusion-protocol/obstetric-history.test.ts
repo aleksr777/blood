@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
-import { formatObstetricHistory } from './obstetric-history';
+import { formatObstetricHistory, hasNoPregnancies } from './obstetric-history';
+import type { ProtocolValues } from './protocol-types';
 
 it.each([
   ['1', ['беременность', 'раз', 'самопроизвольный аборт']],
@@ -57,5 +58,25 @@ it.each(['-1', '1.5', '1e1', '9007199254740993'])(
     expect(formatObstetricHistory({ recipientPregnanciesCount: value })).toBe(
       `Количество беременностей: ${value}`,
     );
+  },
+);
+
+it.each(['0', '00', ' 0 '])('omits all dependent history for explicit zero %j', (zero) => {
+  const values = Object.freeze({
+    recipientPregnanciesCount: zero,
+    recipientBirthsCount: '2',
+    recipientSpontaneousAbortionsCount: '1',
+    recipientHemolyticDiseaseNewbornHistory: 'Да',
+  });
+  expect(hasNoPregnancies(values)).toBe(true);
+  expect(formatObstetricHistory(values)).toBe('Беременностей не было');
+  expect(values.recipientBirthsCount).toBe('2');
+});
+
+it.each([undefined, '', ' ', '1', '99', 'неизвестно'])(
+  'does not interpret pregnancy count %j as no pregnancies',
+  (value) => {
+    const values: ProtocolValues = value === undefined ? {} : { recipientPregnanciesCount: value };
+    expect(hasNoPregnancies(values)).toBe(false);
   },
 );

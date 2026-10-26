@@ -38,9 +38,7 @@ it.each(['0', '00', ' 0 '])('prints natural obstetric statements for explicit ze
     recipientSpontaneousAbortionsCount: zero,
   };
   const original = { ...values };
-  expect(formatObstetricHistory(values)).toBe(
-    'Беременностей не было; Родов не было; Самопроизвольных абортов в анамнезе не было',
-  );
+  expect(formatObstetricHistory(values)).toBe('Беременностей не было');
   expect(values).toEqual(original);
 });
 

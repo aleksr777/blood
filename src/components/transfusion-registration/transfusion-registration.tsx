@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
+import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
 import { useEffect, useState } from 'react';
 import {
@@ -47,6 +48,12 @@ export const TransfusionRegistration = () => {
   const [recordId, setRecordId] = useState<number | null>(null);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [registryOpen, setRegistryOpen] = useState(false);
+  const savedList = useSavedDocumentList({
+    kind: 'registration',
+    record: documentState.record,
+    open: registryOpen,
+    onOpen: () => setRegistryOpen(true),
+  });
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
   const [patientDetailsOpen, setPatientDetailsOpen] = useState(false);
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
@@ -377,6 +384,7 @@ export const TransfusionRegistration = () => {
             onOpenCurrentRecipient={openCurrentRecipient}
           />
           <SavedDocumentBar
+            onReturnToList={savedList.returnToList}
             document={documentState}
             title={savedDocumentTitle('registration', values)}
           />
@@ -581,6 +589,7 @@ export const TransfusionRegistration = () => {
 
       {registryOpen && (
         <RecipientDatabaseModal
+          initialList={savedList.initialList}
           initialRecipientId={registryRecipientId}
           initialRecipientName={readCurrentRecipient()?.fullName ?? values.recipientName ?? ''}
           onUseRecipient={selectRecipient}

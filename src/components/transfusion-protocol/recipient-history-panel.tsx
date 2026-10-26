@@ -7,13 +7,18 @@ import type {
   RecipientRecord,
   RegistrationRecord,
 } from '../../storage/repositories/recipients';
-import type { SavedRecordOpener } from '../saved-document/saved-document-navigation';
+import type {
+  SavedDocumentKind,
+  SavedRecordOpener,
+} from '../saved-document/saved-document-navigation';
+import type { SavedDocumentListLocation } from '../saved-document/saved-document-list';
 import type { SavedDocumentMode } from '../saved-document/use-document-state';
 import { RecipientRecordList } from './recipient-record-list';
 import { formatRecipientAge } from './recipient-demographics';
 import styles from './recipient-database.module.css';
 
 type Props = {
+  initialList?: SavedDocumentListLocation | null;
   recipient: RecipientRecord | null;
   records: ProtocolRecord[];
   registrationRecords: RegistrationRecord[];
@@ -36,7 +41,15 @@ type Props = {
 type RecordCategory =
   'protocols' | 'registrations' | 'individual-selection-directions' | 'component-requests';
 
+const CATEGORY_BY_KIND: Record<SavedDocumentKind, RecordCategory> = {
+  protocol: 'protocols',
+  registration: 'registrations',
+  'individual-selection-direction': 'individual-selection-directions',
+  'component-request': 'component-requests',
+};
+
 export const RecipientHistoryPanel = ({
+  initialList,
   recipient,
   records,
   registrationRecords,
@@ -55,7 +68,11 @@ export const RecipientHistoryPanel = ({
   onDeleteRegistrationRecord,
   onDeleteBloodRequestRecord,
 }: Props) => {
-  const [category, setCategory] = useState<RecordCategory | null>(null);
+  const restoredCategory =
+    initialList?.recipientId === recipient?.id && initialList
+      ? CATEGORY_BY_KIND[initialList.kind]
+      : null;
+  const [category, setCategory] = useState<RecordCategory | null>(restoredCategory);
   const demographics = recipient
     ? [
         recipient.profile.recipientBirthDate
@@ -71,8 +88,8 @@ export const RecipientHistoryPanel = ({
     : '';
 
   useEffect(() => {
-    setCategory(null);
-  }, [recipient?.id]);
+    setCategory(restoredCategory);
+  }, [recipient?.id, restoredCategory]);
 
   const requestRecords =
     category === 'individual-selection-directions'
@@ -201,6 +218,7 @@ export const RecipientHistoryPanel = ({
 
               <RecipientRecordList
                 key={`${recipient.id}:${category}`}
+                initialSelectedId={category === restoredCategory ? initialList?.recordId : null}
                 emptyMessage={
                   category === 'protocols'
                     ? 'Сохранённых протоколов пока нет.'

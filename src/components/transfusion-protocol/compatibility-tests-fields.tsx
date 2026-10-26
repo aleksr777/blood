@@ -57,18 +57,20 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
     );
   };
   const compatibilityDangerWarning = getCompatibilityDangerWarning(values);
-  const showDonorAboConfirmation = values.componentGroup === 'erythrocytes';
+  const isErythrocytes = values.componentGroup === 'erythrocytes';
 
   useEffect(() => {
     if (!applyDefaults) return;
     const missingDefaults = Object.fromEntries(
-      Object.entries(DEFAULT_RESULTS).filter(([name]) => !values[name]),
+      Object.entries(DEFAULT_RESULTS).filter(
+        ([name]) => !values[name] && (name !== 'planeTestResult' || isErythrocytes),
+      ),
     );
 
     if (Object.keys(missingDefaults).length > 0) {
       onChange(missingDefaults);
     }
-  }, [onChange, values, applyDefaults]);
+  }, [onChange, values, applyDefaults, isErythrocytes]);
 
   return (
     <div className={styles.root}>
@@ -116,10 +118,11 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
 
       <div className={styles.results}>
         {RADIO_GROUPS.map((group) => {
+          if (group.name === 'planeTestResult' && !isErythrocytes) return null;
           const selected =
             values[group.name] ||
             (applyDefaults ? DEFAULT_RESULTS[group.name as keyof typeof DEFAULT_RESULTS] : '');
-          const disabled = group.name === 'confirmedDonorAboResult' && !showDonorAboConfirmation;
+          const disabled = group.name === 'confirmedDonorAboResult' && !isErythrocytes;
 
           return (
             <fieldset

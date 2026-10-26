@@ -5,13 +5,13 @@ import {
   combinePreviousTransfusionText,
   splitPreviousTransfusionText,
 } from './previous-transfusion-text';
-import { ProtocolFieldControl } from './protocol-field-control';
+import { ObstetricHistoryFields } from './obstetric-history-fields';
 import {
   HISTORY_STATUS,
   getHistoryStatus,
   TRANSFUSION_HISTORY_FIELDS,
 } from './recipient-history-model';
-import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
+import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-history-fields.module.css';
 
 type Props = {
@@ -28,33 +28,6 @@ const STATUS_OPTIONS = [
   [HISTORY_STATUS.unknown, 'Не известно'],
   [HISTORY_STATUS.had, 'Были'],
 ] as const;
-
-const OBSTETRIC_FIELDS: ProtocolFieldConfig[] = [
-  {
-    name: 'recipientPregnanciesCount',
-    label: 'Количество беременностей',
-    type: 'number',
-    step: '1',
-  },
-  {
-    name: 'recipientBirthsCount',
-    label: 'Количество родов',
-    type: 'number',
-    step: '1',
-  },
-  {
-    name: 'recipientSpontaneousAbortionsCount',
-    label: 'Самопроизвольные аборты в анамнезе',
-    type: 'number',
-    step: '1',
-  },
-  {
-    name: 'recipientHemolyticDiseaseNewbornHistory',
-    label: 'Гемолитическая болезнь новорождённого в анамнезе',
-    type: 'select',
-    options: ['Нет', 'Да'],
-  },
-];
 
 export const RecipientHistoryFields = ({
   applyDefaults = true,
@@ -140,19 +113,7 @@ export const RecipientHistoryFields = ({
   return (
     <div className={styles.root}>
       {showObstetricHistory && values.recipientSex === 'Женский' && (
-        <fieldset className={styles.group}>
-          <legend>Акушерский анамнез</legend>
-          <div className={styles.obstetricGrid}>
-            {OBSTETRIC_FIELDS.map((field) => (
-              <ProtocolFieldControl
-                key={field.name}
-                field={field}
-                value={values[field.name] ?? ''}
-                onChange={(name, value) => onChange({ [name]: value })}
-              />
-            ))}
-          </div>
-        </fieldset>
+        <ObstetricHistoryFields values={values} onChange={onChange} />
       )}
 
       {showTransfusionHistory &&

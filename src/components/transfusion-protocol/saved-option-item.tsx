@@ -47,25 +47,6 @@ export const SavedOptionItem = ({
 
   return (
     <div className={styles.historyRow}>
-      {editing ? (
-        <input
-          autoFocus
-          className={styles.historyInput}
-          aria-label={`Изменить: ${label}`}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-      ) : (
-        <button
-          type="button"
-          className={styles.historyValue}
-          title="Подставить значение"
-          onClick={() => onSelect(item)}
-        >
-          {item.value}
-        </button>
-      )}
       {editable && (
         <>
           {editing ? (
@@ -102,6 +83,25 @@ export const SavedOptionItem = ({
             ×
           </button>
         </>
+      )}
+      {editing ? (
+        <input
+          autoFocus
+          className={styles.historyInput}
+          aria-label={`Изменить: ${label}`}
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          onKeyDown={handleKeyDown}
+        />
+      ) : (
+        <button
+          type="button"
+          className={styles.historyValue}
+          title="Подставить значение"
+          onClick={() => onSelect(item)}
+        >
+          {item.value}
+        </button>
       )}
     </div>
   );

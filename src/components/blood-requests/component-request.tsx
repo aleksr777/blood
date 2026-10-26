@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
+import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
@@ -36,6 +37,7 @@ import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
 import { getBloodGroupMismatch } from '../transfusion-protocol/blood-group-validation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
+import { formatObstetricHistory } from '../transfusion-protocol/recipient-history-model';
 import {
   formatAlloimmuneAntibodies,
   formatRecipientAntigens,
@@ -52,6 +54,7 @@ import { IndividualSelectionRecipientModal } from './individual-selection-recipi
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { AdaptiveRuledField } from './adaptive-ruled-field';
+import { hasStructuredObstetricHistory } from './direction-history';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:component-request-direction-draft';
@@ -296,20 +299,6 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
   return next;
 };
 
-const formatObstetricHistory = (values: ProtocolValues) => {
-  const items = [
-    ['беременности', values.recipientPregnanciesCount],
-    ['роды', values.recipientBirthsCount],
-    ['самопроизвольные аборты', values.recipientSpontaneousAbortionsCount],
-    ['гемолитическая болезнь новорождённого', values.recipientHemolyticDiseaseNewbornHistory],
-  ] as const;
-
-  return items
-    .filter(([, value]) => Boolean(value?.trim()))
-    .map(([label, value]) => `${label}: ${value?.trim()}`)
-    .join('; ');
-};
-
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
 ): Promise<Partial<Record<AutoField, string>>> => {
@@ -394,6 +383,12 @@ export const ComponentRequest = () => {
     if (next === null || !documentState.isReadOnly()) setEditorState(next);
   };
   const [registryOpen, setRegistryOpen] = useState(false);
+  const savedList = useSavedDocumentList({
+    kind: 'component-request',
+    record: documentState.record,
+    open: registryOpen,
+    onOpen: () => setRegistryOpen(true),
+  });
   const [status, setStatus] = useState('');
   const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
   const refreshVersionRef = useRef(0);
@@ -946,7 +941,11 @@ export const ComponentRequest = () => {
           >
             <AdaptiveRuledField
               label="Акушерский анамнез у женщин:"
-              value={draft.obstetricHistory}
+              value={
+                hasStructuredObstetricHistory(examinationValues)
+                  ? formatObstetricHistory(examinationValues)
+                  : draft.obstetricHistory
+              }
             />
           </div>,
         ]
@@ -1029,6 +1028,7 @@ export const ComponentRequest = () => {
             onOpenCurrentRecipient={() => setRegistryOpen(true)}
           />
           <SavedDocumentBar
+            onReturnToList={savedList.returnToList}
             document={documentState}
             title={savedDocumentTitle('component-request', draft)}
           />
@@ -1223,6 +1223,7 @@ export const ComponentRequest = () => {
 
       {registryOpen && (
         <RecipientDatabaseModal
+          initialList={savedList.initialList}
           initialRecipientId={currentRecipient?.id ?? null}
           initialRecipientName={currentRecipient?.fullName ?? ''}
           onUseRecipient={selectRecipient}

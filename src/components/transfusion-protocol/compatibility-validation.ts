@@ -2,19 +2,17 @@ import type { ProtocolValues } from './protocol-types';
 
 export const getFailedCompatibilityChecks = (values: ProtocolValues): string[] => {
   const failures: string[] = [];
+  const isErythrocytes = values.componentGroup === 'erythrocytes';
 
   if (values.confirmedRecipientAboResult === 'Не подтверждено') {
     failures.push('группа крови реципиента не подтверждена');
   }
 
-  if (
-    values.componentGroup === 'erythrocytes' &&
-    values.confirmedDonorAboResult === 'Не подтверждено'
-  ) {
+  if (isErythrocytes && values.confirmedDonorAboResult === 'Не подтверждено') {
     failures.push('группа крови донора не подтверждена');
   }
 
-  if (values.planeTestResult === 'Несовместимо') {
+  if (isErythrocytes && values.planeTestResult === 'Несовместимо') {
     failures.push('проба на плоскости — несовместимо');
   }
 

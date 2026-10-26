@@ -155,10 +155,14 @@
 
 .historyRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 1.85rem 1.85rem;
+  grid-template-columns: 1.85rem 1.85rem minmax(0, 1fr);
   align-items: center;
   gap: 0.15rem;
   min-height: 2rem;
+}
+
+.historyRow > :only-child {
+  grid-column: 1 / -1;
 }
 
 .historyFixedRow {
@@ -187,9 +191,27 @@
   font-size: 0.84rem;
 }
 
+.historyEdit,
+.historyDelete,
+.historySave {
+  border: 1px solid currentColor;
+  border-radius: var(--ui-radius-small);
+  background: var(--ui-surface);
+  transition:
+    background-color var(--ui-motion-fast) ease,
+    color var(--ui-motion-fast) ease;
+}
+
 .historySave {
   composes: ui-icon-button ui-success-icon from global;
+  color: color-mix(in srgb, var(--ui-success-text) 75%, var(--ui-surface));
   font-weight: 700;
+}
+
+.historySave:hover,
+.historySave:focus-visible {
+  background: var(--ui-success-soft);
+  color: var(--ui-success-text);
 }
 
 .historyEmpty {
@@ -414,8 +436,22 @@
 
 .historyEdit {
   composes: ui-icon-button from global;
+  color: color-mix(in srgb, var(--ui-accent) 75%, var(--ui-surface));
+}
+
+.historyEdit:hover,
+.historyEdit:focus-visible {
+  background: var(--ui-surface-soft);
+  color: var(--ui-accent);
 }
 
 .historyDelete {
   composes: ui-icon-button ui-danger-icon from global;
+  color: color-mix(in srgb, var(--ui-danger-text) 75%, var(--ui-surface));
+}
+
+.historyDelete:hover,
+.historyDelete:focus-visible {
+  background: var(--ui-danger-soft);
+  color: var(--ui-danger-text);
 }

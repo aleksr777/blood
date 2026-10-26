@@ -1,5 +1,6 @@
 import type { ProtocolValues } from './protocol-types';
 import { splitPreviousTransfusionText } from './previous-transfusion-text';
+export { formatObstetricHistory } from './obstetric-history';
 
 export const HISTORY_STATUS = {
   none: 'none',

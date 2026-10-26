@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
+import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
@@ -49,6 +50,7 @@ import {
 } from '../transfusion-protocol/recipient-examination-model';
 import {
   formatHistoryValue,
+  formatObstetricHistory,
   TRANSFUSION_HISTORY_FIELDS,
 } from '../transfusion-protocol/recipient-history-model';
 import { RecipientHistoryModal } from '../transfusion-protocol/recipient-history-modal';
@@ -314,20 +316,6 @@ const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
   return next;
 };
 
-const formatObstetricHistory = (values: ProtocolValues) => {
-  const items = [
-    ['беременности', values.recipientPregnanciesCount],
-    ['роды', values.recipientBirthsCount],
-    ['самопроизвольные аборты', values.recipientSpontaneousAbortionsCount],
-    ['гемолитическая болезнь новорождённого', values.recipientHemolyticDiseaseNewbornHistory],
-  ] as const;
-
-  return items
-    .filter(([, value]) => Boolean(value?.trim()))
-    .map(([label, value]) => `${label}: ${value?.trim()}`)
-    .join('; ');
-};
-
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
 ): Promise<{
@@ -425,6 +413,12 @@ export const IndividualSelectionDirection = () => {
     if (next === null || !documentState.isReadOnly()) setEditorState(next);
   };
   const [registryOpen, setRegistryOpen] = useState(false);
+  const savedList = useSavedDocumentList({
+    kind: 'individual-selection-direction',
+    record: documentState.record,
+    open: registryOpen,
+    onOpen: () => setRegistryOpen(true),
+  });
   const [status, setStatus] = useState('');
   const refreshVersionRef = useRef(0);
   const profileEditVersionRef = useRef(0);
@@ -1163,6 +1157,7 @@ export const IndividualSelectionDirection = () => {
             onOpenCurrentRecipient={() => setRegistryOpen(true)}
           />
           <SavedDocumentBar
+            onReturnToList={savedList.returnToList}
             document={documentState}
             title={savedDocumentTitle('individual-selection-direction', draft)}
           />
@@ -1291,6 +1286,7 @@ export const IndividualSelectionDirection = () => {
 
       {registryOpen && (
         <RecipientDatabaseModal
+          initialList={savedList.initialList}
           initialRecipientId={currentRecipient?.id ?? null}
           initialRecipientName={currentRecipient?.fullName ?? ''}
           onUseRecipient={selectRecipient}

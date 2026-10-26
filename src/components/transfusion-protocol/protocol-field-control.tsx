@@ -35,6 +35,8 @@ const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' 
       name={field.name}
       type={field.type ?? 'text'}
       step={field.step}
+      min={field.min}
+      max={field.max}
       value={value}
       readOnly={field.readOnly}
       onChange={(event) => onChange(field.name, event.target.value)}

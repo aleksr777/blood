@@ -22,6 +22,8 @@ export type ProtocolFieldConfig = {
   options?: string[];
   wide?: boolean;
   step?: string;
+  min?: string;
+  max?: string;
   required?: boolean;
   readOnly?: boolean;
 };

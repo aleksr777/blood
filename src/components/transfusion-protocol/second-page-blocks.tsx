@@ -65,7 +65,7 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
   const recipientAboConfirmed =
     (values.confirmedRecipientAboResult || 'Подтверждено') === 'Подтверждено';
   const donorAboConfirmed = (values.confirmedDonorAboResult || 'Подтверждено') === 'Подтверждено';
-  const showDonorAboConfirmation = values.componentGroup === 'erythrocytes';
+  const isErythrocytes = values.componentGroup === 'erythrocytes';
   const planeTestResult = values.planeTestResult || 'Совместимо';
   const biologicalTestResult = values.biologicalTestResult || 'Совместимо';
 
@@ -111,10 +111,7 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
 
       {part === 'confirmed' && (
         <tr className="row-confirmed-blood-groups">
-          <td
-            colSpan={showDonorAboConfirmation ? 3 : 6}
-            className={showDonorAboConfirmation ? 'span-3' : 'span-6'}
-          >
+          <td colSpan={isErythrocytes ? 3 : 6} className={isErythrocytes ? 'span-3' : 'span-6'}>
             <div className="compatibility-inline">
               <span className="compatibility-inline-label">
                 Подтверждена группа крови реципиента:
@@ -132,7 +129,7 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
             </div>
           </td>
 
-          {showDonorAboConfirmation && (
+          {isErythrocytes && (
             <td colSpan={3} className="span-3">
               <div className="compatibility-inline">
                 <span className="compatibility-inline-label">
@@ -156,13 +153,15 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
 
       {part === 'tests' && (
         <tr className="row-tests">
-          <td colSpan={3} className="span-3">
-            <div className="compatibility-inline">
-              <span className="compatibility-inline-label">На плоскости:</span>
-              <span className="compatibility-inline-value">{planeTestResult}</span>
-            </div>
-          </td>
-          <td colSpan={3} className="span-3">
+          {isErythrocytes && (
+            <td colSpan={3} className="span-3">
+              <div className="compatibility-inline">
+                <span className="compatibility-inline-label">На плоскости:</span>
+                <span className="compatibility-inline-value">{planeTestResult}</span>
+              </div>
+            </td>
+          )}
+          <td colSpan={isErythrocytes ? 3 : 6} className={isErythrocytes ? 'span-3' : 'span-6'}>
             <div className="compatibility-inline">
               <span className="compatibility-inline-label">Биологическая проба:</span>
               <span className="compatibility-inline-value">{biologicalTestResult}</span>

@@ -1,6 +1,7 @@
 import { formatRecipientAge } from './recipient-demographics';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
+import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import { useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { readCurrentRecipient } from '../../storage/repositories/current-recipient';
 import { FirstPage } from './first-page';
@@ -41,6 +42,12 @@ export const TransfusionProtocol = () => {
   const sheetsRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<ProtocolChunkId[][]>(INITIAL_PAGES);
   const [registryRecipientId, setRegistryRecipientId] = useState<number | null>(null);
+  const savedList = useSavedDocumentList({
+    kind: 'protocol',
+    record: workspace.document.record,
+    open: workspace.registryOpen,
+    onOpen: () => workspace.setRegistryOpen(true),
+  });
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -191,6 +198,7 @@ export const TransfusionProtocol = () => {
       <ProtocolToolbar
         document={workspace.document}
         documentTitle={savedDocumentTitle('protocol', workspace.values)}
+        onReturnToList={savedList.returnToList}
         status={workspace.status}
         warning={workspace.reagentWarning}
         hemaconWarning={workspace.hemaconWarning}
@@ -289,6 +297,7 @@ export const TransfusionProtocol = () => {
 
       {workspace.registryOpen && (
         <RecipientDatabaseModal
+          initialList={savedList.initialList}
           initialRecipientId={registryRecipientId}
           initialRecipientName={
             readCurrentRecipient()?.fullName ?? workspace.values.recipientName ?? ''

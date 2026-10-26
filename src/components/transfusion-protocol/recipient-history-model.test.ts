@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { formatHistoryValue } from './recipient-history-model';
+import { formatHistoryValue, formatObstetricHistory } from './recipient-history-model';
 
 it('prints a manual addition immediately after inserted history without rewriting saved data', () => {
   const generated = '23.10.2026 — Отмытые эритроциты, 300 мл';
@@ -29,4 +29,54 @@ it('keeps intentional paragraphs in manual history and other history fields', ()
       formatHistoryValue({ [statusName]: 'had', [textName]: text }, statusName, textName),
     ).toBe(text);
   }
+});
+
+it.each(['0', '00', ' 0 '])('prints natural obstetric statements for explicit zero %s', (zero) => {
+  const values = {
+    recipientPregnanciesCount: zero,
+    recipientBirthsCount: zero,
+    recipientSpontaneousAbortionsCount: zero,
+  };
+  const original = { ...values };
+  expect(formatObstetricHistory(values)).toBe('Беременностей не было');
+  expect(values).toEqual(original);
+});
+
+it('keeps positive counts and separately entered newborn history with mixed zero values', () => {
+  expect(
+    formatObstetricHistory({
+      recipientPregnanciesCount: ' 2 ',
+      recipientBirthsCount: '1',
+      recipientSpontaneousAbortionsCount: '0',
+      recipientHemolyticDiseaseNewbornHistory: 'Да',
+    }),
+  ).toBe(
+    '2 беременности в анамнезе; Роды в анамнезе были 1 раз; ' +
+      'Самопроизвольных абортов в анамнезе не было; ' +
+      'Гемолитическая болезнь новорождённых в анамнезе отмечалась',
+  );
+});
+
+it('does not treat missing obstetric data as zero or infer other history from no pregnancies', () => {
+  expect(formatObstetricHistory({})).toBe('');
+  expect(
+    formatObstetricHistory({
+      recipientPregnanciesCount: '',
+      recipientBirthsCount: ' ',
+      recipientSpontaneousAbortionsCount: '',
+    }),
+  ).toBe('');
+  expect(formatObstetricHistory({ recipientPregnanciesCount: '0' })).toBe('Беременностей не было');
+});
+
+it('preserves unrecognized stored count text and an explicit negative newborn history', () => {
+  expect(
+    formatObstetricHistory({
+      recipientPregnanciesCount: 'неизвестно',
+      recipientHemolyticDiseaseNewbornHistory: 'Нет',
+    }),
+  ).toBe(
+    'Количество беременностей: неизвестно; ' +
+      'Гемолитической болезни новорождённых в анамнезе не было',
+  );
 });

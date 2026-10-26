@@ -43,17 +43,14 @@ it.each([
   'registration',
   'component-request',
   'individual-selection-direction',
-] as const)(
-  'falls back to the opened record in %s when no source list was recorded',
-  (kind) => {
-    expect(getSavedDocumentList(kind, record)).toEqual({
-      kind,
-      recipientId: 7,
-      recordId: 42,
-      query: '',
-    });
-  },
-);
+] as const)('falls back to the opened record in %s when no source list was recorded', (kind) => {
+  expect(getSavedDocumentList(kind, record)).toEqual({
+    kind,
+    recipientId: 7,
+    recordId: 42,
+    query: '',
+  });
+});
 
 it('does not reuse the search for another patient, kind or record with a colliding ID', () => {
   rememberSavedDocumentList(location);

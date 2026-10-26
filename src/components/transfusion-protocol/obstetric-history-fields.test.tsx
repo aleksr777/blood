@@ -16,7 +16,7 @@ const stored = {
 };
 
 it.each(['0', '00'])(
-  'disables dependent fields at %s and restores them without data loss',
+  'clears excessive counts at %s and re-enables the fields when pregnancies are entered',
   (zero) => {
     const onChange = vi.fn();
     const History = () => {
@@ -43,14 +43,21 @@ it.each(['0', '00'])(
       screen.getByRole('button', { name: newbornLabel }),
     ];
     fireEvent.change(pregnancy, { target: { value: zero } });
+    expect(onChange).toHaveBeenLastCalledWith({
+      recipientPregnanciesCount: zero,
+      recipientBirthsCount: '',
+      recipientSpontaneousAbortionsCount: '',
+    });
     expect(pregnancy.matches(':disabled')).toBe(false);
     for (const control of controls()) expect(control.matches(':disabled')).toBe(true);
     onChange.mockClear();
     fireEvent.change(births(), { target: { value: '3' } });
     expect(onChange).not.toHaveBeenCalled();
-    expect(births().value).toBe('1');
+    expect(births().value).toBe('');
     fireEvent.change(pregnancy, { target: { value: '1' } });
     for (const control of controls()) expect(control.matches(':disabled')).toBe(false);
+    expect(births().value).toBe('');
+    fireEvent.change(births(), { target: { value: '1' } });
     expect(births().value).toBe('1');
     fireEvent.click(screen.getByRole('button', { name: newbornLabel }));
     fireEvent.click(screen.getByRole('option', { name: 'Да' }));

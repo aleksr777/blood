@@ -8,6 +8,8 @@ type Props = {
   onChange: (values: ProtocolValues) => void;
 };
 
+const DEPENDENT_COUNTS = ['recipientBirthsCount', 'recipientSpontaneousAbortionsCount'];
+
 const FIELDS: ProtocolFieldConfig[] = [
   {
     name: 'recipientPregnanciesCount',
@@ -43,21 +45,35 @@ const FIELDS: ProtocolFieldConfig[] = [
 
 export const ObstetricHistoryFields = ({ values, onChange }: Props) => {
   const noPregnancies = hasNoPregnancies(values);
+  const pregnancies = values.recipientPregnanciesCount?.trim() ?? '';
+  const dependentMaximum = /^\d+$/.test(pregnancies) ? Math.min(Number(pregnancies), 99) : 99;
   return (
     <fieldset className={styles.group}>
       <legend>Акушерский анамнез</legend>
       <div className={styles.obstetricGrid}>
         {FIELDS.map((field) => {
           const disabled = noPregnancies && field.name !== 'recipientPregnanciesCount';
+          const maximum = field.name === 'recipientPregnanciesCount' ? 99 : dependentMaximum;
           return (
             <fieldset key={field.name} className={styles.obstetricField} disabled={disabled}>
               <ProtocolFieldControl
                 key={String(disabled)}
-                field={field}
+                field={field.type === 'number' ? { ...field, max: String(maximum) } : field}
                 value={values[field.name] ?? ''}
                 onChange={(name, value) => {
-                  if (disabled || (field.type === 'number' && !/^\d{0,2}$/.test(value))) return;
-                  onChange({ [name]: value });
+                  if (
+                    disabled ||
+                    (field.type === 'number' &&
+                      (!/^\d{0,2}$/.test(value) || Number(value) > maximum))
+                  )
+                    return;
+                  const changes = { [name]: value };
+                  if (name === 'recipientPregnanciesCount' && value !== '') {
+                    for (const dependent of DEPENDENT_COUNTS) {
+                      if (Number(values[dependent]) > Number(value)) changes[dependent] = '';
+                    }
+                  }
+                  onChange(changes);
                 }}
               />
             </fieldset>

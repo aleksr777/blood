@@ -9,6 +9,7 @@ import type { SavedDocumentControls } from '../saved-document/use-document-state
 type Props = {
   document?: SavedDocumentControls;
   documentTitle?: string;
+  onReturnToList?: () => void;
   status: string;
   warning: string;
   hemaconWarning: string;
@@ -35,6 +36,7 @@ type Props = {
 export const ProtocolToolbar = ({
   document,
   documentTitle = 'Протокол трансфузии',
+  onReturnToList,
   status,
   warning,
   hemaconWarning,
@@ -87,7 +89,13 @@ export const ProtocolToolbar = ({
           currentRecipientAvailable={currentRecipientAvailable}
           onOpenCurrentRecipient={onOpenCurrentRecipient}
         />
-        {document && <SavedDocumentBar document={document} title={documentTitle} />}
+        {document && (
+          <SavedDocumentBar
+            document={document}
+            title={documentTitle}
+            onReturnToList={onReturnToList}
+          />
+        )}
         <div className="print-actions" aria-label="Панель действий">
           {!document?.record && (
             <>

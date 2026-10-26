@@ -12,4 +12,20 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.bar > strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 680px) {
+  .actions {
+    width: 100%;
+  }
+
+  .actions > button {
+    flex: 1 1 auto;
+  }
 }

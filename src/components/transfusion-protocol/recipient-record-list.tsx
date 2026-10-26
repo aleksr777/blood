@@ -1,5 +1,5 @@
 import { AnimatedReveal } from '../animated-reveal/animated-reveal';
-import { useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { SavedDocumentMode } from '../saved-document/use-document-state';
 import styles from './recipient-database.module.css';
 
@@ -13,15 +13,34 @@ export type RecipientArchiveItem = {
 export const RecipientRecordList = ({
   records,
   emptyMessage,
+  initialSelectedId = null,
 }: {
   records: RecipientArchiveItem[];
   emptyMessage: string;
+  initialSelectedId?: number | null;
 }) => {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(initialSelectedId);
+  const listRef = useRef<HTMLDivElement>(null);
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current || initialSelectedId === null) return;
+    const list = listRef.current;
+    const row = list?.querySelector<HTMLElement>(`[data-record-id="${initialSelectedId}"]`);
+    if (!list || !row) return;
+    const frame = window.requestAnimationFrame(() => {
+      const listRect = list.getBoundingClientRect();
+      const rowRect = row.getBoundingClientRect();
+      const top =
+        list.scrollTop + rowRect.top - listRect.top - (list.clientHeight - rowRect.height) / 2;
+      list.scrollTo?.({ top: Math.max(0, top), behavior: 'auto' });
+      restored.current = true;
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [initialSelectedId, records]);
   const actionsId = useId();
   const toggle = (id: number) => setSelectedId((current) => (current === id ? null : id));
   return (
-    <div className={styles.records} role="list" aria-label="Сохранённые бланки">
+    <div ref={listRef} className={styles.records} role="list" aria-label="Сохранённые бланки">
       {records.length === 0 && <div className={styles.empty}>{emptyMessage}</div>}
       {records.map((record) => {
         const selected = selectedId === record.id;

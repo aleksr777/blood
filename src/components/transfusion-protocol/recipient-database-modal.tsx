@@ -27,8 +27,13 @@ import {
 import Modal from '../modal/modal';
 import {
   navigateToSavedDocument,
+  type SavedDocumentKind,
   type SavedRecordOpener,
 } from '../saved-document/saved-document-navigation';
+import {
+  rememberSavedDocumentList,
+  type SavedDocumentListLocation,
+} from '../saved-document/saved-document-list';
 import { RecipientDatabaseDialogs } from './recipient-database-dialogs';
 import { RecipientHistoryPanel } from './recipient-history-panel';
 import { RecipientListPanel } from './recipient-list-panel';
@@ -46,6 +51,7 @@ type Props = {
   onRecipientDisconnected?: (recipientId: number) => void | Promise<void>;
   initialRecipientId?: number | null;
   initialRecipientName?: string;
+  initialList?: SavedDocumentListLocation | null;
 };
 
 const RecipientDatabaseContent = ({
@@ -59,14 +65,14 @@ const RecipientDatabaseContent = ({
   onRecipientDisconnected,
   initialRecipientId = null,
   initialRecipientName = '',
+  initialList = null,
 }: Props) => {
   const [initialRecipient] = useState(() => {
     const currentRecipient = readCurrentRecipient();
+    const requestedId = initialList?.recipientId ?? initialRecipientId;
     const requestedRecipientId =
-      typeof initialRecipientId === 'number' &&
-      Number.isFinite(initialRecipientId) &&
-      initialRecipientId > 0
-        ? initialRecipientId
+      typeof requestedId === 'number' && Number.isFinite(requestedId) && requestedId > 0
+        ? requestedId
         : null;
     const id = requestedRecipientId ?? currentRecipient?.id ?? null;
     const name =
@@ -74,7 +80,7 @@ const RecipientDatabaseContent = ({
 
     return { id, name };
   });
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialList?.query ?? '');
   const [initializingRecipient, setInitializingRecipient] = useState(
     Boolean(initialRecipient.id || initialRecipient.name),
   );
@@ -126,7 +132,7 @@ const RecipientDatabaseContent = ({
         if (!active) return;
         setRecipients(items);
         setSelected(recipient);
-        setQuery('');
+        setQuery(initialList?.query ?? '');
       })
       .catch((error: unknown) => console.error('Не удалось открыть текущего реципиента:', error))
       .finally(() => {
@@ -138,7 +144,7 @@ const RecipientDatabaseContent = ({
     return () => {
       active = false;
     };
-  }, [initialRecipient.id, initialRecipient.name]);
+  }, [initialList?.query, initialRecipient.id, initialRecipient.name]);
 
   useEffect(() => {
     if (initializingRecipient) return undefined;
@@ -334,6 +340,14 @@ const RecipientDatabaseContent = ({
     );
   };
 
+  const rememberList = (kind: SavedDocumentKind, record: { id: number; recipientId: number }) =>
+    rememberSavedDocumentList({
+      kind,
+      recipientId: record.recipientId,
+      recordId: record.id,
+      query,
+    });
+
   return (
     <Modal title="База реципиентов" onClose={onClose} className={styles.modal}>
       <div className={styles.body}>
@@ -347,6 +361,7 @@ const RecipientDatabaseContent = ({
           onCreate={() => setCreating(true)}
         />
         <RecipientHistoryPanel
+          initialList={initialList}
           recipient={selected}
           currentRecipientId={currentRecipientId}
           records={records}
@@ -354,6 +369,7 @@ const RecipientDatabaseContent = ({
           individualSelectionDirectionRecords={individualSelectionDirectionRecords}
           componentRequestRecords={componentRequestRecords}
           onOpenRecord={(record, recipient, mode) => {
+            rememberList('protocol', record);
             if (onOpenRecord) onOpenRecord(record, recipient, mode);
             else {
               navigateToSavedDocument('protocol', record, mode);
@@ -361,6 +377,7 @@ const RecipientDatabaseContent = ({
             }
           }}
           onOpenRegistrationRecord={(record, recipient, mode) => {
+            rememberList('registration', record);
             if (onOpenRegistrationRecord) onOpenRegistrationRecord(record, recipient, mode);
             else {
               navigateToSavedDocument('registration', record, mode);
@@ -368,6 +385,7 @@ const RecipientDatabaseContent = ({
             }
           }}
           onOpenIndividualSelectionDirectionRecord={(record, recipient, mode) => {
+            rememberList('individual-selection-direction', record);
             if (onOpenIndividualSelectionDirectionRecord)
               onOpenIndividualSelectionDirectionRecord(record, recipient, mode);
             else {
@@ -376,6 +394,7 @@ const RecipientDatabaseContent = ({
             }
           }}
           onOpenComponentRequestRecord={(record, recipient, mode) => {
+            rememberList('component-request', record);
             if (onOpenComponentRequestRecord) onOpenComponentRequestRecord(record, recipient, mode);
             else {
               navigateToSavedDocument('component-request', record, mode);

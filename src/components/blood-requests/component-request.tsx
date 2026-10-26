@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
+import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
@@ -382,6 +383,12 @@ export const ComponentRequest = () => {
     if (next === null || !documentState.isReadOnly()) setEditorState(next);
   };
   const [registryOpen, setRegistryOpen] = useState(false);
+  const savedList = useSavedDocumentList({
+    kind: 'component-request',
+    record: documentState.record,
+    open: registryOpen,
+    onOpen: () => setRegistryOpen(true),
+  });
   const [status, setStatus] = useState('');
   const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
   const refreshVersionRef = useRef(0);
@@ -1021,6 +1028,7 @@ export const ComponentRequest = () => {
             onOpenCurrentRecipient={() => setRegistryOpen(true)}
           />
           <SavedDocumentBar
+            onReturnToList={savedList.returnToList}
             document={documentState}
             title={savedDocumentTitle('component-request', draft)}
           />
@@ -1215,6 +1223,7 @@ export const ComponentRequest = () => {
 
       {registryOpen && (
         <RecipientDatabaseModal
+          initialList={savedList.initialList}
           initialRecipientId={currentRecipient?.id ?? null}
           initialRecipientName={currentRecipient?.fullName ?? ''}
           onUseRecipient={selectRecipient}

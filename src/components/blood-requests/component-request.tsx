@@ -4,6 +4,7 @@ import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
+import { clearComponentRequestSelection } from '../saved-document/working-form-cleanup';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
@@ -369,8 +370,9 @@ const formatDirectionDate = (value: string) => {
 
 export const ComponentRequest = () => {
   const [initialStored] = useState(() => ({ draft: loadDraft(), id: loadSavedRecordId() }));
-  const documentState = useDocumentState<DirectionDraft>(() =>
-    initialStored.id === null ? initialStored.draft : emptyDraft(),
+  const documentState = useDocumentState<DirectionDraft>(
+    () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
+    clearComponentRequestSelection,
   );
   const {
     values: draft,
@@ -703,12 +705,7 @@ export const ComponentRequest = () => {
       draftRef.current = draftToSave;
       setDraft(draftToSave);
       documentState.open(record, draftToSave);
-      documentState.setWorkingValues({
-        ...emptyDraft(),
-        medicalOrganization: draftToSave.medicalOrganization,
-        doctorName: draftToSave.doctorName,
-        doctorPhone: draftToSave.doctorPhone,
-      });
+      documentState.setWorkingValues(clearComponentRequestSelection(draftToSave));
       setStatus(afterPrint ? 'Заявка сохранена после печати.' : 'Заявка сохранена.');
       return true;
     } catch (error) {

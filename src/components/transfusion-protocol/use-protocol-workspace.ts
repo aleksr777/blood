@@ -38,6 +38,7 @@ import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
+import { clearProtocolHemacon } from '../saved-document/working-form-cleanup';
 
 const OPEN_WINDOW_STORAGE_KEY = 'blood:protocol-open-window';
 
@@ -86,7 +87,7 @@ const getInitialActiveBlock = () => {
 const getInitialRegistryOpen = () => readStoredOpenWindow()?.type === 'registry';
 
 export const useProtocolWorkspace = () => {
-  const document = useDocumentState<ProtocolValues>(() => ({}));
+  const document = useDocumentState<ProtocolValues>(() => ({}), clearProtocolHemacon);
   const { values, setValues, open: openSavedDocument, isActive: hasSavedDocument } = document;
   const [workingRecordId, setRecordId] = useState<number | null>(null);
   const recordId = document.record?.id ?? workingRecordId;
@@ -278,10 +279,7 @@ export const useProtocolWorkspace = () => {
       setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
       document.open(record, savedValues);
-      document.setWorkingValues({
-        ...currentRecipientValues(savedValues),
-        ...reagentDefaultsForNewBlank({}),
-      });
+      document.setWorkingValues(clearProtocolHemacon(savedValues));
       setRecordId(null);
       setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
       return true;

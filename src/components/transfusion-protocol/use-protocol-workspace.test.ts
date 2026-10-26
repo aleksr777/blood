@@ -5,6 +5,7 @@ import { database } from '../../storage/sqlite/database-client';
 import { adoptCurrentRecipientFromValues } from '../../storage/repositories/current-recipient';
 import { getProtocolNewBlankWarning } from '../../domain/protocol-hemacon';
 import { useProtocolWorkspace } from './use-protocol-workspace';
+import { clearProtocolHemacon } from '../saved-document/working-form-cleanup';
 
 vi.mock('../../storage/sqlite/database-client', () => ({
   database: {
@@ -60,11 +61,12 @@ it('opening and printing an archive never merge current data or save an archived
   await act(async () => result.current.saveToDatabase(true));
   expect(database.saveProtocolRecord).not.toHaveBeenCalled();
   expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  expect(result.current.document.workingValues).toEqual(working);
   act(() => result.current.document.close());
-  expect(result.current.values).toEqual(working);
+  expect(result.current.values).toEqual(clearProtocolHemacon(working));
 });
 
-it('explicit archive editing updates its ID and leaves the working draft untouched', async () => {
+it('archive editing updates its ID and keeps working data until returning to the draft', async () => {
   const original = {
     id: 42,
     recipientId: 2,
@@ -92,8 +94,28 @@ it('explicit archive editing updates its ID and leaves the working draft untouch
   });
   expect(database.saveProtocolRecord).not.toHaveBeenCalled();
   expect(result.current.document.mode).toBe('view');
+  expect(result.current.document.workingValues).toEqual(working);
   act(() => result.current.document.close());
+  expect(result.current.values).toEqual(clearProtocolHemacon(working));
+});
+
+it('retains non-hemacon protocol data after saving and returning to the working draft', async () => {
+  const { result } = await openDraft({
+    ...hemacon,
+    transfusionDate: '2026-10-26',
+    startTime: '10:00',
+    indications: 'Рабочие показания',
+    beforePulse: '70',
+    doctorName: 'Текущий врач',
+    nurseName: 'Текущая медсестра',
+  });
+  const working = structuredClone(result.current.values);
+  await act(async () => result.current.saveToDatabase());
+  expect(result.current.document.mode).toBe('view');
   expect(result.current.values).toEqual(working);
+  act(() => result.current.document.close());
+  expect(result.current.values).toEqual(clearProtocolHemacon(working));
+  expect(database.saveProtocolRecord).toHaveBeenCalledTimes(1);
 });
 afterEach(cleanup);
 

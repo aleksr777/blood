@@ -23,18 +23,28 @@ export const RecipientRecordList = ({
   const listRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
   useEffect(() => {
-    if (restored.current || initialSelectedId === null) return;
+    if (initialSelectedId === null) return;
     const list = listRef.current;
     const row = list?.querySelector<HTMLElement>(`[data-record-id="${initialSelectedId}"]`);
-    if (!list || !row) return;
-    const frame = window.requestAnimationFrame(() => {
+    if (!list || !row) {
+      restored.current = false;
+      return;
+    }
+    if (restored.current) return;
+    let frame: number;
+    const restore = () => {
+      if (!list.clientHeight || row.querySelector('[data-animating="true"]')) {
+        frame = window.requestAnimationFrame(restore);
+        return;
+      }
       const listRect = list.getBoundingClientRect();
       const rowRect = row.getBoundingClientRect();
       const top =
         list.scrollTop + rowRect.top - listRect.top - (list.clientHeight - rowRect.height) / 2;
       list.scrollTo?.({ top: Math.max(0, top), behavior: 'auto' });
       restored.current = true;
-    });
+    };
+    frame = window.requestAnimationFrame(restore);
     return () => window.cancelAnimationFrame(frame);
   }, [initialSelectedId, records]);
   const actionsId = useId();

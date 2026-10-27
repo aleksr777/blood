@@ -356,6 +356,16 @@ const RecipientDatabaseContent = ({
           loading={loading}
           recipients={recipients}
           selected={selected}
+          currentRecipientId={currentRecipientId}
+          onUseRecipient={
+            onUseRecipient
+              ? async (recipient) => {
+                  const accepted = await onUseRecipient(recipient);
+                  if (accepted !== false) onClose();
+                  return accepted;
+                }
+              : undefined
+          }
           onQueryChange={setQuery}
           onSelect={setSelected}
           onCreate={() => setCreating(true)}
@@ -401,15 +411,6 @@ const RecipientDatabaseContent = ({
               onClose();
             }
           }}
-          onUseRecipient={
-            onUseRecipient
-              ? async (recipient) => {
-                  const accepted = await onUseRecipient(recipient);
-                  if (accepted !== false) onClose();
-                  return accepted;
-                }
-              : undefined
-          }
           onDisconnectRecipient={disconnectRecipient}
           onEdit={setEditing}
           onDelete={setDeleting}

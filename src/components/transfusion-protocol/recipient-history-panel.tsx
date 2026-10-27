@@ -28,7 +28,6 @@ type Props = {
   onOpenRegistrationRecord: SavedRecordOpener<RegistrationRecord>;
   onOpenIndividualSelectionDirectionRecord: SavedRecordOpener<BloodRequestRecord>;
   onOpenComponentRequestRecord: SavedRecordOpener<BloodRequestRecord>;
-  onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   onDisconnectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
   currentRecipientId?: number | null;
   onEdit: (recipient: RecipientRecord) => void;
@@ -59,7 +58,6 @@ export const RecipientHistoryPanel = ({
   onOpenRegistrationRecord,
   onOpenIndividualSelectionDirectionRecord,
   onOpenComponentRequestRecord,
-  onUseRecipient,
   onDisconnectRecipient,
   currentRecipientId = null,
   onEdit,
@@ -122,16 +120,6 @@ export const RecipientHistoryPanel = ({
               {demographics && <div className={styles.meta}>{demographics}</div>}
             </div>
             <div className={styles.headerActions}>
-              {onUseRecipient && (
-                <button
-                  type="button"
-                  className={styles.action}
-                  disabled={recipient.id === currentRecipientId}
-                  onClick={() => onUseRecipient(recipient)}
-                >
-                  Выбрать
-                </button>
-              )}
               {onDisconnectRecipient && recipient.id === currentRecipientId && (
                 <button
                   type="button"

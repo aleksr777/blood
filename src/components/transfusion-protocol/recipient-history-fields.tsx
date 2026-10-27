@@ -113,7 +113,7 @@ export const RecipientHistoryFields = ({
   return (
     <div className={styles.root}>
       {showObstetricHistory && values.recipientSex === 'Женский' && (
-        <ObstetricHistoryFields values={values} onChange={onChange} />
+        <ObstetricHistoryFields values={values} applyDefaults={applyDefaults} onChange={onChange} />
       )}
 
       {showTransfusionHistory &&

@@ -36,35 +36,41 @@ it.each(['0', '00'])(
     render(<History />);
     const pregnancy = screen.getByRole('spinbutton', { name: 'Количество беременностей' });
     const births = () =>
-      screen.getByRole('spinbutton', { name: 'Количество родов' }) as HTMLInputElement;
+      screen.getByLabelText('Количество родов', { selector: 'input' }) as HTMLInputElement;
     const controls = () => [
       births(),
-      screen.getByRole('spinbutton', { name: 'Самопроизвольные аборты в анамнезе' }),
+      screen.getByLabelText('Самопроизвольные аборты в анамнезе', { selector: 'input' }),
       screen.getByRole('button', { name: newbornLabel }),
     ];
     fireEvent.change(pregnancy, { target: { value: zero } });
     expect(onChange).toHaveBeenLastCalledWith({
       recipientPregnanciesCount: zero,
-      recipientBirthsCount: '',
-      recipientSpontaneousAbortionsCount: '',
+      recipientBirthsCount: 'Не известно',
+      recipientSpontaneousAbortionsCount: 'Не известно',
+      recipientHemolyticDiseaseNewbornHistory: 'Не известно',
     });
     expect(pregnancy.matches(':disabled')).toBe(false);
     for (const control of controls()) expect(control.matches(':disabled')).toBe(true);
     onChange.mockClear();
     fireEvent.change(births(), { target: { value: '3' } });
     expect(onChange).not.toHaveBeenCalled();
-    expect(births().value).toBe('');
-    fireEvent.change(pregnancy, { target: { value: '1' } });
-    for (const control of controls()) expect(control.matches(':disabled')).toBe(false);
-    expect(births().value).toBe('');
-    fireEvent.change(births(), { target: { value: '1' } });
+    expect(births().value).toBe('Не известно');
+    expect((pregnancy as HTMLInputElement).value).toBe('Не было');
+    fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
+    fireEvent.click(screen.getByRole('option', { name: '1' }));
+    for (const control of controls().slice(0, 2)) expect(control.matches(':disabled')).toBe(false);
+    expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);
+    expect(births().value).toBe('Не известно');
+    fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество родов' }));
+    fireEvent.click(screen.getByRole('option', { name: '1' }));
     expect(births().value).toBe('1');
     fireEvent.click(screen.getByRole('button', { name: newbornLabel }));
     fireEvent.click(screen.getByRole('option', { name: 'Да' }));
     expect(onChange).toHaveBeenLastCalledWith({ recipientHemolyticDiseaseNewbornHistory: 'Да' });
     fireEvent.change(pregnancy, { target: { value: zero } });
-    fireEvent.change(pregnancy, { target: { value: '' } });
-    expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Не известно' }));
+    expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);
   },
 );
 

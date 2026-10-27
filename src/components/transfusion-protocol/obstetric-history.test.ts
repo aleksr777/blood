@@ -22,17 +22,17 @@ it.each([
     recipientSpontaneousAbortionsCount: count,
   });
   expect(formatObstetricHistory(values)).toBe(
-    `${count} ${pregnancies} в анамнезе; Роды в анамнезе были ${count} ${times}; ` +
-      `${count} ${abortions} в анамнезе`,
+    `В анамнезе ${count} ${pregnancies}. Роды — ${count} ${times}. ` +
+      `${count} ${abortions} в анамнезе.`,
   );
 });
 
 it.each([
-  ['Да', 'Гемолитическая болезнь новорождённых в анамнезе отмечалась'],
-  ['Нет', 'Гемолитической болезни новорождённых в анамнезе не было'],
-  [' ДА ', 'Гемолитическая болезнь новорождённых в анамнезе отмечалась'],
-  [' нет ', 'Гемолитической болезни новорождённых в анамнезе не было'],
-  ['неизвестно', 'Гемолитическая болезнь новорождённых в анамнезе: неизвестно'],
+  ['Да', 'Гемолитическая болезнь новорождённых отмечалась.'],
+  ['Нет', 'Гемолитическая болезнь новорождённых не отмечалась.'],
+  [' ДА ', 'Гемолитическая болезнь новорождённых отмечалась.'],
+  [' нет ', 'Гемолитическая болезнь новорождённых не отмечалась.'],
+  ['неизвестно', 'Сведения о гемолитической болезни новорождённых неизвестны.'],
   ['', ''],
   [' ', ''],
 ])('formats explicit newborn history %j without guessing missing data', (value, expected) => {
@@ -46,8 +46,7 @@ it('formats padded counts without changing stored values', () => {
     recipientSpontaneousAbortionsCount: ' 05 ',
   });
   expect(formatObstetricHistory(values)).toBe(
-    '1 беременность в анамнезе; Роды в анамнезе были 2 раза; ' +
-      '5 самопроизвольных абортов в анамнезе',
+    'В анамнезе 1 беременность. Роды — 2 раза. ' + '5 самопроизвольных абортов в анамнезе.',
   );
   expect(values.recipientPregnanciesCount).toBe('01');
 });
@@ -56,7 +55,7 @@ it.each(['-1', '1.5', '1e1', '9007199254740993'])(
   'retains unrecognized earlier count %s as entered',
   (value) => {
     expect(formatObstetricHistory({ recipientPregnanciesCount: value })).toBe(
-      `Количество беременностей: ${value}`,
+      `Количество беременностей: ${value}.`,
     );
   },
 );
@@ -80,3 +79,18 @@ it.each([undefined, '', ' ', '1', '99', 'неизвестно'])(
     expect(hasNoPregnancies(values)).toBe(false);
   },
 );
+
+it('collapses four explicit unknown values but keeps partial unknown information', () => {
+  const unknown = {
+    recipientPregnanciesCount: 'Не известно',
+    recipientBirthsCount: 'Не известно',
+    recipientSpontaneousAbortionsCount: 'Не известно',
+    recipientHemolyticDiseaseNewbornHistory: 'Не известно',
+  };
+  expect(formatObstetricHistory(unknown)).toBe('Не известен');
+  expect(formatObstetricHistory({ ...unknown, recipientBirthsCount: '3' })).toBe(
+    'Количество беременностей неизвестно. Роды — 3 раза. ' +
+      'Количество самопроизвольных абортов неизвестно. ' +
+      'Сведения о гемолитической болезни новорождённых неизвестны.',
+  );
+});

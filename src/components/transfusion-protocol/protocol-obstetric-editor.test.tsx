@@ -15,13 +15,15 @@ vi.mock('../modal/modal', () => ({
 }));
 afterEach(cleanup);
 
-it('keeps unknown history selected and blocked after the protocol receives updated values', () => {
+it('keeps unknown choices in all fields after the protocol receives updated values', () => {
   const onClose = vi.fn();
   const Editor = () => {
     const [values, setValues] = useState<ProtocolValues>({
       recipientSex: 'Женский',
       recipientPregnanciesCount: '2',
       recipientBirthsCount: '1',
+      recipientSpontaneousAbortionsCount: '1',
+      recipientHemolyticDiseaseNewbornHistory: 'Да',
     });
     return (
       <ProtocolEditorModal
@@ -43,14 +45,23 @@ it('keeps unknown history selected and blocked after the protocol receives updat
     );
   };
   render(<Editor />);
-  fireEvent.click(screen.getByRole('radio', { name: 'Не известен' }));
-  expect((screen.getByRole('radio', { name: 'Не известен' }) as HTMLInputElement).checked).toBe(
-    true,
-  );
-  for (const control of screen.getAllByRole('spinbutton'))
-    expect(control.matches(':disabled')).toBe(true);
+  for (const label of [
+    'Варианты: Количество беременностей',
+    'Варианты: Количество родов',
+    'Варианты: Самопроизвольные аборты в анамнезе',
+  ]) {
+    fireEvent.click(screen.getByRole('button', { name: label }));
+    fireEvent.click(screen.getByRole('option', { name: 'Не известно' }));
+  }
+  for (const control of screen.getAllByRole('textbox'))
+    expect((control as HTMLInputElement).value).toBe('Не известно');
   fireEvent.click(screen.getByRole('button', { name: 'Готово' }));
   expect(onClose).toHaveBeenCalledWith(
-    expect.objectContaining({ recipientObstetricHistoryStatus: 'unknown' }),
+    expect.objectContaining({
+      recipientPregnanciesCount: 'Не известно',
+      recipientBirthsCount: 'Не известно',
+      recipientSpontaneousAbortionsCount: 'Не известно',
+      recipientHemolyticDiseaseNewbornHistory: 'Не известно',
+    }),
   );
 });

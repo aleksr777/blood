@@ -217,8 +217,8 @@ const RecipientDatabaseContent = ({
       active = false;
     };
   }, [selected]);
-  const addRecipient = async (fullName: string) => {
-    const created = await createRecipient(fullName);
+  const addRecipient = async (fullName: string, values: ProtocolValues) => {
+    const created = await createRecipient(fullName, values);
     setRecipients((current) =>
       [...current, created].sort((left, right) =>
         left.fullName.localeCompare(right.fullName, 'ru'),
@@ -356,6 +356,16 @@ const RecipientDatabaseContent = ({
           loading={loading}
           recipients={recipients}
           selected={selected}
+          currentRecipientId={currentRecipientId}
+          onUseRecipient={
+            onUseRecipient
+              ? async (recipient) => {
+                  const accepted = await onUseRecipient(recipient);
+                  if (accepted !== false) onClose();
+                  return accepted;
+                }
+              : undefined
+          }
           onQueryChange={setQuery}
           onSelect={setSelected}
           onCreate={() => setCreating(true)}
@@ -401,15 +411,6 @@ const RecipientDatabaseContent = ({
               onClose();
             }
           }}
-          onUseRecipient={
-            onUseRecipient
-              ? async (recipient) => {
-                  const accepted = await onUseRecipient(recipient);
-                  if (accepted !== false) onClose();
-                  return accepted;
-                }
-              : undefined
-          }
           onDisconnectRecipient={disconnectRecipient}
           onEdit={setEditing}
           onDelete={setDeleting}

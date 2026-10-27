@@ -2,6 +2,7 @@ import ui from '../../styles/ui';
 import { useState } from 'react';
 import { createRecipient, type RecipientRecord } from '../../storage/repositories/recipients';
 import { RecipientNewModal } from './recipient-new-modal';
+import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-field.module.css';
 
 type Props = {
@@ -19,8 +20,8 @@ export const RecipientField = ({ value, onSelectRecipient, onOpenRecipients }: P
     }
   };
 
-  const create = async (fullName: string) => {
-    const created = await createRecipient(fullName);
+  const create = async (fullName: string, values: ProtocolValues) => {
+    const created = await createRecipient(fullName, values);
     await select(created);
   };
 

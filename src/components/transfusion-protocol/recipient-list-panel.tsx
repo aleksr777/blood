@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
+import { RecipientListItem } from './recipient-list-item';
 import styles from './recipient-database.module.css';
 
 type Props = {
@@ -7,6 +8,8 @@ type Props = {
   loading: boolean;
   recipients: RecipientRecord[];
   selected: RecipientRecord | null;
+  currentRecipientId?: number | null;
+  onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
   onQueryChange: (value: string) => void;
   onSelect: (recipient: RecipientRecord) => void;
   onCreate: () => void;
@@ -17,6 +20,8 @@ export const RecipientListPanel = ({
   loading,
   recipients,
   selected,
+  currentRecipientId = null,
+  onUseRecipient,
   onQueryChange,
   onSelect,
   onCreate,
@@ -27,20 +32,32 @@ export const RecipientListPanel = ({
     const list = listRef.current;
     if (!list || !selected) return undefined;
 
-    const frame = window.requestAnimationFrame(() => {
+    let frame: number;
+    const scrollToSelected = () => {
       const item = list.querySelector<HTMLElement>(`[data-recipient-id="${selected.id}"]`);
       if (!item) return;
+      if (!list.clientHeight || item.querySelector('[data-animating="true"]')) {
+        frame = window.requestAnimationFrame(scrollToSelected);
+        return;
+      }
 
       const listRect = list.getBoundingClientRect();
       const itemRect = item.getBoundingClientRect();
-      const targetScrollTop =
-        list.scrollTop + (itemRect.top - listRect.top) - (list.clientHeight - itemRect.height) / 2;
+      const actionBottom =
+        item.querySelector('[data-animated-reveal] button')?.getBoundingClientRect().bottom ??
+        itemRect.bottom;
+      const targetScrollTop = Math.max(
+        0,
+        list.scrollTop + (itemRect.top - listRect.top) - (list.clientHeight - itemRect.height) / 2,
+        list.scrollTop + actionBottom - listRect.bottom,
+      );
 
       list.scrollTo({
-        top: Math.max(0, targetScrollTop),
+        top: targetScrollTop,
         behavior: 'auto',
       });
-    });
+    };
+    frame = window.requestAnimationFrame(scrollToSelected);
 
     return () => window.cancelAnimationFrame(frame);
   }, [recipients, selected]);
@@ -68,22 +85,14 @@ export const RecipientListPanel = ({
           <div className={styles.empty}>Реципиенты не найдены</div>
         )}
         {recipients.map((recipient) => (
-          <button
+          <RecipientListItem
             key={recipient.id}
-            type="button"
-            className={styles.person}
-            data-recipient-id={recipient.id}
-            data-selected={selected?.id === recipient.id}
-            onClick={() => onSelect(recipient)}
-          >
-            <span className={styles.personName}>{recipient.fullName}</span>
-            <span className={styles.meta}>
-              Карточка № {recipient.id} · протоколов: {recipient.protocolCount} · листов
-              регистрации: {recipient.registrationCount} · направлений:{' '}
-              {recipient.individualSelectionDirectionCount} · заявок:{' '}
-              {recipient.componentRequestCount}
-            </span>
-          </button>
+            recipient={recipient}
+            selected={selected?.id === recipient.id}
+            current={currentRecipientId === recipient.id}
+            onSelect={onSelect}
+            onUseRecipient={onUseRecipient}
+          />
         ))}
       </div>
     </section>

@@ -18,6 +18,7 @@ it.each(fields)('keeps %s within 0–99 when editing and clearing', (name, label
   const History = () => {
     const [values, setValues] = useState<ProtocolValues>({
       recipientSex: 'Женский',
+      recipientPregnanciesCount: 'Не известно',
       [name]: '2',
     });
     return (
@@ -35,9 +36,14 @@ it.each(fields)('keeps %s within 0–99 when editing and clearing', (name, label
   const input = screen.getByRole('spinbutton', { name: label }) as HTMLInputElement;
   expect([input.min, input.max, input.step]).toEqual(['0', '99', '1']);
   for (const value of ['0', '1', '99']) {
-    fireEvent.change(input, { target: { value } });
+    if (value === '1') {
+      fireEvent.click(screen.getByRole('button', { name: `Варианты: ${label}` }));
+      expect(screen.queryByRole('option', { name: '0' })).toBeNull();
+      expect(screen.getByRole('option', { name: 'Не было' })).toBeTruthy();
+      fireEvent.click(screen.getByRole('option', { name: value }));
+    } else fireEvent.change(input, { target: { value } });
     expect(onChange).toHaveBeenLastCalledWith({ [name]: value });
-    expect(input.value).toBe(value);
+    expect(input.value).toBe(value === '0' ? 'Не было' : value);
   }
   onChange.mockClear();
   for (const value of ['-1', '100', '999', '1.5', '1e1']) {
@@ -46,8 +52,13 @@ it.each(fields)('keeps %s within 0–99 when editing and clearing', (name, label
     expect(input.value).toBe('99');
   }
   fireEvent.change(input, { target: { value: '' } });
-  expect(onChange).toHaveBeenLastCalledWith({ [name]: '' });
   expect(input.value).toBe('');
+  expect(onChange).not.toHaveBeenCalled();
+  fireEvent.blur(input);
+  expect(onChange).toHaveBeenLastCalledWith({ [name]: 'Не известно' });
+  expect((screen.getByRole('textbox', { name: label }) as HTMLInputElement).value).toBe(
+    'Не известно',
+  );
 });
 
 it('does not rewrite stored obstetric history when opening a saved document', () => {

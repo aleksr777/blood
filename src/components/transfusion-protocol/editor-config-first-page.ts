@@ -1,4 +1,5 @@
 import type { ProtocolBlockConfig } from './protocol-types';
+import { obstetricHistoryFields } from './obstetric-history-config';
 
 export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
   {
@@ -111,30 +112,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     fields: [
       { name: 'recipientSex', label: 'Пол' },
       { name: 'recipientObstetricHistoryStatus', label: 'Акушерский анамнез' },
-      {
-        name: 'recipientPregnanciesCount',
-        label: 'Количество беременностей',
-        type: 'number',
-        step: '1',
-      },
-      {
-        name: 'recipientBirthsCount',
-        label: 'Количество родов',
-        type: 'number',
-        step: '1',
-      },
-      {
-        name: 'recipientSpontaneousAbortionsCount',
-        label: 'Самопроизвольные аборты в анамнезе',
-        type: 'number',
-        step: '1',
-      },
-      {
-        name: 'recipientHemolyticDiseaseNewbornHistory',
-        label: 'Гемолитическая болезнь новорождённого в анамнезе',
-        type: 'select',
-        options: ['Нет', 'Да'],
-      },
+      ...obstetricHistoryFields,
       { name: 'previousTransfusionsStatus', label: 'previousTransfusionsStatus' },
       { name: 'previousTransfusionsAutoText', label: 'previousTransfusionsAutoText' },
       { name: 'previousTransfusionsSuggestedText', label: 'previousTransfusionsSuggestedText' },

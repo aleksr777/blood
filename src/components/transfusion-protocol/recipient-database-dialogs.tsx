@@ -26,7 +26,7 @@ type Props = {
   onCloseRecordDelete: () => void;
   onCloseRegistrationRecordDelete: () => void;
   onCloseBloodRequestRecordDelete: () => void;
-  onCreate: (fullName: string) => Promise<void>;
+  onCreate: (fullName: string, values: ProtocolValues) => Promise<void>;
   onExisting: (recipient: RecipientRecord) => void;
   onSave: (recipient: RecipientRecord, values: ProtocolValues) => Promise<void>;
   onDelete: (recipient: RecipientRecord) => Promise<void>;
@@ -64,7 +64,6 @@ export const RecipientDatabaseDialogs = ({
         onCreate={onCreate}
         onExisting={onExisting}
         existingActionLabel="Открыть реципиента"
-        hint="Реципиент будет сразу добавлен в базу без создания бланка."
       />
     )}
     {editing && (

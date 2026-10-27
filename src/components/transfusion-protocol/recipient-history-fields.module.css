@@ -63,8 +63,17 @@
   max-width: 100%;
 }
 
-.obstetricGrid [aria-haspopup='listbox'] {
-  width: 10rem;
+.countField {
+  width: 12rem;
+  max-width: 100%;
+}
+
+.countField input {
+  width: 100%;
+}
+
+.obstetricField[data-type='select'] [aria-haspopup='listbox'] {
+  width: 12rem;
   max-width: 100%;
 }
 

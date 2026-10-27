@@ -18,6 +18,7 @@ it.each(fields)('keeps %s within 0–99 when editing and clearing', (name, label
   const History = () => {
     const [values, setValues] = useState<ProtocolValues>({
       recipientSex: 'Женский',
+      recipientPregnanciesCount: 'Не известно',
       [name]: '2',
     });
     return (
@@ -46,8 +47,13 @@ it.each(fields)('keeps %s within 0–99 when editing and clearing', (name, label
     expect(input.value).toBe('99');
   }
   fireEvent.change(input, { target: { value: '' } });
-  expect(onChange).toHaveBeenLastCalledWith({ [name]: '' });
   expect(input.value).toBe('');
+  expect(onChange).not.toHaveBeenCalled();
+  fireEvent.blur(input);
+  expect(onChange).toHaveBeenLastCalledWith({ [name]: 'Не известно' });
+  expect((screen.getByRole('textbox', { name: label }) as HTMLInputElement).value).toBe(
+    'Не известно',
+  );
 });
 
 it('does not rewrite stored obstetric history when opening a saved document', () => {

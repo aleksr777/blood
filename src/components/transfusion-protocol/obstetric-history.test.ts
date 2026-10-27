@@ -80,3 +80,18 @@ it.each([undefined, '', ' ', '1', '99', 'неизвестно'])(
     expect(hasNoPregnancies(values)).toBe(false);
   },
 );
+
+it('collapses four explicit unknown values but keeps partial unknown information', () => {
+  const unknown = {
+    recipientPregnanciesCount: 'Не известно',
+    recipientBirthsCount: 'Не известно',
+    recipientSpontaneousAbortionsCount: 'Не известно',
+    recipientHemolyticDiseaseNewbornHistory: 'Не известно',
+  };
+  expect(formatObstetricHistory(unknown)).toBe('Не известен');
+  expect(formatObstetricHistory({ ...unknown, recipientBirthsCount: '3' })).toBe(
+    'Количество беременностей: Не известно; Роды в анамнезе были 3 раза; ' +
+      'Самопроизвольные аборты в анамнезе: Не известно; ' +
+      'Гемолитическая болезнь новорождённых в анамнезе: Не известно',
+  );
+});

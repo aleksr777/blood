@@ -1,5 +1,28 @@
 import type { ProtocolValues } from './protocol-types';
 
+export const OBSTETRIC_UNKNOWN = 'Не известно';
+export const OBSTETRIC_HISTORY_FIELDS = [
+  'recipientPregnanciesCount',
+  'recipientBirthsCount',
+  'recipientSpontaneousAbortionsCount',
+  'recipientHemolyticDiseaseNewbornHistory',
+] as const;
+
+export const isObstetricValueUnknown = (value?: string) =>
+  value?.trim().toLocaleLowerCase('ru-RU').replace(/\s+/g, '') === 'неизвестно';
+
+// Old documents have one status for the entire history. Keep that meaning until
+// the user explicitly edits an individual field, without changing the snapshot.
+export const obstetricValuesForEditing = (values: ProtocolValues): ProtocolValues =>
+  Object.fromEntries(
+    OBSTETRIC_HISTORY_FIELDS.map((name) => [
+      name,
+      values.recipientObstetricHistoryStatus === 'unknown'
+        ? OBSTETRIC_UNKNOWN
+        : (values[name] ?? ''),
+    ]),
+  );
+
 const COUNT_FIELDS = [
   [
     'recipientPregnanciesCount',
@@ -29,7 +52,8 @@ export const hasNoPregnancies = (values: ProtocolValues) =>
   /^0+$/.test(values.recipientPregnanciesCount?.trim() ?? '');
 
 export const isObstetricHistoryUnknown = (values: ProtocolValues) =>
-  values.recipientObstetricHistoryStatus === 'unknown';
+  values.recipientObstetricHistoryStatus === 'unknown' ||
+  OBSTETRIC_HISTORY_FIELDS.every((name) => isObstetricValueUnknown(values[name]));
 
 export const formatObstetricHistory = (values: ProtocolValues) => {
   if (isObstetricHistoryUnknown(values)) return 'Не известен';

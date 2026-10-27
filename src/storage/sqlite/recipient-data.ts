@@ -3,6 +3,7 @@ import type { ProtocolRecord, ProtocolValuesRecord, RegistrationRecord } from '.
 export const RECIPIENT_PROFILE_FIELDS = [
   'recipientBirthDate',
   'recipientSex',
+  'recipientObstetricHistoryStatus',
   'recipientPregnanciesCount',
   'recipientBirthsCount',
   'recipientSpontaneousAbortionsCount',

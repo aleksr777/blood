@@ -1,23 +1,7 @@
-import { INDICATION_FIELDS_BY_COMPONENT } from '../../storage/indication-fields';
 import type { ProtocolValues } from './protocol-types';
 
 export const getIndicationComponent = (values: ProtocolValues) =>
   values.componentGroup || values.indicationComponent || '';
-
-export const indicationValuesForComponent = (
-  values: ProtocolValues,
-  component = getIndicationComponent(values),
-): ProtocolValues => {
-  const fields = INDICATION_FIELDS_BY_COMPONENT[component];
-  if (!fields) return {};
-
-  return {
-    indicationComponent: component,
-    ...Object.fromEntries(
-      fields.flatMap((field) => (values[field] !== undefined ? [[field, values[field]]] : [])),
-    ),
-  };
-};
 
 const yes = (value?: string) => value === '1';
 

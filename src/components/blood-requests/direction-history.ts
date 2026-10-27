@@ -29,6 +29,7 @@ export const hasStructuredDirectionHistory = (values: ProtocolValues) =>
 
 export const hasStructuredObstetricHistory = (values: ProtocolValues) =>
   [
+    'recipientObstetricHistoryStatus',
     'recipientPregnanciesCount',
     'recipientBirthsCount',
     'recipientSpontaneousAbortionsCount',

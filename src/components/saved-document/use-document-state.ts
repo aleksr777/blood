@@ -23,7 +23,10 @@ type SavedState<T> = {
   values: T;
 };
 
-export const useDocumentState = <T extends Record<string, unknown>>(initial: () => T) => {
+export const useDocumentState = <T extends Record<string, unknown>>(
+  initial: () => T,
+  cleanWorkingValuesOnClose?: (values: T) => T,
+) => {
   const [workingValues, setWorkingValues] = useState<T>(initial);
   const [saved, setSaved] = useState<SavedState<T> | null>(null);
   const savedRef = useRef(saved);
@@ -59,7 +62,11 @@ export const useDocumentState = <T extends Record<string, unknown>>(initial: () 
     const current = savedRef.current;
     if (current) publish({ ...current, mode: 'view', values: current.original });
   }, [publish]);
-  const close = useCallback(() => publish(null), [publish]);
+  const close = useCallback(() => {
+    if (!savedRef.current) return;
+    if (cleanWorkingValuesOnClose) setWorkingValues(cleanWorkingValuesOnClose);
+    publish(null);
+  }, [publish, cleanWorkingValuesOnClose]);
   const isActive = useCallback(() => savedRef.current !== null, []);
   const isReadOnly = useCallback(() => savedRef.current?.mode === 'view', []);
 

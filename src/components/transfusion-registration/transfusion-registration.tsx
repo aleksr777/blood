@@ -27,6 +27,7 @@ import {
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
+import { clearRegistrationTable } from '../saved-document/working-form-cleanup';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
@@ -37,7 +38,7 @@ import { RegistrationTransfusionsModal } from './registration-transfusions-modal
 
 const ROW_COUNT = 14;
 export const TransfusionRegistration = () => {
-  const documentState = useDocumentState<ProtocolValues>(() => ({}));
+  const documentState = useDocumentState<ProtocolValues>(() => ({}), clearRegistrationTable);
   const {
     values,
     setValues,
@@ -212,6 +213,7 @@ export const TransfusionRegistration = () => {
           recipientId: String(documentState.record.recipientId),
         });
         documentState.open(record, record.values);
+        documentState.setWorkingValues(clearRegistrationTable);
         setPatientDetailsOpen(false);
         setTableEditorOpen(false);
         setStatus('Изменения сохранены в исходном листе регистрации.');
@@ -252,8 +254,7 @@ export const TransfusionRegistration = () => {
       setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
       documentState.open(record, savedValues);
-      const recipient = readCurrentRecipient();
-      documentState.setWorkingValues(recipient ? recipientProfileValuesForForms(recipient) : {});
+      documentState.setWorkingValues(clearRegistrationTable(savedValues));
       setRecordId(null);
       setStatus(
         afterPrint ? 'Лист регистрации сохранён после печати.' : 'Лист регистрации сохранён.',

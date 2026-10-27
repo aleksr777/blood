@@ -17,12 +17,3 @@ export const getProtocolHemaconWarning = (values: Record<string, string>) => {
     ? `Сохранение и печать протокола недоступны.\n\nЗаполните данные гемакона:\n\n${missing.map((field) => `• ${field}`).join('\n')}.`
     : '';
 };
-
-export const getProtocolNewBlankWarning = (values: Record<string, string>) => {
-  const missing = getMissingHemaconFields(values);
-  if (!values.recipientName?.trim()) missing.unshift('ФИО реципиента');
-
-  return missing.length
-    ? `Создание нового бланка недоступно.\n\nДля автоматического сохранения текущего протокола заполните:\n\n${missing.map((field) => `• ${field}`).join('\n')}.`
-    : '';
-};

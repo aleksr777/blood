@@ -4,6 +4,7 @@ import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
+import { clearIndividualSelectionStaff } from '../saved-document/working-form-cleanup';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
@@ -399,8 +400,9 @@ const formatDirectionDate = (value: string) => {
 
 export const IndividualSelectionDirection = () => {
   const [initialStored] = useState(() => ({ draft: loadDraft(), id: loadSavedRecordId() }));
-  const documentState = useDocumentState<DirectionDraft>(() =>
-    initialStored.id === null ? initialStored.draft : emptyDraft(),
+  const documentState = useDocumentState<DirectionDraft>(
+    () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
+    clearIndividualSelectionStaff,
   );
   const {
     values: draft,
@@ -714,6 +716,7 @@ export const IndividualSelectionDirection = () => {
           values: { ...draftRef.current },
         });
         documentState.open(record, draftFromRecord(record.values));
+        documentState.setWorkingValues(clearIndividualSelectionStaff);
         setEditor(null);
         setStatus('Изменения сохранены в исходном бланке.');
         return true;
@@ -751,12 +754,7 @@ export const IndividualSelectionDirection = () => {
       draftRef.current = draftToSave;
       setDraft(draftToSave);
       documentState.open(record, draftToSave);
-      documentState.setWorkingValues({
-        ...emptyDraft(),
-        medicalOrganization: draftToSave.medicalOrganization,
-        doctorName: draftToSave.doctorName,
-        doctorPhone: draftToSave.doctorPhone,
-      });
+      documentState.setWorkingValues(clearIndividualSelectionStaff(draftToSave));
       setStatus(afterPrint ? 'Направление сохранено после печати.' : 'Направление сохранено.');
       return true;
     } catch (error) {

@@ -13,7 +13,7 @@ type Props = {
   status: string;
   warning: string;
   hemaconWarning: string;
-  newBlankWarning: string;
+  hemaconDateWarning: string;
   dangerWarning: string;
   bloodGroupWarning: string;
   bloodGroupWarningDismissible: boolean;
@@ -21,7 +21,6 @@ type Props = {
   componentUnitNumberWarning: string;
   onDismissComponentUnitNumberWarning: () => void;
   onClear: () => void;
-  onNew: () => void;
   onOpenRegistry: () => void;
   onOpenCurrentRecipient: () => void;
   currentRecipientName: string;
@@ -40,7 +39,7 @@ export const ProtocolToolbar = ({
   status,
   warning,
   hemaconWarning,
-  newBlankWarning,
+  hemaconDateWarning,
   dangerWarning,
   bloodGroupWarning,
   bloodGroupWarningDismissible,
@@ -48,7 +47,6 @@ export const ProtocolToolbar = ({
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
   onClear,
-  onNew,
   onOpenRegistry,
   onOpenCurrentRecipient,
   currentRecipientName,
@@ -59,21 +57,19 @@ export const ProtocolToolbar = ({
   pageCount,
   onPrintPage,
 }: Props) => {
-  const [warningAction, setWarningAction] = useState<'hemacon' | 'new' | null>(null);
-  const visibleWarning =
-    warningAction === 'new' ? newBlankWarning : warningAction === 'hemacon' ? hemaconWarning : '';
+  const [showHemaconWarning, setShowHemaconWarning] = useState(false);
+  const visibleWarning = showHemaconWarning ? hemaconWarning : '';
 
   useEffect(() => {
-    if (!visibleWarning) setWarningAction(null);
+    if (!visibleWarning) setShowHemaconWarning(false);
   }, [visibleWarning]);
 
-  const runValidatedAction = (action: () => void, kind: 'hemacon' | 'new' = 'hemacon') => {
-    const warning = kind === 'new' ? newBlankWarning : hemaconWarning;
-    if (warning) {
-      setWarningAction(kind);
+  const runValidatedAction = (action: () => void) => {
+    if (hemaconWarning) {
+      setShowHemaconWarning(true);
       return;
     }
-    setWarningAction(null);
+    setShowHemaconWarning(false);
     action();
   };
 
@@ -105,14 +101,6 @@ export const ProtocolToolbar = ({
                 onClick={onClear}
               >
                 Очистить бланк
-              </button>
-              <button
-                type="button"
-                className={`${ui.secondaryButton} ${ui.toolbarButton} new-button`}
-                onClick={() => runValidatedAction(onNew, 'new')}
-                aria-disabled={Boolean(newBlankWarning)}
-              >
-                Новый бланк
               </button>
             </>
           )}
@@ -147,7 +135,12 @@ export const ProtocolToolbar = ({
         <WarningNotice
           className="toolbar-warning"
           message={visibleWarning}
-          onDismiss={() => setWarningAction(null)}
+          onDismiss={() => setShowHemaconWarning(false)}
+        />
+        <WarningNotice
+          className="toolbar-warning"
+          message={hemaconDateWarning}
+          dismissible={false}
         />
         <AnimatedMessage message={status} className="toolbar-status" />
         <WarningNotice className="toolbar-danger-warning" message={dangerWarning} danger />

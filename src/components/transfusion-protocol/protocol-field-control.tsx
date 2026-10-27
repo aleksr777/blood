@@ -1,4 +1,5 @@
 import { isSavedRecipientIdentityField } from '../../domain/saved-recipient-identity';
+import { BoundedIntegerInput } from '../bounded-integer-input/bounded-integer-input';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { CustomSelectField } from './custom-select-field';
 import { DepartmentField } from './department-field';
@@ -19,6 +20,24 @@ type Props = {
 };
 
 const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' | 'onChange'>) => {
+  if (
+    field.type === 'number' &&
+    field.step === '1' &&
+    field.min !== undefined &&
+    Number(field.min) > 0 &&
+    field.max !== undefined
+  ) {
+    return (
+      <BoundedIntegerInput
+        name={field.name}
+        value={value}
+        min={Number(field.min)}
+        max={Number(field.max)}
+        readOnly={field.readOnly}
+        onChange={(next) => onChange(field.name, next)}
+      />
+    );
+  }
   if (field.type === 'textarea') {
     return (
       <textarea

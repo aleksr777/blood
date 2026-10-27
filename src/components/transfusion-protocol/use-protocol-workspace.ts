@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
@@ -20,11 +20,9 @@ import {
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
-import {
-  getProtocolHemaconWarning,
-  getProtocolNewBlankWarning,
-} from '../../domain/protocol-hemacon';
-import { getIndicationComponent, indicationValuesForComponent } from './indications-model';
+import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
+import { getHemaconDateOrderWarning } from '../../domain/hemacon-dates';
+import { getIndicationComponent } from './indications-model';
 import {
   getExpiredReagentWarnings,
   getHemaconExpirationWarning,
@@ -33,11 +31,11 @@ import {
   saveReagentDefaults,
 } from './reagent-defaults';
 import { usePreviousTransfusionSuggestion } from './use-previous-transfusion-suggestion';
-import { currentRecipientValues } from './recipient-profile-values';
 import { useProtocolDraft } from './use-protocol-draft';
 import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
+import { cleanProtocolDraft } from '../saved-document/working-form-cleanup';
 
 const OPEN_WINDOW_STORAGE_KEY = 'blood:protocol-open-window';
 
@@ -86,7 +84,7 @@ const getInitialActiveBlock = () => {
 const getInitialRegistryOpen = () => readStoredOpenWindow()?.type === 'registry';
 
 export const useProtocolWorkspace = () => {
-  const document = useDocumentState<ProtocolValues>(() => ({}));
+  const document = useDocumentState<ProtocolValues>(() => ({}), cleanProtocolDraft);
   const { values, setValues, open: openSavedDocument, isActive: hasSavedDocument } = document;
   const [workingRecordId, setRecordId] = useState<number | null>(null);
   const recordId = document.record?.id ?? workingRecordId;
@@ -105,10 +103,6 @@ export const useProtocolWorkspace = () => {
     componentUnitNumber: values.componentUnitNumber,
     refreshVersion: historyRefreshToken,
   });
-  const previousBlankIndicationsRef = useRef<{
-    component: string;
-    values: ProtocolValues;
-  } | null>(null);
 
   useEffect(() => {
     try {
@@ -172,18 +166,10 @@ export const useProtocolWorkspace = () => {
       componentChanged && currentRecipient && Number(values.recipientId) === currentRecipient.id
         ? readCurrentIndications(currentRecipient.id, selectedComponent)
         : {};
-    const carriedIndications = previousBlankIndicationsRef.current;
-    const shouldCarryIndications =
-      Boolean(selectedComponent) && carriedIndications?.component === selectedComponent;
     const appliedValues = {
-      ...(shouldCarryIndications ? carriedIndications.values : {}),
       ...sharedIndications,
       ...nextValues,
     };
-
-    if (shouldCarryIndications) {
-      previousBlankIndicationsRef.current = null;
-    }
 
     const merged = { ...values, ...appliedValues };
     if (hasReagentDefaultUpdate(appliedValues)) {
@@ -206,7 +192,6 @@ export const useProtocolWorkspace = () => {
   };
 
   const selectRecipient = async (recipient: RecipientRecord) => {
-    previousBlankIndicationsRef.current = null;
     try {
       document.close();
       const result = await switchCurrentRecipient(recipient, {
@@ -256,6 +241,7 @@ export const useProtocolWorkspace = () => {
         const savedValues = { ...values, recipientId: String(document.record.recipientId) };
         const record = await updateProtocolRecord(document.record.id, savedValues);
         document.open(record, record.values);
+        document.setWorkingValues(cleanProtocolDraft);
         setActiveBlock(null);
         setStatus('Изменения сохранены в исходном бланке.');
         return true;
@@ -278,10 +264,7 @@ export const useProtocolWorkspace = () => {
       setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
       document.open(record, savedValues);
-      document.setWorkingValues({
-        ...currentRecipientValues(savedValues),
-        ...reagentDefaultsForNewBlank({}),
-      });
+      document.setWorkingValues(cleanProtocolDraft(savedValues));
       setRecordId(null);
       setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
       return true;
@@ -292,91 +275,8 @@ export const useProtocolWorkspace = () => {
     }
   };
 
-  const newBlank = async () => {
-    if (document.active) {
-      document.close();
-      return;
-    }
-    const warning = getProtocolNewBlankWarning(values);
-    if (warning) {
-      setStatus(warning);
-      return;
-    }
-    const openedFromDatabase = recordId !== null;
-    let sourceValues = values;
-    let previousBlankSaved = false;
-
-    if (!openedFromDatabase) {
-      try {
-        const record = await saveProtocolRecord(values);
-        sourceValues = {
-          ...values,
-          recipientId: String(record.recipientId),
-        };
-        previousBlankSaved = true;
-      } catch (error) {
-        console.error('Не удалось автоматически сохранить предыдущий бланк:', error);
-        setStatus(
-          error instanceof Error
-            ? error.message
-            : 'Новый бланк не создан: не удалось автоматически сохранить предыдущий бланк.',
-        );
-        return;
-      }
-    }
-
-    const previousComponent = openedFromDatabase ? '' : getIndicationComponent(sourceValues);
-    previousBlankIndicationsRef.current = previousComponent
-      ? {
-          component: previousComponent,
-          values: indicationValuesForComponent(sourceValues, previousComponent),
-        }
-      : null;
-
-    const currentRecipient = readCurrentRecipient();
-    const nextRecipientValues =
-      openedFromDatabase && currentRecipient
-        ? {
-            ...currentRecipient.profile,
-            recipientId: String(currentRecipient.id),
-            recipientName: currentRecipient.fullName,
-          }
-        : currentRecipientValues(sourceValues);
-
-    const nextValues = {
-      ...nextRecipientValues,
-      ...reagentDefaultsForNewBlank(openedFromDatabase ? {} : sourceValues),
-      ...(openedFromDatabase
-        ? {}
-        : {
-            doctorName: sourceValues.doctorName ?? '',
-            nurseName: sourceValues.nurseName ?? '',
-          }),
-    };
-
-    draft.touch();
-    setActiveBlock(null);
-    setRegistryOpen(false);
-    setRecordId(null);
-    setValues(nextValues);
-    setHistoryRefreshToken((current) => current + 1);
-    setComponentUnitNumberChecked(false);
-    setDismissedComponentUnitWarningKey('');
-
-    if (sourceValues.recipientName?.trim()) {
-      setStatus(
-        previousBlankSaved
-          ? 'Предыдущий бланк автоматически сохранён. Создан новый бланк для текущего реципиента.'
-          : 'Создан новый бланк для текущего реципиента.',
-      );
-    } else {
-      setStatus('Создан новый бланк.');
-    }
-  };
-
   const clearForm = () => {
     if (document.active) return;
-    previousBlankIndicationsRef.current = null;
     const currentRecipient = readCurrentRecipient();
     const nextValues = currentRecipient
       ? {
@@ -404,7 +304,6 @@ export const useProtocolWorkspace = () => {
   };
 
   const openRecord = async (record: ProtocolRecord, mode: SavedDocumentMode = 'view') => {
-    previousBlankIndicationsRef.current = null;
     setComponentUnitNumberChecked(false);
     setDismissedComponentUnitWarningKey('');
     setActiveBlock(null);
@@ -468,7 +367,6 @@ export const useProtocolWorkspace = () => {
     if (document.record?.recipientId === recipientId) document.close();
     if (Number(document.workingValues.recipientId) !== recipientId) return;
 
-    previousBlankIndicationsRef.current = null;
     draft.touch();
     setRecordId(null);
     document.setWorkingValues(clearRecipientLinkedValues(document.workingValues, recipientId));
@@ -481,7 +379,6 @@ export const useProtocolWorkspace = () => {
   const handleRecipientDisconnected = (recipientId: number) => {
     if (Number(document.workingValues.recipientId) !== recipientId) return;
 
-    previousBlankIndicationsRef.current = null;
     draft.touch();
     setRecordId(null);
     document.setWorkingValues(clearRecipientLinkedValues(document.workingValues, recipientId));
@@ -516,8 +413,7 @@ export const useProtocolWorkspace = () => {
     saveToDatabase,
     validateHemacon,
     hemaconWarning: getProtocolHemaconWarning(values),
-    newBlankWarning: document.active ? '' : getProtocolNewBlankWarning(values),
-    newBlank,
+    hemaconDateWarning: getHemaconDateOrderWarning(values),
     reagentWarning,
     compatibilityWarning,
     bloodGroupWarning,

@@ -15,7 +15,7 @@ import {
 } from '../blood-component-selector/blood-component-selector';
 import { inferBloodComponentGroup } from '../../domain/blood-components';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
-import { sanitizeDoseQuantity } from './dose-quantity';
+import { BoundedIntegerInput } from '../bounded-integer-input/bounded-integer-input';
 import editorStyles from '../transfusion-protocol/protocol-editor.module.css';
 import styles from './individual-selection-component-modal.module.css';
 
@@ -156,16 +156,12 @@ export const IndividualSelectionComponentModal = ({
         <div className={styles.localGrid}>
           <label className={styles.quantityField}>
             <span>Количество доз</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={sanitizeDoseQuantity(quantity)}
-              onChange={(event) =>
-                onLocalChange({
-                  quantity: sanitizeDoseQuantity(event.target.value),
-                })
-              }
+            <BoundedIntegerInput
+              name="quantity"
+              min={1}
+              max={99}
+              value={quantity}
+              onChange={(value) => onLocalChange({ quantity: value })}
             />
           </label>
         </div>

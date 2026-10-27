@@ -83,8 +83,8 @@ export const database = {
   getRecipientById: (id: number) => withDatabase<RecipientRecord>('recipients:get', { id }),
   findRecipientsByName: (fullName: string) =>
     withDatabase<RecipientRecord[]>('recipients:find-name', { fullName }),
-  createRecipient: (fullName: string) =>
-    withDatabase<RecipientRecord>('recipients:create', { fullName }),
+  createRecipient: (fullName: string, values: ProtocolValuesRecord = {}) =>
+    withDatabase<RecipientRecord>('recipients:create', { fullName, values }),
   updateRecipient: (id: number, values: ProtocolValuesRecord) =>
     withDatabase<RecipientRecord>('recipients:update', { id, values }),
   removeRecipient: (id: number) => withDatabase<void>('recipients:remove', { id }),

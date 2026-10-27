@@ -217,8 +217,8 @@ const RecipientDatabaseContent = ({
       active = false;
     };
   }, [selected]);
-  const addRecipient = async (fullName: string) => {
-    const created = await createRecipient(fullName);
+  const addRecipient = async (fullName: string, values: ProtocolValues) => {
+    const created = await createRecipient(fullName, values);
     setRecipients((current) =>
       [...current, created].sort((left, right) =>
         left.fullName.localeCompare(right.fullName, 'ru'),

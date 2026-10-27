@@ -1,10 +1,7 @@
-import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { useState } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
-import Modal, { ModalDismissButton } from '../modal/modal';
-import { formatRecipientAge } from './recipient-demographics';
-import { RecipientExaminationFields } from './recipient-examination-fields';
-import { RecipientHistoryFields } from './recipient-history-fields';
+import Modal from '../modal/modal';
+import { RecipientDataForm } from './recipient-data-form';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-edit-modal.module.css';
 
@@ -21,12 +18,11 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
   }));
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-  const change = (name: string, value: string) =>
-    setValues((current) => ({ ...current, [name]: value }));
   const changeValues = (nextValues: ProtocolValues) =>
     setValues((current) => ({ ...current, ...nextValues }));
 
   const save = async () => {
+    if (saving) return;
     setError('');
     setSaving(true);
     try {
@@ -40,57 +36,21 @@ export const RecipientEditModal = ({ recipient, onClose, onSave }: Props) => {
   };
 
   return (
-    <Modal title="Редактирование реципиента" onClose={onClose} className={styles.modal}>
-      <div className={styles.grid}>
-        <label className={styles.wide}>
-          <span>Фамилия, имя, отчество</span>
-          <input
-            value={values.recipientName ?? ''}
-            onChange={(event) => change('recipientName', event.target.value)}
-          />
-        </label>
-        <label>
-          <span>Дата рождения</span>
-          <input
-            type="date"
-            value={values.recipientBirthDate ?? ''}
-            onChange={(event) => change('recipientBirthDate', event.target.value)}
-          />
-        </label>
-        <label>
-          <span>Пол</span>
-          <select
-            value={values.recipientSex ?? ''}
-            onChange={(event) => change('recipientSex', event.target.value)}
-          >
-            <option value="">Не указано</option>
-            <option value="Мужской">Мужской</option>
-            <option value="Женский">Женский</option>
-          </select>
-        </label>
-        <label>
-          <span>Возраст</span>
-          <input type="text" value={formatRecipientAge(values.recipientBirthDate)} readOnly />
-        </label>
-        <div className={styles.wide}>
-          <RecipientExaminationFields values={values} onChange={changeValues} />
-        </div>
-        <div className={styles.wide}>
-          <RecipientHistoryFields values={values} onChange={changeValues} />
-        </div>
-      </div>
-      <AnimatedMessage message={error} className={styles.error} role="alert" />
-      <div className={styles.actions}>
-        <ModalDismissButton className={styles.secondary}>Отмена</ModalDismissButton>
-        <button
-          type="button"
-          className={styles.primary}
-          disabled={saving}
-          onClick={() => void save()}
-        >
-          {saving ? 'Сохранение...' : 'Сохранить'}
-        </button>
-      </div>
+    <Modal
+      title="Данные реципиента"
+      onClose={onClose}
+      className={styles.modal}
+      dismissible={!saving}
+    >
+      <RecipientDataForm
+        values={values}
+        onChange={changeValues}
+        onSubmit={() => void save()}
+        busy={saving}
+        error={error}
+        submitLabel="Сохранить"
+        pendingLabel="Сохранение..."
+      />
     </Modal>
   );
 };

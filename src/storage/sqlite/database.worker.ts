@@ -100,8 +100,10 @@ const dispatchRequest = async (request: DatabaseRequest) => {
       return getRecipientById((request.payload as { id: number }).id);
     case 'recipients:find-name':
       return findRecipientsByName((request.payload as { fullName: string }).fullName);
-    case 'recipients:create':
-      return createRecipient((request.payload as { fullName: string }).fullName);
+    case 'recipients:create': {
+      const payload = request.payload as { fullName: string; values?: Record<string, string> };
+      return createRecipient(payload.fullName, payload.values);
+    }
     case 'recipients:update': {
       const payload = request.payload as {
         id: number;

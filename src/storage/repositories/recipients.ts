@@ -7,7 +7,8 @@ export const getRecipientById = (id: number) => database.getRecipientById(id);
 
 export const findRecipientsByName = (fullName: string) => database.findRecipientsByName(fullName);
 
-export const createRecipient = (fullName: string) => database.createRecipient(fullName);
+export const createRecipient = (fullName: string, values: ProtocolValuesRecord = {}) =>
+  database.createRecipient(fullName, values);
 
 export const updateRecipient = (id: number, values: ProtocolValuesRecord) =>
   database.updateRecipient(id, values);

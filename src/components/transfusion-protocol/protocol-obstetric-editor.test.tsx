@@ -49,7 +49,6 @@ it('keeps unknown choices in all fields after the protocol receives updated valu
     'Варианты: Количество беременностей',
     'Варианты: Количество родов',
     'Варианты: Самопроизвольные аборты в анамнезе',
-    'Гемолитическая болезнь новорождённого в анамнезе',
   ]) {
     fireEvent.click(screen.getByRole('button', { name: label }));
     fireEvent.click(screen.getByRole('option', { name: 'Не известно' }));

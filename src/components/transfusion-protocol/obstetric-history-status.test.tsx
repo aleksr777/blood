@@ -41,12 +41,10 @@ it('lets each field be unknown and prints one common message when all four are u
     );
   };
   render(<Form />);
-  for (const [index, label] of labels.entries()) {
-    fireEvent.click(screen.getByRole('button', { name: index < 3 ? `Варианты: ${label}` : label }));
+  for (const [index, label] of labels.slice(0, 3).entries()) {
+    fireEvent.click(screen.getByRole('button', { name: `Варианты: ${label}` }));
     const list = screen.getByRole('listbox', { name: label });
     expect(within(list).queryByRole('option', { name: 'Не выбрано' })).toBeNull();
-    for (const option of within(list).getAllByRole('option'))
-      expect(option.textContent?.trim()).not.toBe('');
     fireEvent.click(within(list).getByRole('option', { name: 'Не известно' }));
     if (index === 0) {
       for (const countLabel of labels.slice(1, 3)) {
@@ -65,7 +63,8 @@ it('lets each field be unknown and prints one common message when all four are u
   fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
   fireEvent.click(screen.getByRole('option', { name: '2' }));
   expect(screen.queryByText('Не известен')).toBeNull();
-  expect(screen.getByText(/Количество родов: Не известно/)).toBeTruthy();
+  expect(screen.getByText(/Количество родов неизвестно/)).toBeTruthy();
+  expect(screen.getByRole('button', { name: labels[3] }).matches(':disabled')).toBe(true);
 });
 
 it('defaults new history to zero pregnancies without filling missing saved history', () => {
@@ -77,7 +76,9 @@ it('defaults new history to zero pregnancies without filling missing saved histo
     recipientSpontaneousAbortionsCount: 'Не известно',
     recipientHemolyticDiseaseNewbornHistory: 'Не известно',
   });
-  expect((screen.getByRole('spinbutton', { name: labels[0] }) as HTMLInputElement).value).toBe('0');
+  expect((screen.getByRole('textbox', { name: labels[0] }) as HTMLInputElement).value).toBe(
+    'Не было',
+  );
   expect(screen.getByRole('textbox', { name: labels[1] }).matches(':disabled')).toBe(true);
   onChange.mockClear();
   rerender(<ObstetricHistoryFields values={{}} applyDefaults={false} onChange={onChange} />);

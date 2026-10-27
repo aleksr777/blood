@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
 import {
   hasNoPregnancies,
+  isNewbornHistoryBlocked,
   OBSTETRIC_UNKNOWN,
   obstetricValuesForEditing,
 } from './obstetric-history';
 import { ObstetricCountField } from './obstetric-count-field';
+import { obstetricHistoryFields } from './obstetric-history-config';
 import { ProtocolFieldControl } from './protocol-field-control';
-import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
+import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-history-fields.module.css';
 
 type Props = {
@@ -23,31 +25,6 @@ const DEFAULTS = {
   recipientHemolyticDiseaseNewbornHistory: OBSTETRIC_UNKNOWN,
 };
 
-const FIELDS: ProtocolFieldConfig[] = [
-  {
-    name: 'recipientPregnanciesCount',
-    label: 'Количество беременностей',
-    type: 'number',
-  },
-  {
-    name: 'recipientBirthsCount',
-    label: 'Количество родов',
-    type: 'number',
-  },
-  {
-    name: 'recipientSpontaneousAbortionsCount',
-    label: 'Самопроизвольные аборты в анамнезе',
-    type: 'number',
-  },
-  {
-    name: 'recipientHemolyticDiseaseNewbornHistory',
-    label: 'Гемолитическая болезнь новорождённого в анамнезе',
-    type: 'select',
-    options: [OBSTETRIC_UNKNOWN, 'Нет', 'Да'],
-    required: true,
-  },
-];
-
 export const ObstetricHistoryFields = ({ values, onChange, applyDefaults = true }: Props) => {
   const editableValues = obstetricValuesForEditing(values);
   const missingDefaults = applyDefaults
@@ -56,7 +33,11 @@ export const ObstetricHistoryFields = ({ values, onChange, applyDefaults = true 
   const displayedValues = { ...editableValues, ...missingDefaults };
   const noPregnancies = hasNoPregnancies(displayedValues);
   const pregnancies = displayedValues.recipientPregnanciesCount.trim();
-  const dependentMaximum = /^\d+$/.test(pregnancies) ? Math.min(Number(pregnancies), 99) : 99;
+  const dependentMaximum = noPregnancies
+    ? 0
+    : /^\d+$/.test(pregnancies)
+      ? Math.min(Number(pregnancies), 99)
+      : 99;
 
   useEffect(() => {
     if (!applyDefaults || values.recipientObstetricHistoryStatus === 'unknown') return;
@@ -77,6 +58,12 @@ export const ObstetricHistoryFields = ({ values, onChange, applyDefaults = true 
           changes[dependent] = OBSTETRIC_UNKNOWN;
       }
     }
+    if (
+      (name === 'recipientPregnanciesCount' || name === 'recipientBirthsCount') &&
+      isNewbornHistoryBlocked({ ...displayedValues, ...changes }) &&
+      displayedValues.recipientHemolyticDiseaseNewbornHistory !== OBSTETRIC_UNKNOWN
+    )
+      changes.recipientHemolyticDiseaseNewbornHistory = OBSTETRIC_UNKNOWN;
     onChange(changes);
   };
 
@@ -84,8 +71,10 @@ export const ObstetricHistoryFields = ({ values, onChange, applyDefaults = true 
     <fieldset className={styles.group}>
       <legend>Акушерский анамнез</legend>
       <div className={styles.obstetricGrid}>
-        {FIELDS.map((field) => {
-          const disabled = noPregnancies && field.name !== 'recipientPregnanciesCount';
+        {obstetricHistoryFields.map((field) => {
+          const disabled =
+            (noPregnancies && field.name !== 'recipientPregnanciesCount') ||
+            (field.type === 'select' && isNewbornHistoryBlocked(displayedValues));
           const maximum = field.name === 'recipientPregnanciesCount' ? 99 : dependentMaximum;
           return (
             <fieldset

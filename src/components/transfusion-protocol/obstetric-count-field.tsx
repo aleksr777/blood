@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react';
-import { isObstetricValueUnknown, OBSTETRIC_UNKNOWN } from './obstetric-history';
+import { obstetricCountLabel, OBSTETRIC_UNKNOWN } from './obstetric-history';
 import { useOverlayDropdown } from './use-overlay-dropdown';
 import editorStyles from './protocol-editor.module.css';
 import styles from './recipient-history-fields.module.css';
@@ -12,20 +12,17 @@ type Props = {
   onChange: (value: string) => void;
 };
 
-const displayedValue = (value: string) =>
-  isObstetricValueUnknown(value) ? OBSTETRIC_UNKNOWN : value;
-
 export const ObstetricCountField = ({ name, label, value, maximum, onChange }: Props) => {
-  const [draft, setDraft] = useState(() => displayedValue(value));
+  const [draft, setDraft] = useState(() => obstetricCountLabel(value));
   const [open, setOpen] = useState(false);
   const listId = useId();
   const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
   const numeric = /^\d*$/.test(draft);
 
-  useEffect(() => setDraft(displayedValue(value)), [value]);
+  useEffect(() => setDraft(obstetricCountLabel(value)), [value]);
 
   const select = (next: string) => {
-    setDraft(next);
+    setDraft(obstetricCountLabel(next));
     onChange(next);
     setOpen(false);
   };
@@ -70,7 +67,7 @@ export const ObstetricCountField = ({ name, label, value, maximum, onChange }: P
             onChange={(event) => {
               const next = event.target.value;
               if (!/^\d{0,2}$/.test(next) || Number(next) > maximum) return;
-              setDraft(next);
+              setDraft(obstetricCountLabel(next));
               if (next) onChange(next);
             }}
           />
@@ -104,11 +101,11 @@ export const ObstetricCountField = ({ name, label, value, maximum, onChange }: P
                 type="button"
                 className={editorStyles.customSelectOption}
                 role="option"
-                aria-selected={draft === option}
+                aria-selected={draft === obstetricCountLabel(option)}
                 onClick={() => select(option)}
               >
-                <span>{option}</span>
-                {draft === option && <span aria-hidden="true">✓</span>}
+                <span>{obstetricCountLabel(option)}</span>
+                {draft === obstetricCountLabel(option) && <span aria-hidden="true">✓</span>}
               </button>
             ))}
         </div>

@@ -47,6 +47,7 @@ it.each(['0', '00'])(
       recipientPregnanciesCount: zero,
       recipientBirthsCount: 'Не известно',
       recipientSpontaneousAbortionsCount: 'Не известно',
+      recipientHemolyticDiseaseNewbornHistory: 'Не известно',
     });
     expect(pregnancy.matches(':disabled')).toBe(false);
     for (const control of controls()) expect(control.matches(':disabled')).toBe(true);
@@ -54,8 +55,11 @@ it.each(['0', '00'])(
     fireEvent.change(births(), { target: { value: '3' } });
     expect(onChange).not.toHaveBeenCalled();
     expect(births().value).toBe('Не известно');
-    fireEvent.change(pregnancy, { target: { value: '1' } });
-    for (const control of controls()) expect(control.matches(':disabled')).toBe(false);
+    expect((pregnancy as HTMLInputElement).value).toBe('Не было');
+    fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
+    fireEvent.click(screen.getByRole('option', { name: '1' }));
+    for (const control of controls().slice(0, 2)) expect(control.matches(':disabled')).toBe(false);
+    expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);
     expect(births().value).toBe('Не известно');
     fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество родов' }));
     fireEvent.click(screen.getByRole('option', { name: '1' }));
@@ -64,9 +68,9 @@ it.each(['0', '00'])(
     fireEvent.click(screen.getByRole('option', { name: 'Да' }));
     expect(onChange).toHaveBeenLastCalledWith({ recipientHemolyticDiseaseNewbornHistory: 'Да' });
     fireEvent.change(pregnancy, { target: { value: zero } });
-    fireEvent.change(pregnancy, { target: { value: '' } });
-    fireEvent.blur(pregnancy);
-    expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Не известно' }));
+    expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);
   },
 );
 

@@ -50,12 +50,13 @@ it.each([
   }
   for (const value of ['2', '02', '0']) {
     fireEvent.change(input, { target: { value } });
-    expect(onChange).toHaveBeenLastCalledWith({ [name]: value });
-    expect(input.value).toBe(value);
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ [name]: value }));
+    expect(input.value).toBe(value === '0' ? 'Не было' : value);
   }
   fireEvent.change(countInput('Количество беременностей'), { target: { value: '3' } });
+  fireEvent.click(screen.getByRole('button', { name: `Варианты: ${label}` }));
+  fireEvent.click(screen.getByRole('option', { name: '3' }));
   expect(input.max).toBe('3');
-  fireEvent.change(input, { target: { value: '3' } });
   expect(input.value).toBe('3');
 });
 
@@ -73,6 +74,7 @@ it('clears only excessive counts when the pregnancy count is decreased', () => {
   expect(onChange).toHaveBeenLastCalledWith({
     recipientPregnanciesCount: '4',
     recipientBirthsCount: 'Не известно',
+    recipientHemolyticDiseaseNewbornHistory: 'Не известно',
   });
   expect(births.value).toBe('Не известно');
   expect(abortions.value).toBe('2');

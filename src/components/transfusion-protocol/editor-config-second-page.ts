@@ -90,7 +90,7 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
   {
     id: 'monitoring',
     title: 'Наблюдение за состоянием реципиента',
-    size: 'xlarge',
+    size: 'medium',
     fields: monitoringFields,
   },
   {

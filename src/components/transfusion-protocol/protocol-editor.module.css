@@ -76,6 +76,7 @@
 .departmentControl > input {
   min-width: 0;
   min-height: var(--button-height);
+  padding-block: var(--button-padding-y);
 }
 
 .departmentControl > input:has(+ .historyToggle) {
@@ -324,7 +325,7 @@
 .customSelectValue,
 .customSelectPlaceholder {
   min-width: 0;
-  padding: var(--control-padding-y) var(--control-padding-x);
+  padding: var(--button-padding-y) var(--control-padding-x);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

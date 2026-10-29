@@ -48,7 +48,8 @@
   --ui-font-control: 0.9rem;
   --page-title-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
   --control-height: 2.5rem;
-  --button-height: 2.25rem;
+  --button-height: 32px;
+  --button-padding-y: 0.3rem;
   --control-radius: var(--ui-radius);
   --control-padding-y: 0.45rem;
   --control-padding-x: 0.7rem;

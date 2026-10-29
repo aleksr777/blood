@@ -349,7 +349,7 @@ const RecipientDatabaseContent = ({
     });
 
   return (
-    <Modal title="База реципиентов" onClose={onClose} className={styles.modal}>
+    <Modal title="Реципиенты" onClose={onClose} className={styles.modal}>
       <div className={styles.body}>
         <RecipientListPanel
           query={query}

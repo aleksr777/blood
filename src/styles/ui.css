@@ -2,7 +2,7 @@
   .ui-button {
     display: inline-flex;
     min-width: 0;
-    min-height: var(--button-height, var(--control-height));
+    min-height: var(--button-height);
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
@@ -90,13 +90,11 @@
   }
 
   .ui-compact-button {
-    --button-height: 2rem;
     --button-padding: 0.35rem 0.65rem;
     --button-font-size: var(--ui-font-small);
   }
 
   .ui-toolbar-button {
-    --button-height: 2.25rem;
     --button-padding: 0.4rem 0.75rem;
     --button-font-size: 0.8rem;
     white-space: nowrap;
@@ -104,8 +102,10 @@
 
   .ui-icon-button {
     display: inline-flex;
-    width: var(--icon-button-size, 1.85rem);
-    min-height: var(--icon-button-size, 1.85rem);
+    flex-shrink: 0;
+    width: var(--button-height);
+    height: var(--button-height);
+    min-height: var(--button-height);
     align-items: center;
     justify-content: center;
     border: 0;
@@ -145,6 +145,9 @@
   }
 
   .ui-text-button {
+    display: inline-flex;
+    min-height: var(--button-height);
+    align-items: center;
     border: 0;
     padding: 0;
     background: transparent;
@@ -244,6 +247,7 @@
 
   .ui-selectable-card {
     min-width: 0;
+    min-height: var(--button-height);
     border: 1px solid var(--ui-border);
     border-radius: var(--ui-radius-large);
     padding: 0.75rem 0.85rem;
@@ -284,7 +288,7 @@
   .ui-menu-item {
     display: flex;
     min-width: 0;
-    min-height: 2.25rem;
+    min-height: var(--button-height);
     width: 100%;
     align-items: center;
     justify-content: space-between;

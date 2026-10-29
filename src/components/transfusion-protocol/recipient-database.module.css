@@ -21,6 +21,7 @@
 
 .listHeader {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
@@ -122,6 +123,8 @@
 
 .createRecipient {
   composes: ui-button ui-secondary-button ui-compact-button from global;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .secondaryAction {
@@ -146,7 +149,6 @@
 .categoryButton {
   composes: ui-selectable-card from global;
   display: flex;
-  min-height: 6.5rem;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;

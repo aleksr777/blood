@@ -1,6 +1,7 @@
 @layer blood-ui {
   button {
     font: inherit;
+    min-height: var(--button-height);
   }
 
   :where(input:not([type='radio']):not([type='checkbox']), select, textarea) {

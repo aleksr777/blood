@@ -26,7 +26,7 @@
   --component-selected-hover: var(--ui-accent-hover);
 
   min-width: 0;
-  min-height: var(--control-height);
+  min-height: var(--button-height);
   border: 1px solid var(--component-border);
   border-radius: var(--control-radius);
   padding: var(--control-padding-y) var(--control-padding-x);

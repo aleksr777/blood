@@ -17,7 +17,7 @@
 }
 ```
 
-Варианты действий: `primaryButton`, `secondaryButton`, `successButton`, `dangerButton`, `dangerPrimaryButton`. Размеры можно изменить классами `compactButton` и `toolbarButton`. Иконки используют `iconButton`, `successIcon` или `dangerIcon`.
+Варианты действий: `primaryButton`, `secondaryButton`, `successButton`, `dangerButton`, `dangerPrimaryButton`. Общая базовая высота кнопок — `--button-height` (2.25rem), как у кнопки текущего реципиента. Классы `compactButton` и `toolbarButton` меняют только шрифт и отступы. Иконки используют `iconButton`, `successIcon` или `dangerIcon` и тот же размер. Карточки с несколькими строками данных и длинные подписи могут расти по содержимому.
 
 `aria-disabled` меняет только внешний вид: кнопки нового бланка, сохранения и печати протокола должны продолжать принимать нажатия для показа предупреждения. Обработчик обязан проверить обязательные поля перед выполнением действия. Нативный `disabled` блокирует действия во время загрузки.
 

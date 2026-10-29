@@ -46,7 +46,6 @@
 
 .antigenField [aria-haspopup='listbox'] {
   grid-template-columns: minmax(0, 1fr) 1.25rem;
-  min-height: 2.25rem;
 }
 
 .antigenField [aria-haspopup='listbox'] > span:first-child {

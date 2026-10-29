@@ -44,17 +44,16 @@ export const BloodComponentSelector = ({
           </button>
         ))}
       </div>
-      {showName && (
+      {showName && selected && category && (
         <div className={styles.name}>
           <div className={styles.label}>Наименование компонента донорской крови</div>
           <SavedOptionsField
             key={category}
             name={inputName}
             label="Наименование компонента донорской крови"
-            category={category ?? 'componentName:unselected'}
-            fixedOptions={selected ? [...selected.names] : []}
+            category={category}
+            fixedOptions={[...selected.names]}
             value={name}
-            disabled={!category}
             rememberOnBlur
             wrapOptions
             onChange={(nextName) => onChange({ group: selectedGroup, name: nextName })}

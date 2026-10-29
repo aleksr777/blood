@@ -652,7 +652,13 @@ export const ComponentRequest = () => {
 
   const save = async (afterPrint = false) => {
     if (documentState.active) {
-      if (afterPrint || !documentState.editing || !documentState.record) return true;
+      if (
+        afterPrint ||
+        !documentState.editing ||
+        !documentState.record ||
+        !documentState.hasChanges
+      )
+        return true;
       try {
         const record = await saveBloodRequestRecord({
           recordId: documentState.record.id,
@@ -1041,9 +1047,9 @@ export const ComponentRequest = () => {
               type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={documentState.readOnly}
+              disabled={documentState.active && !documentState.hasChanges}
             >
-              {documentState.editing ? 'Сохранить изменения' : 'Сохранить'}
+              Сохранить
             </button>
             <button
               type="button"

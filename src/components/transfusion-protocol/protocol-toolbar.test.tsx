@@ -113,6 +113,7 @@ it.each(['view', 'edit'] as const)(
         document={{
           mode,
           record: { id: 42, recipientId: 2 },
+          hasChanges: false,
           edit: vi.fn(),
           cancel: vi.fn(),
           close: vi.fn(),
@@ -137,3 +138,30 @@ it.each(['view', 'edit'] as const)(
     ).not.toContain('text-button');
   },
 );
+
+it.each([
+  ['view', false, true],
+  ['edit', false, true],
+  ['edit', true, false],
+] as const)('allows saving in %s only with changes (%s)', (mode, hasChanges, disabled) => {
+  const handlers = props();
+  render(
+    <ProtocolToolbar
+      {...handlers}
+      hemaconWarning=""
+      document={{
+        mode,
+        hasChanges,
+        record: { id: 42, recipientId: 2 },
+        edit: vi.fn(),
+        cancel: vi.fn(),
+        close: vi.fn(),
+      }}
+    />,
+  );
+  const save = screen.getByRole('button', { name: /^Сохранить$/ }) as HTMLButtonElement;
+  expect(save.disabled).toBe(disabled);
+  expect(save.getAttribute('aria-disabled')).toBe(String(disabled));
+  fireEvent.click(save);
+  expect(handlers.onSave).toHaveBeenCalledTimes(disabled ? 0 : 1);
+});

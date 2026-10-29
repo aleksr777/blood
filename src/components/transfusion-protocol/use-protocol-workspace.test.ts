@@ -82,6 +82,9 @@ it('archive editing updates its ID and keeps working data until returning to the
   const working = structuredClone(result.current.values);
   await act(async () => result.current.openRecord(original));
   act(() => result.current.document.edit());
+  await act(async () => result.current.saveToDatabase());
+  expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  expect(result.current.document.workingValues).toEqual(working);
   act(() => result.current.saveValues({ doctorName: 'Исправленный врач' }));
   await act(async () => result.current.saveToDatabase(true));
   expect(database.updateProtocolRecord).not.toHaveBeenCalled();

@@ -235,7 +235,7 @@ export const useProtocolWorkspace = () => {
 
   const saveToDatabase = async (afterPrint = false) => {
     if (document.active) {
-      if (afterPrint || !document.editing || !document.record) return true;
+      if (afterPrint || !document.editing || !document.record || !document.hasChanges) return true;
       if (!validateHemacon()) return false;
       try {
         const savedValues = { ...values, recipientId: String(document.record.recipientId) };

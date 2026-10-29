@@ -59,6 +59,8 @@ export const ProtocolToolbar = ({
 }: Props) => {
   const [showHemaconWarning, setShowHemaconWarning] = useState(false);
   const visibleWarning = showHemaconWarning ? hemaconWarning : '';
+  const saveDisabled =
+    document?.mode === 'view' || (document?.mode === 'edit' && !document.hasChanges);
 
   useEffect(() => {
     if (!visibleWarning) setShowHemaconWarning(false);
@@ -115,10 +117,10 @@ export const ProtocolToolbar = ({
             type="button"
             className={`${ui.successButton} ${ui.toolbarButton} save-button`}
             onClick={() => runValidatedAction(onSave)}
-            disabled={document?.mode === 'view'}
-            aria-disabled={Boolean(hemaconWarning)}
+            disabled={saveDisabled}
+            aria-disabled={saveDisabled || Boolean(hemaconWarning)}
           >
-            {document?.mode === 'edit' ? 'Сохранить изменения' : 'Сохранить'}
+            Сохранить
           </button>
           {Array.from({ length: pageCount }, (_, pageIndex) => (
             <button

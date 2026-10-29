@@ -9,6 +9,7 @@ it.each(['view', 'edit'] as const)('returns from %s without discarding edits', (
   const document = {
     mode,
     record: { id: 42, recipientId: 7 },
+    hasChanges: false,
     edit: vi.fn(),
     cancel: vi.fn(),
     close: vi.fn(),

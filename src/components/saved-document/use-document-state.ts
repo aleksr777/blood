@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState, type SetStateAction } from 'react';
 import { preserveSavedRecipientIdentity } from '../../domain/saved-recipient-identity';
+import { getFormContentKey } from '../../domain/form-content';
 
 export type SavedDocumentMode = 'view' | 'edit';
 export type SavedDocumentReference = {
@@ -11,6 +12,7 @@ export type SavedDocumentReference = {
 export type SavedDocumentControls = {
   mode: 'draft' | 'view' | 'edit';
   record: SavedDocumentReference | null;
+  hasChanges: boolean;
   edit: () => void;
   cancel: () => void;
   close: () => void;
@@ -82,6 +84,9 @@ export const useDocumentState = <T extends Record<string, unknown>>(
     active: saved !== null,
     readOnly: saved?.mode === 'view',
     editing: saved?.mode === 'edit',
+    hasChanges:
+      saved?.mode === 'edit' &&
+      getFormContentKey(saved.values) !== getFormContentKey(saved.original),
     isActive,
     isReadOnly,
     open,

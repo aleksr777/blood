@@ -206,7 +206,13 @@ export const TransfusionRegistration = () => {
 
   const save = async (afterPrint = false) => {
     if (documentState.active) {
-      if (afterPrint || !documentState.editing || !documentState.record) return true;
+      if (
+        afterPrint ||
+        !documentState.editing ||
+        !documentState.record ||
+        !documentState.hasChanges
+      )
+        return true;
       try {
         const record = await updateRegistrationRecord(documentState.record.id, {
           ...values,
@@ -410,9 +416,9 @@ export const TransfusionRegistration = () => {
               type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={documentState.readOnly}
+              disabled={documentState.active && !documentState.hasChanges}
             >
-              {documentState.editing ? 'Сохранить изменения' : 'Сохранить'}
+              Сохранить
             </button>
             <button
               type="button"

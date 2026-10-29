@@ -88,6 +88,7 @@ export const ProtocolToolbar = ({
           recipientRh={currentRecipientRh}
           currentRecipientAvailable={currentRecipientAvailable}
           onOpenCurrentRecipient={onOpenCurrentRecipient}
+          onOpenRecipients={onOpenRegistry}
         />
         {document && (
           <SavedDocumentBar
@@ -97,6 +98,16 @@ export const ProtocolToolbar = ({
           />
         )}
         <div className="print-actions" aria-label="Панель действий">
+          {!document?.record && (
+            <button
+              type="button"
+              className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+              onClick={onClear}
+              disabled={!hasContent}
+            >
+              Очистить бланк
+            </button>
+          )}
           <button
             type="button"
             className={`${ui.successButton} ${ui.toolbarButton} save-button`}
@@ -106,25 +117,6 @@ export const ProtocolToolbar = ({
           >
             Сохранить
           </button>
-          <button
-            type="button"
-            className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-            onClick={onOpenRegistry}
-          >
-            Реципиенты
-          </button>
-          {!document?.record && (
-            <>
-              <button
-                type="button"
-                className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-                onClick={onClear}
-                disabled={!hasContent}
-              >
-                Очистить бланк
-              </button>
-            </>
-          )}
           {Array.from({ length: pageCount }, (_, pageIndex) => (
             <button
               key={pageIndex}

@@ -1,3 +1,5 @@
+import ui from '../../styles/ui';
+
 type Props = {
   current: 'protocol' | 'registration' | 'summary-request' | 'component-request';
   recipientName?: string;
@@ -5,6 +7,7 @@ type Props = {
   recipientRh?: string;
   currentRecipientAvailable?: boolean;
   onOpenCurrentRecipient?: () => void;
+  onOpenRecipients: () => void;
   showRecipient?: boolean;
 };
 
@@ -44,6 +47,7 @@ export const SiteNavigation = ({
   recipientRh = '',
   currentRecipientAvailable = false,
   onOpenCurrentRecipient,
+  onOpenRecipients,
   showRecipient = true,
 }: Props) => {
   const name = recipientName.trim();
@@ -71,8 +75,8 @@ export const SiteNavigation = ({
         </nav>
       </div>
 
-      {showRecipient && (
-        <div className="site-current-recipient-row">
+      <div className="site-current-recipient-row">
+        {showRecipient && (
           <button
             type="button"
             className={`current-recipient-summary${name ? '' : ' current-recipient-summary--empty'}`}
@@ -92,8 +96,15 @@ export const SiteNavigation = ({
               <span className="current-recipient-summary__empty">не выбран</span>
             )}
           </button>
-        </div>
-      )}
+        )}
+        <button
+          type="button"
+          className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+          onClick={onOpenRecipients}
+        >
+          Реципиенты
+        </button>
+      </div>
     </div>
   );
 };

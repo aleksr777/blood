@@ -56,10 +56,8 @@
 
 .shortNumber {
   width: 4.25rem;
-  height: 1.45rem;
-  min-height: 1.45rem;
   border-radius: var(--ui-radius-small);
-  padding: 0.05rem 0.35rem;
+  padding: var(--control-padding-y) 0.35rem;
   line-height: 1.2;
   text-align: center;
 }

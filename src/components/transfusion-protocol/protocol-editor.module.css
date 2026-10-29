@@ -75,8 +75,6 @@
 
 .departmentControl > input {
   min-width: 0;
-  min-height: var(--button-height);
-  padding-block: var(--button-padding-y);
 }
 
 .departmentControl > input:has(+ .historyToggle) {
@@ -84,7 +82,9 @@
 }
 
 .historyToggle {
+  align-self: center;
   width: var(--button-height);
+  height: var(--button-height);
   min-height: var(--button-height);
   border: 1px solid var(--control-border);
   border-left: 0;
@@ -188,7 +188,6 @@
 }
 
 .historyInput {
-  min-height: var(--button-height);
   border-radius: var(--ui-radius-small);
   padding: 0.3rem 0.5rem;
   font-size: 0.84rem;

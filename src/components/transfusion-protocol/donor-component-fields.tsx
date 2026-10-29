@@ -20,15 +20,15 @@ export const DonorComponentFields = (props: ComponentProps<typeof DonorDetailsFi
           onChange({ componentGroup: group, indicationComponent: group, componentName: name })
         }
       />
-      <section className={styles.wide} aria-label="Показания к трансфузии">
-        <h3 className={styles.sectionTitle}>Показания к трансфузии</h3>
-        <IndicationsFields values={values} onChange={onChange} showComponentSelector={false} />
-      </section>
       <section className={styles.wide} aria-label="Данные гемакона">
         <h3 className={styles.sectionTitle}>Данные гемакона</h3>
         <div className={styles.grid}>
           <DonorDetailsFields {...props} />
         </div>
+      </section>
+      <section className={styles.wide} aria-label="Показания к трансфузии">
+        <h3 className={styles.sectionTitle}>Показания к трансфузии</h3>
+        <IndicationsFields values={values} onChange={onChange} showComponentSelector={false} />
       </section>
     </>
   );

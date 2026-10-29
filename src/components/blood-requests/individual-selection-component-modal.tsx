@@ -13,7 +13,7 @@ import {
   BloodComponentSelector,
   type BloodComponentSelection,
 } from '../blood-component-selector/blood-component-selector';
-import { inferBloodComponentGroup } from '../../domain/blood-components';
+import { BLOOD_COMPONENTS, inferBloodComponentGroup } from '../../domain/blood-components';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { BoundedIntegerInput } from '../bounded-integer-input/bounded-integer-input';
 import editorStyles from '../transfusion-protocol/protocol-editor.module.css';
@@ -64,6 +64,7 @@ export const IndividualSelectionComponentModal = ({
   const normalizedComponentRh = normalizeBloodGroupRh(componentRh);
   const componentBloodGroupTone = getBloodGroupTone(normalizedComponentRh);
   const isErythrocytes = component === 'erythrocytes';
+  const hasSelectedComponent = BLOOD_COMPONENTS.some(({ value }) => value === component);
   const requiresIndividualSelection =
     isErythrocytes && componentSelectionRequirement === 'individual';
 
@@ -125,34 +126,6 @@ export const IndividualSelectionComponentModal = ({
           onChange={handleComponentChange}
         />
 
-        {showRequestOptions && (
-          <>
-            <div className={styles.divider} />
-
-            <fieldset className={styles.optionGroup}>
-              <legend>Порядок трансфузии</legend>
-              <div className={styles.radioOptions}>
-                <Choice
-                  type="radio"
-                  name="componentRequestTransfusionOrder"
-                  checked={transfusionOrder === 'planned'}
-                  onChange={() => onLocalChange({ transfusionOrder: 'planned' })}
-                >
-                  плановая
-                </Choice>
-                <Choice
-                  type="radio"
-                  name="componentRequestTransfusionOrder"
-                  checked={transfusionOrder === 'emergency'}
-                  onChange={() => onLocalChange({ transfusionOrder: 'emergency' })}
-                >
-                  экстренная
-                </Choice>
-              </div>
-            </fieldset>
-          </>
-        )}
-
         <div className={styles.localGrid}>
           <label className={styles.quantityField}>
             <span>Количество доз</span>
@@ -188,17 +161,6 @@ export const IndividualSelectionComponentModal = ({
             </div>
           </>
         )}
-
-        <div className={styles.divider} />
-
-        <section className={styles.indicationsSection}>
-          <div className={styles.sectionTitle}>Показания к трансфузии</div>
-          <IndicationsFields
-            values={effectiveIndicationValues}
-            showComponentSelector={false}
-            onChange={handleIndicationsChange}
-          />
-        </section>
 
         {showRequestOptions && isErythrocytes && (
           <>
@@ -242,6 +204,49 @@ export const IndividualSelectionComponentModal = ({
                 </button>
               )}
             </fieldset>
+          </>
+        )}
+
+        {showRequestOptions && (
+          <>
+            <div className={styles.divider} />
+
+            <fieldset className={styles.optionGroup}>
+              <legend>Порядок трансфузии</legend>
+              <div className={styles.radioOptions}>
+                <Choice
+                  type="radio"
+                  name="componentRequestTransfusionOrder"
+                  checked={transfusionOrder === 'planned'}
+                  onChange={() => onLocalChange({ transfusionOrder: 'planned' })}
+                >
+                  плановая
+                </Choice>
+                <Choice
+                  type="radio"
+                  name="componentRequestTransfusionOrder"
+                  checked={transfusionOrder === 'emergency'}
+                  onChange={() => onLocalChange({ transfusionOrder: 'emergency' })}
+                >
+                  экстренная
+                </Choice>
+              </div>
+            </fieldset>
+          </>
+        )}
+
+        {hasSelectedComponent && (
+          <>
+            <div className={styles.divider} />
+
+            <section className={styles.indicationsSection}>
+              <div className={styles.sectionTitle}>Показания к трансфузии</div>
+              <IndicationsFields
+                values={effectiveIndicationValues}
+                showComponentSelector={false}
+                onChange={handleIndicationsChange}
+              />
+            </section>
           </>
         )}
 

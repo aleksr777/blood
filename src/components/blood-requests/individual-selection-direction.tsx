@@ -705,15 +705,9 @@ export const IndividualSelectionDirection = () => {
     setStatus('');
   };
 
-  const save = async (afterPrint = false) => {
+  const save = async () => {
     if (documentState.active) {
-      if (
-        afterPrint ||
-        !documentState.editing ||
-        !documentState.record ||
-        !documentState.hasChanges
-      )
-        return true;
+      if (!documentState.editing || !documentState.record || !documentState.hasChanges) return true;
       try {
         const record = await saveBloodRequestRecord({
           recordId: documentState.record.id,
@@ -721,7 +715,7 @@ export const IndividualSelectionDirection = () => {
           kind: 'individual-selection-direction',
           values: { ...draftRef.current },
         });
-        documentState.open(record, draftFromRecord(record.values));
+        documentState.open(record, draftFromRecord(record.values), 'edit');
         documentState.setWorkingValues(clearIndividualSelectionStaff);
         setEditor(null);
         setStatus('Изменения сохранены в исходном бланке.');
@@ -759,9 +753,9 @@ export const IndividualSelectionDirection = () => {
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);
-      documentState.open(record, draftToSave);
+      documentState.open(record, draftToSave, 'edit');
       documentState.setWorkingValues(clearIndividualSelectionStaff(draftToSave));
-      setStatus(afterPrint ? 'Направление сохранено после печати.' : 'Направление сохранено.');
+      setStatus('Направление сохранено.');
       return true;
     } catch (error) {
       console.error('Не удалось сохранить направление:', error);
@@ -1143,12 +1137,11 @@ export const IndividualSelectionDirection = () => {
     } finally {
       sheet.removeAttribute('data-print-active');
       document.body.classList.remove('print-individual-direction');
-      if (!documentState.active) void save(true);
     }
   };
 
   return (
-    <SavedDocumentPage className={styles.shell} mode={documentState.mode}>
+    <SavedDocumentPage className={styles.shell} document={documentState} onSave={save}>
       <header className={`app-header ${styles.header}`}>
         <div className="toolbar-wrap">
           <SiteNavigation

@@ -116,9 +116,9 @@ it.each(['view', 'edit'] as const)(
 it('preserves other request data when a working request is saved and closed', async () => {
   render(<ComponentRequest />);
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await screen.findByRole('button', { name: 'Вернуться к текущему бланку' });
+  await screen.findByRole('button', { name: 'Закрыть без сохранения' });
   expect(screen.getAllByText('Эритроцитная взвесь').length).toBeGreaterThan(0);
-  fireEvent.click(screen.getByRole('button', { name: 'Вернуться к текущему бланку' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Закрыть без сохранения' }));
   await expectWorkingSelectionCleared();
   expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce();
 });

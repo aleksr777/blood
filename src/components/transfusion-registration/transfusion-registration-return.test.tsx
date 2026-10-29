@@ -89,9 +89,9 @@ it('keeps all non-table data when saving a working sheet and returning to it', a
   render(<TransfusionRegistration />);
   await waitFor(() => expect(readCurrentRecipient()?.id).toBe(1));
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await screen.findByRole('button', { name: 'Вернуться к текущему бланку' });
+  await screen.findByRole('button', { name: 'Закрыть без сохранения' });
   expect(screen.getByText('Рабочая таблица')).toBeTruthy();
-  fireEvent.click(screen.getByRole('button', { name: 'Вернуться к текущему бланку' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Закрыть без сохранения' }));
   await expectEmptyWorkingTable();
   expect(database.saveRegistrationRecord).toHaveBeenCalledOnce();
 });

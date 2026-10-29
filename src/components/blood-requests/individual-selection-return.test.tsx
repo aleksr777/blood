@@ -90,8 +90,8 @@ it.each(['view', 'edit'] as const)('clears only staff when returning from %s', a
 it('clears staff after saving while retaining the component, indications and date', async () => {
   render(<IndividualSelectionDirection />);
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await screen.findByRole('button', { name: 'Вернуться к текущему бланку' });
-  fireEvent.click(screen.getByRole('button', { name: 'Вернуться к текущему бланку' }));
+  await screen.findByRole('button', { name: 'Закрыть без сохранения' });
+  fireEvent.click(screen.getByRole('button', { name: 'Закрыть без сохранения' }));
   await expectStaffCleared();
   expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce();
 });

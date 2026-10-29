@@ -650,15 +650,9 @@ export const ComponentRequest = () => {
     setStatus('');
   };
 
-  const save = async (afterPrint = false) => {
+  const save = async () => {
     if (documentState.active) {
-      if (
-        afterPrint ||
-        !documentState.editing ||
-        !documentState.record ||
-        !documentState.hasChanges
-      )
-        return true;
+      if (!documentState.editing || !documentState.record || !documentState.hasChanges) return true;
       try {
         const record = await saveBloodRequestRecord({
           recordId: documentState.record.id,
@@ -666,7 +660,7 @@ export const ComponentRequest = () => {
           kind: 'component-request',
           values: { ...draftRef.current },
         });
-        documentState.open(record, draftFromRecord(record.values));
+        documentState.open(record, draftFromRecord(record.values), 'edit');
         documentState.setWorkingValues(cleanComponentRequestDraft);
         setEditor(null);
         setStatus('Изменения сохранены в исходном бланке.');
@@ -702,9 +696,9 @@ export const ComponentRequest = () => {
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);
-      documentState.open(record, draftToSave);
+      documentState.open(record, draftToSave, 'edit');
       documentState.setWorkingValues(cleanComponentRequestDraft(draftToSave));
-      setStatus(afterPrint ? 'Заявка сохранена после печати.' : 'Заявка сохранена.');
+      setStatus('Заявка сохранена.');
       return true;
     } catch (error) {
       console.error('Не удалось сохранить заявку:', error);
@@ -1004,12 +998,11 @@ export const ComponentRequest = () => {
       window.print();
     } finally {
       document.body.classList.remove(className);
-      if (!documentState.active) void save(true);
     }
   };
 
   return (
-    <SavedDocumentPage className={styles.shell} mode={documentState.mode}>
+    <SavedDocumentPage className={styles.shell} document={documentState} onSave={save}>
       <header className={`app-header ${styles.header}`}>
         <div className="toolbar-wrap">
           <SiteNavigation

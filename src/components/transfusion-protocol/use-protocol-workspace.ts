@@ -233,14 +233,14 @@ export const useProtocolWorkspace = () => {
     return false;
   };
 
-  const saveToDatabase = async (afterPrint = false) => {
+  const saveToDatabase = async () => {
     if (document.active) {
-      if (afterPrint || !document.editing || !document.record || !document.hasChanges) return true;
+      if (!document.editing || !document.record || !document.hasChanges) return true;
       if (!validateHemacon()) return false;
       try {
         const savedValues = { ...values, recipientId: String(document.record.recipientId) };
         const record = await updateProtocolRecord(document.record.id, savedValues);
-        document.open(record, record.values);
+        document.open(record, record.values, 'edit');
         document.setWorkingValues(cleanProtocolDraft);
         setActiveBlock(null);
         setStatus('Изменения сохранены в исходном бланке.');
@@ -253,7 +253,7 @@ export const useProtocolWorkspace = () => {
     if (!validateHemacon()) return false;
     if (!values.recipientName?.trim()) {
       setStatus('Для сохранения укажите ФИО реципиента.');
-      if (!afterPrint) setActiveBlock('general');
+      setActiveBlock('general');
       return false;
     }
 
@@ -263,10 +263,10 @@ export const useProtocolWorkspace = () => {
       const savedValues = { ...values, recipientId: String(record.recipientId) };
       setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
-      document.open(record, savedValues);
+      document.open(record, savedValues, 'edit');
       document.setWorkingValues(cleanProtocolDraft(savedValues));
       setRecordId(null);
-      setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
+      setStatus('Бланк сохранён.');
       return true;
     } catch (error) {
       console.error('Не удалось сохранить бланк в базе:', error);

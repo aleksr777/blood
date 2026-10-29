@@ -357,6 +357,7 @@ const RecipientDatabaseContent = ({
           recipients={recipients}
           selected={selected}
           currentRecipientId={currentRecipientId}
+          onDisconnectRecipient={disconnectRecipient}
           onUseRecipient={
             onUseRecipient
               ? async (recipient) => {
@@ -373,7 +374,6 @@ const RecipientDatabaseContent = ({
         <RecipientHistoryPanel
           initialList={initialList}
           recipient={selected}
-          currentRecipientId={currentRecipientId}
           records={records}
           registrationRecords={registrationRecords}
           individualSelectionDirectionRecords={individualSelectionDirectionRecords}
@@ -411,7 +411,6 @@ const RecipientDatabaseContent = ({
               onClose();
             }
           }}
-          onDisconnectRecipient={disconnectRecipient}
           onEdit={setEditing}
           onDelete={setDeleting}
           onDeleteRecord={setDeletingRecord}

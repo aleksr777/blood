@@ -28,8 +28,6 @@ type Props = {
   onOpenRegistrationRecord: SavedRecordOpener<RegistrationRecord>;
   onOpenIndividualSelectionDirectionRecord: SavedRecordOpener<BloodRequestRecord>;
   onOpenComponentRequestRecord: SavedRecordOpener<BloodRequestRecord>;
-  onDisconnectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
-  currentRecipientId?: number | null;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
   onDeleteRecord: (record: ProtocolRecord) => void;
@@ -58,8 +56,6 @@ export const RecipientHistoryPanel = ({
   onOpenRegistrationRecord,
   onOpenIndividualSelectionDirectionRecord,
   onOpenComponentRequestRecord,
-  onDisconnectRecipient,
-  currentRecipientId = null,
   onEdit,
   onDelete,
   onDeleteRecord,
@@ -120,16 +116,6 @@ export const RecipientHistoryPanel = ({
               {demographics && <div className={styles.meta}>{demographics}</div>}
             </div>
             <div className={styles.headerActions}>
-              {onDisconnectRecipient && recipient.id === currentRecipientId && (
-                <button
-                  type="button"
-                  className={styles.disconnectAction}
-                  title="Снять реципиента как текущего"
-                  onClick={() => onDisconnectRecipient(recipient)}
-                >
-                  Отключить
-                </button>
-              )}
               <button
                 type="button"
                 className={styles.secondaryAction}

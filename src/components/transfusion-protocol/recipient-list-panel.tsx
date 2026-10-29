@@ -10,6 +10,7 @@ type Props = {
   selected: RecipientRecord | null;
   currentRecipientId?: number | null;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
+  onDisconnectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
   onQueryChange: (value: string) => void;
   onSelect: (recipient: RecipientRecord) => void;
   onCreate: () => void;
@@ -22,6 +23,7 @@ export const RecipientListPanel = ({
   selected,
   currentRecipientId = null,
   onUseRecipient,
+  onDisconnectRecipient,
   onQueryChange,
   onSelect,
   onCreate,
@@ -92,6 +94,7 @@ export const RecipientListPanel = ({
             current={currentRecipientId === recipient.id}
             onSelect={onSelect}
             onUseRecipient={onUseRecipient}
+            onDisconnectRecipient={onDisconnectRecipient}
           />
         ))}
       </div>

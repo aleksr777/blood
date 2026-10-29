@@ -43,6 +43,7 @@
 .list,
 .records {
   display: grid;
+  grid-auto-rows: max-content;
   min-height: 0;
   flex: 1 1 auto;
   align-content: start;
@@ -131,7 +132,7 @@
   composes: ui-button ui-secondary-button ui-compact-button from global;
 }
 
-.disconnectAction {
+.cancelSelection {
   composes: ui-button ui-secondary-button ui-compact-button from global;
 }
 

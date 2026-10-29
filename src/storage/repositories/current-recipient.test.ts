@@ -118,6 +118,41 @@ describe('current recipient profile', () => {
     );
   });
 
+  it('does not archive recipient-only forms or an empty registration table on a recipient switch', async () => {
+    const values = {
+      ...recipientProfileValuesForForms(recipient),
+      ...generatedHistory,
+      recipientAge: '46 лет',
+      reagentAntiASeries: '123',
+      doctorName: 'Сохранённый врач',
+      nurseName: 'Сохранённая медсестра',
+    };
+    adoptCurrentRecipientFromValues(values);
+    vi.mocked(loadProtocolDraft).mockResolvedValue({
+      values,
+      protocolRecordId: null,
+      updatedAt: Date.now(),
+    });
+    vi.mocked(loadRegistrationDraft).mockResolvedValue({
+      values: { ...values, registrationTransfusionRows: '[]' },
+      registrationRecordId: null,
+      updatedAt: Date.now(),
+    });
+    const result = await switchCurrentRecipient({
+      ...recipient,
+      id: 2,
+      fullName: 'Другой реципиент',
+      protocolCount: 0,
+      registrationCount: 0,
+      componentRequestCount: 0,
+      individualSelectionDirectionCount: 0,
+    });
+    expect(result.protocolSaved).toBe(false);
+    expect(result.registrationSaved).toBe(false);
+    expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+    expect(database.saveRegistrationRecord).not.toHaveBeenCalled();
+  });
+
   it('keeps a legacy saved snapshot out of the working draft when reselecting the recipient', async () => {
     const values = { ...recipientProfileValuesForForms(recipient), ...generatedHistory };
     adoptCurrentRecipientFromValues(values);

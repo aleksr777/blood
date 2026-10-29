@@ -36,6 +36,7 @@ import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { cleanProtocolDraft } from '../saved-document/working-form-cleanup';
+import { hasDocumentContent } from '../../domain/document-content';
 
 const OPEN_WINDOW_STORAGE_KEY = 'blood:protocol-open-window';
 
@@ -86,6 +87,7 @@ const getInitialRegistryOpen = () => readStoredOpenWindow()?.type === 'registry'
 export const useProtocolWorkspace = () => {
   const document = useDocumentState<ProtocolValues>(() => ({}), cleanProtocolDraft);
   const { values, setValues, open: openSavedDocument, isActive: hasSavedDocument } = document;
+  const hasContent = hasDocumentContent('protocol', values);
   const [workingRecordId, setRecordId] = useState<number | null>(null);
   const recordId = document.record?.id ?? workingRecordId;
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(getInitialActiveBlock);
@@ -234,6 +236,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const saveToDatabase = async () => {
+    if (!hasContent) return false;
     if (document.active) {
       if (!document.editing || !document.record || !document.hasChanges) return true;
       if (!validateHemacon()) return false;
@@ -276,7 +279,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const clearForm = () => {
-    if (document.active) return;
+    if (document.active || !hasContent) return;
     const currentRecipient = readCurrentRecipient();
     const nextValues = currentRecipient
       ? {
@@ -400,6 +403,7 @@ export const useProtocolWorkspace = () => {
 
   return {
     document,
+    hasContent,
     values,
     recordId,
     activeBlock,

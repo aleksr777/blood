@@ -6,6 +6,7 @@ import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { ProtocolToolbar } from './protocol-toolbar';
 
 const props = (): ComponentProps<typeof ProtocolToolbar> => ({
+  hasContent: true,
   status: '',
   warning: '',
   hemaconWarning: getProtocolHemaconWarning({}),
@@ -29,6 +30,19 @@ const props = (): ComponentProps<typeof ProtocolToolbar> => ({
 });
 
 afterEach(cleanup);
+
+it('disables Clear and Save when only recipient or reusable data remain', () => {
+  const handlers = props();
+  render(<ProtocolToolbar {...handlers} hasContent={false} />);
+  for (const name of ['Очистить бланк', 'Сохранить']) {
+    const button = screen.getByRole('button', { name }) as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    fireEvent.click(button);
+  }
+  expect(handlers.onSave).not.toHaveBeenCalled();
+  expect(handlers.onClear).not.toHaveBeenCalled();
+  expect(screen.queryByRole('alert')).toBeNull();
+});
 
 it('has no New blank button and keeps date-order warnings non-dismissible', () => {
   const handlers = props();

@@ -193,9 +193,11 @@ export const TransfusionProtocol = () => {
       className="app-shell protocol-app-shell"
       data-print-blocked={Boolean(workspace.hemaconWarning)}
       document={workspace.document}
+      hasContent={workspace.hasContent}
       onSave={workspace.saveToDatabase}
     >
       <ProtocolToolbar
+        hasContent={workspace.hasContent}
         document={workspace.document}
         documentTitle={savedDocumentTitle('protocol', workspace.values)}
         onReturnToList={savedList.returnToList}

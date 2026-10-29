@@ -5,18 +5,20 @@ import { PrintSavePrompt } from './print-save-prompt';
 
 export const SavedDocumentPage = ({
   document,
+  hasContent,
   onSave,
   children,
   ...props
 }: ComponentPropsWithoutRef<'main'> & {
   document: Pick<SavedDocumentControls, 'mode' | 'hasChanges'>;
+  hasContent: boolean;
   onSave: () => Promise<boolean>;
 }) => (
   <SavedDocumentScope value={document.mode !== 'draft'}>
     <main {...props} data-document-mode={document.mode}>
       {children}
       <PrintSavePrompt
-        canSave={document.mode === 'draft' || document.hasChanges}
+        canSave={hasContent && (document.mode === 'draft' || document.hasChanges)}
         editing={document.mode === 'edit'}
         onSave={onSave}
       />

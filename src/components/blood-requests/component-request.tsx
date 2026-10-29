@@ -1,5 +1,6 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
+import { hasDocumentContent } from '../../domain/document-content';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -372,6 +373,7 @@ export const ComponentRequest = () => {
     open: openSavedDocument,
     isActive: hasSavedDocument,
   } = documentState;
+  const hasContent = hasDocumentContent('component-request', draft);
   const [editor, setEditorState] = useState<Editor>(null);
   const setEditor = (next: Editor) => {
     if (next === null || !documentState.isReadOnly()) setEditorState(next);
@@ -636,7 +638,7 @@ export const ComponentRequest = () => {
   };
 
   const clear = async () => {
-    if (documentState.isActive()) return;
+    if (documentState.isActive() || !hasContent) return;
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
     const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
@@ -651,6 +653,7 @@ export const ComponentRequest = () => {
   };
 
   const save = async () => {
+    if (!hasContent) return false;
     if (documentState.active) {
       if (!documentState.editing || !documentState.record || !documentState.hasChanges) return true;
       try {
@@ -1002,7 +1005,12 @@ export const ComponentRequest = () => {
   };
 
   return (
-    <SavedDocumentPage className={styles.shell} document={documentState} onSave={save}>
+    <SavedDocumentPage
+      className={styles.shell}
+      document={documentState}
+      hasContent={hasContent}
+      onSave={save}
+    >
       <header className={`app-header ${styles.header}`}>
         <div className="toolbar-wrap">
           <SiteNavigation
@@ -1025,6 +1033,7 @@ export const ComponentRequest = () => {
                 type="button"
                 className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
                 onClick={() => void clear()}
+                disabled={!hasContent}
               >
                 Очистить бланк
               </button>
@@ -1040,7 +1049,7 @@ export const ComponentRequest = () => {
               type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={documentState.active && !documentState.hasChanges}
+              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
             >
               Сохранить
             </button>

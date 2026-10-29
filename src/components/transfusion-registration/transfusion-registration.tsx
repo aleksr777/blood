@@ -1,5 +1,6 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
+import { hasDocumentContent } from '../../domain/document-content';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -71,6 +72,7 @@ export const TransfusionRegistration = () => {
       (savedDate ? formatRecipientAge(values.recipientBirthDate, savedDate) : ''))
     : formatRecipientAge(values.recipientBirthDate);
   const registrationRows = parseRegistrationTransfusionRows(values);
+  const hasContent = hasDocumentContent('registration', values);
 
   usePendingSavedDocument('registration', (record, mode) => {
     void openRegistrationRecord(record, mode);
@@ -205,6 +207,7 @@ export const TransfusionRegistration = () => {
   };
 
   const save = async () => {
+    if (!hasContent) return false;
     if (documentState.active) {
       if (!documentState.editing || !documentState.record || !documentState.hasChanges) return true;
       try {
@@ -262,7 +265,7 @@ export const TransfusionRegistration = () => {
   };
 
   const clearBlank = () => {
-    if (documentState.active) return;
+    if (documentState.active || !hasContent) return;
     const currentRecipient = readCurrentRecipient();
     setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
     setRecordId(null);
@@ -365,7 +368,12 @@ export const TransfusionRegistration = () => {
   };
 
   return (
-    <SavedDocumentPage className="registration-app-shell" document={documentState} onSave={save}>
+    <SavedDocumentPage
+      className="registration-app-shell"
+      document={documentState}
+      hasContent={hasContent}
+      onSave={save}
+    >
       <header className="app-header registration-header">
         <div className="toolbar-wrap">
           <SiteNavigation
@@ -388,6 +396,7 @@ export const TransfusionRegistration = () => {
                 type="button"
                 className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
                 onClick={clearBlank}
+                disabled={!hasContent}
               >
                 Очистить бланк
               </button>
@@ -403,7 +412,7 @@ export const TransfusionRegistration = () => {
               type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={documentState.active && !documentState.hasChanges}
+              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
             >
               Сохранить
             </button>

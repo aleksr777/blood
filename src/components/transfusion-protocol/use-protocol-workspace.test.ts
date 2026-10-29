@@ -131,6 +131,21 @@ const openDraft = async (values: Record<string, string>) => {
   return hook;
 };
 
+it('does not save or clear a recipient-only draft with retained reagent defaults', async () => {
+  const { result } = await openDraft({ reagentAntiASeries: '123' });
+  const values = structuredClone(result.current.values);
+  expect(result.current.hasContent).toBe(false);
+  let saved;
+  await act(async () => {
+    saved = await result.current.saveToDatabase();
+  });
+  expect(saved).toBe(false);
+  act(() => result.current.clearForm());
+  expect(result.current.values).toEqual(values);
+  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+  expect(database.clearProtocolDraft).not.toHaveBeenCalled();
+});
+
 it('does not warn about saved unit number matches but still validates an incomplete number', async () => {
   vi.mocked(database.listProtocolRecords).mockResolvedValue([
     {

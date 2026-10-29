@@ -1167,6 +1167,21 @@ export const IndividualSelectionDirection = () => {
             title={savedDocumentTitle('individual-selection-direction', draft)}
           />
           <div className="print-actions" aria-label="Панель действий">
+            <button
+              type="button"
+              className={`${ui.successButton} ${ui.toolbarButton} save-button`}
+              onClick={() => void save()}
+              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
+            >
+              Сохранить
+            </button>
+            <button
+              type="button"
+              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+              onClick={() => setRegistryOpen(true)}
+            >
+              Реципиенты
+            </button>
             {!documentState.active && (
               <button
                 type="button"
@@ -1177,21 +1192,6 @@ export const IndividualSelectionDirection = () => {
                 Очистить бланк
               </button>
             )}
-            <button
-              type="button"
-              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-              onClick={() => setRegistryOpen(true)}
-            >
-              Реципиенты
-            </button>
-            <button
-              type="button"
-              className={`${ui.successButton} ${ui.toolbarButton} save-button`}
-              onClick={() => void save()}
-              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
-            >
-              Сохранить
-            </button>
             {pageStarts.map((_, index) => (
               <button
                 key={index}

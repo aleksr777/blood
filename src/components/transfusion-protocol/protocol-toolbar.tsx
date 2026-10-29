@@ -97,6 +97,22 @@ export const ProtocolToolbar = ({
           />
         )}
         <div className="print-actions" aria-label="Панель действий">
+          <button
+            type="button"
+            className={`${ui.successButton} ${ui.toolbarButton} save-button`}
+            onClick={() => runValidatedAction(onSave)}
+            disabled={saveDisabled}
+            aria-disabled={saveDisabled || Boolean(hemaconWarning)}
+          >
+            Сохранить
+          </button>
+          <button
+            type="button"
+            className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+            onClick={onOpenRegistry}
+          >
+            Реципиенты
+          </button>
           {!document?.record && (
             <>
               <button
@@ -109,22 +125,6 @@ export const ProtocolToolbar = ({
               </button>
             </>
           )}
-          <button
-            type="button"
-            className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-            onClick={onOpenRegistry}
-          >
-            Реципиенты
-          </button>
-          <button
-            type="button"
-            className={`${ui.successButton} ${ui.toolbarButton} save-button`}
-            onClick={() => runValidatedAction(onSave)}
-            disabled={saveDisabled}
-            aria-disabled={saveDisabled || Boolean(hemaconWarning)}
-          >
-            Сохранить
-          </button>
           {Array.from({ length: pageCount }, (_, pageIndex) => (
             <button
               key={pageIndex}

@@ -391,6 +391,21 @@ export const TransfusionRegistration = () => {
             title={savedDocumentTitle('registration', values)}
           />
           <div className="print-actions" aria-label="Панель действий">
+            <button
+              type="button"
+              className={`${ui.successButton} ${ui.toolbarButton} save-button`}
+              onClick={() => void save()}
+              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
+            >
+              Сохранить
+            </button>
+            <button
+              type="button"
+              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+              onClick={openRecipients}
+            >
+              Реципиенты
+            </button>
             {!documentState.active && (
               <button
                 type="button"
@@ -401,21 +416,6 @@ export const TransfusionRegistration = () => {
                 Очистить бланк
               </button>
             )}
-            <button
-              type="button"
-              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-              onClick={openRecipients}
-            >
-              Реципиенты
-            </button>
-            <button
-              type="button"
-              className={`${ui.successButton} ${ui.toolbarButton} save-button`}
-              onClick={() => void save()}
-              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
-            >
-              Сохранить
-            </button>
             <button
               type="button"
               className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}

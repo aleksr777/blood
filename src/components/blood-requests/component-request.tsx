@@ -1028,6 +1028,21 @@ export const ComponentRequest = () => {
             title={savedDocumentTitle('component-request', draft)}
           />
           <div className="print-actions" aria-label="Панель действий">
+            <button
+              type="button"
+              className={`${ui.successButton} ${ui.toolbarButton} save-button`}
+              onClick={() => void save()}
+              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
+            >
+              Сохранить
+            </button>
+            <button
+              type="button"
+              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+              onClick={() => setRegistryOpen(true)}
+            >
+              Реципиенты
+            </button>
             {!documentState.active && (
               <button
                 type="button"
@@ -1038,21 +1053,6 @@ export const ComponentRequest = () => {
                 Очистить бланк
               </button>
             )}
-            <button
-              type="button"
-              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-              onClick={() => setRegistryOpen(true)}
-            >
-              Реципиенты
-            </button>
-            <button
-              type="button"
-              className={`${ui.successButton} ${ui.toolbarButton} save-button`}
-              onClick={() => void save()}
-              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
-            >
-              Сохранить
-            </button>
             <button
               type="button"
               className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}

@@ -362,7 +362,7 @@ const RecipientDatabaseContent = ({
             onUseRecipient
               ? async (recipient) => {
                   const accepted = await onUseRecipient(recipient);
-                  if (accepted !== false) onClose();
+                  if (accepted !== false) setCurrentRecipientId(recipient.id);
                   return accepted;
                 }
               : undefined

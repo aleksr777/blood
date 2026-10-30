@@ -5,8 +5,8 @@ it.each([
   ['2026-10-26', '2026-10-26'],
   ['2026-10-27', '2026-10-26'],
 ])('warns when collection %s is not before expiration %s', (collectionDate, expirationDate) => {
-  expect(getHemaconDateOrderWarning({ collectionDate, expirationDate })).toContain(
-    'должна быть раньше',
+  expect(getHemaconDateOrderWarning({ collectionDate, expirationDate })).toBe(
+    'Дата заготовки должна быть раньше даты окончания срока годности.',
   );
 });
 

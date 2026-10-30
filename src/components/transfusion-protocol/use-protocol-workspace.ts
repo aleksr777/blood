@@ -391,10 +391,10 @@ export const useProtocolWorkspace = () => {
     setStatus('Текущий реципиент отключён. Связанные с ним данные удалены из текущего бланка.');
   };
 
+  const hemaconDateWarning = getHemaconDateOrderWarning(values);
   const expiredReagents = document.active ? [] : getExpiredReagentWarnings(values);
-  const hemaconExpirationWarning = document.active
-    ? ''
-    : getHemaconExpirationWarning(values.expirationDate);
+  const hemaconExpirationWarning =
+    document.active || hemaconDateWarning ? '' : getHemaconExpirationWarning(values.expirationDate);
   const expirationWarnings = [hemaconExpirationWarning, ...expiredReagents].filter(Boolean);
   const reagentWarning = expirationWarnings.length
     ? `Внимание: истёк срок годности.\n\n${expirationWarnings.map((warning) => `• ${warning}`).join('\n')}.`
@@ -417,7 +417,7 @@ export const useProtocolWorkspace = () => {
     saveToDatabase,
     validateHemacon,
     hemaconWarning: getProtocolHemaconWarning(values),
-    hemaconDateWarning: getHemaconDateOrderWarning(values),
+    hemaconDateWarning,
     reagentWarning,
     compatibilityWarning,
     bloodGroupWarning,

@@ -8,5 +8,5 @@ export const getHemaconDateOrderWarning = (values: Record<string, string>) => {
   const collection = values.collectionDate ?? '';
   const expiration = values.expirationDate ?? '';
   if (!isIsoDate(collection) || !isIsoDate(expiration) || collection < expiration) return '';
-  return 'Проверьте даты гемакона.\n\nДата заготовки должна быть раньше даты окончания срока годности.\nИсправьте одну из дат или очистите поле.';
+  return 'Дата заготовки должна быть раньше даты окончания срока годности.';
 };

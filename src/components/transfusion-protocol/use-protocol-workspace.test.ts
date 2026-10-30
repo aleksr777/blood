@@ -227,3 +227,23 @@ it('hides expiration notices in both saved modes and restores notices for the wo
   act(() => result.current.document.close());
   expect(result.current.reagentWarning).toContain('истёк срок годности');
 });
+
+it('suppresses hemacon expiration while its dates conflict without hiding expired reagents', async () => {
+  const { result } = await openDraft({
+    ...hemacon,
+    collectionDate: '2026-10-30',
+    expirationDate: '2000-01-01',
+    reagentAntiAExpiration: '2000-01-01',
+  });
+  expect(result.current.hemaconDateWarning).toBe(
+    'Дата заготовки должна быть раньше даты окончания срока годности.',
+  );
+  expect(result.current.reagentWarning).not.toContain('Срок годности гемакона');
+  expect(result.current.reagentWarning).toContain('анти-A');
+  await act(async () => result.current.saveValues({ collectionDate: '1999-12-01' }));
+  expect(result.current.hemaconDateWarning).toBe('');
+  expect(result.current.reagentWarning).toContain('Срок годности гемакона');
+  await act(async () => result.current.saveValues({ expirationDate: '' }));
+  expect(result.current.hemaconDateWarning).toBe('');
+  expect(result.current.reagentWarning).not.toContain('Срок годности гемакона');
+});

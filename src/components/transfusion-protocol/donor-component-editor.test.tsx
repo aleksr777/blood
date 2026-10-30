@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { ReactNode } from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { SavedDocumentScope } from '../saved-document/saved-document-scope';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
@@ -98,7 +98,10 @@ it.each<ProtocolBlockId>(['donor', 'indications'])(
     expect(nameInput().value).toBe(original.componentName);
     expect(screen.getByText('Несовпадение группы крови.')).toBeTruthy();
     expect(screen.getByText('Проверьте номер гемакона.')).toBeTruthy();
-    expect(screen.getByText(/Срок годности гемакона истёк/)).toBeTruthy();
+    expect(
+      screen.getByText('Дата заготовки должна быть раньше даты окончания срока годности.'),
+    ).toBeTruthy();
+    expect(screen.queryByText(/Срок годности гемакона истёк/)).toBeNull();
     fireEvent.change(screen.getByRole('spinbutton', { name: 'Количество, мл' }), {
       target: { value: '300' },
     });
@@ -147,3 +150,24 @@ it.each<ProtocolBlockId>(['donor', 'indications'])(
     );
   },
 );
+
+it('prioritizes the permanent date-order notice and restores the dismissible expiration notice after correction', () => {
+  renderEditor('donor');
+  const orderNotice = () =>
+    screen.getByText('Дата заготовки должна быть раньше даты окончания срока годности.');
+  expect(
+    within(orderNotice().closest('[role="alert"]') as HTMLElement).queryByRole('button'),
+  ).toBeNull();
+  fireEvent.change(screen.getByLabelText('Дата заготовки'), { target: { value: '1999-12-01' } });
+  expect(screen.queryByText(/Дата заготовки должна быть раньше/)).toBeNull();
+  const expired = screen
+    .getByText(/Срок годности гемакона истёк/)
+    .closest('[role="alert"]') as HTMLElement;
+  fireEvent.click(within(expired).getByRole('button', { name: 'Закрыть предупреждение' }));
+  expect(screen.queryByText(/Срок годности гемакона истёк/)).toBeNull();
+  fireEvent.change(screen.getByLabelText('Дата заготовки'), { target: { value: '2000-01-01' } });
+  expect(orderNotice()).toBeTruthy();
+  fireEvent.change(screen.getByLabelText('Срок годности'), { target: { value: '' } });
+  expect(screen.queryByText(/Дата заготовки должна быть раньше/)).toBeNull();
+  expect(screen.queryByText(/Срок годности гемакона истёк/)).toBeNull();
+});

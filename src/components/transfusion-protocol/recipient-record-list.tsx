@@ -58,13 +58,13 @@ export const RecipientRecordList = ({
         return (
           <div
             key={record.id}
-            className={record.summary ? styles.protocolRecord : styles.record}
+            className={record.summary ? styles.recordCard : styles.record}
             role="listitem"
             data-record-id={record.id}
             data-selected={selected}
           >
             <div
-              className={record.summary ? styles.protocolSummary : styles.recordSummary}
+              className={record.summary ? styles.recordCardSummary : styles.recordSummary}
               role="button"
               tabIndex={0}
               aria-expanded={selected}

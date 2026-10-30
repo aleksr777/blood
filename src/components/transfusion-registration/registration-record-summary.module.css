@@ -1,0 +1,20 @@
+.components {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--ui-border);
+  padding-top: 0.55rem;
+}
+
+.component {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.componentName {
+  color: var(--ui-text);
+  font-size: 0.84rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}

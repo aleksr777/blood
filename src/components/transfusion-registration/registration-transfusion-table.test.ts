@@ -31,12 +31,21 @@ const row = (id: number, date: string, startTime: string) =>
     recipientId: 1,
     createdAt: 1,
     updatedAt: 1,
-    values: { transfusionDate: date, startTime, endTime: '23:59' },
+    values: {
+      transfusionDate: date,
+      startTime,
+      endTime: '23:59',
+      componentUnitNumber: '761022 000456 36',
+    },
   });
 
-it('retains the starting time in a registration snapshot, including after parsing', () => {
+it('retains starting time and unit number in a registration snapshot, including after parsing', () => {
   const original = row(1, '2026-10-30', '09:00');
-  expect(original).toMatchObject({ transfusionDate: '30.10.2026', transfusionTime: '09:00' });
+  expect(original).toMatchObject({
+    transfusionDate: '30.10.2026',
+    transfusionTime: '09:00',
+    componentUnitNumber: '761022 000456 36',
+  });
   expect(
     parseRegistrationTransfusionRows({ registrationTransfusionRows: JSON.stringify([original]) }),
   ).toEqual([original]);
@@ -73,4 +82,5 @@ it('keeps legacy date-only rows and places unknown dates after known dates', () 
   });
   expect(parsed.map(({ protocolId }) => protocolId)).toEqual([3, 2, 1]);
   expect(parsed[0].componentName).toBe('Ранний');
+  expect(parsed[0]).not.toHaveProperty('componentUnitNumber');
 });

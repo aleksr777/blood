@@ -12,6 +12,7 @@ export const REGISTRATION_TRANSFUSION_ROWS_FIELD = 'registrationTransfusionRows'
 export type RegistrationTransfusionRow = {
   protocolId: number;
   componentName: string;
+  componentUnitNumber?: string;
   amountLiters: string;
   units: string;
   transfusionDate: string;
@@ -37,6 +38,7 @@ export const buildRegistrationTransfusionRow = (
 ): RegistrationTransfusionRow => ({
   protocolId: record.id,
   componentName: record.values.componentName?.trim() ?? '',
+  componentUnitNumber: record.values.componentUnitNumber?.trim() ?? '',
   amountLiters: formatLiters(record.values.amountMl),
   units: '1',
   transfusionDate: formatDate(record.values.transfusionDate),
@@ -76,6 +78,9 @@ export const parseRegistrationTransfusionRows = (
           {
             protocolId: row.protocolId,
             componentName: typeof row.componentName === 'string' ? row.componentName : '',
+            ...(typeof row.componentUnitNumber === 'string'
+              ? { componentUnitNumber: row.componentUnitNumber }
+              : {}),
             amountLiters: typeof row.amountLiters === 'string' ? row.amountLiters : '',
             units: typeof row.units === 'string' ? row.units : '',
             transfusionDate: typeof row.transfusionDate === 'string' ? row.transfusionDate : '',

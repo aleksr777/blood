@@ -105,7 +105,7 @@ it.each(['view', 'edit'] as const)(
     render(<ComponentRequest />);
     fireEvent.click(
       screen.getByRole('button', {
-        name: mode === 'view' ? 'Новый бланк' : 'Закрыть без сохранения',
+        name: mode === 'view' ? 'К созданию нового бланка' : 'Закрыть без сохранения',
       }),
     );
     await expectWorkingSelectionCleared();

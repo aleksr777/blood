@@ -51,7 +51,7 @@ it('has no New blank button and keeps date-order warnings non-dismissible', () =
   const { rerender } = render(
     <ProtocolToolbar {...handlers} hemaconWarning="" hemaconDateWarning={message} />,
   );
-  expect(screen.queryByRole('button', { name: 'Новый бланк' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'К созданию нового бланка' })).toBeNull();
   expect(screen.getByRole('alert').textContent).toContain(message);
   expect(screen.queryByRole('button', { name: 'Закрыть предупреждение' })).toBeNull();
   rerender(<ProtocolToolbar {...handlers} hemaconWarning="" hemaconDateWarning="" />);
@@ -173,7 +173,7 @@ it.each(['view', 'edit'] as const)(
     );
     expect(screen.queryByText('Текущий реципиент:')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Очистить бланк' })).toBeNull();
-    expect(screen.queryAllByRole('button', { name: 'Новый бланк' })).toHaveLength(
+    expect(screen.queryAllByRole('button', { name: 'К созданию нового бланка' })).toHaveLength(
       mode === 'view' ? 1 : 0,
     );
     expect(screen.queryByText(/истёк срок годности/)).toBeNull();
@@ -181,7 +181,7 @@ it.each(['view', 'edit'] as const)(
     expect(screen.queryByText(/№ 42/)).toBeNull();
     expect(
       screen.getByRole('button', {
-        name: mode === 'edit' ? 'Закрыть без сохранения' : 'Новый бланк',
+        name: mode === 'edit' ? 'Закрыть без сохранения' : 'К созданию нового бланка',
       }).className,
     ).not.toContain('text-button');
   },

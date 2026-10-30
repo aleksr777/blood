@@ -81,7 +81,7 @@ it.each(['view', 'edit'] as const)('clears only staff when returning from %s', a
   expect(screen.queryByRole('button', { name: 'Очистить бланк' })).toBeNull();
   fireEvent.click(
     screen.getByRole('button', {
-      name: mode === 'view' ? 'Новый бланк' : 'Закрыть без сохранения',
+      name: mode === 'view' ? 'К созданию нового бланка' : 'Закрыть без сохранения',
     }),
   );
   await expectStaffCleared();

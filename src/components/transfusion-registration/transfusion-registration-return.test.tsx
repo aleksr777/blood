@@ -75,23 +75,22 @@ it.each(['view', 'edit'] as const)(
     );
     render(<TransfusionRegistration />);
     await waitFor(() => expect(readCurrentRecipient()?.id).toBe(1));
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: mode === 'view' ? 'К созданию нового бланка' : 'Закрыть без сохранения',
-      }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
     await expectEmptyWorkingTable();
     expect(database.saveRegistrationRecord).not.toHaveBeenCalled();
   },
 );
 
 it('keeps all non-table data when saving a working sheet and returning to it', async () => {
-  render(<TransfusionRegistration />);
+  const { container } = render(<TransfusionRegistration />);
   await waitFor(() => expect(readCurrentRecipient()?.id).toBe(1));
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await screen.findByRole('button', { name: 'Закрыть без сохранения' });
+  await screen.findByRole('button', { name: 'К созданию нового бланка' });
+  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('edit');
+  expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true);
   expect(screen.getByText('Рабочая таблица')).toBeTruthy();
-  fireEvent.click(screen.getByRole('button', { name: 'Закрыть без сохранения' }));
+  fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
   await expectEmptyWorkingTable();
   expect(database.saveRegistrationRecord).toHaveBeenCalledOnce();
+  expect(database.saveRegistrationRecord).toHaveBeenCalledWith(working);
 });

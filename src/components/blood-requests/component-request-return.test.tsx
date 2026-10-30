@@ -103,22 +103,22 @@ it.each(['view', 'edit'] as const)(
       }),
     );
     render(<ComponentRequest />);
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: mode === 'view' ? 'К созданию нового бланка' : 'Закрыть без сохранения',
-      }),
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
     await expectWorkingSelectionCleared();
     expect(database.saveBloodRequestRecord).not.toHaveBeenCalled();
   },
 );
 
 it('preserves other request data when a working request is saved and closed', async () => {
-  render(<ComponentRequest />);
+  const { container } = render(<ComponentRequest />);
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await screen.findByRole('button', { name: 'Закрыть без сохранения' });
-  expect(screen.getAllByText('Эритроцитная взвесь').length).toBeGreaterThan(0);
-  fireEvent.click(screen.getByRole('button', { name: 'Закрыть без сохранения' }));
+  await screen.findByRole('button', { name: 'К созданию нового бланка' });
+  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('edit');
+  expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true);
+  fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
   await expectWorkingSelectionCleared();
   expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce();
+  const saved = vi.mocked(database.saveBloodRequestRecord).mock.calls[0][0].values;
+  expect(saved.requiredComponent).toBe(working.requiredComponent);
+  expect(saved.doctorName).toBe(working.doctorName);
 });

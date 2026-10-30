@@ -51,8 +51,7 @@ export const SavedDocumentBar = ({
           className={`${ui.secondaryButton} ${ui.compactButton}`}
           onClick={document.close}
         >
-          {!editing && <span aria-hidden="true">←</span>}
-          {editing ? 'Закрыть без сохранения' : 'К созданию нового бланка'}
+          <span aria-hidden="true">←</span>К созданию нового бланка
         </button>
       </div>
     </div>

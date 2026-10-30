@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { formatComponentUnitNumber } from './component-unit-number';
 import { DonorFields } from './donor-fields';
@@ -45,7 +46,7 @@ export const DonorDetailsFields = ({
           <div key={field.name} className={styles.componentUnitNumberField}>
             <label>
               <span>{field.label}</span>
-              <input
+              <FormInput
                 name={field.name}
                 type="text"
                 inputMode="numeric"

@@ -1,5 +1,6 @@
+import { FormInput, FormTextarea } from '../form-input/form-input';
 import { isSavedRecipientIdentityField } from '../../domain/saved-recipient-identity';
-import { BoundedIntegerInput } from '../bounded-integer-input/bounded-integer-input';
+import { BoundedNumberInput } from '../bounded-number-input/bounded-number-input';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { CustomSelectField } from './custom-select-field';
 import { DepartmentField } from './department-field';
@@ -22,17 +23,17 @@ type Props = {
 const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' | 'onChange'>) => {
   if (
     field.type === 'number' &&
-    field.step === '1' &&
     field.min !== undefined &&
-    Number(field.min) > 0 &&
+    Number(field.min) >= 0 &&
     field.max !== undefined
   ) {
     return (
-      <BoundedIntegerInput
+      <BoundedNumberInput
         name={field.name}
         value={value}
         min={Number(field.min)}
         max={Number(field.max)}
+        step={field.step}
         readOnly={field.readOnly}
         onChange={(next) => onChange(field.name, next)}
       />
@@ -40,7 +41,7 @@ const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' 
   }
   if (field.type === 'textarea') {
     return (
-      <textarea
+      <FormTextarea
         name={field.name}
         value={value}
         rows={4}
@@ -50,7 +51,7 @@ const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' 
   }
 
   return (
-    <input
+    <FormInput
       name={field.name}
       type={field.type ?? 'text'}
       step={field.step}
@@ -80,7 +81,7 @@ export const ProtocolFieldControl = ({
     return (
       <label className={className}>
         <span>{field.label}</span>
-        <input
+        <FormInput
           name={field.name}
           type={field.type === 'date' ? 'date' : 'text'}
           value={value}

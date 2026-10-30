@@ -1,3 +1,4 @@
+import { FormTextarea } from '../form-input/form-input';
 import Modal from '../modal/modal';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { Choice } from '../transfusion-protocol/indication-controls';
@@ -257,7 +258,7 @@ export const IndividualSelectionComponentModal = ({
             <div className={styles.localGrid}>
               <label className={styles.wide}>
                 <span>Показания для индивидуального подбора</span>
-                <textarea
+                <FormTextarea
                   value={individualSelectionIndications}
                   onChange={(event) =>
                     onLocalChange({

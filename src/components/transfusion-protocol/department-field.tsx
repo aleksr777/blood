@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
 import {
@@ -80,7 +81,7 @@ export const DepartmentField = ({ value, onChange }: Props) => {
   return (
     <div ref={rootRef} className={styles.departmentField}>
       <div className={styles.departmentControl}>
-        <input
+        <FormInput
           name="department"
           type="text"
           autoComplete="off"

@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import type { PropsWithChildren } from 'react';
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { ModalDismissButton } from '../modal/modal';
@@ -39,7 +40,7 @@ export const RecipientDataForm = ({
       <fieldset className={styles.grid} disabled={busy}>
         <label className={styles.wide}>
           <span>Фамилия, имя, отчество</span>
-          <input
+          <FormInput
             name="recipientName"
             value={values.recipientName ?? ''}
             onChange={(event) => change('recipientName', event.target.value)}
@@ -68,7 +69,7 @@ export const RecipientDataForm = ({
         </label>
         <label>
           <span>Возраст</span>
-          <input type="text" value={formatRecipientAge(values.recipientBirthDate)} readOnly />
+          <FormInput type="text" value={formatRecipientAge(values.recipientBirthDate)} readOnly />
         </label>
         <div className={styles.wide}>
           <RecipientExaminationFields values={values} onChange={onChange} />

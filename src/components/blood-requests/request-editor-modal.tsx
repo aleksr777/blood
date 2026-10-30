@@ -1,3 +1,4 @@
+import { FormInput, FormTextarea } from '../form-input/form-input';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
 import { rememberDepartment } from '../../storage/repositories/departments';
@@ -85,7 +86,7 @@ export const RequestEditorModal = ({ title, fields, values, onChange, onClose }:
                 onChange={(value) => changeValue(field.name, value)}
               />
             ) : field.type === 'textarea' ? (
-              <textarea
+              <FormTextarea
                 value={draft[field.name] ?? ''}
                 onChange={(event) => changeValue(field.name, event.target.value)}
               />
@@ -102,7 +103,7 @@ export const RequestEditorModal = ({ title, fields, values, onChange, onClose }:
                 ))}
               </select>
             ) : (
-              <input
+              <FormInput
                 type={field.type ?? 'text'}
                 value={draft[field.name] ?? ''}
                 onChange={(event) => changeValue(field.name, event.target.value)}

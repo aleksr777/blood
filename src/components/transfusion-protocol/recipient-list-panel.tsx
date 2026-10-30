@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { useEffect, useRef } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import { RecipientListItem } from './recipient-list-item';
@@ -74,7 +75,7 @@ export const RecipientListPanel = ({
           Новый реципиент
         </button>
       </div>
-      <input
+      <FormInput
         id="recipient-search"
         className={styles.search}
         value={query}

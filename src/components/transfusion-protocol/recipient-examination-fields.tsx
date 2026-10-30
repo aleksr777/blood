@@ -1,3 +1,4 @@
+import { FormTextarea } from '../form-input/form-input';
 import {
   ABO_OPTIONS,
   ANTIGEN_OPTIONS,
@@ -91,7 +92,7 @@ export const RecipientExaminationFields = ({
           {values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found && (
             <label className={styles.description}>
               <span>Описание найденных антител</span>
-              <textarea
+              <FormTextarea
                 rows={3}
                 value={values.alloimmuneAntibodyDescription ?? ''}
                 onChange={(event) =>

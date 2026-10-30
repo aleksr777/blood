@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
@@ -27,7 +28,7 @@ export const RegistrationPatientDetailsModal = ({
       <div className={styles.wide}>
         <div className={styles.fieldLabel}>Фамилия, имя, отчество (при наличии)</div>
         {savedDocument ? (
-          <input
+          <FormInput
             aria-label="Фамилия, имя, отчество (при наличии)"
             name="recipientName"
             readOnly={savedDocument}
@@ -77,7 +78,7 @@ export const RegistrationPatientDetailsModal = ({
 
       <label>
         <span>№ медицинской карты</span>
-        <input
+        <FormInput
           name="medicalRecordNumber"
           readOnly={savedDocument}
           type="text"

@@ -1,3 +1,4 @@
+import { BoundedNumberInput } from '../bounded-number-input/bounded-number-input';
 import { ProtocolFieldControl } from './protocol-field-control';
 import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
 import { getDiuresisInputValue, getMonitoringFields, MONITORING_PERIODS } from './monitoring-model';
@@ -17,19 +18,13 @@ export const MonitoringFields = ({ values, onChange }: Props) => {
       return (
         <label key={field.name}>
           <span>{field.label}</span>
-          <input
+          <BoundedNumberInput
             name={field.name}
-            type="number"
-            inputMode="decimal"
-            min="0"
-            step="any"
+            min={Number(field.min)}
+            max={Number(field.max)}
+            step={field.step}
             value={numericValue}
-            onChange={(event) => {
-              const next = event.target.value;
-              if (!next || (Number.isFinite(Number(next)) && Number(next) >= 0)) {
-                changeValue(field.name, next);
-              }
-            }}
+            onChange={(next) => changeValue(field.name, next)}
           />
           {value && !numericValue && (
             <small className={styles.legacyValue}>Ранее введено: {value}</small>

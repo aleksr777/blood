@@ -1,7 +1,7 @@
 import type { ProtocolRecord, RegistrationRecord } from '../../storage/repositories/recipients';
 import { parseRegistrationTransfusionRows } from './registration-transfusion-table';
-import summary from '../transfusion-record-summary/transfusion-record-summary.module.css';
-import styles from './registration-record-summary.module.css';
+import { formatDate } from '../transfusion-protocol/protocol-types';
+import summary from '../record-summary/record-summary.module.css';
 
 export const RegistrationRecordSummary = ({
   record,
@@ -14,9 +14,10 @@ export const RegistrationRecordSummary = ({
     (timestamp) => timestamp > 0 && !Number.isNaN(new Date(timestamp).getTime()),
   );
   const date = savedAt ? new Date(savedAt) : null;
-  const savedDateTime = date
-    ? `${date.toLocaleDateString('ru-RU')} ${date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false })}`
+  const localDate = date
+    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
     : '';
+  const savedDate = formatDate(localDate);
   const rows = parseRegistrationTransfusionRows(record.values);
   const linkedProtocols = new Map(
     protocols
@@ -30,8 +31,8 @@ export const RegistrationRecordSummary = ({
         <strong>Лист регистрации трансфузий</strong>
         <span>
           {date ? (
-            <time dateTime={date.toISOString()} aria-label={`Сохранён: ${savedDateTime}`}>
-              {savedDateTime}
+            <time dateTime={localDate} aria-label={`Сохранён: ${savedDate}`}>
+              {savedDate}
             </time>
           ) : (
             'Дата сохранения не указана'
@@ -39,13 +40,13 @@ export const RegistrationRecordSummary = ({
         </span>
       </span>
       {rows.length ? (
-        <span className={styles.components}>
+        <span className={summary.components}>
           {rows.map((row, index) => {
             const linked = linkedProtocols.get(row.protocolId);
             const name = row.componentName.trim() || linked?.componentName?.trim();
             const unit = row.componentUnitNumber?.trim() || linked?.componentUnitNumber?.trim();
             return (
-              <span key={`${row.protocolId}:${index}`} className={styles.component}>
+              <span key={`${row.protocolId}:${index}`} className={summary.component}>
                 <span className={summary.details}>{name || 'Компонент не указан'}</span>
                 <span className={summary.details}>
                   {unit ? `№ ${unit}` : 'Номер гемакона не указан'}

@@ -1,5 +1,5 @@
 import { formatDate } from '../transfusion-protocol/protocol-types';
-import styles from './transfusion-record-summary.module.css';
+import styles from '../record-summary/record-summary.module.css';
 
 export const TransfusionRecordSummary = ({ values }: { values: Record<string, string> }) => {
   const dateTime = [formatDate(values.transfusionDate), values.startTime || values.endTime]

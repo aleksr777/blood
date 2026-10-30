@@ -20,7 +20,7 @@ const record = (rows: Record<string, unknown>[]): RegistrationRecord => ({
   updatedAt: new Date(2026, 9, 30, 21, 45).getTime(),
 });
 
-it('shows the last save time and every snapshot component, even after its protocol changes or is deleted', () => {
+it('shows only the last save date and every snapshot component after protocol changes or deletion', () => {
   const snapshot = record([
     {
       protocolId: 7,
@@ -30,9 +30,8 @@ it('shows the last save time and every snapshot component, even after its protoc
     { protocolId: 8, componentName: 'Тромбоциты', componentUnitNumber: '333333 333333 33' },
   ]);
   render(<RegistrationRecordSummary record={snapshot} protocols={[protocol]} />);
-  expect(screen.getByText('30.10.2026 21:45').getAttribute('datetime')).toBe(
-    new Date(snapshot.updatedAt).toISOString(),
-  );
+  expect(screen.getByText('30.10.2026').getAttribute('datetime')).toBe('2026-10-30');
+  expect(screen.queryByText(/21:45/)).toBeNull();
   for (const text of [
     'Исходные эритроциты',
     '№ 111111 111111 11',
@@ -93,9 +92,10 @@ it('keeps separate sheets from mixing their components', () => {
   ).toBeNull();
 });
 
-it('uses creation time if the last save time is absent and handles an empty legacy sheet', () => {
+it('uses creation date if the last save date is absent and handles an empty legacy sheet', () => {
   render(<RegistrationRecordSummary record={{ ...record([]), updatedAt: 0 }} protocols={[]} />);
-  expect(screen.getByText('29.10.2026 12:00')).toBeDefined();
+  expect(screen.getByText('29.10.2026')).toBeDefined();
+  expect(screen.queryByText(/12:00/)).toBeNull();
   expect(screen.getByText('Трансфузии не указаны.')).toBeDefined();
 });
 

@@ -32,8 +32,20 @@ const props = (): ComponentProps<typeof RecipientHistoryPanel> => ({
   recipient,
   records: [record, { ...record, id: 2, values: { transfusionDate: '2026-10-24' } }],
   registrationRecords: [record],
-  componentRequestRecords: [{ ...record, kind: 'component-request' }],
-  individualSelectionDirectionRecords: [{ ...record, kind: 'individual-selection-direction' }],
+  componentRequestRecords: [
+    {
+      ...record,
+      kind: 'component-request',
+      values: { requiredComponent: 'Плазма свежезамороженная' },
+    },
+  ],
+  individualSelectionDirectionRecords: [
+    {
+      ...record,
+      kind: 'individual-selection-direction',
+      values: { requiredComponent: 'Эритроцитная взвесь' },
+    },
+  ],
   onOpenRecord: vi.fn(),
   onOpenRegistrationRecord: vi.fn(),
   onOpenComponentRequestRecord: vi.fn(),
@@ -80,6 +92,14 @@ it.each(cases.map(([label, records, open, remove]) => ({ label, records, open, r
       expect(within(list).getByText('23.10.2026 09:15')).toBeDefined();
       expect(within(list).getByText('300 мл · № 761022 000456 36')).toBeDefined();
       expect(within(list).queryByText(/Петров А\. Н\./)).toBeNull();
+    }
+    if (
+      records === 'componentRequestRecords' ||
+      records === 'individualSelectionDirectionRecords'
+    ) {
+      expect(
+        within(list).getByText(String(handlers[records][0].values.requiredComponent)),
+      ).toBeDefined();
     }
     expect(list.querySelectorAll('button')).toHaveLength(0);
     expect(screen.queryByRole('group', { name: 'Действия с бланком' })).toBeNull();

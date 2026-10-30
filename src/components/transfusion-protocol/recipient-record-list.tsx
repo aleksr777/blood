@@ -5,8 +5,7 @@ import styles from './recipient-database.module.css';
 
 export type RecipientArchiveItem = {
   id: number;
-  title: string;
-  summary?: ReactNode;
+  summary: ReactNode;
   onOpen: (mode: SavedDocumentMode) => void;
   onDelete: () => void;
 };
@@ -58,13 +57,13 @@ export const RecipientRecordList = ({
         return (
           <div
             key={record.id}
-            className={record.summary ? styles.recordCard : styles.record}
+            className={styles.recordCard}
             role="listitem"
             data-record-id={record.id}
             data-selected={selected}
           >
             <div
-              className={record.summary ? styles.recordCardSummary : styles.recordSummary}
+              className={styles.recordCardSummary}
               role="button"
               tabIndex={0}
               aria-expanded={selected}
@@ -78,7 +77,7 @@ export const RecipientRecordList = ({
                 }
               }}
             >
-              {record.summary ?? <div className={styles.recordTitle}>{record.title}</div>}
+              {record.summary}
             </div>
             <AnimatedReveal open={selected}>
               <div

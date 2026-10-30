@@ -32,8 +32,7 @@ const profile = {
 const readDraft = () => JSON.parse(window.localStorage.getItem(storageKey)!);
 const clearButton = () =>
   screen.getByRole('button', { name: 'Очистить бланк' }) as HTMLButtonElement;
-const saveButton = () =>
-  screen.getByRole('button', { name: 'Сохранить' }) as HTMLButtonElement;
+const saveButton = () => screen.getByRole('button', { name: 'Сохранить' }) as HTMLButtonElement;
 const open = async (values = {}) => {
   window.localStorage.setItem(storageKey, JSON.stringify({ sourceRecipientId: '1', ...values }));
   render(<IndividualSelectionDirection />);

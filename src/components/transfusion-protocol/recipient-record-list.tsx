@@ -61,6 +61,7 @@ export const RecipientRecordList = ({
             className={record.summary ? styles.protocolRecord : styles.record}
             role="listitem"
             data-record-id={record.id}
+            data-selected={selected}
           >
             <div
               className={record.summary ? styles.protocolSummary : styles.recordSummary}

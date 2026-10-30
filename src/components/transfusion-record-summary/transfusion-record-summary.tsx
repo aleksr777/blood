@@ -19,9 +19,6 @@ export const TransfusionRecordSummary = ({ values }: { values: Record<string, st
         <span>{dateTime || 'Дата не указана'}</span>
       </span>
       {details && <span className={styles.details}>{details}</span>}
-      {values.doctorName?.trim() && (
-        <span className={styles.details}>Врач: {values.doctorName.trim()}</span>
-      )}
     </span>
   );
 };

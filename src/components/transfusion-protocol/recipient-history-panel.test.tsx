@@ -79,7 +79,7 @@ it.each(cases.map(([label, records, open, remove]) => ({ label, records, open, r
       expect(within(list).getByText(record.values.componentName)).toBeDefined();
       expect(within(list).getByText('23.10.2026 09:15')).toBeDefined();
       expect(within(list).getByText('300 мл · № 761022 000456 36')).toBeDefined();
-      expect(within(list).getByText('Врач: Петров А. Н.')).toBeDefined();
+      expect(within(list).queryByText(/Петров А\. Н\./)).toBeNull();
     }
     expect(list.querySelectorAll('button')).toHaveLength(0);
     expect(screen.queryByRole('group', { name: 'Действия с бланком' })).toBeNull();

@@ -75,6 +75,10 @@ import { RequestEditorModal, type RequestEditorField } from './request-editor-mo
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
 import { normalizeDirectionIndications } from './direction-indications';
+import {
+  getIndividualSelectionClearValues,
+  hasIndividualSelectionValuesToClear,
+} from './individual-selection-clear';
 import { useFormPages } from './use-form-pages';
 import { AdaptiveRuledField } from './adaptive-ruled-field';
 import styles from './individual-selection-direction.module.css';
@@ -162,25 +166,18 @@ const FOOTER_FIELDS: RequestEditorField[] = [
 ];
 
 const emptyDraft = (): DirectionDraft => ({
+  ...getIndividualSelectionClearValues(null),
   sourceRecipientId: '',
-  requiredComponent: '',
-  quantity: '',
-  individualSelectionIndications: '',
   recipientAboRh: '',
   recipientPhenotype: '',
   recipientName: '',
   recipientAge: '',
   department: '',
   medicalRecordNumber: '',
-  medicalOrganization: '',
   diagnosis: '',
   transfusionHistory: '',
   obstetricHistory: '',
   recipientSex: '',
-  directionDate: '',
-  doctorName: '',
-  doctorPhone: '',
-  indicationValues: normalizeDirectionIndications(),
   recipientProfileSnapshot: {},
   autoValues: {},
 });
@@ -322,6 +319,12 @@ export const IndividualSelectionDirection = () => {
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
+  const canClear =
+    hasContent &&
+    hasIndividualSelectionValuesToClear(
+      draft,
+      getIndividualSelectionClearValues(currentRecipient?.id ?? null),
+    );
 
   useEffect(() => {
     if (initialStored.id === null) return;
@@ -572,27 +575,13 @@ export const IndividualSelectionDirection = () => {
   };
 
   const clear = async () => {
-    if (documentState.isActive() || !hasContent) return;
+    if (documentState.isActive() || !canClear) return;
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
     const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
-    const sharedIndividualSelectionIndications =
-      recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
-        ? readCurrentIndividualSelectionIndications(recipient.id)
-        : '';
-
     setDraft({
-      ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
-        ? {
-            ...next,
-            indicationValues: {
-              ...readCurrentIndications(recipient.id, 'erythrocytes'),
-              componentGroup: 'erythrocytes',
-              indicationComponent: 'erythrocytes',
-            },
-          }
-        : next),
-      individualSelectionIndications: sharedIndividualSelectionIndications,
+      ...next,
+      ...getIndividualSelectionClearValues(recipient?.id ?? null),
     });
     setStatus('');
   };
@@ -1063,7 +1052,7 @@ export const IndividualSelectionDirection = () => {
                 type="button"
                 className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
                 onClick={() => void clear()}
-                disabled={!hasContent}
+                disabled={!canClear}
               >
                 Очистить бланк
               </button>

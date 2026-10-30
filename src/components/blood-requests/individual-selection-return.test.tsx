@@ -78,6 +78,7 @@ it.each(['view', 'edit'] as const)('clears only staff when returning from %s', a
     }),
   );
   render(<IndividualSelectionDirection />);
+  expect(screen.queryByRole('button', { name: 'Очистить бланк' })).toBeNull();
   fireEvent.click(
     screen.getByRole('button', {
       name: mode === 'view' ? 'Вернуться к текущему бланку' : 'Закрыть без сохранения',

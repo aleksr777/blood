@@ -6,10 +6,12 @@ import { getRecipientById, updateRecipient } from './recipient-store';
 import { listProtocolRecords, saveProtocolRecord } from './protocol-record-store';
 import { listRegistrationRecords, saveRegistrationRecord } from './registration-record-store';
 import { listBloodRequestRecords, saveBloodRequestRecord } from './blood-request-record-store';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 
 const state = vi.hoisted(() => ({ db: null as Database | null }));
 vi.mock('./database', () => ({ getDatabase: async () => state.db }));
 const hemacon = {
+  ...completeProtocolDates,
   componentName: 'Эритроцитная взвесь',
   componentUnitNumber: '76102200045636',
   donorAbo: 'A(II)',
@@ -157,8 +159,9 @@ describe('saved form snapshots', () => {
     { componentUnitNumber: '761022' },
     { donorAbo: '' },
     { donorAbo: ' ', recipientAbo: 'A(II)' },
+    ...Object.keys(completeProtocolDates).map((name) => ({ [name]: '' })),
   ])(
-    'rejects incomplete hemacon data before changing the recipient or archive: %j',
+    'rejects incomplete required protocol data before changing the recipient or archive: %j',
     async (missing) => {
       const recipient = await createRecipient('Исходное Имя');
       await expect(
@@ -168,15 +171,16 @@ describe('saved form snapshots', () => {
           recipientId: String(recipient.id),
           recipientName: 'Изменённое Имя',
         }),
-      ).rejects.toThrow('Заполните данные гемакона');
+      ).rejects.toThrow('Заполните обязательные поля');
       expect((await getRecipientById(recipient.id)).fullName).toBe('Исходное Имя');
       expect(await listProtocolRecords(recipient.id)).toEqual([]);
     },
   );
 
-  it('saves a protocol with just the three required hemacon fields', async () => {
+  it('saves a protocol with the required hemacon fields and dates, without optional volume', async () => {
     const recipient = await createRecipient('Тестовый Реципиент');
     const values = {
+      ...completeProtocolDates,
       recipientId: String(recipient.id),
       recipientName: recipient.fullName,
       componentName: hemacon.componentName,

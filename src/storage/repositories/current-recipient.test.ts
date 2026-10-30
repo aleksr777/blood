@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 import {
   adoptCurrentRecipientFromValues,
   hasRecipientProfileDifference,
@@ -185,6 +186,7 @@ describe('current recipient profile', () => {
 
   it('saves the previous patient’s forms and clears transfusion data when selecting another patient', async () => {
     const oldValues = {
+      ...completeProtocolDates,
       ...recipientProfileValuesForForms(recipient),
       componentUnitNumber: '12345678901234',
       componentName: 'Эритроцитная взвесь',
@@ -250,7 +252,7 @@ describe('current recipient profile', () => {
         componentRequestCount: 0,
         individualSelectionDirectionCount: 0,
       }),
-    ).rejects.toThrow('Заполните данные гемакона');
+    ).rejects.toThrow('Заполните обязательные поля');
     expect(readCurrentRecipient()?.id).toBe(recipient.id);
     expect(database.saveProtocolRecord).not.toHaveBeenCalled();
     expect(saveProtocolDraft).not.toHaveBeenCalled();

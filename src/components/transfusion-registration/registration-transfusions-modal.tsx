@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listProtocolRecords, type ProtocolRecord } from '../../storage/repositories/recipients';
+import { transfusionOrderKey } from '../../domain/date-time';
 import Modal from '../modal/modal';
 import { formatDate } from '../transfusion-protocol/protocol-types';
 import {
@@ -21,7 +22,12 @@ type Props = {
 };
 
 const formatTime = (record: ProtocolRecord) =>
-  record.values.endTime || record.values.startTime || '';
+  record.values.startTime || record.values.endTime || '';
+
+const compareRecords = (left: ProtocolRecord, right: ProtocolRecord) =>
+  transfusionOrderKey(left.values.transfusionDate, formatTime(left)).localeCompare(
+    transfusionOrderKey(right.values.transfusionDate, formatTime(right)),
+  ) || left.id - right.id;
 
 const recordLabel = (record: ProtocolRecord) => {
   const values = record.values;
@@ -62,9 +68,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
     void listProtocolRecords(recipientId)
       .then((items) => {
         if (!active) return;
-        setRecords(
-          [...items].sort((left, right) => right.updatedAt - left.updatedAt || right.id - left.id),
-        );
+        setRecords([...items].sort(compareRecords));
       })
       .catch((error: unknown) => {
         console.error('Не удалось загрузить протоколы трансфузий:', error);
@@ -95,9 +99,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
   };
 
   const apply = () => {
-    const selectedRecords = records
-      .filter(({ id }) => selectedIds.has(id))
-      .sort((left, right) => right.updatedAt - left.updatedAt || right.id - left.id);
+    const selectedRecords = records.filter(({ id }) => selectedIds.has(id));
 
     const selectedRecordIds = new Set(selectedRecords.map(({ id }) => id));
     const preservedRows = initialRows.filter(

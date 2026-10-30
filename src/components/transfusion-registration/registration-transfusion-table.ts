@@ -1,4 +1,5 @@
 import type { ProtocolRecord } from '../../storage/repositories/recipients';
+import { transfusionOrderKey } from '../../domain/date-time';
 import {
   COMPLICATIONS_STATUS,
   getComplicationsStatus,
@@ -14,6 +15,7 @@ export type RegistrationTransfusionRow = {
   amountLiters: string;
   units: string;
   transfusionDate: string;
+  transfusionTime?: string;
   doctorName: string;
   workerName: string;
   complications: string;
@@ -38,10 +40,19 @@ export const buildRegistrationTransfusionRow = (
   amountLiters: formatLiters(record.values.amountMl),
   units: '1',
   transfusionDate: formatDate(record.values.transfusionDate),
+  transfusionTime: record.values.startTime || record.values.endTime || '',
   doctorName: record.values.doctorName?.trim() ?? '',
   workerName: record.values.nurseName?.trim() ?? '',
   complications: getComplicationsStatus(record.values) === COMPLICATIONS_STATUS.had ? 'Да' : 'Нет',
 });
+
+const rowOrderKey = (row: RegistrationTransfusionRow) => {
+  const date = row.transfusionDate.replace(/^(\d{2})\.(\d{2})\.(\d{4})$/, '$3-$2-$1');
+  return transfusionOrderKey(date, row.transfusionTime);
+};
+
+const compareRows = (left: RegistrationTransfusionRow, right: RegistrationTransfusionRow) =>
+  rowOrderKey(left).localeCompare(rowOrderKey(right)) || left.protocolId - right.protocolId;
 
 export const parseRegistrationTransfusionRows = (
   values: ProtocolValues,
@@ -53,30 +64,35 @@ export const parseRegistrationTransfusionRows = (
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
 
-    return parsed.flatMap((item) => {
-      if (!item || typeof item !== 'object') return [];
-      const row = item as Partial<RegistrationTransfusionRow>;
-      if (typeof row.protocolId !== 'number' || !Number.isFinite(row.protocolId)) {
-        return [];
-      }
+    return parsed
+      .flatMap((item) => {
+        if (!item || typeof item !== 'object') return [];
+        const row = item as Partial<RegistrationTransfusionRow>;
+        if (typeof row.protocolId !== 'number' || !Number.isFinite(row.protocolId)) {
+          return [];
+        }
 
-      return [
-        {
-          protocolId: row.protocolId,
-          componentName: typeof row.componentName === 'string' ? row.componentName : '',
-          amountLiters: typeof row.amountLiters === 'string' ? row.amountLiters : '',
-          units: typeof row.units === 'string' ? row.units : '',
-          transfusionDate: typeof row.transfusionDate === 'string' ? row.transfusionDate : '',
-          doctorName: typeof row.doctorName === 'string' ? row.doctorName : '',
-          workerName: typeof row.workerName === 'string' ? row.workerName : '',
-          complications: typeof row.complications === 'string' ? row.complications : '',
-        },
-      ];
-    });
+        return [
+          {
+            protocolId: row.protocolId,
+            componentName: typeof row.componentName === 'string' ? row.componentName : '',
+            amountLiters: typeof row.amountLiters === 'string' ? row.amountLiters : '',
+            units: typeof row.units === 'string' ? row.units : '',
+            transfusionDate: typeof row.transfusionDate === 'string' ? row.transfusionDate : '',
+            ...(typeof row.transfusionTime === 'string'
+              ? { transfusionTime: row.transfusionTime }
+              : {}),
+            doctorName: typeof row.doctorName === 'string' ? row.doctorName : '',
+            workerName: typeof row.workerName === 'string' ? row.workerName : '',
+            complications: typeof row.complications === 'string' ? row.complications : '',
+          },
+        ];
+      })
+      .sort(compareRows);
   } catch {
     return [];
   }
 };
 
 export const serializeRegistrationTransfusionRows = (rows: RegistrationTransfusionRow[]) =>
-  JSON.stringify(rows);
+  JSON.stringify([...rows].sort(compareRows));

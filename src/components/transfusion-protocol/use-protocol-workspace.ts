@@ -20,7 +20,7 @@ import {
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
-import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
+import { getMissingProtocolFields, getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { getHemaconDateOrderWarning } from '../../domain/hemacon-dates';
 import { getIndicationComponent } from './indications-model';
 import {
@@ -231,7 +231,7 @@ export const useProtocolWorkspace = () => {
     const warning = getProtocolHemaconWarning(values);
     if (!warning) return true;
     setStatus(warning);
-    setActiveBlock('donor');
+    setActiveBlock(getMissingProtocolFields(values)[0].block);
     return false;
   };
 

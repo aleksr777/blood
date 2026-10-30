@@ -5,6 +5,7 @@ import { database } from '../../storage/sqlite/database-client';
 import { adoptCurrentRecipientFromValues } from '../../storage/repositories/current-recipient';
 import { useProtocolWorkspace } from './use-protocol-workspace';
 import { cleanProtocolDraft } from '../saved-document/working-form-cleanup';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 
 vi.mock('../../storage/sqlite/database-client', () => ({
   database: {
@@ -17,6 +18,7 @@ vi.mock('../../storage/sqlite/database-client', () => ({
   },
 }));
 const hemacon = {
+  ...completeProtocolDates,
   componentName: 'Эритроцитная взвесь',
   componentUnitNumber: '76102200045636',
   donorAbo: 'A(II)',
@@ -130,6 +132,41 @@ const openDraft = async (values: Record<string, string>) => {
   await waitFor(() => expect(hook.result.current.values.recipientId).toBe('1'));
   return hook;
 };
+
+it.each(Object.keys(completeProtocolDates))(
+  'keeps a draft intact and opens the relevant section when %s is missing',
+  async (name) => {
+    const { result } = await openDraft({ ...hemacon, [name]: '' });
+    const original = structuredClone(result.current.values);
+    await act(async () => expect(await result.current.saveToDatabase()).toBe(false));
+    expect(result.current.activeBlock).toBe(
+      name === 'collectionDate' || name === 'expirationDate' ? 'donor' : 'general',
+    );
+    expect(result.current.status).toBe(result.current.hemaconWarning);
+    expect(result.current.values).toEqual(original);
+    expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+    expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  },
+);
+
+it('cannot save an edited snapshot after removing a required time', async () => {
+  const { result } = await openDraft(hemacon);
+  const record = {
+    id: 42,
+    recipientId: 1,
+    values: { ...recipient, ...hemacon },
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await act(async () => result.current.openRecord(record, 'edit'));
+  act(() => result.current.saveValues({ endTime: '' }));
+  await act(async () => expect(await result.current.saveToDatabase()).toBe(false));
+  expect(result.current.document.mode).toBe('edit');
+  expect(result.current.document.hasChanges).toBe(true);
+  expect(result.current.values.endTime).toBe('');
+  expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  expect(record.values.endTime).toBe(hemacon.endTime);
+});
 
 it('does not save or clear a recipient-only draft with retained reagent defaults', async () => {
   const { result } = await openDraft({ reagentAntiASeries: '123' });

@@ -6,6 +6,7 @@ import { getRecipientById, removeRecipient } from './recipient-store';
 import { listProtocolRecords, saveProtocolRecord } from './protocol-record-store';
 import { listRegistrationRecords, saveRegistrationRecord } from './registration-record-store';
 import { listBloodRequestRecords, saveBloodRequestRecord } from './blood-request-record-store';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 
 const state = vi.hoisted(() => ({ db: null as Database | null }));
 vi.mock('./database', () => ({ getDatabase: async () => state.db }));
@@ -22,6 +23,7 @@ afterEach(() => state.db?.close());
 const populate = async (name: string) => {
   const recipient = await createRecipient(name);
   const values = {
+    ...completeProtocolDates,
     recipientId: String(recipient.id),
     recipientName: name,
     componentName: 'Эритроцитная взвесь',

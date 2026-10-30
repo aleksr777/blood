@@ -4,6 +4,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import type { ComponentProps } from 'react';
 import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { ProtocolToolbar } from './protocol-toolbar';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 
 const props = (): ComponentProps<typeof ProtocolToolbar> => ({
   hasContent: true,
@@ -98,6 +99,7 @@ it('unlocks all actions after the required fields are completed and hides the wa
   rerender(<ProtocolToolbar {...callbacks} hemaconWarning={partialWarning} />);
   expectWarningText(partialWarning);
   const hemaconWarning = getProtocolHemaconWarning({
+    ...completeProtocolDates,
     componentName: 'Эритроцитная взвесь',
     componentUnitNumber: '76102200045636',
     donorAbo: 'A(II)',
@@ -116,6 +118,36 @@ it('unlocks all actions after the required fields are completed and hides the wa
   rerender(<ProtocolToolbar {...callbacks} />);
   expect(screen.queryByRole('alert')).toBeNull();
 });
+
+it.each(Object.keys(completeProtocolDates))(
+  'blocks Save and every print button again if %s is removed',
+  (name) => {
+    const callbacks = props();
+    const complete = {
+      ...completeProtocolDates,
+      componentName: 'Эритроцитная взвесь',
+      componentUnitNumber: '76102200045636',
+      donorAbo: 'A(II)',
+    };
+    const { rerender } = render(<ProtocolToolbar {...callbacks} hemaconWarning="" />);
+    const warning = getProtocolHemaconWarning({ ...complete, [name]: '' });
+    rerender(<ProtocolToolbar {...callbacks} hemaconWarning={warning} />);
+    expect(screen.queryByRole('alert')).toBeNull();
+    for (const label of ['Сохранить', 'Печать страницы 1', 'Печать страницы 2']) {
+      const button = screen.getByRole('button', { name: label });
+      expect(button.getAttribute('aria-disabled')).toBe('true');
+      fireEvent.click(button);
+      expectWarningText(warning);
+    }
+    expect(callbacks.onSave).not.toHaveBeenCalled();
+    expect(callbacks.onPrintPage).not.toHaveBeenCalled();
+    rerender(<ProtocolToolbar {...callbacks} hemaconWarning="" />);
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Сохранить' }).getAttribute('aria-disabled')).toBe(
+      'false',
+    );
+  },
+);
 
 it.each(['view', 'edit'] as const)(
   'keeps the %s archive header free of current-patient, draft and expiration controls',

@@ -3,6 +3,7 @@ import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 import { initializeSchema } from './database-schema';
 import { createRecipient } from './recipient-create-store';
 import { getRecipientById } from './recipient-store';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 import {
   listProtocolRecords,
   saveProtocolRecord,
@@ -22,6 +23,7 @@ import {
 const state = vi.hoisted(() => ({ db: null as Database | null }));
 vi.mock('./database', () => ({ getDatabase: async () => state.db }));
 const values = {
+  ...completeProtocolDates,
   recipientName: 'Реципиент',
   medicalRecordNumber: 'Исходная карта',
   recipientBirthDate: '1980-01-02',

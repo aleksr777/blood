@@ -228,6 +228,15 @@
   font-weight: 600;
 }
 
+.protocolRecord {
+  display: grid;
+  min-width: 0;
+}
+
+.protocolSummary {
+  composes: ui-selectable-card from global;
+}
+
 .recordActions {
   display: flex;
   flex-wrap: wrap;

@@ -16,7 +16,15 @@ const recipient = {
 const record = {
   id: 1,
   recipientId: 1,
-  values: { transfusionDate: '2026-10-23' },
+  values: {
+    transfusionDate: '2026-10-23',
+    startTime: '09:15',
+    endTime: '10:30',
+    componentName: 'Эритроцитная взвесь лейкоредуцированная',
+    amountMl: '300',
+    componentUnitNumber: '761022 000456 36',
+    doctorName: 'Петров А. Н.',
+  },
   createdAt: 1,
   updatedAt: 1,
 };
@@ -66,6 +74,13 @@ it.each(cases.map(([label, records, open, remove]) => ({ label, records, open, r
     render(<RecipientHistoryPanel {...handlers} />);
     fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${label}`) }));
     const list = screen.getByRole('list', { name: 'Сохранённые бланки' });
+    expect(list.querySelectorAll('input, select, textarea')).toHaveLength(0);
+    if (records === 'records') {
+      expect(within(list).getByText(record.values.componentName)).toBeDefined();
+      expect(within(list).getByText('23.10.2026 09:15')).toBeDefined();
+      expect(within(list).getByText('300 мл · № 761022 000456 36')).toBeDefined();
+      expect(within(list).getByText('Врач: Петров А. Н.')).toBeDefined();
+    }
     expect(list.querySelectorAll('button')).toHaveLength(0);
     expect(screen.queryByRole('group', { name: 'Действия с бланком' })).toBeNull();
     const row = within(list).getAllByRole('button')[0];
@@ -99,7 +114,7 @@ it('keeps actions under one record, supports keyboard selection and resets on ca
   fireEvent.keyDown(within(rows[1]).getByRole('button'), { key: ' ' });
   expect(within(rows[0]).queryByRole('group')).toBeNull();
   expect(within(rows[1]).getByRole('group')).toBeDefined();
-  fireEvent.click(within(rows[1]).getByRole('button', { name: /^Протокол трансфузии/ }));
+  fireEvent.click(within(rows[1]).getByRole('button', { expanded: true }));
   expect(screen.queryByRole('group')).toBeNull();
   fireEvent.click(within(rows[0]).getByRole('button'));
   fireEvent.click(screen.getByRole('button', { name: '← К категориям' }));

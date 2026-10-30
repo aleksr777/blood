@@ -1,11 +1,12 @@
 import { AnimatedReveal } from '../animated-reveal/animated-reveal';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import type { SavedDocumentMode } from '../saved-document/use-document-state';
 import styles from './recipient-database.module.css';
 
 export type RecipientArchiveItem = {
   id: number;
   title: string;
+  summary?: ReactNode;
   onOpen: (mode: SavedDocumentMode) => void;
   onDelete: () => void;
 };
@@ -55,9 +56,14 @@ export const RecipientRecordList = ({
       {records.map((record) => {
         const selected = selectedId === record.id;
         return (
-          <div key={record.id} className={styles.record} role="listitem" data-record-id={record.id}>
+          <div
+            key={record.id}
+            className={record.summary ? styles.protocolRecord : styles.record}
+            role="listitem"
+            data-record-id={record.id}
+          >
             <div
-              className={styles.recordSummary}
+              className={record.summary ? styles.protocolSummary : styles.recordSummary}
               role="button"
               tabIndex={0}
               aria-expanded={selected}
@@ -71,7 +77,7 @@ export const RecipientRecordList = ({
                 }
               }}
             >
-              <div className={styles.recordTitle}>{record.title}</div>
+              {record.summary ?? <div className={styles.recordTitle}>{record.title}</div>}
             </div>
             <AnimatedReveal open={selected}>
               <div

@@ -45,38 +45,6 @@
   accent-color: var(--ui-accent);
 }
 
-.itemContent {
-  display: grid;
-  gap: 0.28rem;
-  min-width: 0;
-}
-
-.itemTopLine {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  color: var(--ui-text);
-  font-size: 0.9rem;
-}
-
-.itemTopLine strong {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--ui-text-strong);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.itemTopLine > span {
-  flex: 0 0 auto;
-  color: var(--ui-text-muted);
-}
-
-.itemDetails {
-  color: var(--ui-text-muted);
-  font-size: 0.82rem;
-}
-
 .empty {
   border: 1px dashed var(--ui-border);
   border-radius: 0.65rem;
@@ -99,15 +67,4 @@
 
 .applyButton {
   composes: ui-button ui-primary-button from global;
-}
-
-@media (max-width: 700px) {
-  .itemTopLine {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .itemTopLine > span {
-    flex: initial;
-  }
 }

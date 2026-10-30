@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { listProtocolRecords, type ProtocolRecord } from '../../storage/repositories/recipients';
 import { transfusionOrderKey } from '../../domain/date-time';
 import Modal from '../modal/modal';
-import { formatDate } from '../transfusion-protocol/protocol-types';
+import { TransfusionRecordSummary } from '../transfusion-record-summary/transfusion-record-summary';
 import {
   buildRegistrationTransfusionRow,
   parseRegistrationTransfusionRows,
@@ -28,22 +28,6 @@ const compareRecords = (left: ProtocolRecord, right: ProtocolRecord) =>
   transfusionOrderKey(left.values.transfusionDate, formatTime(left)).localeCompare(
     transfusionOrderKey(right.values.transfusionDate, formatTime(right)),
   ) || left.id - right.id;
-
-const recordLabel = (record: ProtocolRecord) => {
-  const values = record.values;
-  const dateTime = [formatDate(values.transfusionDate), formatTime(record)]
-    .filter(Boolean)
-    .join(' ');
-  const component = values.componentName?.trim() || 'Компонент не указан';
-  const details = [
-    values.amountMl?.trim() ? `${values.amountMl.trim()} мл` : '',
-    values.componentUnitNumber?.trim() ? `№ ${values.componentUnitNumber.trim()}` : '',
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-  return { dateTime, component, details };
-};
 
 export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, onClose }: Props) => {
   const initialRows = useMemo(() => parseRegistrationTransfusionRows(values), [values]);
@@ -140,7 +124,6 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
                 records.map((record) => {
                   const checked = selectedIds.has(record.id);
                   const disabled = !checked && selectedIds.size >= MAX_ROWS;
-                  const label = recordLabel(record);
 
                   return (
                     <label
@@ -159,20 +142,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
                         disabled={disabled}
                         onChange={() => toggleRecord(record.id)}
                       />
-                      <span className={styles.itemContent}>
-                        <span className={styles.itemTopLine}>
-                          <strong>{label.component}</strong>
-                          <span>{label.dateTime || 'Дата не указана'}</span>
-                        </span>
-                        {label.details && (
-                          <span className={styles.itemDetails}>{label.details}</span>
-                        )}
-                        {record.values.doctorName?.trim() && (
-                          <span className={styles.itemDetails}>
-                            Врач: {record.values.doctorName.trim()}
-                          </span>
-                        )}
-                      </span>
+                      <TransfusionRecordSummary values={record.values} />
                     </label>
                   );
                 })

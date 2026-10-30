@@ -14,6 +14,7 @@ import type {
 import type { SavedDocumentListLocation } from '../saved-document/saved-document-list';
 import type { SavedDocumentMode } from '../saved-document/use-document-state';
 import { RecipientRecordList } from './recipient-record-list';
+import { TransfusionRecordSummary } from '../transfusion-record-summary/transfusion-record-summary';
 import { formatRecipientAge } from './recipient-demographics';
 import styles from './recipient-database.module.css';
 
@@ -205,6 +206,7 @@ export const RecipientHistoryPanel = ({
                     ? records.map((record) => ({
                         id: record.id,
                         title: savedDocumentTitle('protocol', record.values),
+                        summary: <TransfusionRecordSummary values={record.values} />,
                         onOpen: (mode: SavedDocumentMode) => onOpenRecord(record, recipient, mode),
                         onDelete: () => onDeleteRecord(record),
                       }))

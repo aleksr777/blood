@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "icons": "node scripts/generate-icons.mjs",
-    "build": "npm run typecheck && vite build",
+    "predev": "npm run check:icons",
+    "icons": "node scripts/generate-icons.mjs && npm run check:icons",
+    "check:icons": "node scripts/check-icons.mjs",
+    "build": "npm run typecheck && vite build && node scripts/check-icons.mjs dist",
     "typecheck": "tsc --noEmit && tsc --project tsconfig.node.json --noEmit",
     "test": "vitest run",
     "check": "npm run lint && npm test && npm run build",

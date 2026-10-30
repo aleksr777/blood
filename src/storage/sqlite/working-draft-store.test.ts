@@ -2,6 +2,7 @@ import sqlite3InitModule, { type Database, type Sqlite3Static } from '@sqlite.or
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initializeSchema } from './database-schema';
 import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft-store';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft-store';
 import { createRecipient } from './recipient-create-store';
 import { getRecipientById } from './recipient-store';
@@ -65,6 +66,7 @@ describe('working draft reset', () => {
   it('does not alter recipients, saved forms, or shared dropdown options', async () => {
     const recipient = await createRecipient('Архивный Реципиент');
     const values = {
+      ...completeProtocolDates,
       recipientId: String(recipient.id),
       recipientName: recipient.fullName,
       componentUnitNumber: '76102200045636',

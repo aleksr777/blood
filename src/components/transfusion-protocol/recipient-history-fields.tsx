@@ -1,3 +1,4 @@
+import { FormTextarea } from '../form-input/form-input';
 import { useEffect, useState } from 'react';
 import { PreviousTransfusionInput } from './previous-transfusion-input';
 import { PreviousTransfusionNotice } from './previous-transfusion-notice';
@@ -170,7 +171,7 @@ export const RecipientHistoryFields = ({
                       }
                     />
                   ) : (
-                    <textarea
+                    <FormTextarea
                       name={textName}
                       aria-label={label}
                       rows={4}

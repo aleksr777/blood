@@ -1,11 +1,11 @@
 import {
   ABO_OPTIONS,
   ANTIGEN_OPTIONS,
-  BloodGroupSelectField,
   getBloodGroupTone,
   normalizeBloodGroupRh,
   RH_OPTIONS,
-} from './blood-group-select-field';
+} from './blood-group-options';
+import { BloodGroupSelectField } from './blood-group-select-field';
 import { DONOR_ANTIGENS } from './donor-model';
 import { inferBloodComponentGroup } from '../../domain/blood-components';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';

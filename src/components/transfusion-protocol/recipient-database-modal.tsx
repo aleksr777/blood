@@ -349,7 +349,7 @@ const RecipientDatabaseContent = ({
     });
 
   return (
-    <Modal title="База реципиентов" onClose={onClose} className={styles.modal}>
+    <Modal title="Реципиенты" onClose={onClose} className={styles.modal}>
       <div className={styles.body}>
         <RecipientListPanel
           query={query}
@@ -357,11 +357,12 @@ const RecipientDatabaseContent = ({
           recipients={recipients}
           selected={selected}
           currentRecipientId={currentRecipientId}
+          onDisconnectRecipient={disconnectRecipient}
           onUseRecipient={
             onUseRecipient
               ? async (recipient) => {
                   const accepted = await onUseRecipient(recipient);
-                  if (accepted !== false) onClose();
+                  if (accepted !== false) setCurrentRecipientId(recipient.id);
                   return accepted;
                 }
               : undefined
@@ -373,7 +374,6 @@ const RecipientDatabaseContent = ({
         <RecipientHistoryPanel
           initialList={initialList}
           recipient={selected}
-          currentRecipientId={currentRecipientId}
           records={records}
           registrationRecords={registrationRecords}
           individualSelectionDirectionRecords={individualSelectionDirectionRecords}
@@ -411,7 +411,6 @@ const RecipientDatabaseContent = ({
               onClose();
             }
           }}
-          onDisconnectRecipient={disconnectRecipient}
           onEdit={setEditing}
           onDelete={setDeleting}
           onDeleteRecord={setDeletingRecord}

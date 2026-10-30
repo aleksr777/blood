@@ -7,10 +7,12 @@ import { listProtocolRecords, saveProtocolRecord } from './protocol-record-store
 import { listRegistrationRecords, saveRegistrationRecord } from './registration-record-store';
 import { listBloodRequestRecords, saveBloodRequestRecord } from './blood-request-record-store';
 import type { BloodRequestRecordKind, ProtocolValuesRecord } from './database-types';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 
 const state = vi.hoisted(() => ({ db: null as Database | null }));
 vi.mock('./database', () => ({ getDatabase: async () => state.db }));
 const values = {
+  ...completeProtocolDates,
   recipientName: 'Тестовый Реципиент',
   componentName: 'Эритроцитная взвесь',
   componentUnitNumber: '76102200045636',

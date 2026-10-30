@@ -8,10 +8,31 @@ export const MONITORING_PERIODS = [
 
 export const getMonitoringFields = (prefix: string): ProtocolFieldConfig[] => [
   { name: `${prefix}Bp`, label: 'АД, мм рт. ст.' },
-  { name: `${prefix}Pulse`, label: 'Частота пульса, уд/мин', type: 'number' },
-  { name: `${prefix}Temperature`, label: 'Температура, °C', type: 'number', step: '0.1' },
+  {
+    name: `${prefix}Pulse`,
+    label: 'Частота пульса, уд/мин',
+    type: 'number',
+    min: '1',
+    max: '999',
+    step: '1',
+  },
+  {
+    name: `${prefix}Temperature`,
+    label: 'Температура, °C',
+    type: 'number',
+    min: '20',
+    max: '50',
+    step: '0.1',
+  },
   // Keep the existing key so previously saved combined text remains intact.
-  { name: `${prefix}Urine`, label: 'Диурез, мл', type: 'number', step: 'any' },
+  {
+    name: `${prefix}Urine`,
+    label: 'Диурез, мл',
+    type: 'number',
+    min: '0',
+    max: '9999',
+    step: 'any',
+  },
   { name: `${prefix}UrineColor`, label: 'Цвет мочи' },
 ];
 

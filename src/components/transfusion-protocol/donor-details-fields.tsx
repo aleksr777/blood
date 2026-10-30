@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { formatComponentUnitNumber } from './component-unit-number';
 import { DonorFields } from './donor-fields';
@@ -24,8 +25,9 @@ export const DonorDetailsFields = ({
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
 }: Props) => {
-  const expirationWarning = savedDocument ? '' : getHemaconExpirationWarning(values.expirationDate);
   const dateOrderWarning = getHemaconDateOrderWarning(values);
+  const expirationWarning =
+    savedDocument || dateOrderWarning ? '' : getHemaconExpirationWarning(values.expirationDate);
   const renderField = (field: ProtocolFieldConfig) => (
     <ProtocolFieldControl
       key={field.name}
@@ -35,6 +37,10 @@ export const DonorDetailsFields = ({
       onChange={(name, value) => onChange({ [name]: value })}
     />
   );
+  const renderNamedField = (name: string) => {
+    const field = fields.find((field) => field.name === name);
+    return field ? renderField(field) : null;
+  };
 
   return (
     <>
@@ -45,7 +51,7 @@ export const DonorDetailsFields = ({
           <div key={field.name} className={styles.componentUnitNumberField}>
             <label>
               <span>{field.label}</span>
-              <input
+              <FormInput
                 name={field.name}
                 type="text"
                 inputMode="numeric"
@@ -64,28 +70,19 @@ export const DonorDetailsFields = ({
             />
           </div>
         ))}
-      {['amountMl', 'collectionDate', 'expirationDate', 'collectionOrganization'].flatMap(
-        (name) => {
-          const field = fields.find((field) => field.name === name);
-          if (!field) return [];
-          return name === 'expirationDate' ? (
-            <div key={name} className={styles.componentUnitNumberField}>
-              {renderField(field)}
-              <WarningNotice
-                className={styles.fieldWarning}
-                message={dateOrderWarning}
-                dismissible={false}
-              />
-              <WarningNotice
-                className={styles.fieldWarning}
-                message={expirationWarning ? `${expirationWarning}.` : ''}
-              />
-            </div>
-          ) : (
-            renderField(field)
-          );
-        },
-      )}
+      {renderNamedField('amountMl')}
+      <div className={styles.wide} role="group" aria-label="Даты гемакона">
+        <div className={styles.grid}>
+          {renderNamedField('collectionDate')}
+          {renderNamedField('expirationDate')}
+        </div>
+        <WarningNotice
+          className={styles.fieldWarning}
+          message={dateOrderWarning || (expirationWarning ? `${expirationWarning}.` : '')}
+          dismissible={!dateOrderWarning}
+        />
+      </div>
+      {renderNamedField('collectionOrganization')}
     </>
   );
 };

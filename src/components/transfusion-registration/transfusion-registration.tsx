@@ -1,5 +1,6 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
+import { hasDocumentContent } from '../../domain/document-content';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -71,6 +72,7 @@ export const TransfusionRegistration = () => {
       (savedDate ? formatRecipientAge(values.recipientBirthDate, savedDate) : ''))
     : formatRecipientAge(values.recipientBirthDate);
   const registrationRows = parseRegistrationTransfusionRows(values);
+  const hasContent = hasDocumentContent('registration', values);
 
   usePendingSavedDocument('registration', (record, mode) => {
     void openRegistrationRecord(record, mode);
@@ -204,15 +206,16 @@ export const TransfusionRegistration = () => {
     setStatus('');
   };
 
-  const save = async (afterPrint = false) => {
+  const save = async () => {
+    if (!hasContent) return false;
     if (documentState.active) {
-      if (afterPrint || !documentState.editing || !documentState.record) return true;
+      if (!documentState.editing || !documentState.record || !documentState.hasChanges) return true;
       try {
         const record = await updateRegistrationRecord(documentState.record.id, {
           ...values,
           recipientId: String(documentState.record.recipientId),
         });
-        documentState.open(record, record.values);
+        documentState.open(record, record.values, 'edit');
         documentState.setWorkingValues(clearRegistrationTable);
         setPatientDetailsOpen(false);
         setTableEditorOpen(false);
@@ -225,18 +228,14 @@ export const TransfusionRegistration = () => {
     }
     if (!currentRecipientAvailable || !values.recipientName?.trim()) {
       setStatus('Для сохранения выберите реципиента.');
-      if (!afterPrint) {
-        setRegistryRecipientId(null);
-        setRegistryOpen(true);
-      }
+      setRegistryRecipientId(null);
+      setRegistryOpen(true);
       return false;
     }
 
     if (recordId !== null) {
       setStatus(
-        afterPrint
-          ? 'Сохранённый лист регистрации не изменён.'
-          : 'Сохранённый лист регистрации не изменён. Исходная запись оставлена без изменений.',
+        'Сохранённый лист регистрации не изменён. Исходная запись оставлена без изменений.',
       );
       return true;
     }
@@ -253,12 +252,10 @@ export const TransfusionRegistration = () => {
       };
       setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
-      documentState.open(record, savedValues);
+      documentState.open(record, savedValues, 'edit');
       documentState.setWorkingValues(clearRegistrationTable(savedValues));
       setRecordId(null);
-      setStatus(
-        afterPrint ? 'Лист регистрации сохранён после печати.' : 'Лист регистрации сохранён.',
-      );
+      setStatus('Лист регистрации сохранён.');
       return true;
     } catch (error) {
       console.error('Не удалось сохранить лист регистрации:', error);
@@ -268,7 +265,7 @@ export const TransfusionRegistration = () => {
   };
 
   const clearBlank = () => {
-    if (documentState.active) return;
+    if (documentState.active || !hasContent) return;
     const currentRecipient = readCurrentRecipient();
     setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
     setRecordId(null);
@@ -360,7 +357,6 @@ export const TransfusionRegistration = () => {
     const restoreOrientation = () => {
       delete root.dataset.registrationPrintRotated;
       window.removeEventListener('afterprint', restoreOrientation);
-      void save(true);
     };
 
     root.dataset.registrationPrintRotated = 'true';
@@ -372,7 +368,12 @@ export const TransfusionRegistration = () => {
   };
 
   return (
-    <SavedDocumentPage className="registration-app-shell" mode={documentState.mode}>
+    <SavedDocumentPage
+      className="registration-app-shell"
+      document={documentState}
+      hasContent={hasContent}
+      onSave={save}
+    >
       <header className="app-header registration-header">
         <div className="toolbar-wrap">
           <SiteNavigation
@@ -383,6 +384,7 @@ export const TransfusionRegistration = () => {
             recipientRh={storedCurrentRecipient?.profile.recipientRh ?? ''}
             currentRecipientAvailable={Boolean(storedCurrentRecipient)}
             onOpenCurrentRecipient={openCurrentRecipient}
+            onOpenRecipients={openRecipients}
           />
           <SavedDocumentBar
             onReturnToList={savedList.returnToList}
@@ -395,24 +397,18 @@ export const TransfusionRegistration = () => {
                 type="button"
                 className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
                 onClick={clearBlank}
+                disabled={!hasContent}
               >
                 Очистить бланк
               </button>
             )}
             <button
               type="button"
-              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-              onClick={openRecipients}
-            >
-              Реципиенты
-            </button>
-            <button
-              type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={documentState.readOnly}
+              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
             >
-              {documentState.editing ? 'Сохранить изменения' : 'Сохранить'}
+              Сохранить
             </button>
             <button
               type="button"

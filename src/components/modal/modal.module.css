@@ -140,7 +140,6 @@
   top: 0.75rem;
   right: 0.75rem;
   font-size: 1.75rem;
-  --icon-button-size: var(--control-height);
   border: 1px solid var(--ui-border);
   border-radius: 50%;
   background: var(--ui-surface);

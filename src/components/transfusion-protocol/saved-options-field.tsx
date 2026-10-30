@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
 import {
@@ -111,7 +112,7 @@ export const SavedOptionsField = ({
   return (
     <div ref={rootRef} className={styles.departmentField}>
       <div className={styles.departmentControl}>
-        <input
+        <FormInput
           name={name}
           aria-label={label}
           type="text"

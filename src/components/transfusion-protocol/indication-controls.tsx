@@ -1,3 +1,4 @@
+import { FormTextarea } from '../form-input/form-input';
 import type { ReactNode } from 'react';
 import type { ProtocolValues } from './protocol-types';
 import styles from './indications-fields.module.css';
@@ -45,7 +46,7 @@ export const OtherChoice = ({
       {label}
     </Choice>
     {checked && (
-      <textarea
+      <FormTextarea
         className={styles.otherText}
         name={`${name}Text`}
         rows={4}

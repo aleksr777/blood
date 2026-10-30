@@ -181,7 +181,6 @@ export const TransfusionProtocol = () => {
       delete root.dataset.printPage;
       sheetElements.forEach((sheet) => delete sheet.dataset.printHidden);
       window.removeEventListener('afterprint', afterPrint);
-      void workspace.saveToDatabase(true);
     };
 
     root.dataset.printPage = String(pageIndex + 1);
@@ -193,9 +192,12 @@ export const TransfusionProtocol = () => {
     <SavedDocumentPage
       className="app-shell protocol-app-shell"
       data-print-blocked={Boolean(workspace.hemaconWarning)}
-      mode={workspace.document.mode}
+      document={workspace.document}
+      hasContent={workspace.hasContent}
+      onSave={workspace.saveToDatabase}
     >
       <ProtocolToolbar
+        hasContent={workspace.hasContent}
         document={workspace.document}
         documentTitle={savedDocumentTitle('protocol', workspace.values)}
         onReturnToList={savedList.returnToList}

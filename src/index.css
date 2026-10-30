@@ -87,8 +87,13 @@ body {
 .site-current-recipient-row {
   display: flex;
   align-items: center;
+  gap: 7px;
   min-width: 0;
   margin-top: 8px;
+}
+
+.site-current-recipient-row > .ui-button {
+  flex-shrink: 0;
 }
 
 .current-recipient-summary {
@@ -96,6 +101,7 @@ body {
   align-items: center;
   gap: 7px;
   min-width: 0;
+  min-height: var(--button-height);
   margin-left: 0;
   padding: 6px 10px;
   border: 1px solid var(--ui-border);
@@ -860,7 +866,7 @@ a.site-navigation__link:focus-visible {
   }
 
   .current-recipient-summary {
-    width: 100%;
+    flex: 1;
   }
 
   .print-actions {
@@ -876,6 +882,22 @@ a.site-navigation__link:focus-visible {
   .sheet {
     flex: 0 0 210mm;
     transform-origin: top left;
+  }
+}
+
+@media (max-width: 600px) {
+  .current-recipient-summary {
+    flex-wrap: wrap;
+    gap: 3px 7px;
+    text-align: left;
+  }
+
+  .current-recipient-summary__label {
+    flex-basis: 100%;
+  }
+
+  .current-recipient-summary__name {
+    flex: 1;
   }
 }
 

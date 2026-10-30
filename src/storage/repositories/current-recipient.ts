@@ -2,6 +2,7 @@ import { resetCurrentIndications } from './current-indications';
 import { savePreviousRequestDrafts } from './request-drafts';
 import { runRecipientOperation } from './recipient-operation-queue';
 import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
+import { hasDocumentContent } from '../../domain/document-content';
 import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft';
 import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft';
 import {
@@ -25,41 +26,12 @@ const CURRENT_RECIPIENT_STORAGE_KEY = 'blood:current-recipient';
 
 const recipientProfileFieldSet = new Set<string>(RECIPIENT_PROFILE_FIELDS);
 
-const protocolRecipientOnlyFields = new Set([
-  'doctorName',
-  'nurseName',
-  'recipientId',
-  'recipientName',
-  ...RECIPIENT_PROFILE_FIELDS,
-  'reagentAntiASeries',
-  'reagentAntiAExpiration',
-  'reagentAntiAManufacturer',
-  'reagentAntiBSeries',
-  'reagentAntiBExpiration',
-  'reagentAntiBManufacturer',
-  'reagentAntiABSeries',
-  'reagentAntiABExpiration',
-  'reagentAntiABManufacturer',
-  'reagentAntiDSeries',
-  'reagentAntiDExpiration',
-  'reagentAntiDManufacturer',
-]);
-
-const registrationRecipientOnlyFields = new Set([
-  'recipientId',
-  'recipientName',
-  ...RECIPIENT_PROFILE_FIELDS,
-]);
-
 const reusableProtocolValues = (values: ProtocolValuesRecord) =>
   Object.fromEntries(
     Object.entries(values).filter(
       ([name]) => name.startsWith('reagent') || name === 'doctorName' || name === 'nurseName',
     ),
   );
-
-const hasDocumentData = (values: ProtocolValuesRecord, ignoredFields: Set<string>) =>
-  Object.entries(values).some(([key, value]) => !ignoredFields.has(key) && value.trim() !== '');
 
 const getRecipientId = (values: ProtocolValuesRecord) => {
   const id = Number(values.recipientId);
@@ -246,7 +218,7 @@ const savePreviousProtocol = async (draft: ProtocolDraftState, nextRecipientId: 
 
   if (draft.protocolRecordId !== null) return false;
 
-  if (!hasDocumentData(draft.values, protocolRecipientOnlyFields)) {
+  if (!hasDocumentContent('protocol', { ...draft.values, doctorName: '', nurseName: '' })) {
     return false;
   }
 
@@ -264,7 +236,7 @@ const savePreviousRegistration = async (draft: RegistrationDraftState, nextRecip
 
   if (draft.registrationRecordId !== null) return false;
 
-  if (!hasDocumentData(draft.values, registrationRecipientOnlyFields)) {
+  if (!hasDocumentContent('registration', draft.values)) {
     return false;
   }
 

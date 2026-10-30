@@ -1,11 +1,12 @@
+import { FormTextarea } from '../form-input/form-input';
 import {
   ABO_OPTIONS,
   ANTIGEN_OPTIONS,
-  BloodGroupSelectField,
   getBloodGroupTone,
   normalizeBloodGroupRh,
   RH_OPTIONS,
-} from './blood-group-select-field';
+} from './blood-group-options';
+import { BloodGroupSelectField } from './blood-group-select-field';
 import { ANTIBODY_STATUS, RECIPIENT_ANTIGENS } from './recipient-examination-model';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-examination-fields.module.css';
@@ -91,7 +92,7 @@ export const RecipientExaminationFields = ({
           {values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found && (
             <label className={styles.description}>
               <span>Описание найденных антител</span>
-              <textarea
+              <FormTextarea
                 rows={3}
                 value={values.alloimmuneAntibodyDescription ?? ''}
                 onChange={(event) =>

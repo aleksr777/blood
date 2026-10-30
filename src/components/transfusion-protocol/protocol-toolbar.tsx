@@ -7,6 +7,7 @@ import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import type { SavedDocumentControls } from '../saved-document/use-document-state';
 
 type Props = {
+  hasContent: boolean;
   document?: SavedDocumentControls;
   documentTitle?: string;
   onReturnToList?: () => void;
@@ -33,6 +34,7 @@ type Props = {
 };
 
 export const ProtocolToolbar = ({
+  hasContent,
   document,
   documentTitle = 'Протокол трансфузии',
   onReturnToList,
@@ -59,6 +61,8 @@ export const ProtocolToolbar = ({
 }: Props) => {
   const [showHemaconWarning, setShowHemaconWarning] = useState(false);
   const visibleWarning = showHemaconWarning ? hemaconWarning : '';
+  const saveDisabled =
+    !hasContent || document?.mode === 'view' || (document?.mode === 'edit' && !document.hasChanges);
 
   useEffect(() => {
     if (!visibleWarning) setShowHemaconWarning(false);
@@ -84,6 +88,7 @@ export const ProtocolToolbar = ({
           recipientRh={currentRecipientRh}
           currentRecipientAvailable={currentRecipientAvailable}
           onOpenCurrentRecipient={onOpenCurrentRecipient}
+          onOpenRecipients={onOpenRegistry}
         />
         {document && (
           <SavedDocumentBar
@@ -94,31 +99,23 @@ export const ProtocolToolbar = ({
         )}
         <div className="print-actions" aria-label="Панель действий">
           {!document?.record && (
-            <>
-              <button
-                type="button"
-                className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
-                onClick={onClear}
-              >
-                Очистить бланк
-              </button>
-            </>
+            <button
+              type="button"
+              className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
+              onClick={onClear}
+              disabled={!hasContent}
+            >
+              Очистить бланк
+            </button>
           )}
-          <button
-            type="button"
-            className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-            onClick={onOpenRegistry}
-          >
-            Реципиенты
-          </button>
           <button
             type="button"
             className={`${ui.successButton} ${ui.toolbarButton} save-button`}
             onClick={() => runValidatedAction(onSave)}
-            disabled={document?.mode === 'view'}
-            aria-disabled={Boolean(hemaconWarning)}
+            disabled={saveDisabled}
+            aria-disabled={saveDisabled || Boolean(hemaconWarning)}
           >
-            {document?.mode === 'edit' ? 'Сохранить изменения' : 'Сохранить'}
+            Сохранить
           </button>
           {Array.from({ length: pageCount }, (_, pageIndex) => (
             <button

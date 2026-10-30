@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { useEffect, useRef } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import { RecipientListItem } from './recipient-list-item';
@@ -10,6 +11,7 @@ type Props = {
   selected: RecipientRecord | null;
   currentRecipientId?: number | null;
   onUseRecipient?: (recipient: RecipientRecord) => boolean | Promise<boolean>;
+  onDisconnectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
   onQueryChange: (value: string) => void;
   onSelect: (recipient: RecipientRecord) => void;
   onCreate: () => void;
@@ -22,6 +24,7 @@ export const RecipientListPanel = ({
   selected,
   currentRecipientId = null,
   onUseRecipient,
+  onDisconnectRecipient,
   onQueryChange,
   onSelect,
   onCreate,
@@ -72,7 +75,7 @@ export const RecipientListPanel = ({
           Новый реципиент
         </button>
       </div>
-      <input
+      <FormInput
         id="recipient-search"
         className={styles.search}
         value={query}
@@ -92,6 +95,7 @@ export const RecipientListPanel = ({
             current={currentRecipientId === recipient.id}
             onSelect={onSelect}
             onUseRecipient={onUseRecipient}
+            onDisconnectRecipient={onDisconnectRecipient}
           />
         ))}
       </div>

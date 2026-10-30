@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { useEffect, useId, useState } from 'react';
 import { obstetricCountLabel, OBSTETRIC_UNKNOWN } from './obstetric-history';
 import { useOverlayDropdown } from './use-overlay-dropdown';
@@ -39,7 +40,7 @@ export const ObstetricCountField = ({ name, label, value, maximum, onChange }: P
         }}
       >
         <div className={editorStyles.departmentControl}>
-          <input
+          <FormInput
             name={name}
             aria-label={label}
             type={numeric ? 'number' : 'text'}

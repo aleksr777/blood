@@ -1,5 +1,4 @@
 import { formatDate } from './protocol-types';
-import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useEffect, useState } from 'react';
 import type {
   BloodRequestRecord,
@@ -14,6 +13,9 @@ import type {
 import type { SavedDocumentListLocation } from '../saved-document/saved-document-list';
 import type { SavedDocumentMode } from '../saved-document/use-document-state';
 import { RecipientRecordList } from './recipient-record-list';
+import { TransfusionRecordSummary } from '../transfusion-record-summary/transfusion-record-summary';
+import { RegistrationRecordSummary } from '../transfusion-registration/registration-record-summary';
+import { BloodRequestRecordSummary } from '../blood-requests/blood-request-record-summary';
 import { formatRecipientAge } from './recipient-demographics';
 import styles from './recipient-database.module.css';
 
@@ -28,8 +30,6 @@ type Props = {
   onOpenRegistrationRecord: SavedRecordOpener<RegistrationRecord>;
   onOpenIndividualSelectionDirectionRecord: SavedRecordOpener<BloodRequestRecord>;
   onOpenComponentRequestRecord: SavedRecordOpener<BloodRequestRecord>;
-  onDisconnectRecipient?: (recipient: RecipientRecord) => void | Promise<void>;
-  currentRecipientId?: number | null;
   onEdit: (recipient: RecipientRecord) => void;
   onDelete: (recipient: RecipientRecord) => void;
   onDeleteRecord: (record: ProtocolRecord) => void;
@@ -58,8 +58,6 @@ export const RecipientHistoryPanel = ({
   onOpenRegistrationRecord,
   onOpenIndividualSelectionDirectionRecord,
   onOpenComponentRequestRecord,
-  onDisconnectRecipient,
-  currentRecipientId = null,
   onEdit,
   onDelete,
   onDeleteRecord,
@@ -116,20 +114,9 @@ export const RecipientHistoryPanel = ({
           <div className={styles.header}>
             <div>
               <h3 className={styles.title}>{recipient.fullName}</h3>
-              <div className={styles.meta}>Карточка № {recipient.id}</div>
               {demographics && <div className={styles.meta}>{demographics}</div>}
             </div>
             <div className={styles.headerActions}>
-              {onDisconnectRecipient && recipient.id === currentRecipientId && (
-                <button
-                  type="button"
-                  className={styles.disconnectAction}
-                  title="Снять реципиента как текущего"
-                  onClick={() => onDisconnectRecipient(recipient)}
-                >
-                  Отключить
-                </button>
-              )}
               <button
                 type="button"
                 className={styles.secondaryAction}
@@ -218,21 +205,23 @@ export const RecipientHistoryPanel = ({
                   category === 'protocols'
                     ? records.map((record) => ({
                         id: record.id,
-                        title: savedDocumentTitle('protocol', record.values),
+                        summary: <TransfusionRecordSummary values={record.values} />,
                         onOpen: (mode: SavedDocumentMode) => onOpenRecord(record, recipient, mode),
                         onDelete: () => onDeleteRecord(record),
                       }))
                     : category === 'registrations'
                       ? registrationRecords.map((record) => ({
                           id: record.id,
-                          title: savedDocumentTitle('registration', record.values),
+                          summary: (
+                            <RegistrationRecordSummary record={record} protocols={records} />
+                          ),
                           onOpen: (mode: SavedDocumentMode) =>
                             onOpenRegistrationRecord(record, recipient, mode),
                           onDelete: () => onDeleteRegistrationRecord(record),
                         }))
                       : requestRecords.map((record) => ({
                           id: record.id,
-                          title: savedDocumentTitle(record.kind, record.values),
+                          summary: <BloodRequestRecordSummary record={record} />,
                           onOpen: (mode: SavedDocumentMode) => requestOpen(record, recipient, mode),
                           onDelete: () => onDeleteBloodRequestRecord(record),
                         }))

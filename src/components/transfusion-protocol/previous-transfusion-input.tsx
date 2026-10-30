@@ -1,3 +1,4 @@
+import { FormTextarea } from '../form-input/form-input';
 import styles from './previous-transfusion-input.module.css';
 
 type Props = {
@@ -39,7 +40,7 @@ export const PreviousTransfusionInput = ({
         </button>
       </div>
     )}
-    <textarea
+    <FormTextarea
       name="previousTransfusions"
       aria-label={label}
       placeholder={generated ? 'Дополнительные сведения' : undefined}

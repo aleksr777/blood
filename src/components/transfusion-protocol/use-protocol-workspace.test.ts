@@ -5,6 +5,7 @@ import { database } from '../../storage/sqlite/database-client';
 import { adoptCurrentRecipientFromValues } from '../../storage/repositories/current-recipient';
 import { useProtocolWorkspace } from './use-protocol-workspace';
 import { cleanProtocolDraft } from '../saved-document/working-form-cleanup';
+import { completeProtocolDates } from '../../test-fixtures/protocol';
 
 vi.mock('../../storage/sqlite/database-client', () => ({
   database: {
@@ -17,6 +18,7 @@ vi.mock('../../storage/sqlite/database-client', () => ({
   },
 }));
 const hemacon = {
+  ...completeProtocolDates,
   componentName: 'Эритроцитная взвесь',
   componentUnitNumber: '76102200045636',
   donorAbo: 'A(II)',
@@ -36,7 +38,7 @@ beforeEach(() => {
   }));
 });
 
-it('opening and printing an archive never merge current data or save an archived copy', async () => {
+it('opening an archive never merges current data or saves an archived copy', async () => {
   const original = {
     id: 42,
     recipientId: 2,
@@ -56,7 +58,7 @@ it('opening and printing an archive never merge current data or save an archived
   expect(result.current.values).toEqual(original.values);
   act(() => result.current.saveValues({ diagnosis: 'Автозамена' }));
   expect(result.current.values).toEqual(original.values);
-  await act(async () => result.current.saveToDatabase(true));
+  await act(async () => result.current.saveToDatabase());
   expect(database.saveProtocolRecord).not.toHaveBeenCalled();
   expect(database.updateProtocolRecord).not.toHaveBeenCalled();
   expect(result.current.document.workingValues).toEqual(working);
@@ -82,17 +84,18 @@ it('archive editing updates its ID and keeps working data until returning to the
   const working = structuredClone(result.current.values);
   await act(async () => result.current.openRecord(original));
   act(() => result.current.document.edit());
-  act(() => result.current.saveValues({ doctorName: 'Исправленный врач' }));
-  await act(async () => result.current.saveToDatabase(true));
+  await act(async () => result.current.saveToDatabase());
   expect(database.updateProtocolRecord).not.toHaveBeenCalled();
   expect(result.current.document.workingValues).toEqual(working);
+  act(() => result.current.saveValues({ doctorName: 'Исправленный врач' }));
   await act(async () => result.current.saveToDatabase());
   expect(database.updateProtocolRecord).toHaveBeenCalledWith(42, {
     ...original.values,
     doctorName: 'Исправленный врач',
   });
   expect(database.saveProtocolRecord).not.toHaveBeenCalled();
-  expect(result.current.document.mode).toBe('view');
+  expect(result.current.document.mode).toBe('edit');
+  expect(result.current.document.hasChanges).toBe(false);
   expect(result.current.document.workingValues).toEqual(cleanProtocolDraft(working));
   act(() => result.current.document.close());
   expect(result.current.values).toEqual(cleanProtocolDraft(working));
@@ -110,7 +113,8 @@ it('retains non-hemacon protocol data after saving and returning to the working 
   });
   const working = structuredClone(result.current.values);
   await act(async () => result.current.saveToDatabase());
-  expect(result.current.document.mode).toBe('view');
+  expect(result.current.document.mode).toBe('edit');
+  expect(result.current.document.hasChanges).toBe(false);
   expect(result.current.values).toEqual(working);
   act(() => result.current.document.close());
   expect(result.current.values).toEqual(cleanProtocolDraft(working));
@@ -128,6 +132,56 @@ const openDraft = async (values: Record<string, string>) => {
   await waitFor(() => expect(hook.result.current.values.recipientId).toBe('1'));
   return hook;
 };
+
+it.each(Object.keys(completeProtocolDates))(
+  'keeps a draft intact and opens the relevant section when %s is missing',
+  async (name) => {
+    const { result } = await openDraft({ ...hemacon, [name]: '' });
+    const original = structuredClone(result.current.values);
+    await act(async () => expect(await result.current.saveToDatabase()).toBe(false));
+    expect(result.current.activeBlock).toBe(
+      name === 'collectionDate' || name === 'expirationDate' ? 'donor' : 'general',
+    );
+    expect(result.current.status).toBe(result.current.hemaconWarning);
+    expect(result.current.values).toEqual(original);
+    expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+    expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  },
+);
+
+it('cannot save an edited snapshot after removing a required time', async () => {
+  const { result } = await openDraft(hemacon);
+  const record = {
+    id: 42,
+    recipientId: 1,
+    values: { ...recipient, ...hemacon },
+    createdAt: 1,
+    updatedAt: 1,
+  };
+  await act(async () => result.current.openRecord(record, 'edit'));
+  act(() => result.current.saveValues({ endTime: '' }));
+  await act(async () => expect(await result.current.saveToDatabase()).toBe(false));
+  expect(result.current.document.mode).toBe('edit');
+  expect(result.current.document.hasChanges).toBe(true);
+  expect(result.current.values.endTime).toBe('');
+  expect(database.updateProtocolRecord).not.toHaveBeenCalled();
+  expect(record.values.endTime).toBe(hemacon.endTime);
+});
+
+it('does not save or clear a recipient-only draft with retained reagent defaults', async () => {
+  const { result } = await openDraft({ reagentAntiASeries: '123' });
+  const values = structuredClone(result.current.values);
+  expect(result.current.hasContent).toBe(false);
+  let saved;
+  await act(async () => {
+    saved = await result.current.saveToDatabase();
+  });
+  expect(saved).toBe(false);
+  act(() => result.current.clearForm());
+  expect(result.current.values).toEqual(values);
+  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+  expect(database.clearProtocolDraft).not.toHaveBeenCalled();
+});
 
 it('does not warn about saved unit number matches but still validates an incomplete number', async () => {
   vi.mocked(database.listProtocolRecords).mockResolvedValue([
@@ -209,4 +263,24 @@ it('hides expiration notices in both saved modes and restores notices for the wo
   expect(result.current.reagentWarning).toBe('');
   act(() => result.current.document.close());
   expect(result.current.reagentWarning).toContain('истёк срок годности');
+});
+
+it('suppresses hemacon expiration while its dates conflict without hiding expired reagents', async () => {
+  const { result } = await openDraft({
+    ...hemacon,
+    collectionDate: '2026-10-30',
+    expirationDate: '2000-01-01',
+    reagentAntiAExpiration: '2000-01-01',
+  });
+  expect(result.current.hemaconDateWarning).toBe(
+    'Дата заготовки должна быть раньше даты окончания срока годности.',
+  );
+  expect(result.current.reagentWarning).not.toContain('Срок годности гемакона');
+  expect(result.current.reagentWarning).toContain('анти-A');
+  await act(async () => result.current.saveValues({ collectionDate: '1999-12-01' }));
+  expect(result.current.hemaconDateWarning).toBe('');
+  expect(result.current.reagentWarning).toContain('Срок годности гемакона');
+  await act(async () => result.current.saveValues({ expirationDate: '' }));
+  expect(result.current.hemaconDateWarning).toBe('');
+  expect(result.current.reagentWarning).not.toContain('Срок годности гемакона');
 });

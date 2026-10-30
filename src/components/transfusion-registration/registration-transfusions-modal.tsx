@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { listProtocolRecords, type ProtocolRecord } from '../../storage/repositories/recipients';
+import { transfusionOrderKey } from '../../domain/date-time';
 import Modal from '../modal/modal';
-import { formatDate } from '../transfusion-protocol/protocol-types';
+import { TransfusionRecordSummary } from '../transfusion-record-summary/transfusion-record-summary';
 import {
   buildRegistrationTransfusionRow,
   parseRegistrationTransfusionRows,
@@ -21,23 +22,12 @@ type Props = {
 };
 
 const formatTime = (record: ProtocolRecord) =>
-  record.values.endTime || record.values.startTime || '';
+  record.values.startTime || record.values.endTime || '';
 
-const recordLabel = (record: ProtocolRecord) => {
-  const values = record.values;
-  const dateTime = [formatDate(values.transfusionDate), formatTime(record)]
-    .filter(Boolean)
-    .join(' ');
-  const component = values.componentName?.trim() || 'Компонент не указан';
-  const details = [
-    values.amountMl?.trim() ? `${values.amountMl.trim()} мл` : '',
-    values.componentUnitNumber?.trim() ? `№ ${values.componentUnitNumber.trim()}` : '',
-  ]
-    .filter(Boolean)
-    .join(' · ');
-
-  return { dateTime, component, details };
-};
+const compareRecords = (left: ProtocolRecord, right: ProtocolRecord) =>
+  transfusionOrderKey(left.values.transfusionDate, formatTime(left)).localeCompare(
+    transfusionOrderKey(right.values.transfusionDate, formatTime(right)),
+  ) || left.id - right.id;
 
 export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, onClose }: Props) => {
   const initialRows = useMemo(() => parseRegistrationTransfusionRows(values), [values]);
@@ -62,9 +52,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
     void listProtocolRecords(recipientId)
       .then((items) => {
         if (!active) return;
-        setRecords(
-          [...items].sort((left, right) => right.updatedAt - left.updatedAt || right.id - left.id),
-        );
+        setRecords([...items].sort(compareRecords));
       })
       .catch((error: unknown) => {
         console.error('Не удалось загрузить протоколы трансфузий:', error);
@@ -95,9 +83,8 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
   };
 
   const apply = () => {
-    const selectedRecords = records
-      .filter(({ id }) => selectedIds.has(id))
-      .sort((left, right) => right.updatedAt - left.updatedAt || right.id - left.id);
+    if (selectedIds.size === 0) return;
+    const selectedRecords = records.filter(({ id }) => selectedIds.has(id));
 
     const selectedRecordIds = new Set(selectedRecords.map(({ id }) => id));
     const preservedRows = initialRows.filter(
@@ -138,7 +125,6 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
                 records.map((record) => {
                   const checked = selectedIds.has(record.id);
                   const disabled = !checked && selectedIds.size >= MAX_ROWS;
-                  const label = recordLabel(record);
 
                   return (
                     <label
@@ -157,20 +143,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
                         disabled={disabled}
                         onChange={() => toggleRecord(record.id)}
                       />
-                      <span className={styles.itemContent}>
-                        <span className={styles.itemTopLine}>
-                          <strong>{label.component}</strong>
-                          <span>{label.dateTime || 'Дата не указана'}</span>
-                        </span>
-                        {label.details && (
-                          <span className={styles.itemDetails}>{label.details}</span>
-                        )}
-                        {record.values.doctorName?.trim() && (
-                          <span className={styles.itemDetails}>
-                            Врач: {record.values.doctorName.trim()}
-                          </span>
-                        )}
-                      </span>
+                      <TransfusionRecordSummary values={record.values} />
                     </label>
                   );
                 })
@@ -181,7 +154,12 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
               <button type="button" className={styles.cancelButton} onClick={onClose}>
                 Отмена
               </button>
-              <button type="button" className={styles.applyButton} onClick={apply}>
+              <button
+                type="button"
+                className={styles.applyButton}
+                onClick={apply}
+                disabled={selectedIds.size === 0}
+              >
                 Внести в таблицу
               </button>
             </div>

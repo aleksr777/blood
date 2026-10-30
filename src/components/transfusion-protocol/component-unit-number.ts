@@ -2,7 +2,7 @@ import type { ProtocolValues } from './protocol-types';
 
 const COMPONENT_UNIT_DIGITS = 14;
 
-export const getComponentUnitDigits = (value?: string) =>
+const getComponentUnitDigits = (value?: string) =>
   (value ?? '').replace(/\D/g, '').slice(0, COMPONENT_UNIT_DIGITS);
 
 export const formatComponentUnitNumber = (value?: string) => {

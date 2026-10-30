@@ -82,7 +82,10 @@
 }
 
 .historyToggle {
-  width: var(--control-height);
+  align-self: center;
+  width: var(--button-height);
+  height: var(--button-height);
+  min-height: var(--button-height);
   border: 1px solid var(--control-border);
   border-left: 0;
   border-radius: 0 var(--control-radius) var(--control-radius) 0;
@@ -138,8 +141,8 @@
 }
 
 .historyDropdownCompact .customSelectOption {
-  min-height: 2.25rem;
   padding: 0.2rem 0.4rem;
+  white-space: nowrap;
 }
 
 .historyDropdown[data-state='open'] {
@@ -155,10 +158,10 @@
 
 .historyRow {
   display: grid;
-  grid-template-columns: 1.85rem 1.85rem minmax(0, 1fr);
+  grid-template-columns: repeat(2, var(--button-height)) minmax(0, 1fr);
   align-items: center;
   gap: 0.15rem;
-  min-height: 2rem;
+  min-height: var(--button-height);
 }
 
 .historyRow > :only-child {
@@ -168,7 +171,7 @@
 .historyFixedRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  min-height: 2rem;
+  min-height: var(--button-height);
 }
 
 .historyValue {
@@ -185,7 +188,6 @@
 }
 
 .historyInput {
-  min-height: 2rem;
   border-radius: var(--ui-radius-small);
   padding: 0.3rem 0.5rem;
   font-size: 0.84rem;
@@ -230,10 +232,10 @@
   --select-focus: var(--ui-accent);
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--control-height);
+  grid-template-columns: minmax(0, 1fr) var(--button-height);
   align-items: center;
   width: 100%;
-  min-height: var(--control-height);
+  min-height: var(--button-height);
   border: 1px solid var(--select-border);
   border-radius: var(--control-radius);
   padding: 0;
@@ -247,7 +249,6 @@
 
 .customSelectControlCompact {
   grid-template-columns: minmax(0, 1fr) 1.55rem;
-  min-height: 1.9rem;
   border-radius: 0.4rem;
   font-size: 0.78rem;
 }
@@ -323,7 +324,7 @@
 .customSelectValue,
 .customSelectPlaceholder {
   min-width: 0;
-  padding: var(--control-padding-y) var(--control-padding-x);
+  padding: var(--button-padding-y) var(--control-padding-x);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

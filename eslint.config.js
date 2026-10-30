@@ -35,6 +35,12 @@ export default tseslint.config(
     },
   },
   {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      parserOptions: { project: null },
+    },
+  },
+  {
     files: ['**/*.{ts,tsx}'],
     settings: {
       react: {

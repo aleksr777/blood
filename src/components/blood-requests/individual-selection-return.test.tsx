@@ -78,20 +78,27 @@ it.each(['view', 'edit'] as const)('clears only staff when returning from %s', a
     }),
   );
   render(<IndividualSelectionDirection />);
-  fireEvent.click(
-    screen.getByRole('button', {
-      name: mode === 'view' ? 'Вернуться к текущему бланку' : 'Закрыть без сохранения',
-    }),
-  );
+  expect(screen.queryByRole('button', { name: 'Очистить бланк' })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
   await expectStaffCleared();
   expect(database.saveBloodRequestRecord).not.toHaveBeenCalled();
 });
 
 it('clears staff after saving while retaining the component, indications and date', async () => {
-  render(<IndividualSelectionDirection />);
+  const { container } = render(<IndividualSelectionDirection />);
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await screen.findByRole('button', { name: 'Вернуться к текущему бланку' });
-  fireEvent.click(screen.getByRole('button', { name: 'Вернуться к текущему бланку' }));
+  await screen.findByRole('button', { name: 'К созданию нового бланка' });
+  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('edit');
+  expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true);
+  fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
   await expectStaffCleared();
   expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce();
+  expect(database.saveBloodRequestRecord).toHaveBeenCalledWith(
+    expect.objectContaining({
+      values: expect.objectContaining({
+        doctorName: working.doctorName,
+        doctorPhone: working.doctorPhone,
+      }),
+    }),
+  );
 });

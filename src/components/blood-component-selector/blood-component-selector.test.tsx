@@ -54,7 +54,9 @@ const openNames = () =>
 
 it('requires a group and clears an incompatible name only when the group actually changes', async () => {
   render(<Harness />);
-  expect(nameInput().disabled).toBe(true);
+  expect(
+    screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }),
+  ).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));
   fireEvent.change(nameInput(), { target: { value: 'Мой компонент' } });
   fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));

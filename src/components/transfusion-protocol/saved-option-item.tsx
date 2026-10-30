@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { useState, type KeyboardEvent } from 'react';
 import type { SavedOptionRecord } from '../../storage/repositories/saved-options';
 import styles from './protocol-editor.module.css';
@@ -85,7 +86,7 @@ export const SavedOptionItem = ({
         </>
       )}
       {editing ? (
-        <input
+        <FormInput
           autoFocus
           className={styles.historyInput}
           aria-label={`Изменить: ${label}`}

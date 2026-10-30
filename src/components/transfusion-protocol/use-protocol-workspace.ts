@@ -20,7 +20,7 @@ import {
 import { getCompatibilityDangerWarning } from './compatibility-validation';
 import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
-import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
+import { getMissingProtocolFields, getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { getHemaconDateOrderWarning } from '../../domain/hemacon-dates';
 import { getIndicationComponent } from './indications-model';
 import {
@@ -36,6 +36,7 @@ import type { ProtocolBlockId, ProtocolValues } from './protocol-types';
 import { useDocumentState, type SavedDocumentMode } from '../saved-document/use-document-state';
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { cleanProtocolDraft } from '../saved-document/working-form-cleanup';
+import { hasDocumentContent } from '../../domain/document-content';
 
 const OPEN_WINDOW_STORAGE_KEY = 'blood:protocol-open-window';
 
@@ -86,6 +87,7 @@ const getInitialRegistryOpen = () => readStoredOpenWindow()?.type === 'registry'
 export const useProtocolWorkspace = () => {
   const document = useDocumentState<ProtocolValues>(() => ({}), cleanProtocolDraft);
   const { values, setValues, open: openSavedDocument, isActive: hasSavedDocument } = document;
+  const hasContent = hasDocumentContent('protocol', values);
   const [workingRecordId, setRecordId] = useState<number | null>(null);
   const recordId = document.record?.id ?? workingRecordId;
   const [activeBlock, setActiveBlock] = useState<ProtocolBlockId | null>(getInitialActiveBlock);
@@ -229,18 +231,19 @@ export const useProtocolWorkspace = () => {
     const warning = getProtocolHemaconWarning(values);
     if (!warning) return true;
     setStatus(warning);
-    setActiveBlock('donor');
+    setActiveBlock(getMissingProtocolFields(values)[0].block);
     return false;
   };
 
-  const saveToDatabase = async (afterPrint = false) => {
+  const saveToDatabase = async () => {
+    if (!hasContent) return false;
     if (document.active) {
-      if (afterPrint || !document.editing || !document.record) return true;
+      if (!document.editing || !document.record || !document.hasChanges) return true;
       if (!validateHemacon()) return false;
       try {
         const savedValues = { ...values, recipientId: String(document.record.recipientId) };
         const record = await updateProtocolRecord(document.record.id, savedValues);
-        document.open(record, record.values);
+        document.open(record, record.values, 'edit');
         document.setWorkingValues(cleanProtocolDraft);
         setActiveBlock(null);
         setStatus('Изменения сохранены в исходном бланке.');
@@ -253,7 +256,7 @@ export const useProtocolWorkspace = () => {
     if (!validateHemacon()) return false;
     if (!values.recipientName?.trim()) {
       setStatus('Для сохранения укажите ФИО реципиента.');
-      if (!afterPrint) setActiveBlock('general');
+      setActiveBlock('general');
       return false;
     }
 
@@ -263,10 +266,10 @@ export const useProtocolWorkspace = () => {
       const savedValues = { ...values, recipientId: String(record.recipientId) };
       setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
-      document.open(record, savedValues);
+      document.open(record, savedValues, 'edit');
       document.setWorkingValues(cleanProtocolDraft(savedValues));
       setRecordId(null);
-      setStatus(afterPrint ? 'Бланк сохранён после печати.' : 'Бланк сохранён.');
+      setStatus('Бланк сохранён.');
       return true;
     } catch (error) {
       console.error('Не удалось сохранить бланк в базе:', error);
@@ -276,7 +279,7 @@ export const useProtocolWorkspace = () => {
   };
 
   const clearForm = () => {
-    if (document.active) return;
+    if (document.active || !hasContent) return;
     const currentRecipient = readCurrentRecipient();
     const nextValues = currentRecipient
       ? {
@@ -388,10 +391,10 @@ export const useProtocolWorkspace = () => {
     setStatus('Текущий реципиент отключён. Связанные с ним данные удалены из текущего бланка.');
   };
 
+  const hemaconDateWarning = getHemaconDateOrderWarning(values);
   const expiredReagents = document.active ? [] : getExpiredReagentWarnings(values);
-  const hemaconExpirationWarning = document.active
-    ? ''
-    : getHemaconExpirationWarning(values.expirationDate);
+  const hemaconExpirationWarning =
+    document.active || hemaconDateWarning ? '' : getHemaconExpirationWarning(values.expirationDate);
   const expirationWarnings = [hemaconExpirationWarning, ...expiredReagents].filter(Boolean);
   const reagentWarning = expirationWarnings.length
     ? `Внимание: истёк срок годности.\n\n${expirationWarnings.map((warning) => `• ${warning}`).join('\n')}.`
@@ -400,6 +403,7 @@ export const useProtocolWorkspace = () => {
 
   return {
     document,
+    hasContent,
     values,
     recordId,
     activeBlock,
@@ -413,7 +417,7 @@ export const useProtocolWorkspace = () => {
     saveToDatabase,
     validateHemacon,
     hemaconWarning: getProtocolHemaconWarning(values),
-    hemaconDateWarning: getHemaconDateOrderWarning(values),
+    hemaconDateWarning,
     reagentWarning,
     compatibilityWarning,
     bloodGroupWarning,

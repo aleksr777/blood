@@ -2,7 +2,7 @@ import type { ProtocolValues } from './protocol-types';
 import { formatDate } from './protocol-types';
 import { REAGENTS, REAGENT_DEFAULT_FIELDS } from '../../domain/reagents';
 
-export { REAGENTS, REAGENT_DEFAULT_FIELDS } from '../../domain/reagents';
+export { REAGENTS } from '../../domain/reagents';
 
 const STORAGE_KEY = 'blood:reagent-defaults';
 
@@ -11,10 +11,10 @@ const fieldSet = new Set<string>(REAGENT_DEFAULT_FIELDS);
 export const hasReagentDefaultUpdate = (values: ProtocolValues) =>
   Object.keys(values).some((name) => fieldSet.has(name));
 
-export const pickReagentDefaults = (values: ProtocolValues): ProtocolValues =>
+const pickReagentDefaults = (values: ProtocolValues): ProtocolValues =>
   Object.fromEntries(REAGENT_DEFAULT_FIELDS.map((name) => [name, values[name] ?? '']));
 
-export const loadReagentDefaults = (): ProtocolValues => {
+const loadReagentDefaults = (): ProtocolValues => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return {};

@@ -1,5 +1,6 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
+import { hasDocumentContent } from '../../domain/document-content';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -72,7 +73,12 @@ import { IndividualSelectionExaminationModal } from './individual-selection-exam
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
+import { restoreRequestDraft } from './request-draft-values';
 import { normalizeDirectionIndications } from './direction-indications';
+import {
+  getIndividualSelectionClearValues,
+  hasIndividualSelectionValuesToClear,
+} from './individual-selection-clear';
 import { useFormPages } from './use-form-pages';
 import { AdaptiveRuledField } from './adaptive-ruled-field';
 import styles from './individual-selection-direction.module.css';
@@ -160,161 +166,43 @@ const FOOTER_FIELDS: RequestEditorField[] = [
 ];
 
 const emptyDraft = (): DirectionDraft => ({
+  ...getIndividualSelectionClearValues(null),
   sourceRecipientId: '',
-  requiredComponent: '',
-  quantity: '',
-  individualSelectionIndications: '',
   recipientAboRh: '',
   recipientPhenotype: '',
   recipientName: '',
   recipientAge: '',
   department: '',
   medicalRecordNumber: '',
-  medicalOrganization: '',
   diagnosis: '',
   transfusionHistory: '',
   obstetricHistory: '',
   recipientSex: '',
-  directionDate: '',
-  doctorName: '',
-  doctorPhone: '',
-  indicationValues: normalizeDirectionIndications(),
   recipientProfileSnapshot: {},
   autoValues: {},
 });
 
-const loadDraft = (): DirectionDraft => {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyDraft();
-
-    const parsed = JSON.parse(raw) as Partial<DirectionDraft>;
-    const blank = emptyDraft();
-    const savedValues = Object.fromEntries(
-      Object.keys(blank).flatMap((key) => {
-        if (
-          key === 'autoValues' ||
-          key === 'indicationValues' ||
-          key === 'recipientProfileSnapshot'
-        ) {
-          return [];
-        }
-        const value = parsed[key as keyof DirectionDraft];
-        return typeof value === 'string' ? [[key, value]] : [];
-      }),
-    );
-    const next = {
-      ...blank,
-      ...savedValues,
-      indicationValues:
-        parsed.indicationValues &&
-        typeof parsed.indicationValues === 'object' &&
-        !Array.isArray(parsed.indicationValues)
-          ? Object.fromEntries(
-              Object.entries(parsed.indicationValues).filter(
-                (entry): entry is [string, string] => typeof entry[1] === 'string',
-              ),
-            )
-          : {},
-      recipientProfileSnapshot:
-        parsed.recipientProfileSnapshot &&
-        typeof parsed.recipientProfileSnapshot === 'object' &&
-        !Array.isArray(parsed.recipientProfileSnapshot)
-          ? Object.fromEntries(
-              Object.entries(parsed.recipientProfileSnapshot).filter(
-                (entry): entry is [string, string] => typeof entry[1] === 'string',
-              ),
-            )
-          : {},
-      autoValues:
-        parsed.autoValues &&
-        typeof parsed.autoValues === 'object' &&
-        !Array.isArray(parsed.autoValues)
-          ? Object.fromEntries(
-              Object.entries(parsed.autoValues).filter(
-                (entry): entry is [string, string] => typeof entry[1] === 'string',
-              ),
-            )
-          : {},
-    } as DirectionDraft;
-
-    next.recipientProfileSnapshot = restoreDirectionHistory(
-      next.recipientProfileSnapshot,
-      next.transfusionHistory,
-    );
-    next.quantity = sanitizeDoseQuantity(next.quantity);
-    next.indicationValues = normalizeDirectionIndications(
-      next.indicationValues,
-      next.requiredComponent,
-    );
-    return next;
-  } catch {
-    return emptyDraft();
-  }
-};
-
-const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
-  const blank = emptyDraft();
-  const savedValues = Object.fromEntries(
-    Object.keys(blank).flatMap((key) => {
-      if (
-        key === 'autoValues' ||
-        key === 'indicationValues' ||
-        key === 'recipientProfileSnapshot'
-      ) {
-        return [];
-      }
-      const value = values[key];
-      return typeof value === 'string' ? [[key, value]] : [];
-    }),
-  );
-
-  const indicationValues =
-    values.indicationValues &&
-    typeof values.indicationValues === 'object' &&
-    !Array.isArray(values.indicationValues)
-      ? Object.fromEntries(
-          Object.entries(values.indicationValues).filter(
-            (entry): entry is [string, string] => typeof entry[1] === 'string',
-          ),
-        )
-      : {};
-
-  const autoValues =
-    values.autoValues && typeof values.autoValues === 'object' && !Array.isArray(values.autoValues)
-      ? Object.fromEntries(
-          Object.entries(values.autoValues).filter(
-            (entry): entry is [string, string] => typeof entry[1] === 'string',
-          ),
-        )
-      : {};
-
-  const next = {
-    ...blank,
-    ...savedValues,
-    indicationValues: normalizeDirectionIndications(
-      indicationValues,
-      savedValues.requiredComponent,
-    ),
-    recipientProfileSnapshot:
-      values.recipientProfileSnapshot &&
-      typeof values.recipientProfileSnapshot === 'object' &&
-      !Array.isArray(values.recipientProfileSnapshot)
-        ? Object.fromEntries(
-            Object.entries(values.recipientProfileSnapshot).filter(
-              (entry): entry is [string, string] => typeof entry[1] === 'string',
-            ),
-          )
-        : {},
-    autoValues,
-  } as DirectionDraft;
-
+const draftFromRecord = (values: unknown): DirectionDraft => {
+  const next = restoreRequestDraft(emptyDraft(), values);
   next.recipientProfileSnapshot = restoreDirectionHistory(
     next.recipientProfileSnapshot,
     next.transfusionHistory,
   );
+  next.indicationValues = normalizeDirectionIndications(
+    next.indicationValues,
+    next.requiredComponent,
+  );
   next.quantity = sanitizeDoseQuantity(next.quantity);
   return next;
+};
+
+const loadDraft = (): DirectionDraft => {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? draftFromRecord(JSON.parse(raw)) : emptyDraft();
+  } catch {
+    return emptyDraft();
+  }
 };
 
 const currentAutoValues = async (
@@ -410,6 +298,7 @@ export const IndividualSelectionDirection = () => {
     open: openSavedDocument,
     isActive: hasSavedDocument,
   } = documentState;
+  const hasContent = hasDocumentContent('individual-selection-direction', draft);
   const [editor, setEditorState] = useState<Editor>(null);
   const setEditor = (next: Editor) => {
     if (next === null || !documentState.isReadOnly()) setEditorState(next);
@@ -430,6 +319,12 @@ export const IndividualSelectionDirection = () => {
   const [currentRecipient, setCurrentRecipient] = useState<CurrentRecipient | null>(
     readCurrentRecipient,
   );
+  const canClear =
+    hasContent &&
+    hasIndividualSelectionValuesToClear(
+      draft,
+      getIndividualSelectionClearValues(currentRecipient?.id ?? null),
+    );
 
   useEffect(() => {
     if (initialStored.id === null) return;
@@ -680,34 +575,21 @@ export const IndividualSelectionDirection = () => {
   };
 
   const clear = async () => {
-    if (documentState.isActive()) return;
+    if (documentState.isActive() || !canClear) return;
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
     const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
-    const sharedIndividualSelectionIndications =
-      recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
-        ? readCurrentIndividualSelectionIndications(recipient.id)
-        : '';
-
     setDraft({
-      ...(recipient && hasStoredCurrentIndications(recipient.id, 'erythrocytes')
-        ? {
-            ...next,
-            indicationValues: {
-              ...readCurrentIndications(recipient.id, 'erythrocytes'),
-              componentGroup: 'erythrocytes',
-              indicationComponent: 'erythrocytes',
-            },
-          }
-        : next),
-      individualSelectionIndications: sharedIndividualSelectionIndications,
+      ...next,
+      ...getIndividualSelectionClearValues(recipient?.id ?? null),
     });
     setStatus('');
   };
 
-  const save = async (afterPrint = false) => {
+  const save = async () => {
+    if (!hasContent) return false;
     if (documentState.active) {
-      if (afterPrint || !documentState.editing || !documentState.record) return true;
+      if (!documentState.editing || !documentState.record || !documentState.hasChanges) return true;
       try {
         const record = await saveBloodRequestRecord({
           recordId: documentState.record.id,
@@ -715,7 +597,7 @@ export const IndividualSelectionDirection = () => {
           kind: 'individual-selection-direction',
           values: { ...draftRef.current },
         });
-        documentState.open(record, draftFromRecord(record.values));
+        documentState.open(record, draftFromRecord(record.values), 'edit');
         documentState.setWorkingValues(clearIndividualSelectionStaff);
         setEditor(null);
         setStatus('Изменения сохранены в исходном бланке.');
@@ -753,9 +635,9 @@ export const IndividualSelectionDirection = () => {
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);
-      documentState.open(record, draftToSave);
+      documentState.open(record, draftToSave, 'edit');
       documentState.setWorkingValues(clearIndividualSelectionStaff(draftToSave));
-      setStatus(afterPrint ? 'Направление сохранено после печати.' : 'Направление сохранено.');
+      setStatus('Направление сохранено.');
       return true;
     } catch (error) {
       console.error('Не удалось сохранить направление:', error);
@@ -1137,12 +1019,16 @@ export const IndividualSelectionDirection = () => {
     } finally {
       sheet.removeAttribute('data-print-active');
       document.body.classList.remove('print-individual-direction');
-      if (!documentState.active) void save(true);
     }
   };
 
   return (
-    <SavedDocumentPage className={styles.shell} mode={documentState.mode}>
+    <SavedDocumentPage
+      className={styles.shell}
+      document={documentState}
+      hasContent={hasContent}
+      onSave={save}
+    >
       <header className={`app-header ${styles.header}`}>
         <div className="toolbar-wrap">
           <SiteNavigation
@@ -1153,6 +1039,7 @@ export const IndividualSelectionDirection = () => {
             recipientRh={currentRecipient?.profile.recipientRh ?? ''}
             currentRecipientAvailable={Boolean(currentRecipient)}
             onOpenCurrentRecipient={() => setRegistryOpen(true)}
+            onOpenRecipients={() => setRegistryOpen(true)}
           />
           <SavedDocumentBar
             onReturnToList={savedList.returnToList}
@@ -1165,24 +1052,18 @@ export const IndividualSelectionDirection = () => {
                 type="button"
                 className={`${ui.dangerButton} ${ui.toolbarButton} clear-button`}
                 onClick={() => void clear()}
+                disabled={!canClear}
               >
                 Очистить бланк
               </button>
             )}
             <button
               type="button"
-              className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-              onClick={() => setRegistryOpen(true)}
-            >
-              Реципиенты
-            </button>
-            <button
-              type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={documentState.readOnly}
+              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
             >
-              {documentState.editing ? 'Сохранить изменения' : 'Сохранить'}
+              Сохранить
             </button>
             {pageStarts.map((_, index) => (
               <button

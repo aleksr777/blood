@@ -84,7 +84,7 @@ export const ExaminationBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             colSpan={3}
             className="span-3"
             inline
-            label="Резус-принадлежность"
+            label="Резус-принадлежность реципиента"
             value={formatRh(values.recipientRh)}
           />
         </tr>

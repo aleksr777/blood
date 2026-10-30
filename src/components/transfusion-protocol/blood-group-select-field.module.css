@@ -44,9 +44,22 @@
   color: var(--blood-blue-text);
 }
 
+.antigenField[data-tone='positive'] [aria-haspopup='listbox'] {
+  --select-background: var(--blood-red-option-selected);
+  --select-border: var(--blood-red-text);
+  --select-hover-background: var(--blood-red-option-selected);
+  --select-hover-border: var(--blood-red-text);
+}
+
+.antigenField[data-tone='negative'] [aria-haspopup='listbox'] {
+  --select-background: var(--blood-blue-option-selected);
+  --select-border: var(--blood-blue-text);
+  --select-hover-background: var(--blood-blue-option-selected);
+  --select-hover-border: var(--blood-blue-text);
+}
+
 .antigenField [aria-haspopup='listbox'] {
   grid-template-columns: minmax(0, 1fr) 1.25rem;
-  min-height: 2.25rem;
 }
 
 .antigenField [aria-haspopup='listbox'] > span:first-child {

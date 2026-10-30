@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { useState, type KeyboardEvent } from 'react';
 import type { DepartmentRecord } from '../../storage/repositories/departments';
 import styles from './protocol-editor.module.css';
@@ -89,7 +90,7 @@ export const DepartmentHistoryItem = ({
         </>
       )}
       {editing ? (
-        <input
+        <FormInput
           autoFocus
           className={styles.historyInput}
           aria-label={`Изменить сохранённое отделение: ${item.name}`}

@@ -1,6 +1,6 @@
 import type { ProtocolValues } from './protocol-types';
 
-export const getFailedCompatibilityChecks = (values: ProtocolValues): string[] => {
+const getFailedCompatibilityChecks = (values: ProtocolValues): string[] => {
   const failures: string[] = [];
   const isErythrocytes = values.componentGroup === 'erythrocytes';
 

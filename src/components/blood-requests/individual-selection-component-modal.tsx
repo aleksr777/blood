@@ -4,11 +4,11 @@ import { WarningNotice } from '../warning-notice/warning-notice';
 import { Choice } from '../transfusion-protocol/indication-controls';
 import {
   ABO_OPTIONS,
-  BloodGroupSelectField,
   getBloodGroupTone,
   normalizeBloodGroupRh,
   RH_OPTIONS,
-} from '../transfusion-protocol/blood-group-select-field';
+} from '../transfusion-protocol/blood-group-options';
+import { BloodGroupSelectField } from '../transfusion-protocol/blood-group-select-field';
 import { IndicationsFields } from '../transfusion-protocol/indications-fields';
 import {
   BloodComponentSelector,

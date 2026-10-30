@@ -12,7 +12,7 @@ export type ProtocolBlockId =
 
 export type ProtocolValues = Record<string, string>;
 
-export type ProtocolFieldType =
+type ProtocolFieldType =
   'text' | 'date' | 'time' | 'datetime-local' | 'number' | 'textarea' | 'select';
 
 export type ProtocolFieldConfig = {
@@ -28,7 +28,7 @@ export type ProtocolFieldConfig = {
   readOnly?: boolean;
 };
 
-export type ProtocolBlockSize = 'small' | 'medium' | 'large' | 'xlarge';
+type ProtocolBlockSize = 'small' | 'medium' | 'large' | 'xlarge';
 
 export type ProtocolBlockConfig = {
   id: ProtocolBlockId;

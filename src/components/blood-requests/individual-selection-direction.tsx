@@ -73,6 +73,7 @@ import { IndividualSelectionExaminationModal } from './individual-selection-exam
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
+import { restoreRequestDraft } from './request-draft-values';
 import { normalizeDirectionIndications } from './direction-indications';
 import { useFormPages } from './use-form-pages';
 import { AdaptiveRuledField } from './adaptive-ruled-field';
@@ -184,138 +185,27 @@ const emptyDraft = (): DirectionDraft => ({
   autoValues: {},
 });
 
-const loadDraft = (): DirectionDraft => {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyDraft();
-
-    const parsed = JSON.parse(raw) as Partial<DirectionDraft>;
-    const blank = emptyDraft();
-    const savedValues = Object.fromEntries(
-      Object.keys(blank).flatMap((key) => {
-        if (
-          key === 'autoValues' ||
-          key === 'indicationValues' ||
-          key === 'recipientProfileSnapshot'
-        ) {
-          return [];
-        }
-        const value = parsed[key as keyof DirectionDraft];
-        return typeof value === 'string' ? [[key, value]] : [];
-      }),
-    );
-    const next = {
-      ...blank,
-      ...savedValues,
-      indicationValues:
-        parsed.indicationValues &&
-        typeof parsed.indicationValues === 'object' &&
-        !Array.isArray(parsed.indicationValues)
-          ? Object.fromEntries(
-              Object.entries(parsed.indicationValues).filter(
-                (entry): entry is [string, string] => typeof entry[1] === 'string',
-              ),
-            )
-          : {},
-      recipientProfileSnapshot:
-        parsed.recipientProfileSnapshot &&
-        typeof parsed.recipientProfileSnapshot === 'object' &&
-        !Array.isArray(parsed.recipientProfileSnapshot)
-          ? Object.fromEntries(
-              Object.entries(parsed.recipientProfileSnapshot).filter(
-                (entry): entry is [string, string] => typeof entry[1] === 'string',
-              ),
-            )
-          : {},
-      autoValues:
-        parsed.autoValues &&
-        typeof parsed.autoValues === 'object' &&
-        !Array.isArray(parsed.autoValues)
-          ? Object.fromEntries(
-              Object.entries(parsed.autoValues).filter(
-                (entry): entry is [string, string] => typeof entry[1] === 'string',
-              ),
-            )
-          : {},
-    } as DirectionDraft;
-
-    next.recipientProfileSnapshot = restoreDirectionHistory(
-      next.recipientProfileSnapshot,
-      next.transfusionHistory,
-    );
-    next.quantity = sanitizeDoseQuantity(next.quantity);
-    next.indicationValues = normalizeDirectionIndications(
-      next.indicationValues,
-      next.requiredComponent,
-    );
-    return next;
-  } catch {
-    return emptyDraft();
-  }
-};
-
-const draftFromRecord = (values: Record<string, unknown>): DirectionDraft => {
-  const blank = emptyDraft();
-  const savedValues = Object.fromEntries(
-    Object.keys(blank).flatMap((key) => {
-      if (
-        key === 'autoValues' ||
-        key === 'indicationValues' ||
-        key === 'recipientProfileSnapshot'
-      ) {
-        return [];
-      }
-      const value = values[key];
-      return typeof value === 'string' ? [[key, value]] : [];
-    }),
-  );
-
-  const indicationValues =
-    values.indicationValues &&
-    typeof values.indicationValues === 'object' &&
-    !Array.isArray(values.indicationValues)
-      ? Object.fromEntries(
-          Object.entries(values.indicationValues).filter(
-            (entry): entry is [string, string] => typeof entry[1] === 'string',
-          ),
-        )
-      : {};
-
-  const autoValues =
-    values.autoValues && typeof values.autoValues === 'object' && !Array.isArray(values.autoValues)
-      ? Object.fromEntries(
-          Object.entries(values.autoValues).filter(
-            (entry): entry is [string, string] => typeof entry[1] === 'string',
-          ),
-        )
-      : {};
-
-  const next = {
-    ...blank,
-    ...savedValues,
-    indicationValues: normalizeDirectionIndications(
-      indicationValues,
-      savedValues.requiredComponent,
-    ),
-    recipientProfileSnapshot:
-      values.recipientProfileSnapshot &&
-      typeof values.recipientProfileSnapshot === 'object' &&
-      !Array.isArray(values.recipientProfileSnapshot)
-        ? Object.fromEntries(
-            Object.entries(values.recipientProfileSnapshot).filter(
-              (entry): entry is [string, string] => typeof entry[1] === 'string',
-            ),
-          )
-        : {},
-    autoValues,
-  } as DirectionDraft;
-
+const draftFromRecord = (values: unknown): DirectionDraft => {
+  const next = restoreRequestDraft(emptyDraft(), values);
   next.recipientProfileSnapshot = restoreDirectionHistory(
     next.recipientProfileSnapshot,
     next.transfusionHistory,
   );
+  next.indicationValues = normalizeDirectionIndications(
+    next.indicationValues,
+    next.requiredComponent,
+  );
   next.quantity = sanitizeDoseQuantity(next.quantity);
   return next;
+};
+
+const loadDraft = (): DirectionDraft => {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    return raw ? draftFromRecord(JSON.parse(raw)) : emptyDraft();
+  } catch {
+    return emptyDraft();
+  }
 };
 
 const currentAutoValues = async (

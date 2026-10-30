@@ -1,18 +1,18 @@
 import type { ProtocolValues } from './protocol-types';
 
 export const OBSTETRIC_UNKNOWN = 'Не известно';
-export const OBSTETRIC_NONE = 'Не было';
-export const OBSTETRIC_HISTORY_FIELDS = [
+const OBSTETRIC_NONE = 'Не было';
+const OBSTETRIC_HISTORY_FIELDS = [
   'recipientPregnanciesCount',
   'recipientBirthsCount',
   'recipientSpontaneousAbortionsCount',
   'recipientHemolyticDiseaseNewbornHistory',
 ] as const;
 
-export const isObstetricValueUnknown = (value?: string) =>
+const isObstetricValueUnknown = (value?: string) =>
   value?.trim().toLocaleLowerCase('ru-RU').replace(/\s+/g, '') === 'неизвестно';
 
-export const isObstetricCountNone = (value?: string) =>
+const isObstetricCountNone = (value?: string) =>
   /^0+$/.test(value?.trim() ?? '') || value?.trim().toLocaleLowerCase('ru-RU') === 'не было';
 
 export const obstetricCountLabel = (value: string) =>
@@ -67,7 +67,7 @@ export const isNewbornHistoryBlocked = (values: ProtocolValues) =>
   isObstetricCountNone(values.recipientBirthsCount) ||
   isObstetricValueUnknown(values.recipientBirthsCount);
 
-export const isObstetricHistoryUnknown = (values: ProtocolValues) =>
+const isObstetricHistoryUnknown = (values: ProtocolValues) =>
   values.recipientObstetricHistoryStatus === 'unknown' ||
   OBSTETRIC_HISTORY_FIELDS.every((name) => isObstetricValueUnknown(values[name]));
 

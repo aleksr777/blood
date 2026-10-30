@@ -48,10 +48,7 @@ export const removeBloodRequestRecord = (id: number) => database.removeBloodRequ
 
 export type {
   BloodRequestRecord,
-  BloodRequestRecordKind,
-  BloodRequestRecordValues,
   ProtocolRecord,
   RecipientRecord,
   RegistrationRecord,
-  SaveBloodRequestRecordInput,
 } from '../sqlite/database-types';

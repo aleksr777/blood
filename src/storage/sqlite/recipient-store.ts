@@ -136,8 +136,16 @@ export const updateRecipient = async (id: number, values: ProtocolValuesRecord) 
 };
 export const removeRecipient = async (id: number) => {
   const db = await getDatabase();
-  db.exec({ sql: 'DELETE FROM protocol_records WHERE recipient_id = $id', bind: { $id: id } });
-  db.exec({ sql: 'DELETE FROM registration_records WHERE recipient_id = $id', bind: { $id: id } });
-  db.exec({ sql: 'DELETE FROM blood_request_records WHERE recipient_id = $id', bind: { $id: id } });
-  db.exec({ sql: 'DELETE FROM recipients WHERE id = $id', bind: { $id: id } });
+  db.transaction(() => {
+    db.exec({ sql: 'DELETE FROM protocol_records WHERE recipient_id = $id', bind: { $id: id } });
+    db.exec({
+      sql: 'DELETE FROM registration_records WHERE recipient_id = $id',
+      bind: { $id: id },
+    });
+    db.exec({
+      sql: 'DELETE FROM blood_request_records WHERE recipient_id = $id',
+      bind: { $id: id },
+    });
+    db.exec({ sql: 'DELETE FROM recipients WHERE id = $id', bind: { $id: id } });
+  });
 };

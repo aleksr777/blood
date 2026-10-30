@@ -6,8 +6,7 @@
   composes: ui-form-grid from global;
 }
 
-.grid > :first-child,
-.wide {
+.grid > :first-child {
   grid-column: 1 / -1;
 }
 
@@ -28,8 +27,7 @@
     grid-template-columns: 1fr;
   }
 
-  .grid > :first-child,
-  .wide {
+  .grid > :first-child {
     grid-column: auto;
   }
 }

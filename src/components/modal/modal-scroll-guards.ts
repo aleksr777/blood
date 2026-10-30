@@ -27,7 +27,7 @@ export const bindModalScrollGuards = (dialog: HTMLDialogElement) => {
   };
 
   const preventBackgroundKeys = (event: KeyboardEvent) => {
-    if (!isTopmost()) return;
+    if (!isTopmost() || event.defaultPrevented) return;
     const target = event.target;
     if (
       target instanceof HTMLInputElement ||
@@ -37,6 +37,14 @@ export const bindModalScrollGuards = (dialog: HTMLDialogElement) => {
     ) {
       return;
     }
+    // Space activates these controls. Preventing its default action would also
+    // cancel button clicks, disclosure toggles and keyboard option selection.
+    if (
+      event.key === ' ' &&
+      target instanceof Element &&
+      target.closest('button, summary, [role="button"], [role="option"]')
+    )
+      return;
     const viewport = dialog.querySelector<HTMLElement>('[data-modal-scroll-viewport]');
     const pageHeight = viewport?.clientHeight ?? dialog.clientHeight;
     const deltas: Record<string, number> = {

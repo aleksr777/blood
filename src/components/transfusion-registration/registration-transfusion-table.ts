@@ -19,40 +19,9 @@ export type RegistrationTransfusionRow = {
   complications: string;
 };
 
-const parseLocalDateTime = (dateValue?: string, timeValue?: string) => {
-  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue ?? '');
-  if (!dateMatch) return null;
-
-  const timeMatch = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(timeValue ?? '');
-  const hour = timeMatch ? Number(timeMatch[1]) : 0;
-  const minute = timeMatch ? Number(timeMatch[2]) : 0;
-
-  const date = new Date(
-    Number(dateMatch[1]),
-    Number(dateMatch[2]) - 1,
-    Number(dateMatch[3]),
-    hour,
-    minute,
-  );
-
-  return Number.isNaN(date.getTime()) ? null : date.getTime();
-};
-
-export const getProtocolTransfusionTimestamp = (record: ProtocolRecord) =>
-  parseLocalDateTime(
-    record.values.transfusionDate,
-    record.values.endTime || record.values.startTime,
-  ) ?? record.createdAt;
-
-export const hasRegistrationTransfusionData = (record: ProtocolRecord) =>
-  Boolean(
-    record.values.componentName?.trim() ||
-    record.values.componentUnitNumber?.trim() ||
-    record.values.amountMl?.trim(),
-  );
-
 const formatLiters = (amountMl?: string) => {
-  const amount = Number((amountMl ?? '').replace(',', '.'));
+  if (!amountMl?.trim()) return '';
+  const amount = Number(amountMl.replace(',', '.'));
   if (!Number.isFinite(amount) || amount < 0) return '';
 
   return (amount / 1000).toLocaleString('ru-RU', {

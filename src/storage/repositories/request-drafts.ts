@@ -1,4 +1,5 @@
 import { saveBloodRequestRecord } from './recipients';
+import { hasDocumentContent } from '../../domain/document-content';
 
 export const REQUEST_DRAFTS = [
   { storageKey: 'blood:component-request-direction-draft', kind: 'component-request' },
@@ -7,17 +8,6 @@ export const REQUEST_DRAFTS = [
     kind: 'individual-selection-direction',
   },
 ] as const;
-
-const hasDocumentData = (draft: Record<string, unknown>) =>
-  [
-    'requiredComponent',
-    'quantity',
-    'componentAbo',
-    'componentRh',
-    'transfusionOrder',
-    'componentSelectionRequirement',
-    'individualSelectionIndications',
-  ].some((field) => typeof draft[field] === 'string' && draft[field].trim() !== '');
 
 export const savePreviousRequestDrafts = async (nextRecipientId: number) => {
   for (const { storageKey, kind } of REQUEST_DRAFTS) {
@@ -36,7 +26,13 @@ export const savePreviousRequestDrafts = async (nextRecipientId: number) => {
       continue;
 
     const savedRecordId = Number(window.localStorage.getItem(`${storageKey}:saved-record-id`));
-    if ((!Number.isSafeInteger(savedRecordId) || savedRecordId <= 0) && hasDocumentData(draft)) {
+    // Reused organization/staff fields alone do not make a new request. Check
+    // every other field with the same rules used by the form's Save button.
+    const content = { ...draft, medicalOrganization: '', doctorName: '', doctorPhone: '' };
+    if (
+      (!Number.isSafeInteger(savedRecordId) || savedRecordId <= 0) &&
+      hasDocumentContent(kind, content)
+    ) {
       await saveBloodRequestRecord({ recipientId, kind, values: draft });
     }
 

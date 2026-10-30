@@ -83,6 +83,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
   };
 
   const apply = () => {
+    if (selectedIds.size === 0) return;
     const selectedRecords = records.filter(({ id }) => selectedIds.has(id));
 
     const selectedRecordIds = new Set(selectedRecords.map(({ id }) => id));
@@ -153,7 +154,12 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
               <button type="button" className={styles.cancelButton} onClick={onClose}>
                 Отмена
               </button>
-              <button type="button" className={styles.applyButton} onClick={apply}>
+              <button
+                type="button"
+                className={styles.applyButton}
+                onClick={apply}
+                disabled={selectedIds.size === 0}
+              >
                 Внести в таблицу
               </button>
             </div>

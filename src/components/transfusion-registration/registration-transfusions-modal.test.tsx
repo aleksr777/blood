@@ -42,6 +42,15 @@ it('lists and applies protocols by transfusion start, independent of edits and s
   );
   await waitFor(() => expect(screen.getAllByRole('checkbox')).toHaveLength(3));
   const checkboxes = screen.getAllByRole('checkbox');
+  const apply = screen.getByRole('button', { name: 'Внести в таблицу' }) as HTMLButtonElement;
+  expect(apply.disabled).toBe(true);
+  fireEvent.click(checkboxes[0]);
+  expect(apply.disabled).toBe(false);
+  fireEvent.click(checkboxes[0]);
+  expect(apply.disabled).toBe(true);
+  fireEvent.click(apply);
+  expect(onApply).not.toHaveBeenCalled();
+  expect(onClose).not.toHaveBeenCalled();
   expect(checkboxes.map((input) => input.closest('label')?.textContent)).toEqual([
     expect.stringContaining('Компонент 9'),
     expect.stringContaining('Компонент 5'),
@@ -49,6 +58,7 @@ it('lists and applies protocols by transfusion start, independent of edits and s
   ]);
   expect(checkboxes[1].closest('label')?.textContent).toContain('01.02.2026 08:00');
   for (const input of [...checkboxes].reverse()) fireEvent.click(input);
+  expect(apply.disabled).toBe(false);
   fireEvent.click(screen.getByRole('button', { name: 'Внести в таблицу' }));
   const rows = JSON.parse(onApply.mock.calls[0][0].registrationTransfusionRows);
   expect(rows.map((row: { protocolId: number }) => row.protocolId)).toEqual([9, 5, 1]);

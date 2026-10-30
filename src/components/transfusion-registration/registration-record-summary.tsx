@@ -46,7 +46,7 @@ export const RegistrationRecordSummary = ({
             const unit = row.componentUnitNumber?.trim() || linked?.componentUnitNumber?.trim();
             return (
               <span key={`${row.protocolId}:${index}`} className={styles.component}>
-                <span className={styles.componentName}>{name || 'Компонент не указан'}</span>
+                <span className={summary.details}>{name || 'Компонент не указан'}</span>
                 <span className={summary.details}>
                   {unit ? `№ ${unit}` : 'Номер гемакона не указан'}
                 </span>

@@ -29,7 +29,7 @@ npm run icons
 npm run check:icons
 ```
 
-Проверка читает все значки, на которые ссылаются HTML, манифест и настройки Windows: проверяет SVG, размеры PNG, полноту сжатых пикселей и ICO-контейнера. Она запускается перед `npm run dev`, после генерации значков и после сборки для файлов в `dist/`. Регрессионный тест отдельно проверяет фактические ссылки, возвращаемые HTML-преобразованием сервера Vite.
+Проверка использует только встроенные модули Node.js и не требует `jsdom` или других установленных пакетов. Она читает все значки, на которые ссылаются HTML, манифест и настройки Windows: проверяет наличие SVG-контуров, размеры PNG, полноту сжатых пикселей и ICO-контейнера. Она запускается перед `npm run dev`, после генерации значков и после сборки для файлов в `dist/`. Регрессионные тесты проверяют работу скрипта в изолированной папке без `node_modules`, обнаружение повреждённых значков и фактические ссылки, возвращаемые HTML-преобразованием сервера Vite. Самому серверу Vite и тестам по-прежнему нужны зависимости проекта: для установки используйте `npm ci`.
 
 Справочные требования: [манифест и безопасная область](https://w3c.github.io/manifest/#icon-masks), [значки Apple](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html), [закреплённые вкладки Safari](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html).
 

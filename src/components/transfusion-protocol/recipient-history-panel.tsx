@@ -114,7 +114,6 @@ export const RecipientHistoryPanel = ({
           <div className={styles.header}>
             <div>
               <h3 className={styles.title}>{recipient.fullName}</h3>
-              <div className={styles.meta}>Карточка № {recipient.id}</div>
               {demographics && <div className={styles.meta}>{demographics}</div>}
             </div>
             <div className={styles.headerActions}>

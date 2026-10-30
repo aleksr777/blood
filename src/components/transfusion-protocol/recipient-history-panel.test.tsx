@@ -84,6 +84,7 @@ it.each(cases.map(([label, records, open, remove]) => ({ label, records, open, r
   ({ label, records, open, remove }) => {
     const handlers = props();
     render(<RecipientHistoryPanel {...handlers} />);
+    expect(screen.queryByText(/Карточка №/)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${label}`) }));
     const list = screen.getByRole('list', { name: 'Сохранённые бланки' });
     expect(list.querySelectorAll('input, select, textarea')).toHaveLength(0);

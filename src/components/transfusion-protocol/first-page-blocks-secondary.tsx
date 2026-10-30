@@ -124,7 +124,7 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             colSpan={3}
             className="span-3"
             inline
-            label="Резус-принадлежность"
+            label="Резус-принадлежность донора"
             value={formatRh(values.donorRh)}
           />
         </tr>

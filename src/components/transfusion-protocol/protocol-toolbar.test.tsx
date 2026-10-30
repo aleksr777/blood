@@ -173,13 +173,15 @@ it.each(['view', 'edit'] as const)(
     );
     expect(screen.queryByText('Текущий реципиент:')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Очистить бланк' })).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Новый бланк' })).toBeNull();
+    expect(screen.queryAllByRole('button', { name: 'Новый бланк' })).toHaveLength(
+      mode === 'view' ? 1 : 0,
+    );
     expect(screen.queryByText(/истёк срок годности/)).toBeNull();
     expect(screen.getByText('Протокол трансфузии · 21.10.2020')).toBeDefined();
     expect(screen.queryByText(/№ 42/)).toBeNull();
     expect(
       screen.getByRole('button', {
-        name: mode === 'edit' ? 'Закрыть без сохранения' : 'Вернуться к текущему бланку',
+        name: mode === 'edit' ? 'Закрыть без сохранения' : 'Новый бланк',
       }).className,
     ).not.toContain('text-button');
   },

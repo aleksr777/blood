@@ -51,7 +51,7 @@ export const SavedDocumentBar = ({
           className={`${ui.secondaryButton} ${ui.compactButton}`}
           onClick={document.close}
         >
-          {editing ? 'Закрыть без сохранения' : 'Вернуться к текущему бланку'}
+          {editing ? 'Закрыть без сохранения' : 'Новый бланк'}
         </button>
       </div>
     </div>

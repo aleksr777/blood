@@ -83,6 +83,32 @@ it('восстанавливает вторую страницу с таблиц
   expect(screen.getByText('Выдал компоненты крови:')).toBeTruthy();
 });
 
+it.each([
+  ['planned', 'плановая трансфузия'],
+  ['emergency', 'экстренная или неотложная'],
+  ['urgent', 'экстренная или неотложная'],
+  ['', ''],
+])('отображает только выбранную форму помощи (%s)', (transfusionOrder, expected) => {
+  render(
+    <ComponentRequestForm
+      values={{ ...request, transfusionOrder }}
+      examination={{}}
+      readOnly={false}
+      onEdit={() => {}}
+    />,
+  );
+  const metadata = screen.getByRole('button', {
+    name: 'Подразделение, сроки и форма оказания помощи',
+  });
+  const lastMetadataRow = metadata.querySelector('tbody tr:last-child');
+  expect(lastMetadataRow).not.toBeNull();
+  expect(lastMetadataRow?.querySelector('th')?.textContent).toBe(
+    'Форма оказания медицинской помощи',
+  );
+  expect(lastMetadataRow?.querySelector('td')?.textContent).toBe(expected);
+  expect(lastMetadataRow?.querySelector('td span')).toBeNull();
+});
+
 it('открывает переиспользуемые редакторы для логических разделов', () => {
   const onEdit = vi.fn();
   const { container } = render(

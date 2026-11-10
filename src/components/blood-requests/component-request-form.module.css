@@ -99,16 +99,6 @@
   background-color: var(--ui-accent-soft);
 }
 
-.underlined {
-  text-decoration: underline;
-  text-decoration-thickness: 0.2mm;
-  text-underline-offset: 1.5mm;
-}
-
-.screenOnly {
-  display: none;
-}
-
 .dataTable {
   font-size: 7.4pt;
 }

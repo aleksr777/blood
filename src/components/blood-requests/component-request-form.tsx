@@ -42,7 +42,7 @@ type Props = {
 };
 
 const DISPLAY_CARE_FORM: Record<string, string> = {
-  planned: 'плановая',
+  planned: 'плановая трансфузия',
   emergency: 'экстренная или неотложная',
   urgent: 'экстренная или неотложная',
 };
@@ -134,29 +134,8 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
                 <td>{formatRequestDateTime(values.plannedTransfusionDateTime)}</td>
               </tr>
               <tr>
-                <th>Форма оказания медицинской помощи (нужное подчеркнуть)</th>
-                <td>
-                  <span
-                    className={
-                      values.transfusionOrder === 'emergency' ||
-                      values.transfusionOrder === 'urgent'
-                        ? styles.underlined
-                        : ''
-                    }
-                  >
-                    экстренная или неотложная
-                  </span>
-                  {' / '}
-                  <span className={values.transfusionOrder === 'planned' ? styles.underlined : ''}>
-                    плановая трансфузия
-                  </span>
-                  {values.transfusionOrder && (
-                    <span className={styles.screenOnly}>
-                      {' '}
-                      ({DISPLAY_CARE_FORM[values.transfusionOrder]})
-                    </span>
-                  )}
-                </td>
+                <th>Форма оказания медицинской помощи</th>
+                <td>{DISPLAY_CARE_FORM[values.transfusionOrder] ?? ''}</td>
               </tr>
             </tbody>
           </table>

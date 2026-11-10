@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { hasDocumentContent } from '../../domain/document-content';
+import { printPageLabel } from '../../domain/print-page-label';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -1025,7 +1026,7 @@ export const IndividualSelectionDirection = () => {
                 className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
                 onClick={() => printPage(index + 1)}
               >
-                {pageStarts.length > 1 ? `Печать страницы ${index + 1}` : 'Печать страницы'}
+                {printPageLabel(index + 1, pageStarts.length)}
               </button>
             ))}
           </div>

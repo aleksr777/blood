@@ -53,7 +53,24 @@ it('отображает единую заявку с двенадцатью н�
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('2 ед.');
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('Rh(-)');
   expect(container.querySelectorAll('[data-document-paper]')).toHaveLength(1);
+  expect(container.querySelectorAll('section[aria-label*="страница"]')).toHaveLength(2);
   expect(screen.getByText('10.11.2026 09:30')).toBeTruthy();
+});
+
+it('восстанавливает вторую страницу с таблицей выдачи и шестью пустыми строками', () => {
+  render(<ComponentRequestForm values={request} examination={{}} readOnly onEdit={() => {}} />);
+  expect(
+    screen.getByRole('heading', { name: 'Выдано из трансфузиологического кабинета' }),
+  ).toBeTruthy();
+  const issuedTable = screen.getByRole('table', { name: 'Таблица выдачи компонентов крови' });
+  expect(issuedTable.querySelectorAll('colgroup col')).toHaveLength(11);
+  expect(issuedTable.querySelectorAll('thead th')).toHaveLength(11);
+  expect(issuedTable.querySelectorAll('tbody tr')).toHaveLength(6);
+  expect(issuedTable.querySelectorAll('tbody td')).toHaveLength(66);
+  expect(issuedTable.querySelector('thead')?.textContent).toContain('№ контейнера');
+  expect(issuedTable.querySelector('thead')?.textContent).toContain('Изготовитель');
+  expect(screen.getByText('Получил компоненты крови:')).toBeTruthy();
+  expect(screen.getByText('Выдал компоненты крови:')).toBeTruthy();
 });
 
 it('открывает переиспользуемые редакторы для логических разделов', () => {

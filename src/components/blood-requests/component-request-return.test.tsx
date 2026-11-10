@@ -171,3 +171,24 @@ it('сохраняет новые графы приложения № 17 чер�
   expect(saved.individualSelectionRequired).toBe('yes');
   expect(saved.individualSelectionCode).toBe('3');
 });
+
+it('печатает каждую из двух страниц заявки отдельно', () => {
+  const printClasses: string[][] = [];
+  const print = vi.spyOn(window, 'print').mockImplementation(() => {
+    printClasses.push(
+      [...document.body.classList].filter((className) =>
+        className.startsWith('print-component-request-page-'),
+      ),
+    );
+  });
+  render(<ComponentRequest />);
+  fireEvent.click(screen.getByRole('button', { name: 'Печать страницы 1' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Печать страницы 2' }));
+  expect(printClasses).toEqual([
+    ['print-component-request-page-1'],
+    ['print-component-request-page-2'],
+  ]);
+  expect(document.body.classList.contains('print-component-request-page-1')).toBe(false);
+  expect(document.body.classList.contains('print-component-request-page-2')).toBe(false);
+  print.mockRestore();
+});

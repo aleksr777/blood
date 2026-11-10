@@ -1,5 +1,6 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import ui from '../../styles/ui';
+import { printPageLabel } from '../../domain/print-page-label';
 import { useEffect, useState } from 'react';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { WarningNotice } from '../warning-notice/warning-notice';
@@ -129,7 +130,7 @@ export const ProtocolToolbar = ({
               onClick={() => runValidatedAction(() => onPrintPage(pageIndex))}
               aria-disabled={Boolean(hemaconWarning)}
             >
-              Печать страницы {pageIndex + 1}
+              {printPageLabel(pageIndex + 1, pageCount)}
             </button>
           ))}
         </div>

@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { hasDocumentContent } from '../../domain/document-content';
+import { printPageLabel } from '../../domain/print-page-label';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -415,7 +416,7 @@ export const TransfusionRegistration = () => {
               className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
               onClick={print}
             >
-              Печать страницы 1
+              {printPageLabel(1, 1)}
             </button>
           </div>
           <AnimatedMessage message={status} className="toolbar-status" />

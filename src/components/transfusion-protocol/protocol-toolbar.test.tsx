@@ -32,6 +32,14 @@ const props = (): ComponentProps<typeof ProtocolToolbar> => ({
 
 afterEach(cleanup);
 
+it('uses the unnumbered print label when the section has only one page', () => {
+  const callbacks = props();
+  render(<ProtocolToolbar {...callbacks} pageCount={1} hemaconWarning="" />);
+  fireEvent.click(screen.getByRole('button', { name: 'Печать страницы' }));
+  expect(screen.queryByRole('button', { name: 'Печать страницы 1' })).toBeNull();
+  expect(callbacks.onPrintPage).toHaveBeenCalledWith(0);
+});
+
 it('disables Clear and Save when only recipient or reusable data remain', () => {
   const handlers = props();
   render(<ProtocolToolbar {...handlers} hasContent={false} />);

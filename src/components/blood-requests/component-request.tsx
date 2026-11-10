@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { hasDocumentContent } from '../../domain/document-content';
+import { printPageLabel } from '../../domain/print-page-label';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -743,7 +744,15 @@ export const ComponentRequest = () => {
     }
   }, [draft, editor]);
 
-  const printPage = () => window.print();
+  const printPage = (page: 1 | 2) => {
+    const className = `print-component-request-page-${page}`;
+    document.body.classList.add(className);
+    try {
+      window.print();
+    } finally {
+      document.body.classList.remove(className);
+    }
+  };
 
   return (
     <SavedDocumentPage
@@ -791,9 +800,16 @@ export const ComponentRequest = () => {
             <button
               type="button"
               className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-              onClick={printPage}
+              onClick={() => printPage(1)}
             >
-              Печать A4
+              {printPageLabel(1, 2)}
+            </button>
+            <button
+              type="button"
+              className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
+              onClick={() => printPage(2)}
+            >
+              {printPageLabel(2, 2)}
             </button>
           </div>
           <AnimatedMessage message={status} className="toolbar-status" />

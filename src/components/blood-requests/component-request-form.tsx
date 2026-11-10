@@ -2,6 +2,7 @@ import type { KeyboardEvent } from 'react';
 import { formatDirectionDate } from './request-common';
 import { formatRequestDateTime, formatRequestedQuantity } from './component-request-447n';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
+import { ComponentRequestIssuedPage } from './component-request-issued-page';
 import styles from './component-request-form.module.css';
 
 export type ComponentRequestFormValues = {
@@ -87,7 +88,10 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
 
   return (
     <div className={styles.wrap} data-document-paper>
-      <section className={styles.paper} aria-label="Заявка, приложение № 17 к приказу № 447н">
+      <section
+        className={`${styles.paper} ${styles.pageOne}`}
+        aria-label="Заявка, приложение № 17 к приказу № 447н, страница 1"
+      >
         <div className={styles.approval}>
           Приложение № 17 к приказу Министерства здравоохранения Российской Федерации
           <span>от 18 мая 2026 г. № 447н</span>
@@ -231,6 +235,12 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
             Подпись
           </span>
         </div>
+      </section>
+      <section
+        className={`${styles.paper} ${styles.pageTwo}`}
+        aria-label="Выдано из трансфузиологического кабинета, страница 2"
+      >
+        <ComponentRequestIssuedPage />
       </section>
     </div>
   );

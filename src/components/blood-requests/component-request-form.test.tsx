@@ -54,6 +54,13 @@ it('отображает единую заявку с двенадцатью н�
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('Rh(-)');
   expect(container.querySelectorAll('[data-document-paper]')).toHaveLength(1);
   expect(container.querySelectorAll('section[aria-label*="страница"]')).toHaveLength(2);
+  const departmentCell = container.querySelector(
+    'section[aria-label*="страница 1"] table tbody tr:first-child td',
+  );
+  expect(Array.from(departmentCell?.children ?? [], (element) => element.textContent)).toEqual([
+    'ОРИТ',
+    '123-45-67',
+  ]);
   expect(screen.getByText('10.11.2026 09:30')).toBeTruthy();
 });
 
@@ -78,12 +85,21 @@ it('открывает переиспользуемые редакторы дл�
   const { container } = render(
     <ComponentRequestForm values={request} examination={{}} readOnly={false} onEdit={onEdit} />,
   );
-  fireEvent.click(screen.getByText('ОРИТ, 123-45-67'));
+  const organization = screen.getByRole('button', {
+    name: 'Подразделение, сроки и форма оказания помощи',
+  });
+  expect(organization.querySelectorAll('tbody tr')).toHaveLength(4);
+  expect(organization.querySelectorAll('tr[role="button"]')).toHaveLength(0);
+  fireEvent.click(screen.getByText('123-45-67'));
+  fireEvent.click(screen.getByText('Дата и время подачи заявки'));
+  fireEvent.keyDown(organization, { key: 'Enter' });
   fireEvent.click(screen.getByText('Иванов Иван Иванович'));
   fireEvent.click(screen.getByText('ЭВ-Л'));
   fireEvent.click(screen.getByText('Rh(-), C− c+ E− e+ K−'));
   fireEvent.click(screen.getByText('Петров Пётр Петрович'));
   expect(onEdit.mock.calls.map(([section]) => section)).toEqual([
+    'organization',
+    'organization',
     'organization',
     'recipient',
     'component',

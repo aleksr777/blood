@@ -95,7 +95,11 @@ const ORGANIZATION_FIELDS: RequestEditorField[] = [
     name: 'department',
     label: 'Подразделение медицинской организации',
   },
-  { name: 'departmentPhone', label: 'Контактный телефон подразделения' },
+  {
+    name: 'departmentPhone',
+    label: 'Контактный телефон подразделения',
+    savedOptionsCategory: 'componentRequestDepartmentPhone',
+  },
   { name: 'requestDateTime', label: 'Дата и время подачи заявки', type: 'datetime-local' },
   {
     name: 'plannedTransfusionDateTime',

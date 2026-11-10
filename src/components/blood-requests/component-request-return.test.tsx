@@ -13,6 +13,9 @@ vi.mock('../../storage/sqlite/database-client', () => ({
     loadProtocolDraft: vi.fn(async () => ({ values: {}, protocolRecordId: null, updatedAt: 0 })),
     saveBloodRequestRecord: vi.fn(),
     listSavedOptions: vi.fn(async () => []),
+    rememberSavedOption: vi.fn(async () => []),
+    listDepartments: vi.fn(async () => []),
+    rememberDepartment: vi.fn(async () => []),
   },
 }));
 const key = 'blood:component-request-direction-draft';
@@ -46,6 +49,8 @@ const working = {
   doctorPhone: '12345',
 };
 beforeEach(() => {
+  vi.mocked(database.listSavedOptions).mockResolvedValue([]);
+  vi.mocked(database.rememberSavedOption).mockClear();
   vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
   vi.stubGlobal('matchMedia', () => ({ matches: true, addListener() {}, removeListener() {} }));
   vi.stubGlobal(
@@ -160,7 +165,7 @@ it('сохраняет новые графы приложения № 17 чер�
   fireEvent.change(dialog.getByLabelText('Код показания для индивидуального подбора (графа 10)'), {
     target: { value: '3' },
   });
-  fireEvent.click(dialog.getByRole('button', { name: 'Close modal' }));
+  fireEvent(screen.getByRole('dialog'), new Event('cancel', { bubbles: true, cancelable: true }));
 
   expect(screen.getByText('ЭВ-Л')).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
@@ -191,4 +196,32 @@ it('печатает каждую из двух страниц заявки от
   expect(document.body.classList.contains('print-component-request-page-1')).toBe(false);
   expect(document.body.classList.contains('print-component-request-page-2')).toBe(false);
   print.mockRestore();
+});
+
+it('позволяет выбрать и отредактировать контактный телефон подразделения из выпадающего списка', async () => {
+  vi.mocked(database.listSavedOptions).mockImplementation(async (category) =>
+    category === 'componentRequestDepartmentPhone' ? [{ id: 1, value: '+79001112233' }] : [],
+  );
+  render(<ComponentRequest />);
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Подразделение, сроки и форма оказания помощи' }),
+  );
+  const dialog = within(screen.getByRole('dialog'));
+  const phoneInput = dialog.getByRole('textbox', { name: 'Контактный телефон подразделения' });
+  const dropdown = dialog.getByRole('button', {
+    name: 'Показать сохранённые варианты: Контактный телефон подразделения',
+  });
+  fireEvent.click(dropdown);
+  fireEvent.click(await dialog.findByRole('button', { name: '+79001112233' }));
+  expect((phoneInput as HTMLInputElement).value).toBe('+79001112233');
+
+  fireEvent.change(phoneInput, { target: { value: '+79009998877' } });
+  fireEvent(screen.getByRole('dialog'), new Event('cancel', { bubbles: true, cancelable: true }));
+  expect(screen.getByText('+79009998877')).toBeTruthy();
+  await waitFor(() =>
+    expect(database.rememberSavedOption).toHaveBeenCalledWith(
+      'componentRequestDepartmentPhone',
+      '+79009998877',
+    ),
+  );
 });

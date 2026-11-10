@@ -107,52 +107,62 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
           клинического использования
         </div>
 
-        <table className={styles.metadata}>
-          <tbody>
-            <tr {...edit('organization')}>
-              <th>
-                Наименование и контактный телефон подразделения медицинской организации,
-                осуществляющего клиническое использование донорской крови и (или) её компонентов
-              </th>
-              <td>{[values.department, values.departmentPhone].filter(Boolean).join(', ')}</td>
-            </tr>
-            <tr {...edit('organization')}>
-              <th>Дата и время подачи заявки</th>
-              <td>
-                {formatRequestDateTime(values.requestDateTime) ||
-                  formatDirectionDate(values.directionDate)}
-              </td>
-            </tr>
-            <tr {...edit('organization')}>
-              <th>Предполагаемые дата и время трансфузии</th>
-              <td>{formatRequestDateTime(values.plannedTransfusionDateTime)}</td>
-            </tr>
-            <tr {...edit('organization')}>
-              <th>Форма оказания медицинской помощи (нужное подчеркнуть)</th>
-              <td>
-                <span
-                  className={
-                    values.transfusionOrder === 'emergency' || values.transfusionOrder === 'urgent'
-                      ? styles.underlined
-                      : ''
-                  }
-                >
-                  экстренная или неотложная
-                </span>
-                {' / '}
-                <span className={values.transfusionOrder === 'planned' ? styles.underlined : ''}>
-                  плановая трансфузия
-                </span>
-                {values.transfusionOrder && (
-                  <span className={styles.screenOnly}>
-                    {' '}
-                    ({DISPLAY_CARE_FORM[values.transfusionOrder]})
+        <div
+          {...edit('organization')}
+          className={`${styles.metadataSection} ${styles.editable} ${readOnly ? styles.readOnly : ''}`}
+          aria-label="Подразделение, сроки и форма оказания помощи"
+        >
+          <table className={styles.metadata}>
+            <tbody>
+              <tr>
+                <th>
+                  Наименование и контактный телефон подразделения медицинской организации,
+                  осуществляющего клиническое использование донорской крови и (или) её компонентов
+                </th>
+                <td>
+                  <div>{values.department}</div>
+                  <div>{values.departmentPhone}</div>
+                </td>
+              </tr>
+              <tr>
+                <th>Дата и время подачи заявки</th>
+                <td>
+                  {formatRequestDateTime(values.requestDateTime) ||
+                    formatDirectionDate(values.directionDate)}
+                </td>
+              </tr>
+              <tr>
+                <th>Предполагаемые дата и время трансфузии</th>
+                <td>{formatRequestDateTime(values.plannedTransfusionDateTime)}</td>
+              </tr>
+              <tr>
+                <th>Форма оказания медицинской помощи (нужное подчеркнуть)</th>
+                <td>
+                  <span
+                    className={
+                      values.transfusionOrder === 'emergency' ||
+                      values.transfusionOrder === 'urgent'
+                        ? styles.underlined
+                        : ''
+                    }
+                  >
+                    экстренная или неотложная
                   </span>
-                )}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  {' / '}
+                  <span className={values.transfusionOrder === 'planned' ? styles.underlined : ''}>
+                    плановая трансфузия
+                  </span>
+                  {values.transfusionOrder && (
+                    <span className={styles.screenOnly}>
+                      {' '}
+                      ({DISPLAY_CARE_FORM[values.transfusionOrder]})
+                    </span>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <table className={styles.dataTable} aria-label="Графы 1–12 заявки">
           <colgroup>

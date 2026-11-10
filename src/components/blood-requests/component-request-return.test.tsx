@@ -156,7 +156,15 @@ it('сохраняет новые графы приложения № 17 чер�
   render(<ComponentRequest />);
   fireEvent.click(screen.getByText('Эритроцитная взвесь'));
   const dialog = within(screen.getByRole('dialog'));
-  fireEvent.change(dialog.getByLabelText('Идентификационный код компонента (графа 6)'), {
+  expect(dialog.queryByLabelText('Идентификационный код компонента (графа 6)')).toBeNull();
+  const componentSelect = dialog.getByLabelText('Наименование компонента донорской крови');
+  expect(within(componentSelect).queryByRole('option', { name: /КТ-ЛП/ })).toBeNull();
+  expect(
+    within(componentSelect).getByRole('option', {
+      name: 'ЭВ-Л — Эритроцитная взвесь лейкоредуцированная',
+    }),
+  ).toBeTruthy();
+  fireEvent.change(componentSelect, {
     target: { value: 'ЭВ-Л' },
   });
   fireEvent.change(dialog.getByLabelText('Код показания к трансфузии (графа 8)'), {
@@ -172,9 +180,43 @@ it('сохраняет новые графы приложения № 17 чер�
   await waitFor(() => expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce());
   const saved = vi.mocked(database.saveBloodRequestRecord).mock.calls[0][0].values;
   expect(saved.componentCode).toBe('ЭВ-Л');
+  expect(saved.requiredComponent).toBe('Эритроцитная взвесь лейкоредуцированная');
   expect(saved.transfusionIndicationCode).toBe('1.1');
   expect(saved.individualSelectionRequired).toBe('yes');
   expect(saved.individualSelectionCode).toBe('3');
+});
+
+it('при смене группы показывает только её коды и очищает прежнее наименование и код', () => {
+  window.localStorage.setItem(
+    key,
+    JSON.stringify({
+      ...working,
+      requiredComponent: 'Эритроцитная взвесь лейкоредуцированная',
+      componentCode: 'ЭВ-Л',
+      transfusionIndicationCode: '1.1',
+    }),
+  );
+  render(<ComponentRequest />);
+  fireEvent.click(screen.getByText('Эритроцитная взвесь лейкоредуцированная'));
+  const dialog = within(screen.getByRole('dialog'));
+  fireEvent.click(dialog.getByRole('button', { name: 'Плазма' }));
+  const componentSelect = dialog.getByLabelText(
+    'Наименование компонента донорской крови',
+  ) as HTMLSelectElement;
+  expect(componentSelect.value).toBe('');
+  expect(within(componentSelect).queryByRole('option', { name: /ЭВ-Л —/ })).toBeNull();
+  expect(
+    within(componentSelect).getByRole('option', {
+      name: 'КРИО-Л — Криопреципитат лиофилизированный',
+    }),
+  ).toBeTruthy();
+  fireEvent.change(componentSelect, { target: { value: 'КРИО-Л' } });
+  expect(componentSelect.value).toBe('КРИО-Л');
+  expect(
+    (dialog.getByLabelText('Код показания к трансфузии (графа 8)') as HTMLSelectElement).value,
+  ).toBe('');
+  fireEvent(screen.getByRole('dialog'), new Event('cancel', { bubbles: true, cancelable: true }));
+  expect(screen.getByText('КРИО-Л')).toBeTruthy();
 });
 
 it('не переносит старые сведения о доноре КМ/ГСК в заявку', async () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { COMPONENT_NOMENCLATURE, componentCatalogForGroup } from './component-request-catalog';
 import {
   COMPONENT_CODES,
   INDIVIDUAL_SELECTION_INDICATIONS,
@@ -66,6 +67,33 @@ describe('Заявка по приложению № 17 к приказу № 44
       '4.3',
       '5',
     ]);
+    expect(componentTypeForCode('ИСП-RhD')).toBe('plasma');
+  });
+
+  it('ограничивает варианты выбранной группой и хранит только нормативные коды с расшифровками', () => {
+    const erythrocytes = componentCatalogForGroup('erythrocytes');
+    const platelets = componentCatalogForGroup('platelets');
+    const plasma = componentCatalogForGroup('plasma-cryo');
+    expect(erythrocytes).toContainEqual({
+      code: 'ЭВ-Л',
+      name: 'Эритроцитная взвесь лейкоредуцированная',
+    });
+    expect(platelets.some(({ code }) => code.startsWith('ЭВ-'))).toBe(false);
+    expect(plasma).toContainEqual({
+      code: 'КРИО-ПЛ',
+      name: 'Криопреципитат пулированный лиофилизированный',
+    });
+    expect(plasma.some(({ code }) => code.startsWith('КТ-'))).toBe(false);
+    expect(componentCatalogForGroup('')).toEqual([]);
+    expect(
+      Object.values(COMPONENT_NOMENCLATURE)
+        .flat()
+        .every(({ name }) => name.length > 5),
+    ).toBe(true);
+    const validCodes: string[] = Object.values(COMPONENT_NOMENCLATURE)
+      .flat()
+      .map(({ code }) => code);
+    expect(validCodes).not.toContain('ЭВ-УДСО');
   });
 
   it('выводит дату и количество в графы формы', () => {

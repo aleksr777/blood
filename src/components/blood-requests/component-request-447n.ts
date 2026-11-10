@@ -1,39 +1,8 @@
 // Codes and indications for Appendix No. 17, completed under Appendix No. 18
 // to Ministry of Health Order No. 447n of 18 May 2026.
-export const COMPONENT_CODES = {
-  erythrocytes: [
-    'ЭВ-УЛС',
-    'ЭВ-Л',
-    'ЭВ-ЛА',
-    'ЭВ-УДСО',
-    'ЭВ-ЛО',
-    'ЭВ-ЛАО',
-    'ОЭ',
-    'ОЭ-О',
-    'ЭВ-РО',
-    'ЭВ-РОО',
-  ],
-  platelets: [
-    'КТ-ЛП',
-    'КТ-ЛПП',
-    'КТ-ЛПО',
-    'КТ-ЛПДР',
-    'КТ-ЛППДР',
-    'КТ-ЛАПДР',
-    'КТ-ЛАДР',
-    'КТ-ЛПДРО',
-    'КТ-ЛАДРО',
-    'КТ-ЛПА',
-    'КТ-ЛАП',
-    'КТ-ЛКР',
-    'КТ-КР',
-    'КТ-ЛПАО',
-  ],
-  plasma: ['СЗП', 'ПП', 'ППП', 'ЛП'],
-  cryoprecipitate: ['КРИО', 'КРИО-П'],
-  cryosupernatant: ['КП'],
-  granulocytes: ['ГКО', 'ГК-ПО'],
-} as const;
+import { COMPONENT_CODES } from './component-request-catalog';
+
+export { COMPONENT_CODES } from './component-request-catalog';
 
 type IndicationOption = { code: string; label: string; type: keyof typeof COMPONENT_CODES };
 
@@ -85,7 +54,9 @@ export const INDIVIDUAL_SELECTION_INDICATIONS = [
 export const componentTypeForCode = (code: string) =>
   (
     Object.entries(COMPONENT_CODES) as Array<[keyof typeof COMPONENT_CODES, readonly string[]]>
-  ).find(([, codes]) => codes.includes(code.trim().toUpperCase()))?.[0] ?? null;
+  ).find(([, codes]) =>
+    codes.some((item) => item.toUpperCase() === code.trim().toUpperCase()),
+  )?.[0] ?? null;
 
 export const indicationOptionsForComponent = (code: string, group: string) => {
   const type = componentTypeForCode(code);

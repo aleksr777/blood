@@ -1,13 +1,11 @@
-import { useId } from 'react';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
 import { BoundedIntegerInput } from '../bounded-integer-input/bounded-integer-input';
-import { FormInput } from '../form-input/form-input';
 import Modal from '../modal/modal';
 import { Choice } from '../transfusion-protocol/indication-controls';
 import { inferBloodComponentGroup } from '../../domain/blood-components';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
+import { componentCatalogForGroup } from './component-request-catalog';
 import {
-  COMPONENT_CODES,
   INDIVIDUAL_SELECTION_INDICATIONS,
   TRANSFUSION_INDICATIONS,
   indicationOptionsForComponent,
@@ -36,20 +34,25 @@ export const ComponentRequestDetailsModal = ({
   onIndicationsChange,
   onClose,
 }: Props) => {
-  const codeListId = useId();
   const group =
     values.indicationValues.componentGroup ||
     values.indicationValues.indicationComponent ||
     inferBloodComponentGroup(values.requiredComponent);
+  const catalogOptions = componentCatalogForGroup(group);
+  const selectedCode = catalogOptions.some(({ code }) => code === values.componentCode)
+    ? values.componentCode
+    : '';
   const indications = indicationOptionsForComponent(values.componentCode, group);
   const selectedIndication = TRANSFUSION_INDICATIONS.find(
     ({ code }) => code === values.transfusionIndicationCode,
   );
 
-  const changeCode = (code: string) => {
-    const options = indicationOptionsForComponent(code, group);
+  const selectComponent = (code: string) => {
+    const component = catalogOptions.find((option) => option.code === code);
+    const options = indicationOptionsForComponent(component?.code || '', group);
     onChange({
-      componentCode: code.toUpperCase(),
+      componentCode: component?.code || '',
+      requiredComponent: component?.name || '',
       ...(values.transfusionIndicationCode &&
       !options.some((item) => item.code === values.transfusionIndicationCode)
         ? { transfusionIndicationCode: '' }
@@ -68,6 +71,9 @@ export const ComponentRequestDetailsModal = ({
           group={group}
           name={values.requiredComponent}
           inputName="requiredComponent"
+          catalogOptions={catalogOptions}
+          selectedCode={selectedCode}
+          onCodeChange={selectComponent}
           onChange={({ group: nextGroup, name }) => {
             onIndicationsChange({ componentGroup: nextGroup, indicationComponent: nextGroup });
             onChange({
@@ -78,23 +84,6 @@ export const ComponentRequestDetailsModal = ({
         />
 
         <div className={styles.grid}>
-          <label className={styles.wide}>
-            <span>Идентификационный код компонента (графа 6)</span>
-            <FormInput
-              name="componentCode"
-              list={codeListId}
-              value={values.componentCode}
-              onChange={(event) => changeCode(event.target.value)}
-              placeholder="Например, ЭВ-Л или СЗП"
-            />
-            <datalist id={codeListId}>
-              {Object.values(COMPONENT_CODES)
-                .flat()
-                .map((code) => (
-                  <option key={code} value={code} />
-                ))}
-            </datalist>
-          </label>
           <label>
             <span>Количество, единиц (графа 7)</span>
             <BoundedIntegerInput

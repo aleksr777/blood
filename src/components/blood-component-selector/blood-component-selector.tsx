@@ -8,6 +8,9 @@ type Props = BloodComponentSelection & {
   inputName?: string;
   fixedGroup?: string;
   showName?: boolean;
+  catalogOptions?: readonly { code: string; name: string }[];
+  selectedCode?: string;
+  onCodeChange?: (code: string) => void;
   onChange: (selection: BloodComponentSelection) => void;
 };
 
@@ -17,6 +20,9 @@ export const BloodComponentSelector = ({
   inputName = 'componentName',
   fixedGroup,
   showName = true,
+  catalogOptions,
+  selectedCode,
+  onCodeChange,
   onChange,
 }: Props) => {
   const selectedGroup = fixedGroup || group;
@@ -46,18 +52,38 @@ export const BloodComponentSelector = ({
       </div>
       {showName && selected && category && (
         <div className={styles.name}>
-          <div className={styles.label}>Наименование компонента донорской крови</div>
-          <SavedOptionsField
-            key={category}
-            name={inputName}
-            label="Наименование компонента донорской крови"
-            category={category}
-            fixedOptions={[...selected.names]}
-            value={name}
-            rememberOnBlur
-            wrapOptions
-            onChange={(nextName) => onChange({ group: selectedGroup, name: nextName })}
-          />
+          {catalogOptions ? (
+            <label>
+              <span className={styles.label}>Наименование компонента донорской крови</span>
+              <select
+                name={inputName}
+                value={selectedCode || ''}
+                onChange={(event) => onCodeChange?.(event.target.value)}
+              >
+                <option value="">Выберите компонент донорской крови</option>
+                {catalogOptions.map(({ code, name: componentName }) => (
+                  <option key={code} value={code}>
+                    {code} — {componentName}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <>
+              <div className={styles.label}>Наименование компонента донорской крови</div>
+              <SavedOptionsField
+                key={category}
+                name={inputName}
+                label="Наименование компонента донорской крови"
+                category={category}
+                fixedOptions={[...selected.names]}
+                value={name}
+                rememberOnBlur
+                wrapOptions
+                onChange={(nextName) => onChange({ group: selectedGroup, name: nextName })}
+              />
+            </>
+          )}
         </div>
       )}
     </fieldset>

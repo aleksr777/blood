@@ -1,0 +1,48 @@
+.modal {
+  --modal-width: 58rem;
+}
+
+.root {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid {
+  composes: ui-form-grid from global;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.selection {
+  composes: ui-fieldset from global;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.3rem;
+}
+
+.selectionReason {
+  display: block;
+  margin-top: 0.9rem;
+}
+
+.note {
+  margin: 0;
+  color: var(--ui-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wide {
+    grid-column: auto;
+  }
+}

@@ -1,0 +1,242 @@
+.wrap {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 12px 24px;
+  overflow-x: auto;
+}
+
+.paper {
+  box-sizing: border-box;
+  width: 297mm;
+  min-width: 297mm;
+  min-height: 210mm;
+  padding: 9mm 10mm 12mm;
+  background: #fff;
+  box-shadow: 0 8px 32px rgb(18 31 48 / 12%);
+  color: #111;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 10pt;
+  line-height: 1.25;
+  page: component-request-page;
+}
+
+.approval {
+  width: 43%;
+  margin-left: auto;
+  font-size: 9pt;
+  line-height: 1.25;
+  text-align: right;
+}
+
+.approval span {
+  display: block;
+  margin-top: 1mm;
+}
+
+.title {
+  margin: 4mm 0 1mm;
+  font-size: 15pt;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.subtitle {
+  max-width: 250mm;
+  margin: 0 auto 5mm;
+  font-size: 10pt;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.metadata,
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.metadata {
+  margin-bottom: 5mm;
+  font-size: 10pt;
+}
+
+.metadata th,
+.metadata td {
+  border: 0.25mm solid #333;
+  padding: 1.5mm 2mm;
+  text-align: left;
+  vertical-align: top;
+}
+
+.metadata th {
+  width: 54%;
+  font-weight: 400;
+}
+
+.metadata td {
+  min-height: 6mm;
+  font-weight: 400;
+}
+
+.underlined {
+  text-decoration: underline;
+  text-decoration-thickness: 0.2mm;
+  text-underline-offset: 1.5mm;
+}
+
+.screenOnly {
+  display: none;
+}
+
+.dataTable {
+  font-size: 7.4pt;
+}
+
+.dataTable th,
+.dataTable td {
+  box-sizing: border-box;
+  border: 0.25mm solid #333;
+  padding: 1.2mm 0.8mm;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+
+.groupRow th {
+  height: 7mm;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.headerRow th {
+  height: 25mm;
+  font-weight: 400;
+  text-align: center;
+}
+
+.numberRow th {
+  height: 5mm;
+  padding: 0.5mm;
+  text-align: center;
+}
+
+.valuesRow td {
+  height: 30mm;
+  font-size: 8pt;
+  font-weight: 400;
+  white-space: pre-wrap;
+}
+
+.wrapText {
+  white-space: pre-wrap;
+}
+
+.componentName {
+  display: block;
+  margin-top: 1mm;
+  font-size: 7pt;
+}
+
+.editable {
+  cursor: pointer;
+  transition: background-color var(--ui-motion-fast) ease;
+}
+
+.editable:focus-visible {
+  background: var(--ui-accent-soft);
+  outline: 1px solid var(--ui-accent);
+  outline-offset: -1px;
+}
+
+.readOnly {
+  cursor: default;
+}
+
+.signature {
+  display: grid;
+  grid-template-columns: auto minmax(60mm, 1fr) 45mm;
+  column-gap: 4mm;
+  align-items: end;
+  max-width: 195mm;
+  margin-top: 9mm;
+  padding: 2mm 1mm;
+}
+
+.physician,
+.signatureLine {
+  min-height: 7mm;
+  border-bottom: 0.25mm solid #111;
+  padding: 1mm;
+}
+
+.signatureCaption {
+  grid-row: 2;
+  font-size: 7pt;
+  text-align: center;
+}
+
+.signatureNameCaption {
+  grid-column: 2;
+}
+
+.signatureAutographCaption {
+  grid-column: 3;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .editable:not(.readOnly):hover {
+    background: var(--ui-accent-soft);
+  }
+}
+
+@media (max-width: 1200px) {
+  .wrap {
+    justify-content: flex-start;
+  }
+}
+
+@page component-request-page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+@media print {
+  :global(html[data-app-page='component-request']),
+  :global(html[data-app-page='component-request'] body),
+  :global(html[data-app-page='component-request'] #root) {
+    width: 297mm !important;
+    min-width: 297mm !important;
+    height: 210mm !important;
+    min-height: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .wrap {
+    display: block;
+    width: 297mm;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .paper {
+    width: 297mm;
+    min-width: 297mm;
+    min-height: 210mm;
+    height: 210mm;
+    margin: 0;
+    box-shadow: none;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .editable,
+  .editable:hover,
+  .editable:focus-visible {
+    background: transparent !important;
+    outline: none !important;
+  }
+}

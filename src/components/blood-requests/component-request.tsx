@@ -9,7 +9,6 @@ import { cleanComponentRequestDraft } from '../saved-document/working-form-clean
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
-import { WarningNotice } from '../warning-notice/warning-notice';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
@@ -37,49 +36,27 @@ import {
 } from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
-import { getBloodGroupMismatch } from '../transfusion-protocol/blood-group-validation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { formatObstetricHistory } from '../transfusion-protocol/recipient-history-model';
-import {
-  formatAlloimmuneAntibodies,
-  formatRecipientAntigens,
-} from '../transfusion-protocol/recipient-examination-model';
-import {
-  formatIndications,
-  getIndicationComponent,
-} from '../transfusion-protocol/indications-model';
+import { formatRecipientAntigens } from '../transfusion-protocol/recipient-examination-model';
+import { getIndicationComponent } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
-import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
+import { ComponentRequestDetailsModal } from './component-request-details-modal';
+import { ComponentRequestForm } from './component-request-form';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
-import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
-import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
+import { sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
-import { AdaptiveRuledField } from './adaptive-ruled-field';
-import { hasStructuredObstetricHistory } from './direction-history';
 import {
-  activateOnKeyboard,
-  formatDirectionDate,
   readSavedRequestRecordId,
   REQUEST_AUTO_FIELDS,
   type RequestAutoField,
 } from './request-common';
-import styles from './individual-selection-direction.module.css';
+import styles from './component-request-page.module.css';
 
 const STORAGE_KEY = 'blood:component-request-direction-draft';
 const SAVED_RECORD_ID_STORAGE_KEY = `${STORAGE_KEY}:saved-record-id`;
-
-const TRANSFUSION_ORDER_TEXT: Record<string, string> = {
-  planned: 'плановая',
-  emergency: 'экстренная',
-};
-
-const COMPONENT_SELECTION_REQUIREMENT_TEXT: Record<string, string> = {
-  'not-required': 'индивидуальный подбор и подбор по фенотипу не требуется',
-  phenotype: 'требуется подбор по фенотипу',
-  individual: 'требуется индивидуальный подбор',
-};
 
 type DirectionDraft = Record<RequestAutoField, string> & {
   sourceRecipientId: string;
@@ -87,11 +64,22 @@ type DirectionDraft = Record<RequestAutoField, string> & {
   componentAbo: string;
   componentRh: string;
   quantity: string;
+  componentCode: string;
+  estimatedVolumeMl: string;
+  transfusionIndicationCode: string;
+  individualSelectionRequired: string;
+  individualSelectionCode: string;
   transfusionOrder: string;
   componentSelectionRequirement: string;
   individualSelectionIndications: string;
   medicalOrganization: string;
   directionDate: string;
+  departmentPhone: string;
+  requestDateTime: string;
+  plannedTransfusionDateTime: string;
+  stemCellDonorAbo: string;
+  stemCellDonorRh: string;
+  stemCellDonorAntigens: string;
   doctorName: string;
   indicationValues: ProtocolValues;
   recipientProfileSnapshot: ProtocolValues;
@@ -99,26 +87,55 @@ type DirectionDraft = Record<RequestAutoField, string> & {
 };
 
 type Editor =
-  'organization' | 'component' | 'examination' | 'recipient' | 'obstetric' | 'footer' | null;
+  'organization' | 'component' | 'examination' | 'recipient' | 'stem-donor' | 'footer' | null;
 
 const ORGANIZATION_FIELDS: RequestEditorField[] = [
   {
-    name: 'medicalOrganization',
-    label: 'Наименование ЛПУ',
-    savedOptionsCategory: 'medicalOrganization',
+    name: 'department',
+    label: 'Подразделение медицинской организации',
+  },
+  { name: 'departmentPhone', label: 'Контактный телефон подразделения' },
+  { name: 'requestDateTime', label: 'Дата и время подачи заявки', type: 'datetime-local' },
+  {
+    name: 'plannedTransfusionDateTime',
+    label: 'Предполагаемые дата и время трансфузии',
+    type: 'datetime-local',
+  },
+  {
+    name: 'transfusionOrder',
+    label: 'Форма оказания медицинской помощи',
+    type: 'select',
+    options: [
+      { value: 'emergency', label: 'Экстренная или неотложная' },
+      { value: 'planned', label: 'Плановая' },
+    ],
     wide: true,
   },
-  { name: 'department', label: 'Отделение', wide: true },
 ];
 
 const FOOTER_FIELDS: RequestEditorField[] = [
-  { name: 'directionDate', label: 'Дата направления', type: 'date' },
   {
     name: 'doctorName',
-    label: 'Врач, назначивший трансфузию',
+    label: 'Врач, проводящий трансфузию',
     savedOptionsCategory: 'individualSelectionDoctorName',
     wide: true,
   },
+];
+
+const STEM_DONOR_FIELDS: RequestEditorField[] = [
+  {
+    name: 'stemCellDonorAbo',
+    label: 'Группа крови AB0 донора КМ/ГСК',
+    type: 'select',
+    options: ['O(I)', 'A(II)', 'B(III)', 'AB(IV)'].map((value) => ({ value, label: value })),
+  },
+  {
+    name: 'stemCellDonorRh',
+    label: 'Резус-принадлежность донора КМ/ГСК',
+    type: 'select',
+    options: ['Rh(+)', 'Rh(-)'].map((value) => ({ value, label: value })),
+  },
+  { name: 'stemCellDonorAntigens', label: 'Антигены C, c, E, e, K, k донора КМ/ГСК', wide: true },
 ];
 
 const emptyDraft = (): DirectionDraft => ({
@@ -127,6 +144,11 @@ const emptyDraft = (): DirectionDraft => ({
   componentAbo: '',
   componentRh: '',
   quantity: '',
+  componentCode: '',
+  estimatedVolumeMl: '',
+  transfusionIndicationCode: '',
+  individualSelectionRequired: '',
+  individualSelectionCode: '',
   transfusionOrder: '',
   componentSelectionRequirement: '',
   individualSelectionIndications: '',
@@ -137,6 +159,12 @@ const emptyDraft = (): DirectionDraft => ({
   department: '',
   medicalRecordNumber: '',
   medicalOrganization: '',
+  departmentPhone: '',
+  requestDateTime: '',
+  plannedTransfusionDateTime: '',
+  stemCellDonorAbo: '',
+  stemCellDonorRh: '',
+  stemCellDonorAntigens: '',
   diagnosis: '',
   obstetricHistory: '',
   recipientSex: '',
@@ -150,6 +178,14 @@ const emptyDraft = (): DirectionDraft => ({
 const draftFromRecord = (values: unknown): DirectionDraft => {
   const next = restoreRequestDraft(emptyDraft(), values);
   next.quantity = sanitizeDoseQuantity(next.quantity);
+  const isLegacyRequest =
+    values !== null && typeof values === 'object' && !('individualSelectionRequired' in values);
+  if (isLegacyRequest) {
+    if (next.componentSelectionRequirement === 'individual')
+      next.individualSelectionRequired = 'yes';
+    if (next.componentSelectionRequirement === 'not-required')
+      next.individualSelectionRequired = 'no';
+  }
   return next;
 };
 
@@ -244,7 +280,6 @@ export const ComponentRequest = () => {
     onOpen: () => setRegistryOpen(true),
   });
   const [status, setStatus] = useState('');
-  const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
   const refreshVersionRef = useRef(0);
   const profileEditVersionRef = useRef(0);
   const pendingProfileUpdateRef = useRef<Promise<void>>(Promise.resolve());
@@ -638,29 +673,6 @@ export const ComponentRequest = () => {
     };
   }, [currentRecipient, draft, documentState.active]);
 
-  const bloodGroupMismatch = getBloodGroupMismatch({
-    ...examinationValues,
-    donorAbo: draft.componentAbo,
-    donorRh: draft.componentRh,
-  });
-
-  useEffect(() => {
-    if (!bloodGroupMismatch.key) {
-      setDismissedBloodGroupWarningKey('');
-    }
-  }, [bloodGroupMismatch.key]);
-
-  const bloodGroupWarning =
-    bloodGroupMismatch.key && bloodGroupMismatch.key !== dismissedBloodGroupWarningKey
-      ? bloodGroupMismatch.message
-      : '';
-
-  const dismissBloodGroupWarning = () => {
-    if (bloodGroupMismatch.key) {
-      setDismissedBloodGroupWarningKey(bloodGroupMismatch.key);
-    }
-  };
-
   const updateExamination = (changes: ProtocolValues) => {
     if (documentState.isActive()) {
       setDraft((current) =>
@@ -720,147 +732,18 @@ export const ComponentRequest = () => {
           fields: FOOTER_FIELDS,
           values: valuesFor(FOOTER_FIELDS),
         };
+      case 'stem-donor':
+        return {
+          title: 'Сведения о доноре костного мозга / ГСК',
+          fields: STEM_DONOR_FIELDS,
+          values: valuesFor(STEM_DONOR_FIELDS),
+        };
       default:
         return null;
     }
   }, [draft, editor]);
 
-  const selectedComponent = getIndicationComponent(draft.indicationValues);
-  const isErythrocytes = selectedComponent === 'erythrocytes';
-  const requiresIndividualSelection =
-    isErythrocytes && draft.componentSelectionRequirement === 'individual';
-  const transfusionOrderText = TRANSFUSION_ORDER_TEXT[draft.transfusionOrder] ?? '';
-  const componentSelectionRequirementText =
-    COMPONENT_SELECTION_REQUIREMENT_TEXT[draft.componentSelectionRequirement] ?? '';
-
-  const formSections = [
-    <div
-      key="organization"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('organization')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('organization'))}
-    >
-      <AdaptiveRuledField label="Наименование ЛПУ:" value={draft.medicalOrganization} />
-      <AdaptiveRuledField label="Отделение:" value={draft.department} />
-    </div>,
-
-    <div
-      key="recipient"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('recipient')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
-    >
-      <AdaptiveRuledField label="Ф.И.О. реципиента:" value={draft.recipientName} />
-      <AdaptiveRuledField label="Возраст:" value={draft.recipientAge} />
-      <AdaptiveRuledField label="№ медицинской карты:" value={draft.medicalRecordNumber} />
-      <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
-    </div>,
-
-    <div
-      key="examination"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('examination')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('examination'))}
-    >
-      <AdaptiveRuledField
-        label="Группа крови и резус-фактор реципиента:"
-        value={draft.recipientAboRh}
-      />
-      <AdaptiveRuledField label="Фенотип реципиента:" value={draft.recipientPhenotype} />
-      <AdaptiveRuledField
-        label="Аллоиммунные антитела:"
-        value={formatAlloimmuneAntibodies(examinationValues)}
-      />
-    </div>,
-
-    ...(draft.recipientSex === 'Женский'
-      ? [
-          <div
-            key="obstetric"
-            className={styles.fillSection}
-            role={documentState.readOnly ? undefined : 'button'}
-            tabIndex={documentState.readOnly ? -1 : 0}
-            onClick={() => setEditor('obstetric')}
-            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('obstetric'))}
-          >
-            <AdaptiveRuledField
-              label="Акушерский анамнез у женщин:"
-              value={
-                hasStructuredObstetricHistory(examinationValues)
-                  ? formatObstetricHistory(examinationValues)
-                  : draft.obstetricHistory
-              }
-            />
-          </div>,
-        ]
-      : []),
-
-    <div
-      key="component"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('component')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('component'))}
-    >
-      <AdaptiveRuledField
-        label="Наименование требуемого компонента:"
-        value={draft.requiredComponent}
-      />
-      <AdaptiveRuledField
-        label="Группа крови и резус-фактор компонента:"
-        value={[draft.componentAbo, draft.componentRh].filter(Boolean).join(' ')}
-      />
-      <AdaptiveRuledField label="Количество:" value={formatDoseQuantity(draft.quantity)} />
-      <AdaptiveRuledField label="Порядок трансфузии:" value={transfusionOrderText} />
-      <AdaptiveRuledField
-        label="Показания к трансфузии:"
-        value={formatIndications(draft.indicationValues)}
-      />
-      {isErythrocytes && componentSelectionRequirementText && (
-        <AdaptiveRuledField label="" value={componentSelectionRequirementText} />
-      )}
-      {requiresIndividualSelection && (
-        <AdaptiveRuledField
-          label="Показания для индивидуального подбора:"
-          value={draft.individualSelectionIndications}
-        />
-      )}
-    </div>,
-
-    <div
-      key="footer"
-      className={`${styles.fillSection} ${styles.footerSection}`}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('footer')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('footer'))}
-    >
-      <AdaptiveRuledField
-        label="Дата направления:"
-        value={formatDirectionDate(draft.directionDate)}
-      />
-
-      <AdaptiveRuledField label="Врач, назначивший трансфузию:" value={draft.doctorName} />
-    </div>,
-  ];
-
-  const printPage = (page: 1 | 2) => {
-    const className = `print-individual-selection-page-${page}`;
-    document.body.classList.add(className);
-
-    try {
-      window.print();
-    } finally {
-      document.body.classList.remove(className);
-    }
-  };
+  const printPage = () => window.print();
 
   return (
     <SavedDocumentPage
@@ -908,105 +791,21 @@ export const ComponentRequest = () => {
             <button
               type="button"
               className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-              onClick={() => printPage(1)}
+              onClick={printPage}
             >
-              Печать страницы 1
-            </button>
-            <button
-              type="button"
-              className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
-              onClick={() => printPage(2)}
-            >
-              Печать страницы 2
+              Печать A4
             </button>
           </div>
           <AnimatedMessage message={status} className="toolbar-status" />
-          <WarningNotice
-            className="toolbar-blood-group-warning"
-            message={bloodGroupWarning}
-            onDismiss={dismissBloodGroupWarning}
-          />
         </div>
       </header>
 
-      <div className={styles.sheetWrap} data-document-paper>
-        <section
-          className={`${styles.sheet} ${styles.pageOne}`}
-          aria-label="Заявка в трансфузиологический кабинет, страница 1"
-        >
-          <div className={styles.pageContent}>
-            <h1 className={styles.title}>
-              Заявка в трансфузиологический кабинет на компоненты крови.
-            </h1>
-
-            {formSections}
-          </div>
-        </section>
-
-        <section
-          className={`${styles.sheet} ${styles.pageTwo} ${styles.issuedPage}`}
-          aria-label="Выдано из трансфузиологического кабинета, страница 2"
-        >
-          <div className={styles.issuedContent}>
-            <h2 className={styles.issuedTitle}>Выдано из трансфузиологического кабинета</h2>
-
-            <table className={styles.issuedTable}>
-              <colgroup>
-                <col style={{ width: '2%' }} />
-                <col style={{ width: '22.5%' }} />
-                <col style={{ width: '6.3%' }} />
-                <col style={{ width: '6.1%' }} />
-                <col style={{ width: '12%' }} />
-                <col style={{ width: '5.5%' }} />
-                <col style={{ width: '7.3%' }} />
-                <col style={{ width: '7.3%' }} />
-                <col style={{ width: '7.3%' }} />
-                <col style={{ width: '7.3%' }} />
-                <col style={{ width: '16.4%' }} />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>№</th>
-                  <th>Наименование компонента донорской крови</th>
-                  <th>Группа крови донора</th>
-                  <th>Резус-принадлежность</th>
-                  <th>Фенотип донора</th>
-                  <th>Объем (мл)</th>
-                  <th>№ контейнера</th>
-                  <th>Код донора</th>
-                  <th>Дата заготовки</th>
-                  <th>Срок годности</th>
-                  <th>Изготовитель</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 6 }, (_, index) => (
-                  <tr key={index}>
-                    {Array.from({ length: 11 }, (_, cellIndex) => (
-                      <td key={cellIndex}>&nbsp;</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <div className={styles.issuedFooter}>
-              <div className={styles.issuedFooterRow}>
-                <span className={styles.issuedFooterLabel}>Дата:</span>
-                <span className={styles.issuedDateLine} />
-              </div>
-              <div className={styles.issuedFooterRow}>
-                <span className={styles.issuedFooterLabel}>Получил компоненты крови:</span>
-                <span className={styles.issuedSignatureLine} />
-              </div>
-              <div className={styles.issuedFooterRow}>
-                <span className={styles.issuedFooterLabel}>Выдал компоненты крови:</span>
-                <span className={styles.issuedSignatureLine} />
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+      <ComponentRequestForm
+        values={draft}
+        examination={examinationValues}
+        readOnly={documentState.readOnly}
+        onEdit={setEditor}
+      />
 
       {editor === 'recipient' && (
         <IndividualSelectionRecipientModal
@@ -1022,28 +821,10 @@ export const ComponentRequest = () => {
         />
       )}
 
-      {editor === 'obstetric' && draft.recipientSex === 'Женский' && (
-        <IndividualSelectionObstetricHistoryModal
-          values={examinationValues}
-          onChange={updateExamination}
-          onClose={() => setEditor(null)}
-        />
-      )}
-
       {editor === 'component' && (
-        <IndividualSelectionComponentModal
-          requiredComponent={draft.requiredComponent}
-          componentAbo={draft.componentAbo}
-          componentRh={draft.componentRh}
-          quantity={draft.quantity}
-          transfusionOrder={draft.transfusionOrder}
-          componentSelectionRequirement={draft.componentSelectionRequirement}
-          individualSelectionIndications={draft.individualSelectionIndications}
-          indicationValues={draft.indicationValues}
-          showRequestOptions
-          bloodGroupWarning={bloodGroupWarning}
-          onDismissBloodGroupWarning={dismissBloodGroupWarning}
-          onLocalChange={updateFields}
+        <ComponentRequestDetailsModal
+          values={draft}
+          onChange={updateFields}
           onIndicationsChange={updateIndications}
           onClose={() => setEditor(null)}
         />
@@ -1052,8 +833,6 @@ export const ComponentRequest = () => {
       {editor === 'examination' && (
         <IndividualSelectionExaminationModal
           values={examinationValues}
-          bloodGroupWarning={bloodGroupWarning}
-          onDismissBloodGroupWarning={dismissBloodGroupWarning}
           onChange={updateExamination}
           onClose={() => setEditor(null)}
         />

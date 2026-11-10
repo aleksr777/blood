@@ -1,0 +1,16 @@
+.shell {
+  padding: 0 16px 40px;
+}
+
+.header {
+  margin-right: -16px;
+  margin-left: -16px;
+}
+
+@media print {
+  .shell {
+    width: 297mm;
+    margin: 0;
+    padding: 0;
+  }
+}

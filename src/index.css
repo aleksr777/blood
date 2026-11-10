@@ -10,6 +10,19 @@
   box-sizing: border-box;
 }
 
+/* One switch for the entire site; form controls remain selectable in either mode. */
+html[data-text-selection='disabled'] * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html[data-text-selection='disabled'] input,
+html[data-text-selection='disabled'] textarea,
+html[data-text-selection='disabled'] [contenteditable='true'] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 html {
   background: var(--ui-background);
   scrollbar-width: none;

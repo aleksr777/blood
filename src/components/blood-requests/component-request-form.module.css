@@ -40,10 +40,6 @@
   white-space: nowrap;
 }
 
-.approval span + span {
-  margin-top: 0.5mm;
-}
-
 .title {
   margin: 4mm 0 1mm;
   font-size: 15pt;

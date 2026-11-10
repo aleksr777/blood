@@ -97,10 +97,6 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
             Приложение № 17 к приказу Министерства здравоохранения Российской Федерации от 18 мая
             2026 г. № 447н
           </span>
-          <span>
-            Унифицированная форма медицинской документации утверждена приказом Министерства
-            здравоохранения Российской Федерации от 18 мая 2026 г. № 447н
-          </span>
         </div>
         <h1 className={styles.title}>ЗАЯВКА</h1>
         <div className={styles.subtitle}>

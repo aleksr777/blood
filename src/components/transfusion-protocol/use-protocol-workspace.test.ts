@@ -168,6 +168,16 @@ it('cannot save an edited snapshot after removing a required time', async () => 
   expect(record.values.endTime).toBe(hemacon.endTime);
 });
 
+it('blocks a protocol with conflicting hemacon dates without losing the entered values', async () => {
+  const invalidDates = { ...hemacon, collectionDate: '2026-11-01' };
+  const { result } = await openDraft(invalidDates);
+  await act(async () => expect(await result.current.saveToDatabase()).toBe(false));
+  expect(result.current.activeBlock).toBe('donor');
+  expect(result.current.status).toContain('Дата заготовки должна быть раньше');
+  expect(result.current.values).toMatchObject(invalidDates);
+  expect(database.saveProtocolRecord).not.toHaveBeenCalled();
+});
+
 it('does not save or clear a recipient-only draft with retained reagent defaults', async () => {
   const { result } = await openDraft({ reagentAntiASeries: '123' });
   const values = structuredClone(result.current.values);

@@ -11,15 +11,7 @@ import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
 import { RECIPIENT_PROFILE_FIELDS } from '../../storage/sqlite/recipient-data';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type MouseEvent,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import {
   readCurrentRecipient,
   switchCurrentRecipient,
@@ -81,35 +73,19 @@ import {
 } from './individual-selection-clear';
 import { useFormPages } from './use-form-pages';
 import { AdaptiveRuledField } from './adaptive-ruled-field';
+import {
+  activateOnKeyboard,
+  formatDirectionDate,
+  readSavedRequestRecordId,
+  REQUEST_AUTO_FIELDS,
+  type RequestAutoField,
+} from './request-common';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:individual-selection-direction-draft';
 const SAVED_RECORD_ID_STORAGE_KEY = `${STORAGE_KEY}:saved-record-id`;
 
-const loadSavedRecordId = () => {
-  try {
-    const raw = window.localStorage.getItem(SAVED_RECORD_ID_STORAGE_KEY);
-    if (!raw) return null;
-
-    const id = Number(raw);
-    return Number.isFinite(id) && id > 0 ? id : null;
-  } catch {
-    return null;
-  }
-};
-
-type AutoField =
-  | 'recipientAboRh'
-  | 'recipientPhenotype'
-  | 'recipientName'
-  | 'recipientAge'
-  | 'department'
-  | 'medicalRecordNumber'
-  | 'diagnosis'
-  | 'obstetricHistory'
-  | 'recipientSex';
-
-type DirectionDraft = Record<AutoField, string> & {
+type DirectionDraft = Record<RequestAutoField, string> & {
   sourceRecipientId: string;
   transfusionHistory: string;
   requiredComponent: string;
@@ -121,23 +97,11 @@ type DirectionDraft = Record<AutoField, string> & {
   doctorPhone: string;
   indicationValues: ProtocolValues;
   recipientProfileSnapshot: ProtocolValues;
-  autoValues: Partial<Record<AutoField, string>>;
+  autoValues: Partial<Record<RequestAutoField, string>>;
 };
 
 type Editor =
   'organization' | 'component' | 'examination' | 'recipient' | 'history' | 'footer' | null;
-
-const AUTO_FIELDS: AutoField[] = [
-  'recipientAboRh',
-  'recipientPhenotype',
-  'recipientName',
-  'recipientAge',
-  'department',
-  'medicalRecordNumber',
-  'diagnosis',
-  'obstetricHistory',
-  'recipientSex',
-];
 
 const ORGANIZATION_FIELDS: RequestEditorField[] = [
   {
@@ -208,7 +172,7 @@ const loadDraft = (): DirectionDraft => {
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
 ): Promise<{
-  autoValues: Partial<Record<AutoField, string>>;
+  autoValues: Partial<Record<RequestAutoField, string>>;
   recipientProfileSnapshot: ProtocolValues;
 }> => {
   if (!recipient) return { autoValues: {}, recipientProfileSnapshot: {} };
@@ -265,29 +229,18 @@ const mergeAutoValues = (
     autoValues: { ...autoValues },
   };
 
-  AUTO_FIELDS.forEach((field) => {
+  REQUEST_AUTO_FIELDS.forEach((field) => {
     next[field] = autoValues[field] ?? '';
   });
 
   return next;
 };
 
-const activateOnKeyboard = (event: KeyboardEvent<HTMLElement>, action: () => void) => {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    action();
-  }
-};
-
-const formatDirectionDate = (value: string) => {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return '';
-
-  return `${match[3]}.${match[2]}.${match[1]}`;
-};
-
 export const IndividualSelectionDirection = () => {
-  const [initialStored] = useState(() => ({ draft: loadDraft(), id: loadSavedRecordId() }));
+  const [initialStored] = useState(() => ({
+    draft: loadDraft(),
+    id: readSavedRequestRecordId(STORAGE_KEY),
+  }));
   const documentState = useDocumentState<DirectionDraft>(
     () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
     clearIndividualSelectionStaff,

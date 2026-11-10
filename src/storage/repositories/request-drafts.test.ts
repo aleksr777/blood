@@ -111,3 +111,19 @@ it('keeps the request draft intact if automatic archiving fails', async () => {
   await expect(savePreviousRequestDrafts(2)).rejects.toThrow('Write failed');
   expect(window.localStorage.getItem(storageKey)).toBe(raw);
 });
+
+it('leaves both request drafts intact if archiving the second one fails', async () => {
+  const [first, second] = REQUEST_DRAFTS;
+  const rawFirst = JSON.stringify({ sourceRecipientId: '1', quantity: '2' });
+  const rawSecond = JSON.stringify({ sourceRecipientId: '1', requiredComponent: 'Эритроциты' });
+  window.localStorage.setItem(first.storageKey, rawFirst);
+  window.localStorage.setItem(second.storageKey, rawSecond);
+  vi.mocked(database.saveBloodRequestRecord).mockResolvedValueOnce(
+    {} as Awaited<ReturnType<typeof database.saveBloodRequestRecord>>,
+  );
+  vi.mocked(database.saveBloodRequestRecord).mockRejectedValueOnce(new Error('Write failed'));
+
+  await expect(savePreviousRequestDrafts(2)).rejects.toThrow('Write failed');
+  expect(window.localStorage.getItem(first.storageKey)).toBe(rawFirst);
+  expect(window.localStorage.getItem(second.storageKey)).toBe(rawSecond);
+});

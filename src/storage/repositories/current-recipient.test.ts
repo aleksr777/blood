@@ -21,6 +21,7 @@ vi.mock('../sqlite/database-client', () => ({
     updateRecipient: vi.fn(),
     saveProtocolRecord: vi.fn(async () => ({})),
     saveRegistrationRecord: vi.fn(async () => ({})),
+    saveBloodRequestRecord: vi.fn(async () => ({})),
   },
 }));
 vi.mock('./protocol-draft', () => ({
@@ -256,5 +257,39 @@ describe('current recipient profile', () => {
     expect(readCurrentRecipient()?.id).toBe(recipient.id);
     expect(database.saveProtocolRecord).not.toHaveBeenCalled();
     expect(saveProtocolDraft).not.toHaveBeenCalled();
+  });
+
+  it('does not archive or clear request drafts when switching is blocked by an incomplete protocol', async () => {
+    const values = { ...recipientProfileValuesForForms(recipient), componentName: 'Эритроциты' };
+    adoptCurrentRecipientFromValues(values);
+    vi.mocked(loadProtocolDraft).mockResolvedValue({
+      values,
+      protocolRecordId: null,
+      updatedAt: Date.now(),
+    });
+    vi.mocked(loadRegistrationDraft).mockResolvedValue({
+      values: {},
+      registrationRecordId: null,
+      updatedAt: 0,
+    });
+    const storageKey = 'blood:component-request-direction-draft';
+    const raw = JSON.stringify({ sourceRecipientId: '1', quantity: '2' });
+    window.localStorage.setItem(storageKey, raw);
+
+    await expect(
+      switchCurrentRecipient({
+        ...recipient,
+        id: 2,
+        fullName: 'Другой Реципиент',
+        protocolCount: 0,
+        registrationCount: 0,
+        componentRequestCount: 0,
+        individualSelectionDirectionCount: 0,
+      }),
+    ).rejects.toThrow('Заполните обязательные поля');
+
+    expect(window.localStorage.getItem(storageKey)).toBe(raw);
+    expect(database.saveBloodRequestRecord).not.toHaveBeenCalled();
+    expect(readCurrentRecipient()?.id).toBe(1);
   });
 });

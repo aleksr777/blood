@@ -414,8 +414,6 @@ const switchRecipient = async (
   if (registrationDraft.registrationRecordId !== null)
     registrationDraft = { values: {}, registrationRecordId: null, updatedAt: Date.now() };
 
-  await savePreviousRequestDrafts(recipient.id);
-
   const protocolRecipientId = getRecipientId(protocolDraft.values);
   const registrationRecipientId = getRecipientId(registrationDraft.values);
   const activeRecipientId = storedRecipient?.id ?? protocolRecipientId ?? registrationRecipientId;
@@ -424,6 +422,7 @@ const switchRecipient = async (
     (registrationRecipientId !== null && registrationRecipientId !== recipient.id);
 
   if (activeRecipientId === recipient.id && !hasConflictingDraft) {
+    await savePreviousRequestDrafts(recipient.id);
     const profileValues = recipientProfileValuesForForms(recipient);
     const protocolProfileChanged = hasRecipientProfileDifference(protocolDraft.values, recipient);
     const registrationProfileChanged = hasRecipientProfileDifference(
@@ -482,6 +481,9 @@ const switchRecipient = async (
     savePreviousProtocol(protocolDraft, recipient.id),
     savePreviousRegistration(registrationDraft, recipient.id),
   ]);
+
+  // Do not clear request drafts until the protocol/registration archive succeeds.
+  await savePreviousRequestDrafts(recipient.id);
 
   const profileValues = recipientProfileValuesForForms(recipient);
   const protocolValues = {

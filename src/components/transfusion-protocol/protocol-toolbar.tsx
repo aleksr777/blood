@@ -60,7 +60,11 @@ export const ProtocolToolbar = ({
   onPrintPage,
 }: Props) => {
   const [showHemaconWarning, setShowHemaconWarning] = useState(false);
-  const visibleWarning = showHemaconWarning ? hemaconWarning : '';
+  // The date-order warning already has a permanent, non-dismissible notice.
+  const visibleWarning =
+    showHemaconWarning && (!hemaconDateWarning || !hemaconWarning.includes(hemaconDateWarning))
+      ? hemaconWarning
+      : '';
   const saveDisabled =
     !hasContent || document?.mode === 'view' || (document?.mode === 'edit' && !document.hasChanges);
 

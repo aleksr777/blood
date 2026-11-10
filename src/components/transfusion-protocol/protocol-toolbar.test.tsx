@@ -58,6 +58,22 @@ it('has no New blank button and keeps date-order warnings non-dismissible', () =
   expect(screen.queryByRole('alert')).toBeNull();
 });
 
+it('blocks saving invalid hemacon dates without duplicating the permanent date notice', () => {
+  const handlers = props();
+  const message = 'Дата заготовки должна быть раньше даты окончания срока годности.';
+  render(
+    <ProtocolToolbar
+      {...handlers}
+      hemaconWarning={`Сохранение и печать протокола недоступны.\n\n${message}`}
+      hemaconDateWarning={message}
+    />,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+  expect(screen.getAllByRole('alert')).toHaveLength(1);
+  expect(screen.getByRole('alert').textContent).toContain(message);
+  expect(handlers.onSave).not.toHaveBeenCalled();
+});
+
 const expectWarningText = (message: string) => {
   const text = screen.getByRole('alert').textContent;
   for (const line of message.split('\n').filter(Boolean)) {

@@ -11,7 +11,7 @@ import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   readCurrentRecipient,
   switchCurrentRecipient,
@@ -58,22 +58,17 @@ import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
 import { AdaptiveRuledField } from './adaptive-ruled-field';
 import { hasStructuredObstetricHistory } from './direction-history';
+import {
+  activateOnKeyboard,
+  formatDirectionDate,
+  readSavedRequestRecordId,
+  REQUEST_AUTO_FIELDS,
+  type RequestAutoField,
+} from './request-common';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:component-request-direction-draft';
 const SAVED_RECORD_ID_STORAGE_KEY = `${STORAGE_KEY}:saved-record-id`;
-
-const loadSavedRecordId = () => {
-  try {
-    const raw = window.localStorage.getItem(SAVED_RECORD_ID_STORAGE_KEY);
-    if (!raw) return null;
-
-    const id = Number(raw);
-    return Number.isFinite(id) && id > 0 ? id : null;
-  } catch {
-    return null;
-  }
-};
 
 const TRANSFUSION_ORDER_TEXT: Record<string, string> = {
   planned: 'плановая',
@@ -86,18 +81,7 @@ const COMPONENT_SELECTION_REQUIREMENT_TEXT: Record<string, string> = {
   individual: 'требуется индивидуальный подбор',
 };
 
-type AutoField =
-  | 'recipientAboRh'
-  | 'recipientPhenotype'
-  | 'recipientName'
-  | 'recipientAge'
-  | 'department'
-  | 'medicalRecordNumber'
-  | 'diagnosis'
-  | 'obstetricHistory'
-  | 'recipientSex';
-
-type DirectionDraft = Record<AutoField, string> & {
+type DirectionDraft = Record<RequestAutoField, string> & {
   sourceRecipientId: string;
   requiredComponent: string;
   componentAbo: string;
@@ -111,23 +95,11 @@ type DirectionDraft = Record<AutoField, string> & {
   doctorName: string;
   indicationValues: ProtocolValues;
   recipientProfileSnapshot: ProtocolValues;
-  autoValues: Partial<Record<AutoField, string>>;
+  autoValues: Partial<Record<RequestAutoField, string>>;
 };
 
 type Editor =
   'organization' | 'component' | 'examination' | 'recipient' | 'obstetric' | 'footer' | null;
-
-const AUTO_FIELDS: AutoField[] = [
-  'recipientAboRh',
-  'recipientPhenotype',
-  'recipientName',
-  'recipientAge',
-  'department',
-  'medicalRecordNumber',
-  'diagnosis',
-  'obstetricHistory',
-  'recipientSex',
-];
 
 const ORGANIZATION_FIELDS: RequestEditorField[] = [
   {
@@ -192,7 +164,7 @@ const loadDraft = (): DirectionDraft => {
 
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
-): Promise<Partial<Record<AutoField, string>>> => {
+): Promise<Partial<Record<RequestAutoField, string>>> => {
   if (!recipient) return {};
 
   const protocolDraft = await loadProtocolDraft();
@@ -222,7 +194,7 @@ const currentAutoValues = async (
 const mergeAutoValues = (
   current: DirectionDraft,
   recipient: CurrentRecipient | null,
-  autoValues: Partial<Record<AutoField, string>>,
+  autoValues: Partial<Record<RequestAutoField, string>>,
 ): DirectionDraft => {
   if (!recipient) return current;
 
@@ -237,29 +209,18 @@ const mergeAutoValues = (
     autoValues: { ...autoValues },
   };
 
-  AUTO_FIELDS.forEach((field) => {
+  REQUEST_AUTO_FIELDS.forEach((field) => {
     next[field] = autoValues[field] ?? '';
   });
 
   return next;
 };
 
-const activateOnKeyboard = (event: KeyboardEvent<HTMLElement>, action: () => void) => {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    action();
-  }
-};
-
-const formatDirectionDate = (value: string) => {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return '';
-
-  return `${match[3]}.${match[2]}.${match[1]}`;
-};
-
 export const ComponentRequest = () => {
-  const [initialStored] = useState(() => ({ draft: loadDraft(), id: loadSavedRecordId() }));
+  const [initialStored] = useState(() => ({
+    draft: loadDraft(),
+    id: readSavedRequestRecordId(STORAGE_KEY),
+  }));
   const documentState = useDocumentState<DirectionDraft>(
     () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
     cleanComponentRequestDraft,

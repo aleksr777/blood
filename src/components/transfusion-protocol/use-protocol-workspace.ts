@@ -231,7 +231,7 @@ export const useProtocolWorkspace = () => {
     const warning = getProtocolHemaconWarning(values);
     if (!warning) return true;
     setStatus(warning);
-    setActiveBlock(getMissingProtocolFields(values)[0].block);
+    setActiveBlock(getMissingProtocolFields(values)[0]?.block ?? 'donor');
     return false;
   };
 

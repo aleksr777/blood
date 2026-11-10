@@ -8,14 +8,6 @@
 
 * {
   box-sizing: border-box;
-  -webkit-user-select: none;
-  user-select: none;
-}
-
-input,
-textarea {
-  -webkit-user-select: text;
-  user-select: text;
 }
 
 html {
@@ -49,10 +41,6 @@ body {
 
 .app-shell {
   padding: 0 20px 48px;
-}
-
-[data-document-mode='view'] [data-document-paper] {
-  pointer-events: none;
 }
 
 .app-header {

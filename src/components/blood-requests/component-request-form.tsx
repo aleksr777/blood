@@ -25,14 +25,11 @@ export type ComponentRequestFormValues = {
   transfusionIndicationCode: string;
   individualSelectionRequired: string;
   individualSelectionCode: string;
-  stemCellDonorAbo: string;
-  stemCellDonorRh: string;
-  stemCellDonorAntigens: string;
   doctorName: string;
   directionDate: string;
 };
 
-type Section = 'organization' | 'recipient' | 'examination' | 'component' | 'stem-donor' | 'footer';
+type Section = 'organization' | 'recipient' | 'examination' | 'component' | 'footer';
 
 type Props = {
   values: ComponentRequestFormValues;
@@ -200,10 +197,8 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
                     : ''}
               </td>
               <td {...edit('component')}>{values.individualSelectionCode}</td>
-              <td {...edit('stem-donor')}>{values.stemCellDonorAbo}</td>
-              <td {...edit('stem-donor')}>
-                {[values.stemCellDonorRh, values.stemCellDonorAntigens].filter(Boolean).join(', ')}
-              </td>
+              <td />
+              <td />
             </tr>
           </tbody>
         </table>

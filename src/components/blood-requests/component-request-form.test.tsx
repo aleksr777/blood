@@ -25,9 +25,6 @@ const request: ComponentRequestFormValues = {
   transfusionIndicationCode: '1.1',
   individualSelectionRequired: 'yes',
   individualSelectionCode: '3',
-  stemCellDonorAbo: 'O(I)',
-  stemCellDonorRh: 'Rh(-)',
-  stemCellDonorAntigens: 'C− c+ E− e+ K−',
   doctorName: 'Петров Пётр Петрович',
   directionDate: '',
 };
@@ -51,7 +48,10 @@ it('отображает единую заявку с двенадцатью н�
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('15.01.1980');
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('ЭВ-Л');
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('2 ед.');
-  expect(dataTable.querySelector('tbody tr')?.textContent).toContain('Rh(-)');
+  expect(dataTable.querySelector('tbody tr td:nth-child(11)')?.textContent).toBe('');
+  expect(dataTable.querySelector('tbody tr td:nth-child(12)')?.textContent).toBe('');
+  expect(dataTable.querySelector('tbody tr td:nth-child(11)')?.getAttribute('role')).toBeNull();
+  expect(dataTable.querySelector('tbody tr td:nth-child(12)')?.getAttribute('role')).toBeNull();
   const approval = container.querySelector('[data-request-approval]');
   expect(approval?.querySelectorAll('span')).toHaveLength(1);
   expect(approval?.firstElementChild?.textContent).toContain('от 18 мая 2026 г. № 447н');
@@ -124,7 +124,6 @@ it('открывает переиспользуемые редакторы дл�
   fireEvent.keyDown(organization, { key: 'Enter' });
   fireEvent.click(screen.getByText('Иванов Иван Иванович'));
   fireEvent.click(screen.getByText('ЭВ-Л'));
-  fireEvent.click(screen.getByText('Rh(-), C− c+ E− e+ K−'));
   fireEvent.click(screen.getByText('Петров Пётр Петрович'));
   expect(onEdit.mock.calls.map(([section]) => section)).toEqual([
     'organization',
@@ -132,7 +131,6 @@ it('открывает переиспользуемые редакторы дл�
     'organization',
     'recipient',
     'component',
-    'stem-donor',
     'footer',
   ]);
   onEdit.mockClear();

@@ -177,6 +177,30 @@ it('сохраняет новые графы приложения № 17 чер�
   expect(saved.individualSelectionCode).toBe('3');
 });
 
+it('не переносит старые сведения о доноре КМ/ГСК в заявку', async () => {
+  window.localStorage.setItem(
+    key,
+    JSON.stringify({
+      ...working,
+      stemCellDonorAbo: 'A(II)',
+      stemCellDonorRh: 'Rh(+)',
+      stemCellDonorAntigens: 'C+ c+ E− e+ K−',
+    }),
+  );
+  render(<ComponentRequest />);
+  const cells = screen
+    .getByRole('table', { name: 'Графы 1–12 заявки' })
+    .querySelectorAll('tbody td');
+  expect(cells[10].textContent).toBe('');
+  expect(cells[11].textContent).toBe('');
+  fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
+  await waitFor(() => expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce());
+  const saved = vi.mocked(database.saveBloodRequestRecord).mock.calls[0][0].values;
+  expect(saved).not.toHaveProperty('stemCellDonorAbo');
+  expect(saved).not.toHaveProperty('stemCellDonorRh');
+  expect(saved).not.toHaveProperty('stemCellDonorAntigens');
+});
+
 it('печатает каждую из двух страниц заявки отдельно', () => {
   const printClasses: string[][] = [];
   const print = vi.spyOn(window, 'print').mockImplementation(() => {

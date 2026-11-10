@@ -78,17 +78,13 @@ type DirectionDraft = Record<RequestAutoField, string> & {
   departmentPhone: string;
   requestDateTime: string;
   plannedTransfusionDateTime: string;
-  stemCellDonorAbo: string;
-  stemCellDonorRh: string;
-  stemCellDonorAntigens: string;
   doctorName: string;
   indicationValues: ProtocolValues;
   recipientProfileSnapshot: ProtocolValues;
   autoValues: Partial<Record<RequestAutoField, string>>;
 };
 
-type Editor =
-  'organization' | 'component' | 'examination' | 'recipient' | 'stem-donor' | 'footer' | null;
+type Editor = 'organization' | 'component' | 'examination' | 'recipient' | 'footer' | null;
 
 const ORGANIZATION_FIELDS: RequestEditorField[] = [
   {
@@ -127,22 +123,6 @@ const FOOTER_FIELDS: RequestEditorField[] = [
   },
 ];
 
-const STEM_DONOR_FIELDS: RequestEditorField[] = [
-  {
-    name: 'stemCellDonorAbo',
-    label: 'Группа крови AB0 донора КМ/ГСК',
-    type: 'select',
-    options: ['O(I)', 'A(II)', 'B(III)', 'AB(IV)'].map((value) => ({ value, label: value })),
-  },
-  {
-    name: 'stemCellDonorRh',
-    label: 'Резус-принадлежность донора КМ/ГСК',
-    type: 'select',
-    options: ['Rh(+)', 'Rh(-)'].map((value) => ({ value, label: value })),
-  },
-  { name: 'stemCellDonorAntigens', label: 'Антигены C, c, E, e, K, k донора КМ/ГСК', wide: true },
-];
-
 const emptyDraft = (): DirectionDraft => ({
   sourceRecipientId: '',
   requiredComponent: '',
@@ -167,9 +147,6 @@ const emptyDraft = (): DirectionDraft => ({
   departmentPhone: '',
   requestDateTime: '',
   plannedTransfusionDateTime: '',
-  stemCellDonorAbo: '',
-  stemCellDonorRh: '',
-  stemCellDonorAntigens: '',
   diagnosis: '',
   obstetricHistory: '',
   recipientSex: '',
@@ -736,12 +713,6 @@ export const ComponentRequest = () => {
           title: 'Дата и подпись',
           fields: FOOTER_FIELDS,
           values: valuesFor(FOOTER_FIELDS),
-        };
-      case 'stem-donor':
-        return {
-          title: 'Сведения о доноре костного мозга / ГСК',
-          fields: STEM_DONOR_FIELDS,
-          values: valuesFor(STEM_DONOR_FIELDS),
         };
       default:
         return null;

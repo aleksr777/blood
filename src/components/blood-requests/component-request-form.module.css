@@ -28,16 +28,20 @@
 }
 
 .approval {
-  width: 43%;
+  width: 100%;
   margin-left: auto;
-  font-size: 9pt;
-  line-height: 1.25;
+  font-size: 8pt;
+  line-height: 1.1;
   text-align: right;
 }
 
 .approval span {
   display: block;
-  margin-top: 1mm;
+  white-space: nowrap;
+}
+
+.approval span + span {
+  margin-top: 0.5mm;
 }
 
 .title {

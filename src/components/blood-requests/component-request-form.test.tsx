@@ -52,6 +52,10 @@ it('отображает единую заявку с двенадцатью н�
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('ЭВ-Л');
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('2 ед.');
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('Rh(-)');
+  const approval = container.querySelector('[data-request-approval]');
+  expect(approval?.querySelectorAll('span')).toHaveLength(2);
+  expect(approval?.firstElementChild?.textContent).toContain('от 18 мая 2026 г. № 447н');
+  expect(approval?.lastElementChild?.textContent).toContain('Унифицированная форма');
   expect(container.querySelectorAll('[data-document-paper]')).toHaveLength(1);
   expect(container.querySelectorAll('section[aria-label*="страница"]')).toHaveLength(2);
   const departmentCell = container.querySelector(

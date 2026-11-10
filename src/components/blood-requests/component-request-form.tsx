@@ -92,9 +92,11 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
         className={`${styles.paper} ${styles.pageOne}`}
         aria-label="Заявка, приложение № 17 к приказу № 447н, страница 1"
       >
-        <div className={styles.approval}>
-          Приложение № 17 к приказу Министерства здравоохранения Российской Федерации
-          <span>от 18 мая 2026 г. № 447н</span>
+        <div className={styles.approval} data-request-approval>
+          <span>
+            Приложение № 17 к приказу Министерства здравоохранения Российской Федерации от 18 мая
+            2026 г. № 447н
+          </span>
           <span>
             Унифицированная форма медицинской документации утверждена приказом Министерства
             здравоохранения Российской Федерации от 18 мая 2026 г. № 447н

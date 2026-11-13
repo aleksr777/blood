@@ -118,8 +118,14 @@
   left: 0;
   display: grid;
   gap: 0.1rem;
-  max-height: 12rem;
+  --dropdown-natural-max-height: 12rem;
+
+  max-height: min(var(--dropdown-natural-max-height), var(--dropdown-viewport-max-height, 100dvh));
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-scrollbar-thumb) var(--ui-surface-hover);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-0.35rem) scale(0.985);
@@ -136,8 +142,15 @@
   left: 50%;
   min-width: 7.5rem;
   translate: -50% 0;
-  max-height: 8rem;
+  --dropdown-natural-max-height: 8rem;
+
   font-size: 0.78rem;
+}
+
+.departmentField[data-dropdown-placement='above'] .historyDropdown {
+  top: auto;
+  bottom: calc(100% + 0.3rem);
+  transform-origin: bottom center;
 }
 
 .historyDropdownCompact .customSelectOption {

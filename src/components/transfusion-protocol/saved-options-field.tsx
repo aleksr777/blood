@@ -43,7 +43,7 @@ export const SavedOptionsField = ({
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
+  const { rootRef, dropdownRef, dropdownState } = useOverlayDropdown(open, setOpen);
 
   useEffect(() => {
     let active = true;
@@ -140,6 +140,7 @@ export const SavedOptionsField = ({
         </button>
       </div>
       <div
+        ref={dropdownRef}
         className={[styles.historyDropdown, wrapOptions ? styles.historyDropdownWrap : '']
           .filter(Boolean)
           .join(' ')}

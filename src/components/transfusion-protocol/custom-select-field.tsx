@@ -28,7 +28,7 @@ export const CustomSelectField = ({
   tone,
 }: Props) => {
   const [open, setOpen] = useState(false);
-  const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
+  const { rootRef, dropdownRef, dropdownState } = useOverlayDropdown(open, setOpen);
   const allOptions = allowEmpty ? ['', ...options] : options;
   const normalizedName = name.toLocaleLowerCase();
   const toneBloodGroupOptions = Boolean(tone && normalizedName.includes('abo'));
@@ -76,6 +76,7 @@ export const CustomSelectField = ({
       </button>
 
       <div
+        ref={dropdownRef}
         className={[styles.historyDropdown, compact ? styles.historyDropdownCompact : '']
           .filter(Boolean)
           .join(' ')}

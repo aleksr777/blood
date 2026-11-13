@@ -129,6 +129,45 @@
     cursor: default;
   }
 
+
+  /* Chromium/WebKit: keep native select semantics while constraining its picker. */
+  @supports (appearance: base-select) {
+    select:not([multiple]):not([size]),
+    select:not([multiple]):not([size])::picker(select) {
+      appearance: base-select;
+    }
+
+    select:not([multiple]):not([size])::picker(select) {
+      --dropdown-viewport-gap: 12px;
+
+      margin: var(--dropdown-viewport-gap);
+      max-block-size: stretch;
+      max-inline-size: calc(100dvw - 2 * var(--dropdown-viewport-gap));
+      overflow-x: auto;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ui-scrollbar-thumb) var(--ui-surface-hover);
+      border: 1px solid var(--ui-border);
+      border-radius: var(--control-radius);
+      padding: 0.25rem;
+      background: var(--ui-surface);
+      color: var(--ui-text-strong);
+      box-shadow: var(--ui-shadow-dialog);
+    }
+
+    select:not([multiple]):not([size]) option {
+      padding: 0.35rem 0.55rem;
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    select:not([multiple]):not([size]) option:is(:hover, :focus-visible, :checked) {
+      background: var(--ui-accent-soft);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     input,
     select,

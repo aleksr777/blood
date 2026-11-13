@@ -8,8 +8,12 @@ afterEach(cleanup);
 
 it('объединяет графы 1–5 для редактирования данных реципиента', () => {
   const onEdit = vi.fn();
-  render(<ComponentRequestForm values={request} examination={{}} readOnly={false} onEdit={onEdit} />);
-  const cells = screen.getByRole('table', { name: 'Графы 1–12 заявки' }).querySelectorAll('tbody td');
+  render(
+    <ComponentRequestForm values={request} examination={{}} readOnly={false} onEdit={onEdit} />,
+  );
+  const cells = screen
+    .getByRole('table', { name: 'Графы 1–12 заявки' })
+    .querySelectorAll('tbody td');
   const recipientClass = Array.from(cells[0].classList).find((className) =>
     className.includes('recipientCell'),
   );
@@ -30,11 +34,13 @@ it('объединяет графы 1–5 для редактирования д
 it('не разрешает открывать единое окно из граф 1–5 в режиме просмотра', () => {
   const onEdit = vi.fn();
   render(<ComponentRequestForm values={request} examination={{}} readOnly onEdit={onEdit} />);
-  const cells = screen.getByRole('table', { name: 'Графы 1–12 заявки' }).querySelectorAll('tbody td');
-  Array.from(cells).slice(0, 5).forEach((cell) => {
+  const cells = screen
+    .getByRole('table', { name: 'Графы 1–12 заявки' })
+    .querySelectorAll('tbody td');
+  for (const cell of Array.from(cells).slice(0, 5)) {
     fireEvent.click(cell);
     fireEvent.keyDown(cell, { key: 'Enter' });
     expect(cell.getAttribute('role')).toBeNull();
-  });
+  }
   expect(onEdit).not.toHaveBeenCalled();
 });

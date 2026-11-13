@@ -104,7 +104,7 @@ export default tseslint.config(
       'max-lines': ['warn', { max: 124 }],
       'max-params': ['error', 3],
     },
-  },,
+  },
   ...Object.entries(legacyLineBaselines).map(([file, max]) => ({
     files: [file],
     rules: {

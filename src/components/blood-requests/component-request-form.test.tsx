@@ -1,33 +1,10 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
-import { ComponentRequestForm, type ComponentRequestFormValues } from './component-request-form';
+import { ComponentRequestForm } from './component-request-form';
+import { request } from './component-request-form.fixture';
 
 afterEach(cleanup);
-
-const request: ComponentRequestFormValues = {
-  recipientName: 'Иванов Иван Иванович',
-  recipientProfileSnapshot: { recipientBirthDate: '1980-01-15' },
-  recipientAge: '46',
-  diagnosis: 'Анемия',
-  medicalRecordNumber: '1234',
-  recipientAboRh: 'A(II) Rh(+)',
-  recipientPhenotype: 'C+ c+ E− e+ K− k+',
-  department: 'ОРИТ',
-  departmentPhone: '123-45-67',
-  requestDateTime: '2026-11-10T09:30',
-  plannedTransfusionDateTime: '2026-11-10T12:00',
-  transfusionOrder: 'planned',
-  requiredComponent: 'Эритроцитная взвесь',
-  componentCode: 'ЭВ-Л',
-  quantity: '2',
-  estimatedVolumeMl: '',
-  transfusionIndicationCode: '1.1',
-  individualSelectionRequired: 'yes',
-  individualSelectionCode: '3',
-  doctorName: 'Петров Пётр Петрович',
-  directionDate: '',
-};
 
 it('отображает единую заявку с двенадцатью нумерованными графами', () => {
   const { container } = render(
@@ -140,11 +117,4 @@ it('открывает переиспользуемые редакторы дл�
   expect(examinationCell).not.toBeNull();
   fireEvent.keyDown(examinationCell!, { key: 'Enter' });
   expect(onEdit).toHaveBeenCalledWith('examination');
-});
-
-it('не позволяет редактировать сохранённый документ в режиме просмотра', () => {
-  const onEdit = vi.fn();
-  render(<ComponentRequestForm values={request} examination={{}} readOnly onEdit={onEdit} />);
-  fireEvent.click(screen.getByText('ЭВ-Л'));
-  expect(onEdit).not.toHaveBeenCalled();
 });

@@ -1,0 +1,25 @@
+import type { ComponentRequestFormValues } from './component-request-form';
+
+export const request: ComponentRequestFormValues = {
+  recipientName: 'Иванов Иван Иванович',
+  recipientProfileSnapshot: { recipientBirthDate: '1980-01-15' },
+  recipientAge: '46',
+  diagnosis: 'Анемия',
+  medicalRecordNumber: '1234',
+  recipientAboRh: 'A(II) Rh(+)',
+  recipientPhenotype: 'C+ c+ E− e+ K− k+',
+  department: 'ОРИТ',
+  departmentPhone: '123-45-67',
+  requestDateTime: '2026-11-10T09:30',
+  plannedTransfusionDateTime: '2026-11-10T12:00',
+  transfusionOrder: 'planned',
+  requiredComponent: 'Эритроцитная взвесь',
+  componentCode: 'ЭВ-Л',
+  quantity: '2',
+  estimatedVolumeMl: '',
+  transfusionIndicationCode: '1.1',
+  individualSelectionRequired: 'yes',
+  individualSelectionCode: '3',
+  doctorName: 'Петров Пётр Петрович',
+  directionDate: '',
+};

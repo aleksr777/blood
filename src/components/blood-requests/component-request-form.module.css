@@ -158,8 +158,9 @@
   outline-offset: -1px;
 }
 
-/* The five recipient cells form one logical editing area. */
-.valuesRow:has(> .recipientCell:not(.readOnly):focus-visible) > .recipientCell {
+/* Each editing region includes the heading, number and value rows. */
+.dataTable:has(.recipientCell:not(.readOnly):focus-visible) .recipientCell,
+.dataTable:has(.componentCell:not(.readOnly):focus-visible) .componentCell {
   background: var(--ui-accent-soft);
 }
 
@@ -203,7 +204,8 @@
     background: var(--ui-accent-soft);
   }
 
-  .valuesRow:has(> .recipientCell:not(.readOnly):hover) > .recipientCell {
+  .dataTable:has(.recipientCell:not(.readOnly):hover) .recipientCell,
+  .dataTable:has(.componentCell:not(.readOnly):hover) .componentCell {
     background: var(--ui-accent-soft);
   }
 

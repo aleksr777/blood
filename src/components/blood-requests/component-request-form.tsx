@@ -63,7 +63,7 @@ const headers = [
 
 export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: Props) => {
   const edit = (section: Section) => ({
-    className: `${styles.editable} ${section === 'recipient' ? styles.recipientCell : ''} ${readOnly ? styles.readOnly : ''}`,
+    className: `${styles.editable} ${section === 'recipient' ? styles.recipientCell : ''} ${section === 'component' ? styles.componentCell : ''} ${readOnly ? styles.readOnly : ''}`,
     role: readOnly ? undefined : ('button' as const),
     tabIndex: readOnly ? -1 : 0,
     onClick: () => !readOnly && onEdit(section),
@@ -74,6 +74,9 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
       }
     },
   });
+
+  const headerEdit = (index: number) =>
+    index < 10 ? edit(index < 5 ? 'recipient' : 'component') : {};
 
   const recipientBirthDate =
     examination.recipientBirthDate || values.recipientProfileSnapshot.recipientBirthDate;
@@ -154,12 +157,12 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
             </tr>
             <tr className={styles.headerRow}>
               {headers.map((header, index) => (
-                <th key={index}>{header}</th>
+                <th key={index} {...headerEdit(index)}>{header}</th>
               ))}
             </tr>
             <tr className={styles.numberRow}>
               {headers.map((_, index) => (
-                <th key={index}>{index + 1}</th>
+                <th key={index} {...headerEdit(index)}>{index + 1}</th>
               ))}
             </tr>
           </thead>

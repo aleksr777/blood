@@ -116,5 +116,5 @@ it('открывает переиспользуемые редакторы дл�
   );
   expect(examinationCell).not.toBeNull();
   fireEvent.keyDown(examinationCell!, { key: 'Enter' });
-  expect(onEdit).toHaveBeenCalledWith('examination');
+  expect(onEdit).toHaveBeenCalledWith('recipient');
 });

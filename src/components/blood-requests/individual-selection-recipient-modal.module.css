@@ -31,3 +31,9 @@
     grid-column: auto;
   }
 }
+
+.examination {
+  margin-top: 1rem;
+  border-top: 1px solid var(--ui-border);
+  padding-top: 0.8rem;
+}

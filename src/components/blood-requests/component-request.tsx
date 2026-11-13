@@ -40,11 +40,11 @@ import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-databa
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { formatObstetricHistory } from '../transfusion-protocol/recipient-history-model';
 import { formatRecipientAntigens } from '../transfusion-protocol/recipient-examination-model';
+import { RecipientExaminationFields } from '../transfusion-protocol/recipient-examination-fields';
 import { getIndicationComponent } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { ComponentRequestDetailsModal } from './component-request-details-modal';
 import { ComponentRequestForm } from './component-request-form';
-import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { sanitizeDoseQuantity } from './dose-quantity';
@@ -84,7 +84,7 @@ type DirectionDraft = Record<RequestAutoField, string> & {
   autoValues: Partial<Record<RequestAutoField, string>>;
 };
 
-type Editor = 'organization' | 'component' | 'examination' | 'recipient' | 'footer' | null;
+type Editor = 'organization' | 'component' | 'recipient' | 'footer' | null;
 
 const ORGANIZATION_FIELDS: RequestEditorField[] = [
   {
@@ -809,7 +809,18 @@ export const ComponentRequest = () => {
           }}
           onSelectRecipient={documentState.active ? () => false : selectRecipient}
           onClose={() => setEditor(null)}
-        />
+        >
+          <section aria-label="Группа крови и антигены реципиента">
+            <h3 className={styles.examinationTitle}>Группа крови и антигены реципиента</h3>
+            <RecipientExaminationFields
+              values={examinationValues}
+              showAlloimmuneAntibodies={false}
+              onChange={(changes) => {
+                void updateExamination(changes);
+              }}
+            />
+          </section>
+        </IndividualSelectionRecipientModal>
       )}
 
       {editor === 'component' && (
@@ -817,14 +828,6 @@ export const ComponentRequest = () => {
           values={draft}
           onChange={updateFields}
           onIndicationsChange={updateIndications}
-          onClose={() => setEditor(null)}
-        />
-      )}
-
-      {editor === 'examination' && (
-        <IndividualSelectionExaminationModal
-          values={examinationValues}
-          onChange={updateExamination}
           onClose={() => setEditor(null)}
         />
       )}

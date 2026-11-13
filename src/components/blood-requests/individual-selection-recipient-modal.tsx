@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
 import { ProtocolFieldControl } from '../transfusion-protocol/protocol-field-control';
@@ -43,6 +44,7 @@ type Props = {
   onOpenRecipients: () => void;
   onSelectRecipient: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
   onClose: () => void;
+  children?: ReactNode;
 };
 
 export const IndividualSelectionRecipientModal = ({
@@ -52,6 +54,7 @@ export const IndividualSelectionRecipientModal = ({
   onOpenRecipients,
   onSelectRecipient,
   onClose,
+  children,
 }: Props) => {
   const changeValue = (name: string, value: string) => {
     void onRecipientChange({ [name]: value });
@@ -106,6 +109,7 @@ export const IndividualSelectionRecipientModal = ({
           onChange={changeValue}
         />
       </div>
+      {children && <div className={styles.examination}>{children}</div>}
     </Modal>
   );
 };

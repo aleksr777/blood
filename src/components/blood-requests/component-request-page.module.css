@@ -7,6 +7,13 @@
   margin-left: -16px;
 }
 
+.examinationTitle {
+  margin: 0 0 0.65rem;
+  color: var(--ui-text-strong);
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
 @media print {
   .shell {
     width: 297mm;

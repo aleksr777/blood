@@ -29,7 +29,7 @@ export type ComponentRequestFormValues = {
   directionDate: string;
 };
 
-type Section = 'organization' | 'recipient' | 'examination' | 'component' | 'footer';
+type Section = 'organization' | 'recipient' | 'component' | 'footer';
 
 type Props = {
   values: ComponentRequestFormValues;
@@ -63,7 +63,7 @@ const headers = [
 
 export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: Props) => {
   const edit = (section: Section) => ({
-    className: `${styles.editable} ${readOnly ? styles.readOnly : ''}`,
+    className: `${styles.editable} ${section === 'recipient' ? styles.recipientCell : ''} ${readOnly ? styles.readOnly : ''}`,
     role: readOnly ? undefined : ('button' as const),
     tabIndex: readOnly ? -1 : 0,
     onClick: () => !readOnly && onEdit(section),
@@ -171,14 +171,9 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
                 {values.diagnosis && <div className={styles.wrapText}>{values.diagnosis}</div>}
               </td>
               <td {...edit('recipient')}>{values.medicalRecordNumber}</td>
-              <td {...edit('examination')}>{recipientAbo}</td>
-              <td {...edit('examination')}>{recipientRh}</td>
-              <td
-                {...edit('examination')}
-                className={`${styles.editable} ${styles.wrapText} ${readOnly ? styles.readOnly : ''}`}
-              >
-                {phenotype}
-              </td>
+              <td {...edit('recipient')}>{recipientAbo}</td>
+              <td {...edit('recipient')}>{recipientRh}</td>
+              <td {...edit('recipient')}>{phenotype}</td>
               <td {...edit('component')}>
                 <div>{values.componentCode}</div>
                 {values.requiredComponent && (

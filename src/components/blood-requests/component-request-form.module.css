@@ -158,6 +158,11 @@
   outline-offset: -1px;
 }
 
+/* The five recipient cells form one logical editing area. */
+.valuesRow:has(> .recipientCell:not(.readOnly):focus-visible) > .recipientCell {
+  background: var(--ui-accent-soft);
+}
+
 .readOnly {
   cursor: default;
 }
@@ -195,6 +200,10 @@
 
 @media (hover: hover) and (pointer: fine) {
   .editable:not(.readOnly):hover {
+    background: var(--ui-accent-soft);
+  }
+
+  .valuesRow:has(> .recipientCell:not(.readOnly):hover) > .recipientCell {
     background: var(--ui-accent-soft);
   }
 

@@ -12,7 +12,6 @@ import {
 import { SavedOptionItem } from './saved-option-item';
 import { useOverlayDropdown } from './use-overlay-dropdown';
 import styles from './protocol-editor.module.css';
-
 const normalizeValue = (value: string) =>
   value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 

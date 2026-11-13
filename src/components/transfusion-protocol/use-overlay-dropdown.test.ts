@@ -19,14 +19,18 @@ describe('выпадающие списки с отступом от краёв 
   });
 
   it('ограничивает высоту и сохраняет место у нижнего края, если сверху ещё теснее', () => {
-    expect(getDropdownViewportPlacement({ top: 12, bottom: 44 }, { top: 0, bottom: 140 }, 192)).toEqual({
+    expect(
+      getDropdownViewportPlacement({ top: 12, bottom: 44 }, { top: 0, bottom: 140 }, 192),
+    ).toEqual({
       placement: 'below',
       maxHeight: 79,
     });
   });
 
   it('учитывает сдвиг видимой области при использовании экранной клавиатуры', () => {
-    expect(getDropdownViewportPlacement({ top: 380, bottom: 412 }, { top: 120, bottom: 460 }, 150)).toEqual({
+    expect(
+      getDropdownViewportPlacement({ top: 380, bottom: 412 }, { top: 120, bottom: 460 }, 150),
+    ).toEqual({
       placement: 'above',
       maxHeight: 243,
     });

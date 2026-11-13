@@ -27,7 +27,10 @@ export const useOverlayDropdown = (open: boolean, setOpen: Dispatch<SetStateActi
     // Read the uncapped CSS height before applying the viewport constraint.
     root.style.removeProperty('--dropdown-viewport-max-height');
     const naturalMaxHeight = Number.parseFloat(getComputedStyle(dropdown).maxHeight);
-    const desiredHeight = Math.min(dropdown.scrollHeight, naturalMaxHeight || dropdown.scrollHeight);
+    const desiredHeight = Math.min(
+      dropdown.scrollHeight,
+      naturalMaxHeight || dropdown.scrollHeight,
+    );
 
     const position = () => {
       const viewport = window.visualViewport;

@@ -140,7 +140,6 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
             </tbody>
           </table>
         </div>
-
         <table className={styles.dataTable} aria-label="Графы 1–12 заявки">
           <colgroup>
             {columns.map((width, index) => (
@@ -157,12 +156,16 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
             </tr>
             <tr className={styles.headerRow}>
               {headers.map((header, index) => (
-                <th key={index} {...headerEdit(index)}>{header}</th>
+                <th key={index} {...headerEdit(index)}>
+                  {header}
+                </th>
               ))}
             </tr>
             <tr className={styles.numberRow}>
               {headers.map((_, index) => (
-                <th key={index} {...headerEdit(index)}>{index + 1}</th>
+                <th key={index} {...headerEdit(index)}>
+                  {index + 1}
+                </th>
               ))}
             </tr>
           </thead>
@@ -200,7 +203,6 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
             </tr>
           </tbody>
         </table>
-
         <div
           {...edit('footer')}
           className={`${styles.signature} ${styles.editable} ${readOnly ? styles.readOnly : ''}`}

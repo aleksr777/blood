@@ -47,7 +47,9 @@ it('в просмотре заголовки, номера и значения �
   const onEdit = vi.fn();
   render(<ComponentRequestForm values={request} examination={{}} readOnly onEdit={onEdit} />);
   const table = screen.getByRole('table', { name: 'Графы 1–12 заявки' });
-  const cells = table.querySelectorAll('thead tr:nth-child(2) th, thead tr:nth-child(3) th, tbody td');
+  const cells = table.querySelectorAll(
+    'thead tr:nth-child(2) th, thead tr:nth-child(3) th, tbody td',
+  );
   for (const cell of cells) {
     fireEvent.click(cell);
     fireEvent.keyDown(cell, { key: 'Enter' });

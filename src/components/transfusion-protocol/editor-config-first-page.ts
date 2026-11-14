@@ -167,10 +167,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'donorAntigene', label: 'e', type: 'select' },
       { name: 'donorAntigenK', label: 'K', type: 'select' },
       { name: 'donorAntigenk', label: 'k', type: 'select' },
-      {
-        name: 'donorAntigens',
-        label: 'Антигены эритроцитов донора',
-      },
+      { name: 'donorAntigens', label: 'Антигены эритроцитов донора' },
       { name: 'componentUnitNumber', label: '№ единицы компонента крови' },
       {
         name: 'amountMl',

@@ -61,10 +61,9 @@ export const BloodComponentSelector = ({
                 onChange={(event) => onCodeChange?.(event.target.value)}
               >
                 <option value="">Выберите компонент донорской крови</option>
-                {selectedCode &&
-                  !catalogOptions.some(({ code }) => code === selectedCode) && (
-                    <option value={selectedCode}>{name || 'Ранее выбранный компонент'}</option>
-                  )}
+                {selectedCode && !catalogOptions.some(({ code }) => code === selectedCode) && (
+                  <option value={selectedCode}>{name || 'Ранее выбранный компонент'}</option>
+                )}
                 {catalogOptions.map(({ code, name: componentName }) => (
                   <option key={code} value={code}>
                     {componentName}

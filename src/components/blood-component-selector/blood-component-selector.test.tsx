@@ -87,8 +87,12 @@ it('offers platelet names without leaking the previous group presets', async () 
   fireEvent.click(screen.getByRole('button', { name: 'Тромбоциты' }));
   openNames();
   expect(screen.queryByRole('button', { name: 'Эритроцитная взвесь' })).toBeNull();
-  fireEvent.click(screen.getByRole('button', { name: 'Концентрат тромбоцитов' }));
-  expect(nameInput().value).toBe('Концентрат тромбоцитов');
+  fireEvent.click(
+    screen.getByRole('button', {
+      name: 'Концентрат тромбоцитов лейкоредуцированный, пулированный',
+    }),
+  );
+  expect(nameInput().value).toBe('Концентрат тромбоцитов лейкоредуцированный, пулированный');
   await waitFor(() => expect(loadSavedOptions).toHaveBeenCalledWith('componentName:platelets'));
 });
 

@@ -76,7 +76,6 @@ export const currentIndicationsForComponent = (
 ): ProtocolValuesRecord => {
   const prefix = componentPrefix(component);
   if (!prefix) return {};
-
   return {
     indicationComponent: component,
     ...Object.fromEntries(

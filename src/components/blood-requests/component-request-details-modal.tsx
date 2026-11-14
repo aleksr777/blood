@@ -27,9 +27,8 @@ export const ComponentRequestDetailsModal = ({
     values.indicationValues.indicationComponent ||
     inferBloodComponentGroup(values.requiredComponent);
   const catalogOptions = componentCatalogForGroup(group);
-  const selectedCode = catalogOptions.some(({ code }) => code === values.componentCode)
-    ? values.componentCode
-    : '';
+  // Keep older saved requests readable even when a code is no longer selectable.
+  const selectedCode = values.componentCode;
   const indications = indicationOptionsForComponent(values.componentCode, group);
   const selectedIndication = TRANSFUSION_INDICATIONS.find(
     ({ code }) => code === values.transfusionIndicationCode,

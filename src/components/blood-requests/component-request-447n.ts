@@ -61,7 +61,7 @@ export const componentTypeForCode = (code: string) =>
 export const indicationOptionsForComponent = (code: string, group: string) => {
   const type = componentTypeForCode(code);
   if (type) return TRANSFUSION_INDICATIONS.filter((item) => item.type === type);
-  if (group === 'erythrocytes' || group === 'platelets')
+  if (group === 'erythrocytes' || group === 'platelets' || group === 'granulocytes')
     return TRANSFUSION_INDICATIONS.filter((item) => item.type === group);
   if (group === 'plasma-cryo')
     return TRANSFUSION_INDICATIONS.filter((item) =>

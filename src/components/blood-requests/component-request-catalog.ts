@@ -1,6 +1,7 @@
 // Appendix No. 1 to Government Decree No. 641 of 14 May 2025,
 // as amended by Decree No. 1148 of 9 September 2026.
 // Keep the official code/name pairs together: the printed request uses both.
+import { TRANSFUSABLE_COMPONENTS } from '../../domain/transfusable-components';
 import { ERYTHROCYTES } from './component-request-catalog-erythrocytes';
 import { PLATELETS } from './component-request-catalog-platelets';
 import {
@@ -28,14 +29,8 @@ export const COMPONENT_CODES = Object.fromEntries(
   ]),
 ) as { [K in keyof typeof COMPONENT_NOMENCLATURE]: string[] };
 
-export const componentCatalogForGroup = (group: string): readonly ComponentCatalogEntry[] => {
-  if (group === 'erythrocytes') return COMPONENT_NOMENCLATURE.erythrocytes;
-  if (group === 'platelets') return COMPONENT_NOMENCLATURE.platelets;
-  if (group === 'plasma-cryo')
-    return [
-      ...COMPONENT_NOMENCLATURE.plasma,
-      ...COMPONENT_NOMENCLATURE.cryoprecipitate,
-      ...COMPONENT_NOMENCLATURE.cryosupernatant,
-    ];
-  return [];
-};
+const selectableComponents: Record<string, readonly ComponentCatalogEntry[]> =
+  TRANSFUSABLE_COMPONENTS;
+
+export const componentCatalogForGroup = (group: string): readonly ComponentCatalogEntry[] =>
+  selectableComponents[group] ?? [];

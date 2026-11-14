@@ -101,11 +101,9 @@ export const SavedOptionsField = ({
         ? 'Не удалось загрузить список'
         : 'Сохранённых вариантов нет';
 
-  const normalizedFixedOptions = new Set(
-    fixedOptions.map((option) => option.trim().toLocaleLowerCase('ru-RU')),
-  );
+  const normalizedFixedOptions = new Set(fixedOptions.map(normalizeValue));
   const editableItems = items.filter(
-    (item) => !normalizedFixedOptions.has(item.value.trim().toLocaleLowerCase('ru-RU')),
+    (item) => !normalizedFixedOptions.has(normalizeValue(item.value)),
   );
 
   return (
@@ -120,7 +118,12 @@ export const SavedOptionsField = ({
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
           onBlur={() => {
-            if (!isolated && rememberOnBlur && value.trim()) {
+            if (
+              !isolated &&
+              rememberOnBlur &&
+              value.trim() &&
+              !normalizedFixedOptions.has(normalizeValue(value))
+            ) {
               void rememberSavedOption(category, value).catch((error: unknown) =>
                 console.error(`Не удалось сохранить значение ${category}:`, error),
               );

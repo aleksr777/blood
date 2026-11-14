@@ -27,6 +27,12 @@ export const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
     'indicationPlasmaOther',
     'indicationPlasmaOtherText',
   ],
+  granulocytes: [
+    'indications',
+    'indicationGranulocyteNeutrophilsLow',
+    'indicationGranulocyteOther',
+    'indicationGranulocyteOtherText',
+  ],
   platelets: [
     'indications',
     ...PLATELET_INDICATION_OPTIONS.map(([name]) => name),

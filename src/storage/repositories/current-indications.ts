@@ -14,6 +14,7 @@ const componentPrefix = (component: string) => {
   if (component === 'erythrocytes') return 'indicationRbc';
   if (component === 'plasma-cryo') return 'indicationPlasma';
   if (component === 'platelets') return 'indicationPlatelet';
+  if (component === 'granulocytes') return 'indicationGranulocyte';
   return '';
 };
 

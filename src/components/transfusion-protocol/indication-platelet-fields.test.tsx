@@ -38,9 +38,7 @@ it('открывает текстовое поле только при выбо�
   fireEvent.click(screen.getByRole('checkbox', { name: 'Другие показания' }));
   expect(onChange).toHaveBeenLastCalledWith({ indicationPlateletOther: '1' });
 
-  rerender(
-    <PlateletIndications values={{ indicationPlateletOther: '1' }} onChange={onChange} />,
-  );
+  rerender(<PlateletIndications values={{ indicationPlateletOther: '1' }} onChange={onChange} />);
   fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Дополнительное показание' } });
   expect(onChange).toHaveBeenLastCalledWith({
     indicationPlateletOtherText: 'Дополнительное показание',
@@ -56,9 +54,7 @@ it('печатает показания в заданном порядке с с
     indicationPlateletOtherText: 'Индивидуальная причина',
   });
   expect(text).toBe(
-    [...PLATELET_INDICATION_OPTIONS.map(([, label]) => label), 'Индивидуальная причина.'].join(
-      ' ',
-    ),
+    [...PLATELET_INDICATION_OPTIONS.map(([, label]) => label), 'Индивидуальная причина.'].join(' '),
   );
 });
 

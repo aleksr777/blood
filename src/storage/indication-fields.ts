@@ -19,6 +19,7 @@ export const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
     'indicationPlasmaBloodLossPercent',
     'indicationPlasmaOngoingBleeding',
     'indicationPlasmaFactorDeficiency',
+    'indicationPlasmaFactorsBelow50',
     'indicationPlasmaFibrinogenBleeding',
     'indicationPlasmaFibrinogenLow',
     'indicationPlasmaOther',

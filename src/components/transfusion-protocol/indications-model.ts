@@ -53,6 +53,11 @@ export const formatIndications = (values: ProtocolValues) => {
     if (yes(values.indicationPlasmaFactorDeficiency)) {
       items.push('Дефицит плазменных факторов свёртывания крови');
     }
+    if (yes(values.indicationPlasmaFactorsBelow50)) {
+      items.push(
+        'Активность одного или нескольких факторов свёртывания крови составляет не более 50% от нормы, а препарат соответствующего фактора отсутствует.',
+      );
+    }
     if (yes(values.indicationPlasmaFibrinogenBleeding)) {
       items.push('Фибриноген менее 1,5 г/л при кровотечении');
     }

@@ -77,6 +77,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       },
       { name: 'indicationPlasmaOngoingBleeding', label: 'indicationPlasmaOngoingBleeding' },
       { name: 'indicationPlasmaFactorDeficiency', label: 'indicationPlasmaFactorDeficiency' },
+      { name: 'indicationPlasmaFactorsBelow50', label: 'indicationPlasmaFactorsBelow50' },
       {
         name: 'indicationPlasmaFibrinogenBleeding',
         label: 'indicationPlasmaFibrinogenBleeding',

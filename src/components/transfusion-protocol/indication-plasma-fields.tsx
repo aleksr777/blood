@@ -3,6 +3,10 @@ import { Choice, OtherChoice, type IndicationProps } from './indication-controls
 
 const PLASMA_OPTIONS = [
   ['indicationPlasmaFactorDeficiency', 'Дефицит плазменных факторов свёртывания крови'],
+  [
+    'indicationPlasmaFactorsBelow50',
+    'Активность одного или нескольких факторов свёртывания крови составляет не более 50% от нормы, а препарат соответствующего фактора отсутствует.',
+  ],
   ['indicationPlasmaFibrinogenBleeding', 'Фибриноген менее 1,5 г/л при кровотечении'],
   ['indicationPlasmaFibrinogenLow', 'Фибриноген менее 1 г/л'],
 ] as const;

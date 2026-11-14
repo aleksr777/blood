@@ -1,3 +1,4 @@
+import { PLATELET_INDICATION_OPTIONS } from '../../domain/platelet-indications';
 import type { ProtocolValues } from './protocol-types';
 
 export const getIndicationComponent = (values: ProtocolValues) =>
@@ -70,9 +71,10 @@ export const formatIndications = (values: ProtocolValues) => {
   }
 
   if (values.indicationComponent === 'platelets') {
-    if (yes(values.indicationPlateletHemorrhagicSyndrome)) {
-      items.push('Геморрагический синдром');
+    for (const [name, label] of PLATELET_INDICATION_OPTIONS) {
+      if (yes(values[name])) items.push(label);
     }
+    // Preserve the wording of indications saved before the structured list was introduced.
     if (yes(values.indicationPlateletHighBleedingRisk)) {
       items.push('Высокий риск кровотечения');
     }

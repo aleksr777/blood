@@ -102,9 +102,8 @@ export const SavedOptionsField = ({
         : 'Сохранённых вариантов нет';
 
   const normalizedFixedOptions = new Set(fixedOptions.map(normalizeValue));
-  const editableItems = items.filter(
-    (item) => !normalizedFixedOptions.has(normalizeValue(item.value)),
-  );
+  const isFixed = (option: string) => normalizedFixedOptions.has(normalizeValue(option));
+  const editableItems = items.filter((item) => !isFixed(item.value));
 
   return (
     <div ref={rootRef} className={styles.departmentField}>
@@ -118,12 +117,7 @@ export const SavedOptionsField = ({
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
           onBlur={() => {
-            if (
-              !isolated &&
-              rememberOnBlur &&
-              value.trim() &&
-              !normalizedFixedOptions.has(normalizeValue(value))
-            ) {
+            if (!isolated && rememberOnBlur && value.trim() && !isFixed(value)) {
               void rememberSavedOption(category, value).catch((error: unknown) =>
                 console.error(`Не удалось сохранить значение ${category}:`, error),
               );

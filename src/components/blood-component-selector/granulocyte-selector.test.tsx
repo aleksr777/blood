@@ -24,13 +24,16 @@ const Harness = () => {
 
 it('offers a fourth component group with exactly two immutable granulocyte presets', () => {
   render(<Harness />);
-  expect(screen.getAllByRole('button').filter((button) => button.hasAttribute('data-component')))
-    .toHaveLength(4);
+  expect(
+    screen.getAllByRole('button').filter((button) => button.hasAttribute('data-component')),
+  ).toHaveLength(4);
   const button = screen.getByRole('button', { name: 'Гранулоциты' });
   expect(button.getAttribute('data-component')).toBe('granulocytes');
   fireEvent.click(button);
   expect(button.getAttribute('aria-pressed')).toBe('true');
-  fireEvent.click(screen.getByRole('button', { name: `Показать сохранённые варианты: ${selectName}` }));
+  fireEvent.click(
+    screen.getByRole('button', { name: `Показать сохранённые варианты: ${selectName}` }),
+  );
   expect(screen.getByRole('button', { name: firstName })).toBeTruthy();
   expect(screen.getByRole('button', { name: secondName })).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Отмытые эритроциты' })).toBeNull();

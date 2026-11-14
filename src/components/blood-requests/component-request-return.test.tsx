@@ -161,7 +161,7 @@ it('сохраняет новые графы приложения № 17 чер�
   expect(within(componentSelect).queryByRole('option', { name: /КТ-ЛП/ })).toBeNull();
   expect(
     within(componentSelect).getByRole('option', {
-      name: 'ЭВ-Л — Эритроцитная взвесь лейкоредуцированная',
+      name: 'Эритроцитная взвесь лейкоредуцированная',
     }),
   ).toBeTruthy();
   fireEvent.change(componentSelect, {
@@ -207,7 +207,7 @@ it('при смене группы показывает только её код
   expect(within(componentSelect).queryByRole('option', { name: /ЭВ-Л —/ })).toBeNull();
   expect(
     within(componentSelect).getByRole('option', {
-      name: 'КРИО-Л — Криопреципитат лиофилизированный',
+      name: 'Криопреципитат лиофилизированный',
     }),
   ).toBeTruthy();
   fireEvent.change(componentSelect, { target: { value: 'КРИО-Л' } });

@@ -96,8 +96,10 @@ it.each([true, false])(
     fireEvent.click(
       screen.getByRole('button', { name: `Показать сохранённые варианты: ${nameLabel}` }),
     );
-    fireEvent.click(screen.getByRole('button', { name: 'Эритроцитная взвесь' }));
-    expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: 'Эритроцитная взвесь' });
+    fireEvent.click(screen.getByRole('button', { name: 'Эритроцитная взвесь лейкоредуцированная' }));
+    expect(onLocalChange).toHaveBeenLastCalledWith({
+      requiredComponent: 'Эритроцитная взвесь лейкоредуцированная',
+    });
     await waitFor(() =>
       expect(loadSavedOptions).toHaveBeenCalledWith('componentName:erythrocytes'),
     );

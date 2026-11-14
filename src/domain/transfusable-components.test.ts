@@ -1,5 +1,8 @@
 import { expect, it } from 'vitest';
-import { componentCatalogForGroup, COMPONENT_NOMENCLATURE } from '../components/blood-requests/component-request-catalog';
+import {
+  componentCatalogForGroup,
+  COMPONENT_NOMENCLATURE,
+} from '../components/blood-requests/component-request-catalog';
 import { BLOOD_COMPONENTS, inferBloodComponentGroup } from './blood-components';
 import { TRANSFUSABLE_COMPONENTS } from './transfusable-components';
 
@@ -13,7 +16,9 @@ it('keeps only the 34 filtered names in four groups, with exact codes', () => {
   expect(BLOOD_COMPONENTS.map(({ value }) => value)).toEqual(Object.keys(counts));
 
   const originalCodes = new Set(
-    Object.values(COMPONENT_NOMENCLATURE).flat().map(({ code }) => code),
+    Object.values(COMPONENT_NOMENCLATURE)
+      .flat()
+      .map(({ code }) => code),
   );
   for (const [group, count] of Object.entries(counts)) {
     const entries = componentCatalogForGroup(group);

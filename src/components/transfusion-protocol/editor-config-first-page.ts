@@ -9,12 +9,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     fields: [
       { name: 'recipientName', label: 'Фамилия, имя, отчество реципиента', wide: true },
       { name: 'recipientBirthDate', label: 'Дата рождения', type: 'date' },
-      {
-        name: 'recipientSex',
-        label: 'Пол',
-        type: 'select',
-        options: ['Мужской', 'Женский'],
-      },
+      { name: 'recipientSex', label: 'Пол', type: 'select', options: ['Мужской', 'Женский'] },
       { name: 'recipientAge', label: 'Возраст', readOnly: true },
       { name: 'requestDateTime', label: 'Дата и время подачи заявки', type: 'datetime-local' },
       { name: 'transfusionDate', label: 'Дата трансфузии', type: 'date' },

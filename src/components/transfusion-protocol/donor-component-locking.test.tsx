@@ -7,7 +7,9 @@ import { ProtocolEditorModal } from './protocol-editor-modal';
 
 vi.mock('../modal/modal', () => ({
   default: ({ title, children }: { title: string; children: ReactNode }) => (
-    <section role="dialog" aria-label={title}>{children}</section>
+    <section role="dialog" aria-label={title}>
+      {children}
+    </section>
   ),
 }));
 vi.mock('../../storage/repositories/saved-options', () => ({
@@ -28,6 +30,9 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
+
+const isBefore = (first: Node, second: Node) =>
+  Boolean(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING);
 
 it.each(['donor', 'indications'] as const)(
   'показывает показания перед гемаконом и блокирует ввод до выбора группы (%s)',
@@ -53,25 +58,28 @@ it.each(['donor', 'indications'] as const)(
     const dialog = screen.getByRole('dialog', {
       name: 'Компонент крови и показания к трансфузии',
     });
-    const dependent = dialog.querySelector('fieldset[data-component-dependent]') as HTMLFieldSetElement;
+    const dependent = dialog.querySelector(
+      'fieldset[data-component-dependent]',
+    ) as HTMLFieldSetElement;
     expect(dependent.disabled).toBe(true);
-    expect(Array.from(dependent.querySelectorAll('input, button, textarea, select'))
-      .every((control) => control.matches(':disabled'))).toBe(true);
-    expect(screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }))
-      .toBeNull();
-    const options = screen.getByText('Показания к трансфузии');
+    const controls = dependent.querySelectorAll('input, button, textarea, select');
+    expect(Array.from(controls).every((control) => control.matches(':disabled'))).toBe(true);
+    expect(
+      screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }),
+    ).toBeNull();
+
+    const indications = screen.getByText('Показания к трансфузии');
     const donor = screen.getByText('Данные гемакона');
-    expect(Boolean(options.compareDocumentPosition(donor) & Node.DOCUMENT_POSITION_FOLLOWING))
-      .toBe(true);
-    const choose = screen.getByRole('button', { name: 'Эритроциты' }) as HTMLButtonElement;
-    expect(choose.disabled).toBe(false);
-    fireEvent.click(choose);
+    expect(isBefore(indications, donor)).toBe(true);
+
+    const select = screen.getByRole('button', { name: 'Эритроциты' }) as HTMLButtonElement;
+    expect(select.disabled).toBe(false);
+    fireEvent.click(select);
     expect(dependent.disabled).toBe(false);
     const name = screen.getByRole('textbox', {
       name: 'Наименование компонента донорской крови',
     });
-    expect(Boolean(name.compareDocumentPosition(options) & Node.DOCUMENT_POSITION_FOLLOWING))
-      .toBe(true);
+    expect(isBefore(name, indications)).toBe(true);
     const anemic = screen.getByRole('checkbox', { name: 'Анемический синдром' });
     expect(anemic.matches(':disabled')).toBe(false);
     fireEvent.click(anemic);
@@ -80,13 +88,17 @@ it.each(['donor', 'indications'] as const)(
 );
 
 it('формирует запись об анемическом синдроме независимо от гемической гипоксии', () => {
-  expect(formatIndications({
-    indicationComponent: 'erythrocytes',
-    indicationRbcAnemicSyndrome: '1',
-  })).toBe('Анемический синдром.');
-  expect(formatIndications({
-    indicationComponent: 'erythrocytes',
-    indicationRbcAnemicSyndrome: '1',
-    indicationRbcHemicHypoxia: '1',
-  })).toBe('Признаки гемической гипоксии. Анемический синдром.');
+  expect(
+    formatIndications({
+      indicationComponent: 'erythrocytes',
+      indicationRbcAnemicSyndrome: '1',
+    }),
+  ).toBe('Анемический синдром.');
+  expect(
+    formatIndications({
+      indicationComponent: 'erythrocytes',
+      indicationRbcAnemicSyndrome: '1',
+      indicationRbcHemicHypoxia: '1',
+    }),
+  ).toBe('Признаки гемической гипоксии. Анемический синдром.');
 });

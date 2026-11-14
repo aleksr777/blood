@@ -25,10 +25,12 @@ it('предлагает отдельное показание при выбор
 });
 
 it('выводит полное показание в протокол без дублирования точки', () => {
-  expect(formatIndications({
-    indicationComponent: 'plasma-cryo',
-    [FIELD]: '1',
-  })).toBe(LABEL);
+  expect(
+    formatIndications({
+      indicationComponent: 'plasma-cryo',
+      [FIELD]: '1',
+    }),
+  ).toBe(LABEL);
 });
 
 it('включает новое поле в сохранение и восстановление показаний', () => {

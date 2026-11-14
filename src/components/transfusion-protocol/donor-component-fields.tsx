@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react';
-import { inferBloodComponentGroup } from '../../domain/blood-components';
+import { BLOOD_COMPONENTS, inferBloodComponentGroup } from '../../domain/blood-components';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
 import { DonorDetailsFields } from './donor-details-fields';
 import { IndicationsFields } from './indications-fields';
@@ -11,6 +11,8 @@ export const DonorComponentFields = (props: ComponentProps<typeof DonorDetailsFi
     values.componentGroup ||
     values.indicationComponent ||
     inferBloodComponentGroup(values.componentName);
+  const hasComponentGroup = BLOOD_COMPONENTS.some(({ value }) => value === group);
+
   return (
     <>
       <BloodComponentSelector
@@ -20,16 +22,22 @@ export const DonorComponentFields = (props: ComponentProps<typeof DonorDetailsFi
           onChange({ componentGroup: group, indicationComponent: group, componentName: name })
         }
       />
-      <section className={styles.wide} aria-label="Данные гемакона">
-        <h3 className={styles.sectionTitle}>Данные гемакона</h3>
-        <div className={styles.grid}>
-          <DonorDetailsFields {...props} />
-        </div>
-      </section>
-      <section className={styles.wide} aria-label="Показания к трансфузии">
-        <h3 className={styles.sectionTitle}>Показания к трансфузии</h3>
-        <IndicationsFields values={values} onChange={onChange} showComponentSelector={false} />
-      </section>
+      <fieldset
+        className={`${styles.grid} ${styles.componentDependentFields}`}
+        disabled={!hasComponentGroup}
+        data-component-dependent
+      >
+        <section className={styles.wide} aria-label="Показания к трансфузии">
+          <h3 className={styles.sectionTitle}>Показания к трансфузии</h3>
+          <IndicationsFields values={values} onChange={onChange} showComponentSelector={false} />
+        </section>
+        <section className={styles.wide} aria-label="Данные гемакона">
+          <h3 className={styles.sectionTitle}>Данные гемакона</h3>
+          <div className={styles.grid}>
+            <DonorDetailsFields {...props} />
+          </div>
+        </section>
+      </fieldset>
     </>
   );
 };

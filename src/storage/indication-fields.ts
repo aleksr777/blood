@@ -6,6 +6,7 @@ export const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
     'indicationRbcOngoingBleeding',
     'indicationRbcCirculatoryDisturbances',
     'indicationRbcHemicHypoxia',
+    'indicationRbcAnemicSyndrome',
     'indicationRbcThreshold',
     'indicationRbcHgb',
     'indicationRbcHct',

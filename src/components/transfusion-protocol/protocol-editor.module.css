@@ -18,6 +18,15 @@
   composes: ui-form-grid from global;
 }
 
+.componentDependentFields {
+  grid-column: 1 / -1;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
 .fieldLabel {
   composes: ui-field-label from global;
 }

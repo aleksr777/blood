@@ -29,6 +29,7 @@ export const formatIndications = (values: ProtocolValues) => {
     if (yes(values.indicationRbcHemicHypoxia)) {
       items.push('Признаки гемической гипоксии');
     }
+    if (yes(values.indicationRbcAnemicSyndrome)) items.push('Анемический синдром');
     if (values.indicationRbcThreshold === '70-25')
       items.push('Снижение гемоглобина менее 70 г/л и гематокрита менее 25%');
     if (values.indicationRbcThreshold === 'custom') {

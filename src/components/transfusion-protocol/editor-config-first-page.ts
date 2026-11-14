@@ -69,6 +69,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
         label: 'indicationRbcCirculatoryDisturbances',
       },
       { name: 'indicationRbcHemicHypoxia', label: 'indicationRbcHemicHypoxia' },
+      { name: 'indicationRbcAnemicSyndrome', label: 'indicationRbcAnemicSyndrome' },
       { name: 'indicationRbcThreshold', label: 'indicationRbcThreshold' },
       { name: 'indicationRbcHgb', label: 'indicationRbcHgb' },
       { name: 'indicationRbcHct', label: 'indicationRbcHct' },

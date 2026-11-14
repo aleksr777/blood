@@ -7,7 +7,7 @@
 
 .choices {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.55rem;
 }
 
@@ -60,6 +60,16 @@
   --component-selected-hover: var(--blood-yellow-selected-hover);
 }
 
+.choice[data-component='granulocytes'] {
+  --component-background: var(--ui-success-soft);
+  --component-border: var(--ui-success-border);
+  --component-text: var(--ui-success-text);
+  --component-hover-background: #dcefe3;
+  --component-hover-border: var(--ui-success);
+  --component-selected-background: var(--ui-success);
+  --component-selected-hover: var(--ui-success-hover);
+}
+
 .choice:hover:enabled {
   border-color: var(--component-hover-border);
   background: var(--component-hover-background);
@@ -101,7 +111,13 @@
   color: var(--ui-text-muted);
 }
 
-@media (max-width: 560px) {
+@media (max-width: 680px) {
+  .choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
   .choices {
     grid-template-columns: 1fr;
   }

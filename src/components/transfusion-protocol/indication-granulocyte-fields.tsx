@@ -1,7 +1,5 @@
+import { GRANULOCYTE_NEUTROPHIL_INDICATION } from '../../domain/granulocyte-indications';
 import { Choice, OtherChoice, type IndicationProps } from './indication-controls';
-
-export const GRANULOCYTE_NEUTROPHIL_INDICATION =
-  'Абсолютное количество нейтрофилов менее 0,5 × 10⁹/л.';
 
 export const GranulocyteIndications = ({ values, onChange }: IndicationProps) => {
   const checked = values.indicationGranulocyteNeutrophilsLow === '1';

@@ -95,6 +95,9 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationPlateletCount', label: 'indicationPlateletCount' },
       { name: 'indicationPlateletOther', label: 'indicationPlateletOther' },
       { name: 'indicationPlateletOtherText', label: 'indicationPlateletOtherText' },
+      { name: 'indicationGranulocyteNeutrophilsLow', label: 'indicationGranulocyteNeutrophilsLow' },
+      { name: 'indicationGranulocyteOther', label: 'indicationGranulocyteOther' },
+      { name: 'indicationGranulocyteOtherText', label: 'indicationGranulocyteOtherText' },
     ],
   },
   {

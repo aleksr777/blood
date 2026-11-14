@@ -1,3 +1,4 @@
+import { GRANULOCYTE_NEUTROPHIL_INDICATION } from '../../domain/granulocyte-indications';
 import { PLATELET_INDICATION_OPTIONS } from '../../domain/platelet-indications';
 import type { ProtocolValues } from './protocol-types';
 
@@ -86,6 +87,15 @@ export const formatIndications = (values: ProtocolValues) => {
     }
     if (yes(values.indicationPlateletOther) && values.indicationPlateletOtherText?.trim()) {
       items.push(values.indicationPlateletOtherText.trim());
+    }
+  }
+
+  if (values.indicationComponent === 'granulocytes') {
+    if (yes(values.indicationGranulocyteNeutrophilsLow)) {
+      items.push(GRANULOCYTE_NEUTROPHIL_INDICATION);
+    }
+    if (yes(values.indicationGranulocyteOther) && values.indicationGranulocyteOtherText?.trim()) {
+      items.push(values.indicationGranulocyteOtherText.trim());
     }
   }
 

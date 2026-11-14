@@ -1,5 +1,6 @@
 import type { IndicationProps } from './indication-controls';
 import { ErythrocyteIndications } from './indication-erythrocyte-fields';
+import { GranulocyteIndications } from './indication-granulocyte-fields';
 import { IndicationsAutoHeight } from './indications-auto-height';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
 import { inferBloodComponentGroup } from '../../domain/blood-components';
@@ -46,6 +47,9 @@ export const IndicationsFields = ({
               )}
               {component === 'platelets' && (
                 <PlateletIndications values={values} onChange={onChange} />
+              )}
+              {component === 'granulocytes' && (
+                <GranulocyteIndications values={values} onChange={onChange} />
               )}
             </div>
           </fieldset>

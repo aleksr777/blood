@@ -15,7 +15,7 @@ it('keeps only the 34 filtered names in four groups, with exact codes', () => {
   };
   expect(BLOOD_COMPONENTS.map(({ value }) => value)).toEqual(Object.keys(counts));
 
-  const originalCodes = new Set(
+  const originalCodes = new Set<string>(
     Object.values(COMPONENT_NOMENCLATURE)
       .flat()
       .map(({ code }) => code),

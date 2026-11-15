@@ -86,7 +86,6 @@ const nameInput = () =>
   screen.getByRole('textbox', {
     name: 'Наименование компонента донорской крови',
   }) as HTMLInputElement;
-
 it.each<ProtocolBlockId>(['donor', 'indications'])(
   'preserves both sections when opened through %s',
   (entry) => {
@@ -112,7 +111,6 @@ it.each<ProtocolBlockId>(['donor', 'indications'])(
     );
   },
 );
-
 it('changes the component and indication group together from the single selector', () => {
   const { onSave, onClose } = renderEditor('indications');
   fireEvent.click(screen.getByRole('button', { name: 'Плазма' }));

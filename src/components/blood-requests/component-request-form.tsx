@@ -3,6 +3,7 @@ import { formatDirectionDate } from './request-common';
 import { formatRequestDateTime, formatRequestedQuantity } from './component-request-447n';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { ComponentRequestIssuedPage } from './component-request-issued-page';
+import { ComponentRequestIndication } from './component-request-indication';
 import styles from './component-request-form.module.css';
 
 export type ComponentRequestFormValues = {
@@ -83,7 +84,6 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
   const recipientRh = examination.recipientRh || legacyRh;
   const phenotype = values.recipientPhenotype;
   const physician = values.doctorName;
-
   return (
     <div className={styles.wrap} data-document-paper>
       <section
@@ -189,7 +189,7 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
               <td {...edit('component')}>
                 {formatRequestedQuantity(values.quantity, values.estimatedVolumeMl)}
               </td>
-              <td {...edit('component')}>{values.transfusionIndicationCode}</td>
+              <td {...edit('component')}><ComponentRequestIndication code={values.transfusionIndicationCode} /></td>
               <td {...edit('component')}>
                 {values.individualSelectionRequired === 'yes'
                   ? 'да'

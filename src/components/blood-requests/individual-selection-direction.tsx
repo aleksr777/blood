@@ -411,7 +411,7 @@ export const IndividualSelectionDirection = () => {
 
     setDraft((current) => {
       const currentComponent = getIndicationComponent(current.indicationValues);
-      const component = changes.componentGroup || changes.indicationComponent || currentComponent;
+      const component = changes.componentGroup ?? changes.indicationComponent ?? currentComponent;
       const indicationValues = {
         ...current.indicationValues,
         ...changes,

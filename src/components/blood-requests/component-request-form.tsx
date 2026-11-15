@@ -189,7 +189,9 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
               <td {...edit('component')}>
                 {formatRequestedQuantity(values.quantity, values.estimatedVolumeMl)}
               </td>
-              <td {...edit('component')}><ComponentRequestIndication code={values.transfusionIndicationCode} /></td>
+              <td {...edit('component')}>
+                <ComponentRequestIndication code={values.transfusionIndicationCode} />
+              </td>
               <td {...edit('component')}>
                 {values.individualSelectionRequired === 'yes'
                   ? 'да'

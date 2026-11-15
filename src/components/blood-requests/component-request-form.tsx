@@ -4,6 +4,7 @@ import { formatRequestDateTime, formatRequestedQuantity } from './component-requ
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { ComponentRequestIssuedPage } from './component-request-issued-page';
 import { ComponentRequestIndication } from './component-request-indication';
+import { visibleRequestComponentValues } from './component-request-form-values';
 import styles from './component-request-form.module.css';
 
 export type ComponentRequestFormValues = {
@@ -20,6 +21,7 @@ export type ComponentRequestFormValues = {
   plannedTransfusionDateTime: string;
   transfusionOrder: string;
   requiredComponent: string;
+  indicationValues?: ProtocolValues;
   componentCode: string;
   quantity: string;
   estimatedVolumeMl: string;
@@ -82,6 +84,7 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
   const recipientRh = examination.recipientRh || legacyRh;
   const phenotype = values.recipientPhenotype;
   const physician = values.doctorName;
+  const component = visibleRequestComponentValues(values);
   return (
     <div className={styles.wrap} data-document-paper>
       <section
@@ -179,25 +182,25 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
               <td {...edit('recipient')}>{recipientRh}</td>
               <td {...edit('recipient')}>{phenotype}</td>
               <td {...edit('component')}>
-                <div>{values.componentCode}</div>
-                {values.requiredComponent && (
-                  <span className={styles.componentName}>{values.requiredComponent}</span>
+                <div>{component.componentCode}</div>
+                {component.requiredComponent && (
+                  <span className={styles.componentName}>{component.requiredComponent}</span>
                 )}
               </td>
               <td {...edit('component')}>
-                {formatRequestedQuantity(values.quantity, values.estimatedVolumeMl)}
+                {formatRequestedQuantity(component.quantity, component.estimatedVolumeMl)}
               </td>
               <td {...edit('component')}>
-                <ComponentRequestIndication code={values.transfusionIndicationCode} />
+                <ComponentRequestIndication code={component.transfusionIndicationCode} />
               </td>
               <td {...edit('component')}>
-                {values.individualSelectionRequired === 'yes'
+                {component.individualSelectionRequired === 'yes'
                   ? 'да'
-                  : values.individualSelectionRequired === 'no'
+                  : component.individualSelectionRequired === 'no'
                     ? 'нет'
                     : ''}
               </td>
-              <td {...edit('component')}>{values.individualSelectionCode}</td>
+              <td {...edit('component')}>{component.individualSelectionCode}</td>
               <td />
               <td />
             </tr>

@@ -22,7 +22,7 @@ it('отображает единую заявку с двенадцатью н�
   ).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
   expect(dataTable.querySelectorAll('tbody tr')).toHaveLength(1);
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('Иванов Иван Иванович');
-  expect(dataTable.querySelector('tbody tr')?.textContent).toContain('15.01.1980');
+  expect(dataTable.querySelector('tbody tr')?.textContent).toContain('Дата рождения: 15.01.1980');
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('ЭВ-Л');
   expect(dataTable.querySelector('tbody tr')?.textContent).toContain('2 ед.');
   expect(dataTable.querySelector('tbody tr td:nth-child(11)')?.textContent).toBe('');

@@ -9,7 +9,9 @@ import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 
 vi.mock('../modal/modal', () => ({
   default: ({ title, children }: { title: string; children: ReactNode }) => (
-    <section role="dialog" aria-label={title}>{children}</section>
+    <section role="dialog" aria-label={title}>
+      {children}
+    </section>
   ),
 }));
 vi.mock('../../storage/repositories/saved-options', () => ({
@@ -18,10 +20,13 @@ vi.mock('../../storage/repositories/saved-options', () => ({
   rememberSavedOption: vi.fn(async () => []),
 }));
 beforeEach(() => {
-  vi.stubGlobal('ResizeObserver', class {
-    observe() {}
-    disconnect() {}
-  });
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  );
 });
 afterEach(() => {
   cleanup();
@@ -99,11 +104,10 @@ it('блокирует поля заявки до выбора группы ко
   fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));
   expect(dependent.disabled).toBe(false);
   expect(quantity.matches(':disabled')).toBe(false);
-  expect(
-    screen.getByRole('combobox', {
-      name: 'Код показания к трансфузии (графа 8)',
-    }).matches(':disabled'),
-  ).toBe(false);
+  const indicationSelect = screen.getByRole('combobox', {
+    name: 'Код показания к трансфузии (графа 8)',
+  });
+  expect(indicationSelect.matches(':disabled')).toBe(false);
 });
 
 it('блокирует количество и показания в направлении до выбора группы', () => {

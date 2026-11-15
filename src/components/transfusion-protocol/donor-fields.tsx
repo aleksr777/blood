@@ -53,23 +53,27 @@ export const DonorFields = ({ values, onChange, showComponentSelector = true }: 
         />
       </div>
 
-      <div className={styles.groupTitle}>Антигены:</div>
-      <div className={styles.antigenGrid}>
-        {DONOR_ANTIGENS.map(({ name, label }) => (
-          <BloodGroupSelectField
-            key={name}
-            name={name}
-            label={label}
-            options={ANTIGEN_OPTIONS}
-            value={values[name] ?? ''}
-            emptyLabel="Не выбрано"
-            emptyDisplayLabel=""
-            compact
-            antigen
-            onChange={(value) => onChange({ [name]: value, donorAntigens: '' })}
-          />
-        ))}
-      </div>
+      {selectedComponent === 'erythrocytes' && (
+        <>
+          <div className={styles.groupTitle}>Антигены:</div>
+          <div className={styles.antigenGrid}>
+            {DONOR_ANTIGENS.map(({ name, label }) => (
+              <BloodGroupSelectField
+                key={name}
+                name={name}
+                label={label}
+                options={ANTIGEN_OPTIONS}
+                value={values[name] ?? ''}
+                emptyLabel="Не выбрано"
+                emptyDisplayLabel=""
+                compact
+                antigen
+                onChange={(value) => onChange({ [name]: value, donorAntigens: '' })}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

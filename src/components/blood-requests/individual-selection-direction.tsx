@@ -57,7 +57,10 @@ import { IndividualSelectionRecipientModal } from './individual-selection-recipi
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
-import { normalizeDirectionIndications, visibleDirectionComponentValues } from './direction-indications';
+import {
+  normalizeDirectionIndications,
+  visibleDirectionComponentValues,
+} from './direction-indications';
 import { persistRequestOptions } from './request-saved-options';
 import {
   getIndividualSelectionClearValues,
@@ -806,7 +809,10 @@ export const IndividualSelectionDirection = () => {
         label="Наименование требуемого компонента:"
         value={visibleComponent.requiredComponent}
       />
-      <AdaptiveRuledField label="Количество:" value={formatDoseQuantity(visibleComponent.quantity)} />
+      <AdaptiveRuledField
+        label="Количество:"
+        value={formatDoseQuantity(visibleComponent.quantity)}
+      />
       <AdaptiveRuledField
         label="Показания к трансфузии:"
         value={formatIndications(visibleComponent.indicationValues)}

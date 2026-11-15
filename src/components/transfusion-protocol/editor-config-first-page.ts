@@ -1,6 +1,9 @@
 import type { ProtocolBlockConfig } from './protocol-types';
 import { obstetricHistoryFields } from './obstetric-history-config';
-import { PLATELET_INDICATION_OPTIONS } from '../../domain/platelet-indications';
+import {
+  LEGACY_PLATELET_INDICATION_OPTIONS,
+  PLATELET_INDICATION_OPTIONS,
+} from '../../domain/platelet-indications';
 
 export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
   {
@@ -88,7 +91,8 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationPlasmaOther', label: 'indicationPlasmaOther' },
       { name: 'indicationPlasmaOtherText', label: 'indicationPlasmaOtherText' },
       ...PLATELET_INDICATION_OPTIONS.map(([name]) => ({ name, label: name })),
-      { name: 'indicationPlateletHighBleedingRisk', label: 'indicationPlateletHighBleedingRisk' },
+      ...LEGACY_PLATELET_INDICATION_OPTIONS.map(([name]) => ({ name, label: name })),
+      { name: 'indicationPlateletVersion', label: 'indicationPlateletVersion' },
       {
         name: 'indicationPlateletThrombocytopenia',
         label: 'indicationPlateletThrombocytopenia',

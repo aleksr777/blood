@@ -23,7 +23,11 @@ it('hides request component columns without changing the stored component data',
   );
   const cells = () =>
     screen.getByRole('table', { name: 'Графы 1–12 заявки' }).querySelectorAll('tbody td');
-  expect(Array.from(cells()).slice(5, 10).every((cell) => cell.textContent === '')).toBe(true);
+  expect(
+    Array.from(cells())
+      .slice(5, 10)
+      .every((cell) => cell.textContent === ''),
+  ).toBe(true);
   expect(cells()[0].textContent).toContain('Иванов Иван Иванович');
   expect(values.requiredComponent).toBe(request.requiredComponent);
   expect(values.componentCode).toBe('ЭВ-Л');

@@ -1,6 +1,6 @@
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
 import Modal from '../modal/modal';
-import { BLOOD_COMPONENTS, inferBloodComponentGroup } from '../../domain/blood-components';
+import { BLOOD_COMPONENTS, selectedBloodComponentGroup } from '../../domain/blood-components';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import type { ComponentRequestDetailsValues } from './component-request-details-types';
 import { ComponentRequestQuantityFields } from './component-request-quantity-fields';
@@ -22,10 +22,7 @@ export const ComponentRequestDetailsModal = ({
   onIndicationsChange,
   onClose,
 }: Props) => {
-  const group =
-    values.indicationValues.componentGroup ||
-    values.indicationValues.indicationComponent ||
-    inferBloodComponentGroup(values.requiredComponent);
+  const group = selectedBloodComponentGroup(values.indicationValues, values.requiredComponent);
   const hasSelectedComponent = BLOOD_COMPONENTS.some(({ value }) => value === group);
   const catalogOptions = componentCatalogForGroup(group);
   // Keep older saved requests readable even when a code is no longer selectable.
@@ -52,18 +49,25 @@ export const ComponentRequestDetailsModal = ({
       <div className={styles.root}>
         <BloodComponentSelector
           group={group}
+          lastSelectedGroup={values.indicationValues.lastSelectedComponentGroup}
           name={values.requiredComponent}
           inputName="requiredComponent"
           catalogOptions={catalogOptions}
           selectedCode={selectedCode}
           onCodedChange={selectComponent}
           onChange={({ group: nextGroup, name }) => {
-            onIndicationsChange({ componentGroup: nextGroup, indicationComponent: nextGroup });
-            onChange({
-              requiredComponent: name,
-              ...(nextGroup !== group ? { componentCode: '', transfusionIndicationCode: '' } : {}),
+            const previousGroup = group || values.indicationValues.lastSelectedComponentGroup;
+            const switched = Boolean(nextGroup && previousGroup && nextGroup !== previousGroup);
+            onIndicationsChange({
+              componentGroup: nextGroup,
+              indicationComponent: nextGroup,
+              lastSelectedComponentGroup: nextGroup || previousGroup,
             });
-          }}
+            onChange({
+              requiredComponent: switched ? '' : name,
+              ...(switched ? { componentCode: '', transfusionIndicationCode: '' } : {}),
+            });
+          }
         />
 
         <fieldset

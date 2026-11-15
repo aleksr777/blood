@@ -15,7 +15,11 @@ it('persists unique editable values but excludes immutable options', async () =>
   await persistDocumentOptions({
     department: 'ОРИТ',
     options: [
-      { category: 'componentName:granulocytes', value: 'Компонент из справочника', fixedOptions: ['Компонент из справочника'] },
+      {
+        category: 'componentName:granulocytes',
+        value: 'Компонент из справочника',
+        fixedOptions: ['Компонент из справочника'],
+      },
       { category: 'componentName:granulocytes', value: 'Новый вариант' },
       { category: 'componentName:granulocytes', value: '  новый   ВАРИАНТ  ' },
       { category: 'doctorName', value: '  Врач  ' },
@@ -36,10 +40,7 @@ it('does not fail an already saved document if a dictionary update fails', async
     await expect(
       persistDocumentOptions({ options: [{ category: 'doctorName', value: 'Врач' }] }),
     ).resolves.toBeUndefined();
-    expect(log).toHaveBeenCalledWith(
-      'Не удалось сохранить вариант doctorName:',
-      expect.any(Error),
-    );
+    expect(log).toHaveBeenCalledWith('Не удалось сохранить вариант doctorName:', expect.any(Error));
   } finally {
     log.mockRestore();
   }

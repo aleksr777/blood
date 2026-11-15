@@ -92,6 +92,7 @@ it.each(['donor', 'indications'] as const)(
       componentGroup: '',
       indicationComponent: '',
       componentName: '',
+      lastSelectedComponentGroup: 'erythrocytes',
     });
   },
 );

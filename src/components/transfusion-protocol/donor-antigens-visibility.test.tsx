@@ -48,7 +48,11 @@ it('respects explicitly selected group but supports erythrocyte legacy names', (
   expect(formatDonorAntigensForComponent(donor)).toBe('C- K+');
   expect(formatDonorAntigensForComponent({ ...donor, componentGroup: 'platelets' })).toBe('');
   expect(formatDonorAntigensForComponent({ ...donor, componentGroup: '' })).toBe('');
-  const { componentGroup: _group, indicationComponent: _indication, ...legacy } = donor;
+  const legacy = {
+    componentName: donor.componentName,
+    donorAntigenK: donor.donorAntigenK,
+    donorAntigenC: donor.donorAntigenC,
+  };
   expect(formatDonorAntigensForComponent(legacy)).toBe('C- K+');
 });
 

@@ -227,6 +227,11 @@
   margin: 0;
 }
 
+@page rotated-component-request-page {
+  size: A4 portrait;
+  margin: 0;
+}
+
 @media print {
   :global(html[data-app-page='component-request']),
   :global(html[data-app-page='component-request'] body),
@@ -275,6 +280,32 @@
   :global(body.print-component-request-page-2) .pageTwo {
     page-break-before: auto !important;
     break-before: auto !important;
+  }
+
+  :global(html[data-app-page='component-request'][data-request-print-rotated]),
+  :global(html[data-app-page='component-request'][data-request-print-rotated] body),
+  :global(html[data-app-page='component-request'][data-request-print-rotated] #root) {
+    width: 210mm !important;
+    min-width: 210mm !important;
+    height: 297mm !important;
+    min-height: 297mm !important;
+    overflow: hidden !important;
+  }
+
+  :global(html[data-request-print-rotated]) .wrap {
+    position: relative;
+    width: 210mm;
+    height: 297mm;
+    overflow: hidden;
+  }
+
+  :global(html[data-request-print-rotated]) .paper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    page: rotated-component-request-page;
+    transform: translateX(210mm) rotate(90deg);
+    transform-origin: top left;
   }
 
   .editable,

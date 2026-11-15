@@ -237,14 +237,17 @@ it('не переносит старые сведения о доноре КМ/�
   expect(saved).not.toHaveProperty('stemCellDonorAntigens');
 });
 
-it('печатает каждую из двух страниц заявки отдельно', () => {
+it('печатает каждую страницу заявки с поворотом и восстанавливает отображение', () => {
   const printClasses: string[][] = [];
-  const print = vi.spyOn(window, 'print').mockImplementation(() => {
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => (callback(0), 1));
+  vi.spyOn(window, 'print').mockImplementation(() => {
+    expect(document.documentElement.dataset.requestPrintRotated).toBe('true');
     printClasses.push(
       [...document.body.classList].filter((className) =>
         className.startsWith('print-component-request-page-'),
       ),
     );
+    window.dispatchEvent(new Event('afterprint'));
   });
   render(<ComponentRequest />);
   fireEvent.click(screen.getByRole('button', { name: 'Печать страницы 1' }));
@@ -253,9 +256,10 @@ it('печатает каждую из двух страниц заявки от
     ['print-component-request-page-1'],
     ['print-component-request-page-2'],
   ]);
+  expect(document.documentElement.dataset.requestPrintRotated).toBeUndefined();
   expect(document.body.classList.contains('print-component-request-page-1')).toBe(false);
   expect(document.body.classList.contains('print-component-request-page-2')).toBe(false);
-  print.mockRestore();
+  vi.restoreAllMocks();
 });
 
 it('позволяет выбрать и отредактировать контактный телефон подразделения из выпадающего списка', async () => {

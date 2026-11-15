@@ -4,6 +4,7 @@ import { formatRequestDateTime, formatRequestedQuantity } from './component-requ
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { ComponentRequestIssuedPage } from './component-request-issued-page';
 import { ComponentRequestIndication } from './component-request-indication';
+import { REQUEST_FORM_HEADERS } from './component-request-form-headers';
 import { visibleRequestComponentValues } from './component-request-form-values';
 import styles from './component-request-form.module.css';
 
@@ -45,20 +46,6 @@ const DISPLAY_CARE_FORM: Record<string, string> = {
   urgent: 'экстренная или неотложная',
 };
 const columns = [17, 7, 6, 6, 10, 10, 8, 8, 6, 7, 7, 8];
-const headers = [
-  'Фамилия, имя, отчество (при наличии), дата рождения и диагноз реципиента',
-  '№ медицинской карты',
-  'Группа крови AB0',
-  'Резус-принадлежность',
-  'Антигены эритроцитов C, c, E, e, K, k и других систем',
-  'Идентификационный код донорской крови и (или) её компонента',
-  'Количество (единицы измерения)',
-  'Код показания к трансфузии',
-  'Необходимость индивидуального подбора (да/нет)',
-  'Код показания для индивидуального подбора',
-  'Группа крови AB0 донора аллогенного КМ или ГСК',
-  'Резус-принадлежность и антигены C, c, E, e, K, k донора аллогенного КМ или ГСК',
-];
 export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: Props) => {
   const edit = (section: Section) => ({
     className: `${styles.editable} ${section === 'recipient' ? styles.recipientCell : ''} ${section === 'component' ? styles.componentCell : ''} ${readOnly ? styles.readOnly : ''}`,
@@ -150,14 +137,14 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
               </th>
             </tr>
             <tr className={styles.headerRow}>
-              {headers.map((header, index) => (
+              {REQUEST_FORM_HEADERS.map((header, index) => (
                 <th key={index} {...headerEdit(index)}>
                   {header}
                 </th>
               ))}
             </tr>
             <tr className={styles.numberRow}>
-              {headers.map((_, index) => (
+              {REQUEST_FORM_HEADERS.map((_, index) => (
                 <th key={index} {...headerEdit(index)}>
                   {index + 1}
                 </th>
@@ -196,7 +183,12 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
                     ? 'нет'
                     : ''}
               </td>
-              <td {...edit('component')}>{component.individualSelectionCode}</td>
+              <td {...edit('component')}>
+                <ComponentRequestIndication
+                  code={component.individualSelectionCode}
+                  kind="individualSelection"
+                />
+              </td>
               <td />
               <td />
             </tr>

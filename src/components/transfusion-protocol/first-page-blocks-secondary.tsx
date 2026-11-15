@@ -1,3 +1,4 @@
+import { visibleProtocolComponentValues } from '../../domain/blood-components';
 import { formatComponentUnitNumber } from './component-unit-number';
 import { formatDonorAntigens } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
@@ -70,7 +71,7 @@ export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   );
 };
 
-export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
+const DonorBlockContents = ({ values, onOpenBlock, part }: ChunkProps) => (
   <tbody
     className="fill-block"
     data-protocol-block="donor"
@@ -162,6 +163,10 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
       </tr>
     )}
   </tbody>
+);
+
+export const DonorBlock = (props: ChunkProps) => (
+  <DonorBlockContents {...props} values={visibleProtocolComponentValues(props.values)} />
 );
 
 export const SelectionBlock = ({ values, onOpenBlock, part }: ChunkProps) => {

@@ -151,7 +151,6 @@ it('preserves other request data when a working request is saved and closed', as
   expect(saved.requiredComponent).toBe(working.requiredComponent);
   expect(saved.doctorName).toBe(working.doctorName);
 });
-
 it('сохраняет новые графы приложения № 17 через модальное окно компонента', async () => {
   render(<ComponentRequest />);
   fireEvent.click(screen.getByText('Эритроцитная взвесь'));
@@ -185,7 +184,6 @@ it('сохраняет новые графы приложения № 17 чер�
   expect(saved.individualSelectionRequired).toBe('yes');
   expect(saved.individualSelectionCode).toBe('3');
 });
-
 it('при смене группы показывает только её коды и очищает прежнее наименование и код', () => {
   window.localStorage.setItem(
     key,

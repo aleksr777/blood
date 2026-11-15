@@ -1,6 +1,5 @@
-import { rememberDepartment } from '../../storage/repositories/departments';
-import { rememberSavedOption } from '../../storage/repositories/saved-options';
-import { getBloodComponentNameCategory } from '../../domain/blood-components';
+import { persistDocumentOptions } from '../../storage/repositories/document-options';
+import { BLOOD_COMPONENTS, getBloodComponentNameCategory } from '../../domain/blood-components';
 import type { ProtocolValues } from './protocol-types';
 import { REAGENTS } from './reagent-defaults';
 import { URINE_COLOR_FIELDS, SHARED_SAVED_OPTION_GROUPS } from '../../domain/shared-saved-options';
@@ -32,32 +31,22 @@ export const getSavedOptionCategory = (fieldName: string) => {
   return SAVED_OPTION_FIELDS.has(fieldName) ? fieldName : null;
 };
 
-const logStorageError = (fieldName: string, error: unknown) => {
-  console.error(`Не удалось сохранить значение поля ${fieldName}:`, error);
-};
-
+// Values are persisted only by the successful document-save workflow.
 export const persistProtocolOptions = (values: ProtocolValues) => {
-  if (values.department) {
-    void rememberDepartment(values.department).catch((error: unknown) =>
-      logStorageError('department', error),
-    );
-  }
+  const group = values.componentGroup || values.indicationComponent || '';
+  const componentCategory = getBloodComponentNameCategory(group);
+  const fixedNames = BLOOD_COMPONENTS.find(({ value }) => value === group)?.names ?? [];
 
-  const componentNameCategory = getBloodComponentNameCategory(
-    values.componentGroup || values.indicationComponent,
-  );
-  if (componentNameCategory && values.componentName) {
-    void rememberSavedOption(componentNameCategory, values.componentName).catch((error: unknown) =>
-      logStorageError('componentName', error),
-    );
-  }
-
-  SAVED_OPTION_FIELDS.forEach((fieldName) => {
-    const value = values[fieldName];
-    if (!value) return;
-
-    void rememberSavedOption(getSavedOptionCategory(fieldName)!, value).catch((error: unknown) =>
-      logStorageError(fieldName, error),
-    );
+  return persistDocumentOptions({
+    department: values.department,
+    options: [
+      ...(componentCategory
+        ? [{ category: componentCategory, value: values.componentName, fixedOptions: fixedNames }]
+        : []),
+      ...[...SAVED_OPTION_FIELDS].map((fieldName) => ({
+        category: getSavedOptionCategory(fieldName)!,
+        value: values[fieldName],
+      })),
+    ],
   });
 };

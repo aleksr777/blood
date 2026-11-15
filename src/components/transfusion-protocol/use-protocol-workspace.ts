@@ -5,10 +5,6 @@ import {
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
-import {
-  readCurrentIndications,
-  writeCurrentIndications,
-} from '../../storage/repositories/current-indications';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import {
@@ -22,7 +18,7 @@ import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
 import { getMissingProtocolFields, getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { getHemaconDateOrderWarning } from '../../domain/hemacon-dates';
-import { getIndicationComponent } from './indications-model';
+import { persistProtocolOptions } from './saved-field-config';
 import {
   getExpiredReagentWarnings,
   getHemaconExpirationWarning,
@@ -160,31 +156,13 @@ export const useProtocolWorkspace = () => {
       setRecordId(null);
     }
 
-    const selectedComponent = nextValues.componentGroup || nextValues.indicationComponent || '';
-    const currentComponent = getIndicationComponent(values);
-    const currentRecipient = readCurrentRecipient();
-    const componentChanged = Boolean(selectedComponent) && selectedComponent !== currentComponent;
-    const sharedIndications =
-      componentChanged && currentRecipient && Number(values.recipientId) === currentRecipient.id
-        ? readCurrentIndications(currentRecipient.id, selectedComponent)
-        : {};
-    const appliedValues = {
-      ...sharedIndications,
-      ...nextValues,
-    };
-
-    const merged = { ...values, ...appliedValues };
-    if (hasReagentDefaultUpdate(appliedValues)) {
+    const merged = { ...values, ...nextValues };
+    if (hasReagentDefaultUpdate(nextValues)) {
       saveReagentDefaults(merged);
     }
-    setValues((current) => ({ ...current, ...appliedValues }));
+    setValues((current) => ({ ...current, ...nextValues }));
 
-    const activeComponent = getIndicationComponent(merged);
-    if (activeComponent && currentRecipient && Number(merged.recipientId) === currentRecipient.id) {
-      writeCurrentIndications(currentRecipient.id, activeComponent, merged);
-    }
-
-    void syncCurrentRecipientProfile(appliedValues, {
+    void syncCurrentRecipientProfile(nextValues, {
       kind: 'protocol',
       values: merged,
       recordId: editingSavedRecord ? null : recordId,
@@ -192,7 +170,6 @@ export const useProtocolWorkspace = () => {
       console.error('Не удалось синхронизировать данные реципиента:', error),
     );
   };
-
   const selectRecipient = async (recipient: RecipientRecord) => {
     try {
       document.close();
@@ -226,15 +203,13 @@ export const useProtocolWorkspace = () => {
       return false;
     }
   };
-
   const validateHemacon = () => {
     const warning = getProtocolHemaconWarning(values);
     if (!warning) return true;
     setStatus(warning);
-    setActiveBlock(getMissingProtocolFields(values)[0].block);
+    setActiveBlock(getMissingProtocolFields(values)[0]?.block ?? 'donor');
     return false;
   };
-
   const saveToDatabase = async () => {
     if (!hasContent) return false;
     if (document.active) {
@@ -243,6 +218,7 @@ export const useProtocolWorkspace = () => {
       try {
         const savedValues = { ...values, recipientId: String(document.record.recipientId) };
         const record = await updateProtocolRecord(document.record.id, savedValues);
+        await persistProtocolOptions(savedValues);
         document.open(record, record.values, 'edit');
         document.setWorkingValues(cleanProtocolDraft);
         setActiveBlock(null);
@@ -262,6 +238,7 @@ export const useProtocolWorkspace = () => {
 
     try {
       const record = await saveProtocolRecord(values);
+      await persistProtocolOptions(values);
       setRecordId(record.id);
       const savedValues = { ...values, recipientId: String(record.recipientId) };
       setValues(savedValues);

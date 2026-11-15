@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { hasDocumentContent } from '../../domain/document-content';
+import { printPageLabel } from '../../domain/print-page-label';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -11,31 +12,13 @@ import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
 import { RECIPIENT_PROFILE_FIELDS } from '../../storage/sqlite/recipient-data';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type KeyboardEvent,
-  type MouseEvent,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import {
   readCurrentRecipient,
   switchCurrentRecipient,
   updateCurrentRecipientProfile,
   type CurrentRecipient,
 } from '../../storage/repositories/current-recipient';
-import {
-  currentIndicationsForComponent,
-  hasStoredCurrentIndications,
-  hasStoredCurrentIndividualSelectionIndications,
-  readCurrentIndications,
-  readCurrentIndividualSelectionIndications,
-  writeCurrentIndications,
-  writeCurrentIndividualSelectionIndications,
-} from '../../storage/repositories/current-indications';
-import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedRequestDraft } from '../../storage/repositories/recipient-deletion';
 import {
   saveBloodRequestRecord,
@@ -69,47 +52,36 @@ import {
 } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
+import { individualSelectionReasonLabel } from './component-request-447n';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
-import { normalizeDirectionIndications } from './direction-indications';
+import {
+  normalizeDirectionIndications,
+  visibleDirectionComponentValues,
+} from './direction-indications';
+import { persistRequestOptions } from './request-saved-options';
 import {
   getIndividualSelectionClearValues,
   hasIndividualSelectionValuesToClear,
 } from './individual-selection-clear';
 import { useFormPages } from './use-form-pages';
 import { AdaptiveRuledField } from './adaptive-ruled-field';
+import {
+  activateOnKeyboard,
+  formatDirectionDate,
+  readSavedRequestRecordId,
+  REQUEST_AUTO_FIELDS,
+  type RequestAutoField,
+} from './request-common';
 import styles from './individual-selection-direction.module.css';
 
 const STORAGE_KEY = 'blood:individual-selection-direction-draft';
 const SAVED_RECORD_ID_STORAGE_KEY = `${STORAGE_KEY}:saved-record-id`;
 
-const loadSavedRecordId = () => {
-  try {
-    const raw = window.localStorage.getItem(SAVED_RECORD_ID_STORAGE_KEY);
-    if (!raw) return null;
-
-    const id = Number(raw);
-    return Number.isFinite(id) && id > 0 ? id : null;
-  } catch {
-    return null;
-  }
-};
-
-type AutoField =
-  | 'recipientAboRh'
-  | 'recipientPhenotype'
-  | 'recipientName'
-  | 'recipientAge'
-  | 'department'
-  | 'medicalRecordNumber'
-  | 'diagnosis'
-  | 'obstetricHistory'
-  | 'recipientSex';
-
-type DirectionDraft = Record<AutoField, string> & {
+type DirectionDraft = Record<RequestAutoField, string> & {
   sourceRecipientId: string;
   transfusionHistory: string;
   requiredComponent: string;
@@ -121,23 +93,11 @@ type DirectionDraft = Record<AutoField, string> & {
   doctorPhone: string;
   indicationValues: ProtocolValues;
   recipientProfileSnapshot: ProtocolValues;
-  autoValues: Partial<Record<AutoField, string>>;
+  autoValues: Partial<Record<RequestAutoField, string>>;
 };
 
 type Editor =
   'organization' | 'component' | 'examination' | 'recipient' | 'history' | 'footer' | null;
-
-const AUTO_FIELDS: AutoField[] = [
-  'recipientAboRh',
-  'recipientPhenotype',
-  'recipientName',
-  'recipientAge',
-  'department',
-  'medicalRecordNumber',
-  'diagnosis',
-  'obstetricHistory',
-  'recipientSex',
-];
 
 const ORGANIZATION_FIELDS: RequestEditorField[] = [
   {
@@ -166,7 +126,7 @@ const FOOTER_FIELDS: RequestEditorField[] = [
 ];
 
 const emptyDraft = (): DirectionDraft => ({
-  ...getIndividualSelectionClearValues(null),
+  ...getIndividualSelectionClearValues(),
   sourceRecipientId: '',
   recipientAboRh: '',
   recipientPhenotype: '',
@@ -208,22 +168,16 @@ const loadDraft = (): DirectionDraft => {
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
 ): Promise<{
-  autoValues: Partial<Record<AutoField, string>>;
+  autoValues: Partial<Record<RequestAutoField, string>>;
   recipientProfileSnapshot: ProtocolValues;
 }> => {
   if (!recipient) return { autoValues: {}, recipientProfileSnapshot: {} };
 
-  const protocolDraft = await loadProtocolDraft();
-  const sameRecipient = Number(protocolDraft.values.recipientId) === recipient.id;
-  const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
-
   const values: ProtocolValues = {
-    ...currentProtocolValues,
     ...recipient.profile,
     recipientId: String(recipient.id),
     recipientName: recipient.fullName,
   };
-
   return {
     autoValues: {
       recipientAboRh: [values.recipientAbo, values.recipientRh].filter(Boolean).join(' '),
@@ -265,29 +219,18 @@ const mergeAutoValues = (
     autoValues: { ...autoValues },
   };
 
-  AUTO_FIELDS.forEach((field) => {
+  REQUEST_AUTO_FIELDS.forEach((field) => {
     next[field] = autoValues[field] ?? '';
   });
 
   return next;
 };
 
-const activateOnKeyboard = (event: KeyboardEvent<HTMLElement>, action: () => void) => {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    action();
-  }
-};
-
-const formatDirectionDate = (value: string) => {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return '';
-
-  return `${match[3]}.${match[2]}.${match[1]}`;
-};
-
 export const IndividualSelectionDirection = () => {
-  const [initialStored] = useState(() => ({ draft: loadDraft(), id: loadSavedRecordId() }));
+  const [initialStored] = useState(() => ({
+    draft: loadDraft(),
+    id: readSavedRequestRecordId(STORAGE_KEY),
+  }));
   const documentState = useDocumentState<DirectionDraft>(
     () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
     clearIndividualSelectionStaff,
@@ -320,11 +263,7 @@ export const IndividualSelectionDirection = () => {
     readCurrentRecipient,
   );
   const canClear =
-    hasContent &&
-    hasIndividualSelectionValuesToClear(
-      draft,
-      getIndividualSelectionClearValues(currentRecipient?.id ?? null),
-    );
+    hasContent && hasIndividualSelectionValuesToClear(draft, getIndividualSelectionClearValues());
 
   useEffect(() => {
     if (initialStored.id === null) return;
@@ -347,11 +286,6 @@ export const IndividualSelectionDirection = () => {
       setCurrentRecipient(recipient);
 
       const autoValues = await currentAutoValues(recipient);
-      const protocolDraft = recipient ? await loadProtocolDraft() : null;
-      const currentProtocolValues =
-        recipient && protocolDraft && Number(protocolDraft.values.recipientId) === recipient.id
-          ? protocolDraft.values
-          : {};
 
       if (hasSavedDocument() || refreshVersion !== refreshVersionRef.current) return;
       const current = baseDraft ?? draftRef.current;
@@ -370,70 +304,11 @@ export const IndividualSelectionDirection = () => {
               doctorPhone: current.doctorPhone,
             }
           : current;
-      let next = mergeAutoValues(base, recipient, autoValues);
+      const next = mergeAutoValues(base, recipient, autoValues);
       next.recipientProfileSnapshot = {
         ...next.recipientProfileSnapshot,
         ...generatedDirectionHistory(base.recipientProfileSnapshot),
       };
-      const component = getIndicationComponent(next.indicationValues);
-      if (recipient) {
-        if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
-          next = {
-            ...next,
-            individualSelectionIndications: readCurrentIndividualSelectionIndications(recipient.id),
-          };
-        } else if (recipientChanged) {
-          next = {
-            ...next,
-            individualSelectionIndications: '',
-          };
-        } else if (!hasSavedDocument() && next.individualSelectionIndications.trim()) {
-          writeCurrentIndividualSelectionIndications(
-            recipient.id,
-            next.individualSelectionIndications,
-          );
-        }
-
-        if (hasStoredCurrentIndications(recipient.id, component)) {
-          next = {
-            ...next,
-            indicationValues: {
-              ...(recipientChanged ? {} : next.indicationValues),
-              ...readCurrentIndications(recipient.id, component),
-              componentGroup: component,
-              indicationComponent: component,
-            },
-          };
-        } else {
-          const protocolIndications = currentIndicationsForComponent(
-            currentProtocolValues,
-            component,
-          );
-          const hasProtocolIndications = Object.entries(protocolIndications).some(
-            ([key, value]) => key !== 'indicationComponent' && value.trim() !== '',
-          );
-
-          if (hasProtocolIndications) {
-            writeCurrentIndications(recipient.id, component, protocolIndications);
-            next = {
-              ...next,
-              indicationValues: {
-                ...(recipientChanged ? {} : next.indicationValues),
-                ...protocolIndications,
-                componentGroup: component,
-                indicationComponent: component,
-              },
-            };
-          } else if (!hasSavedDocument() && !recipientChanged) {
-            writeCurrentIndications(recipient.id, component, next.indicationValues);
-          } else if (recipientChanged) {
-            next = {
-              ...next,
-              indicationValues: normalizeDirectionIndications({ indicationComponent: component }),
-            };
-          }
-        }
-      }
 
       if (
         hasSavedDocument() ||
@@ -522,13 +397,6 @@ export const IndividualSelectionDirection = () => {
       void updateExamination({ department: changes.department });
     }
 
-    if (currentRecipient && changes.individualSelectionIndications !== undefined) {
-      writeCurrentIndividualSelectionIndications(
-        currentRecipient.id,
-        changes.individualSelectionIndications,
-      );
-    }
-
     setDraft((current) => {
       const next = { ...current };
 
@@ -542,28 +410,18 @@ export const IndividualSelectionDirection = () => {
       return next;
     });
   };
-
   const updateIndications = (changes: ProtocolValues) => {
     if (documentState.isReadOnly()) return;
 
     setDraft((current) => {
       const currentComponent = getIndicationComponent(current.indicationValues);
-      const component = changes.componentGroup || changes.indicationComponent || currentComponent;
-      const sharedIndications =
-        !documentState.isActive() && currentRecipient && component !== currentComponent
-          ? readCurrentIndications(currentRecipient.id, component)
-          : {};
+      const component = changes.componentGroup ?? changes.indicationComponent ?? currentComponent;
       const indicationValues = {
         ...current.indicationValues,
-        ...sharedIndications,
         ...changes,
         componentGroup: component,
         indicationComponent: component,
       };
-
-      if (!documentState.isActive() && currentRecipient) {
-        writeCurrentIndications(currentRecipient.id, component, indicationValues);
-      }
 
       const next = {
         ...current,
@@ -573,7 +431,6 @@ export const IndividualSelectionDirection = () => {
       return next;
     });
   };
-
   const clear = async () => {
     if (documentState.isActive() || !canClear) return;
     const recipient = readCurrentRecipient();
@@ -581,7 +438,7 @@ export const IndividualSelectionDirection = () => {
     const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
     setDraft({
       ...next,
-      ...getIndividualSelectionClearValues(recipient?.id ?? null),
+      ...getIndividualSelectionClearValues(),
     });
     setStatus('');
   };
@@ -597,6 +454,7 @@ export const IndividualSelectionDirection = () => {
           kind: 'individual-selection-direction',
           values: { ...draftRef.current },
         });
+        await persistRequestOptions(draftRef.current, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
         documentState.open(record, draftFromRecord(record.values), 'edit');
         documentState.setWorkingValues(clearIndividualSelectionStaff);
         setEditor(null);
@@ -632,6 +490,7 @@ export const IndividualSelectionDirection = () => {
         kind: 'individual-selection-direction',
         values: { ...draftToSave },
       });
+      await persistRequestOptions(draftToSave, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);
@@ -835,6 +694,7 @@ export const IndividualSelectionDirection = () => {
     }
   }, [draft, editor]);
 
+  const visibleComponent = visibleDirectionComponentValues(draft);
   const formSections = [
     <div
       key="organization"
@@ -948,16 +808,19 @@ export const IndividualSelectionDirection = () => {
     >
       <AdaptiveRuledField
         label="Наименование требуемого компонента:"
-        value={draft.requiredComponent}
+        value={visibleComponent.requiredComponent}
       />
-      <AdaptiveRuledField label="Количество:" value={formatDoseQuantity(draft.quantity)} />
+      <AdaptiveRuledField
+        label="Количество:"
+        value={formatDoseQuantity(visibleComponent.quantity)}
+      />
       <AdaptiveRuledField
         label="Показания к трансфузии:"
-        value={formatIndications(draft.indicationValues)}
+        value={formatIndications(visibleComponent.indicationValues)}
       />
       <AdaptiveRuledField
         label="Показания для индивидуального подбора:"
-        value={draft.individualSelectionIndications}
+        value={individualSelectionReasonLabel(visibleComponent.individualSelectionIndications)}
       />
     </div>,
 
@@ -990,7 +853,7 @@ export const IndividualSelectionDirection = () => {
     draft.recipientAboRh,
     draft.recipientPhenotype,
     formatAlloimmuneAntibodies(examinationValues),
-    formatIndications(draft.indicationValues),
+    formatIndications(visibleComponent.indicationValues),
     ...TRANSFUSION_HISTORY_FIELDS.map(({ statusName, textName }) =>
       formatHistoryValue(examinationValues, statusName, textName),
     ),
@@ -998,9 +861,9 @@ export const IndividualSelectionDirection = () => {
     draft.recipientSex,
     formatObstetricHistory(examinationValues),
     draft.obstetricHistory,
-    draft.requiredComponent,
-    draft.quantity,
-    draft.individualSelectionIndications,
+    visibleComponent.requiredComponent,
+    visibleComponent.quantity,
+    individualSelectionReasonLabel(visibleComponent.individualSelectionIndications),
     draft.directionDate,
     draft.doctorName,
     draft.doctorPhone,
@@ -1072,7 +935,7 @@ export const IndividualSelectionDirection = () => {
                 className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
                 onClick={() => printPage(index + 1)}
               >
-                {pageStarts.length > 1 ? `Печать страницы ${index + 1}` : 'Печать страницы'}
+                {printPageLabel(index + 1, pageStarts.length)}
               </button>
             ))}
           </div>

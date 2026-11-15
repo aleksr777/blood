@@ -186,6 +186,7 @@
     color: var(--ui-text);
     font-size: var(--ui-font-control);
     font-weight: 600;
+    line-height: var(--ui-line-height);
   }
 
   :where(.ui-form-grid) label {
@@ -199,20 +200,51 @@
     margin-bottom: 0.4rem;
   }
 
-  .ui-fieldset {
+  .ui-fieldset,
+  .ui-form-section {
+    display: flow-root;
     min-width: 0;
     margin: 0;
     border: 1px solid var(--ui-border);
     border-radius: var(--ui-radius-large);
-    padding: 0.8rem 0.9rem 0.9rem;
+    padding: var(--ui-section-padding);
     background: var(--ui-surface);
   }
 
-  .ui-fieldset legend {
-    padding: 0 0.35rem;
+  .ui-fieldset > legend,
+  .ui-section-title {
+    display: block;
+    width: 100%;
+    margin: 0 0 0.85rem;
+    border-bottom: 1px solid var(--ui-border);
+    padding: 0 0 0.65rem;
+    color: var(--ui-text-strong);
+    font-size: var(--ui-font-section);
+    font-weight: 700;
+    line-height: var(--ui-line-height);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-fieldset > legend {
+    float: left;
+  }
+
+  .ui-fieldset > legend + * {
+    clear: both;
+  }
+
+  .ui-body-text {
     color: var(--ui-text);
     font-size: var(--ui-font-control);
-    font-weight: 700;
+    font-weight: 400;
+    line-height: var(--ui-line-height);
+  }
+
+  .ui-help-text {
+    color: var(--ui-text-muted);
+    font-size: var(--ui-font-small);
+    font-weight: 400;
+    line-height: var(--ui-line-height);
   }
 
   .ui-choice-label {
@@ -224,8 +256,8 @@
     color: var(--ui-text);
     cursor: pointer;
     font-size: var(--ui-font-control);
-    font-weight: 500;
-    line-height: 1.4;
+    font-weight: 400;
+    line-height: var(--ui-line-height);
   }
 
   .ui-choice-label input {

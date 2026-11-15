@@ -7,6 +7,20 @@
   gap: 1rem;
 }
 
+.dependentFields {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  transition: opacity var(--ui-motion-fast) ease;
+}
+
+.dependentFields:disabled {
+  opacity: 0.58;
+}
+
 .localGrid {
   composes: ui-form-grid from global;
 }
@@ -20,44 +34,16 @@
   max-width: 100%;
 }
 
-.bloodGroupGrid {
-  composes: ui-form-grid from global;
-}
-
-.divider {
-  height: 1px;
-  background: var(--ui-border);
-}
-
-.optionGroup {
-  composes: ui-fieldset from global;
-}
-
-.radioOptions {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.resetSelectionButton {
-  composes: ui-text-button from global;
-  width: fit-content;
-  margin-top: 0.65rem;
-}
-
 .indicationsSection {
-  display: grid;
-  gap: 0.75rem;
+  composes: ui-form-section from global;
 }
 
 .sectionTitle {
-  color: var(--ui-text);
-  font-size: 0.95rem;
-  font-weight: 700;
+  composes: ui-section-title from global;
 }
 
 @media (max-width: 680px) {
-  .localGrid,
-  .bloodGroupGrid {
+  .localGrid {
     grid-template-columns: 1fr;
   }
 

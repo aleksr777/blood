@@ -1,8 +1,9 @@
 import type { IndicationProps } from './indication-controls';
 import { ErythrocyteIndications } from './indication-erythrocyte-fields';
+import { GranulocyteIndications } from './indication-granulocyte-fields';
 import { IndicationsAutoHeight } from './indications-auto-height';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
-import { inferBloodComponentGroup } from '../../domain/blood-components';
+import { componentGroupChanges, selectedBloodComponentGroup } from '../../domain/blood-components';
 import { PlasmaIndications } from './indication-plasma-fields';
 import { PlateletIndications } from './indication-platelet-fields';
 import styles from './indications-fields.module.css';
@@ -16,10 +17,7 @@ export const IndicationsFields = ({
   onChange,
   showComponentSelector = true,
 }: IndicationsFieldsProps) => {
-  const component =
-    values.componentGroup ||
-    values.indicationComponent ||
-    inferBloodComponentGroup(values.componentName);
+  const component = selectedBloodComponentGroup(values, values.componentName);
 
   return (
     <IndicationsAutoHeight>
@@ -28,15 +26,14 @@ export const IndicationsFields = ({
           <BloodComponentSelector
             group={component}
             name={values.componentName ?? ''}
+            lastSelectedGroup={values.lastSelectedComponentGroup}
             showName={false}
-            onChange={({ group, name }) =>
-              onChange({ componentGroup: group, indicationComponent: group, componentName: name })
-            }
+            onChange={({ group, name }) => onChange(componentGroupChanges(values, group, name))}
           />
         )}
 
         {component && (
-          <fieldset className={styles.group}>
+          <div>
             <div className={styles.choiceGrid}>
               {component === 'erythrocytes' && (
                 <ErythrocyteIndications values={values} onChange={onChange} />
@@ -47,8 +44,11 @@ export const IndicationsFields = ({
               {component === 'platelets' && (
                 <PlateletIndications values={values} onChange={onChange} />
               )}
+              {component === 'granulocytes' && (
+                <GranulocyteIndications values={values} onChange={onChange} />
+              )}
             </div>
-          </fieldset>
+          </div>
         )}
       </div>
     </IndicationsAutoHeight>

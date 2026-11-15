@@ -10,6 +10,7 @@ export const REQUEST_DRAFTS = [
 ] as const;
 
 export const savePreviousRequestDrafts = async (nextRecipientId: number) => {
+  const draftsToClear: { storageKey: string; draft: Record<string, unknown> }[] = [];
   for (const { storageKey, kind } of REQUEST_DRAFTS) {
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) continue;
@@ -36,7 +37,12 @@ export const savePreviousRequestDrafts = async (nextRecipientId: number) => {
       await saveBloodRequestRecord({ recipientId, kind, values: draft });
     }
 
-    // A new recipient gets a new request. Keep only reusable organization/staff fields.
+    draftsToClear.push({ storageKey, draft });
+  }
+
+  // Clear only after every required archive write succeeds. If any write fails,
+  // all drafts stay available; repeat writes are deduplicated by SQLite.
+  for (const { storageKey, draft } of draftsToClear) {
     window.localStorage.setItem(
       storageKey,
       JSON.stringify({

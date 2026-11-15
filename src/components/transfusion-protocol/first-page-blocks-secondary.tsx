@@ -1,5 +1,6 @@
+import { visibleProtocolComponentValues } from '../../domain/blood-components';
 import { formatComponentUnitNumber } from './component-unit-number';
-import { formatDonorAntigens } from './donor-model';
+import { formatDonorAntigensForComponent } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatIndications } from './indications-model';
 import {
@@ -70,7 +71,7 @@ export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   );
 };
 
-export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
+const DonorBlockContents = ({ values, onOpenBlock, part }: ChunkProps) => (
   <tbody
     className="fill-block"
     data-protocol-block="donor"
@@ -89,7 +90,6 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
         </tr>
       </>
     )}
-
     {part === 'main' && (
       <>
         <SectionTitle>Данные о донорской крови или ее компоненте</SectionTitle>
@@ -109,7 +109,6 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
         </tr>
       </>
     )}
-
     {part === 'blood' && (
       <>
         <tr>
@@ -139,12 +138,11 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
             colSpan={3}
             className="span-3"
             label="Антигены эритроцитов донора"
-            value={formatDonorAntigens(values)}
+            value={formatDonorAntigensForComponent(values)}
           />
         </tr>
       </>
     )}
-
     {part === 'dates' && (
       <tr>
         <LabeledCell
@@ -163,11 +161,12 @@ export const DonorBlock = ({ values, onOpenBlock, part }: ChunkProps) => (
     )}
   </tbody>
 );
-
+export const DonorBlock = (props: ChunkProps) => (
+  <DonorBlockContents {...props} values={visibleProtocolComponentValues(props.values)} />
+);
 export const SelectionBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   const status = getSelectionStatus(values);
   const performed = status === SELECTION_STATUS.performed;
-
   return (
     <tbody
       className="fill-block"
@@ -181,7 +180,6 @@ export const SelectionBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
           <SectionTitle>
             {performed ? 'Результаты индивидуального подбора' : 'Индивидуальный подбор'}
           </SectionTitle>
-
           {!performed ? (
             <tr className="row-selection-summary">
               <td colSpan={6}>

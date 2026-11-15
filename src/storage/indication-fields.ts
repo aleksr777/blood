@@ -1,3 +1,8 @@
+import {
+  LEGACY_PLATELET_INDICATION_OPTIONS,
+  PLATELET_INDICATION_OPTIONS,
+} from '../domain/platelet-indications';
+
 export const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
   erythrocytes: [
     'indications',
@@ -6,6 +11,7 @@ export const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
     'indicationRbcOngoingBleeding',
     'indicationRbcCirculatoryDisturbances',
     'indicationRbcHemicHypoxia',
+    'indicationRbcAnemicSyndrome',
     'indicationRbcThreshold',
     'indicationRbcHgb',
     'indicationRbcHct',
@@ -18,15 +24,23 @@ export const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
     'indicationPlasmaBloodLossPercent',
     'indicationPlasmaOngoingBleeding',
     'indicationPlasmaFactorDeficiency',
+    'indicationPlasmaFactorsBelow50',
     'indicationPlasmaFibrinogenBleeding',
     'indicationPlasmaFibrinogenLow',
     'indicationPlasmaOther',
     'indicationPlasmaOtherText',
   ],
+  granulocytes: [
+    'indications',
+    'indicationGranulocyteNeutrophilsLow',
+    'indicationGranulocyteOther',
+    'indicationGranulocyteOtherText',
+  ],
   platelets: [
     'indications',
-    'indicationPlateletHemorrhagicSyndrome',
-    'indicationPlateletHighBleedingRisk',
+    ...PLATELET_INDICATION_OPTIONS.map(([name]) => name),
+    ...LEGACY_PLATELET_INDICATION_OPTIONS.map(([name]) => name),
+    'indicationPlateletVersion',
     'indicationPlateletThrombocytopenia',
     'indicationPlateletCount',
     'indicationPlateletOther',

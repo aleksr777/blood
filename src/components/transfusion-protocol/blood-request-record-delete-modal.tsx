@@ -45,7 +45,7 @@ export const BloodRequestRecordDeleteModal = ({
   return (
     <Modal title="Удалить сохранённый бланк?" onClose={onClose} className={styles.modal}>
       <div className={styles.text}>
-        Будет удалено {recordTitle(record)} реципиента <strong>{recipientName}</strong>.
+        Будет удалён бланк «{recordTitle(record)}» реципиента <strong>{recipientName}</strong>.
       </div>
       <div className={styles.warning}>Отменить это действие после удаления будет нельзя.</div>
       <AnimatedMessage message={error} className={styles.error} role="alert" />

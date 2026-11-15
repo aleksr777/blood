@@ -1,5 +1,9 @@
 import type { ProtocolBlockConfig } from './protocol-types';
 import { obstetricHistoryFields } from './obstetric-history-config';
+import {
+  LEGACY_PLATELET_INDICATION_OPTIONS,
+  PLATELET_INDICATION_OPTIONS,
+} from '../../domain/platelet-indications';
 
 export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
   {
@@ -9,12 +13,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     fields: [
       { name: 'recipientName', label: 'Фамилия, имя, отчество реципиента', wide: true },
       { name: 'recipientBirthDate', label: 'Дата рождения', type: 'date' },
-      {
-        name: 'recipientSex',
-        label: 'Пол',
-        type: 'select',
-        options: ['Мужской', 'Женский'],
-      },
+      { name: 'recipientSex', label: 'Пол', type: 'select', options: ['Мужской', 'Женский'] },
       { name: 'recipientAge', label: 'Возраст', readOnly: true },
       { name: 'requestDateTime', label: 'Дата и время подачи заявки', type: 'datetime-local' },
       { name: 'transfusionDate', label: 'Дата трансфузии', type: 'date' },
@@ -59,6 +58,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     fields: [
       { name: 'indications', label: 'indications' },
       { name: 'componentGroup', label: 'componentGroup' },
+      { name: 'lastSelectedComponentGroup', label: 'lastSelectedComponentGroup' },
       { name: 'componentName', label: 'Наименование компонента донорской крови' },
       { name: 'indicationComponent', label: 'indicationComponent' },
       { name: 'indicationRbcBloodLoss', label: 'indicationRbcBloodLoss' },
@@ -69,6 +69,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
         label: 'indicationRbcCirculatoryDisturbances',
       },
       { name: 'indicationRbcHemicHypoxia', label: 'indicationRbcHemicHypoxia' },
+      { name: 'indicationRbcAnemicSyndrome', label: 'indicationRbcAnemicSyndrome' },
       { name: 'indicationRbcThreshold', label: 'indicationRbcThreshold' },
       { name: 'indicationRbcHgb', label: 'indicationRbcHgb' },
       { name: 'indicationRbcHct', label: 'indicationRbcHct' },
@@ -81,6 +82,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       },
       { name: 'indicationPlasmaOngoingBleeding', label: 'indicationPlasmaOngoingBleeding' },
       { name: 'indicationPlasmaFactorDeficiency', label: 'indicationPlasmaFactorDeficiency' },
+      { name: 'indicationPlasmaFactorsBelow50', label: 'indicationPlasmaFactorsBelow50' },
       {
         name: 'indicationPlasmaFibrinogenBleeding',
         label: 'indicationPlasmaFibrinogenBleeding',
@@ -88,14 +90,9 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationPlasmaFibrinogenLow', label: 'indicationPlasmaFibrinogenLow' },
       { name: 'indicationPlasmaOther', label: 'indicationPlasmaOther' },
       { name: 'indicationPlasmaOtherText', label: 'indicationPlasmaOtherText' },
-      {
-        name: 'indicationPlateletHemorrhagicSyndrome',
-        label: 'indicationPlateletHemorrhagicSyndrome',
-      },
-      {
-        name: 'indicationPlateletHighBleedingRisk',
-        label: 'indicationPlateletHighBleedingRisk',
-      },
+      ...PLATELET_INDICATION_OPTIONS.map(([name]) => ({ name, label: name })),
+      ...LEGACY_PLATELET_INDICATION_OPTIONS.map(([name]) => ({ name, label: name })),
+      { name: 'indicationPlateletVersion', label: 'indicationPlateletVersion' },
       {
         name: 'indicationPlateletThrombocytopenia',
         label: 'indicationPlateletThrombocytopenia',
@@ -103,6 +100,9 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'indicationPlateletCount', label: 'indicationPlateletCount' },
       { name: 'indicationPlateletOther', label: 'indicationPlateletOther' },
       { name: 'indicationPlateletOtherText', label: 'indicationPlateletOtherText' },
+      { name: 'indicationGranulocyteNeutrophilsLow', label: 'indicationGranulocyteNeutrophilsLow' },
+      { name: 'indicationGranulocyteOther', label: 'indicationGranulocyteOther' },
+      { name: 'indicationGranulocyteOtherText', label: 'indicationGranulocyteOtherText' },
     ],
   },
   {
@@ -147,6 +147,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     size: 'medium',
     fields: [
       { name: 'componentGroup', label: 'Группа компонентов крови' },
+      { name: 'lastSelectedComponentGroup', label: 'lastSelectedComponentGroup' },
       {
         name: 'componentName',
         label: 'Точное наименование компонента донорской крови',
@@ -172,10 +173,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'donorAntigene', label: 'e', type: 'select' },
       { name: 'donorAntigenK', label: 'K', type: 'select' },
       { name: 'donorAntigenk', label: 'k', type: 'select' },
-      {
-        name: 'donorAntigens',
-        label: 'Антигены эритроцитов донора',
-      },
+      { name: 'donorAntigens', label: 'Антигены эритроцитов донора' },
       { name: 'componentUnitNumber', label: '№ единицы компонента крови' },
       {
         name: 'amountMl',

@@ -1,6 +1,6 @@
 .modal {
   --modal-gap: clamp(0.5rem, 2vw, 2rem);
-  --modal-padding: clamp(1rem, 3vw, 2rem);
+  --modal-padding: clamp(1rem, 3vw, 1.5rem);
 
   border: 1px solid var(--ui-border-strong);
   border-radius: var(--ui-radius-dialog);
@@ -14,6 +14,10 @@
   overflow: visible;
   background: var(--ui-surface-soft);
   color: var(--ui-text-strong);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: var(--ui-font-control);
+  font-weight: 400;
+  line-height: var(--ui-line-height);
   box-shadow: var(--ui-shadow-dialog);
   opacity: 0;
   transition: opacity 160ms ease;
@@ -113,13 +117,16 @@
 .content {
   display: flow-root;
   min-width: 0;
-  padding: 0 var(--modal-padding) var(--modal-padding);
+  padding: var(--modal-padding);
 }
 
 .header {
   position: relative;
   flex: 0 0 auto;
-  padding: var(--modal-padding) var(--modal-padding) 1.5rem;
+  border-bottom: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-dialog) var(--ui-radius-dialog) 0 0;
+  padding: 1.15rem var(--modal-padding);
+  background: var(--ui-surface);
 }
 
 .viewport {
@@ -130,8 +137,11 @@
 
 .title {
   margin: 0 3rem 0 0;
-  font-size: var(--page-title-size);
-  line-height: 1.2;
+  color: var(--ui-text-strong);
+  font-size: var(--ui-font-dialog-title);
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .close {

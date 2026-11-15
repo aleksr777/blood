@@ -11,7 +11,6 @@ import { formatRecipientAge } from './recipient-demographics';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { RecipientHistoryModal } from './recipient-history-modal';
 import { SelectionFields } from './selection-fields';
-import { persistProtocolOptions } from './saved-field-config';
 import styles from './protocol-editor.module.css';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import type { ProtocolBlockId, ProtocolFieldConfig, ProtocolValues } from './protocol-types';
@@ -50,7 +49,6 @@ export const ProtocolEditorModal = ({
   componentUnitNumberWarning,
   onDismissComponentUnitNumberWarning,
   previousTransfusionSuggestion,
-  persistReusableOptions,
   onOpenRecipients,
   onSelectRecipient,
   onSave,
@@ -75,17 +73,9 @@ export const ProtocolEditorModal = ({
     changeValues({ [name]: value });
   };
 
-  const handleClose = () => {
-    if (persistReusableOptions && !savedDocument) {
-      persistProtocolOptions(draft);
-    }
-    onClose(draft);
-  };
+  const handleClose = () => onClose(draft);
 
   const handleOpenRecipients = () => {
-    if (persistReusableOptions && !savedDocument) {
-      persistProtocolOptions(draft);
-    }
     onClose(draft);
     onOpenRecipients();
   };

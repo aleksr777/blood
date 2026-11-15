@@ -1,3 +1,5 @@
+import { GRANULOCYTE_NEUTROPHIL_INDICATION } from '../../domain/granulocyte-indications';
+import { plateletIndicationTexts } from '../../domain/platelet-indications';
 import type { ProtocolValues } from './protocol-types';
 
 export const getIndicationComponent = (values: ProtocolValues) =>
@@ -29,6 +31,7 @@ export const formatIndications = (values: ProtocolValues) => {
     if (yes(values.indicationRbcHemicHypoxia)) {
       items.push('Признаки гемической гипоксии');
     }
+    if (yes(values.indicationRbcAnemicSyndrome)) items.push('Анемический синдром');
     if (values.indicationRbcThreshold === '70-25')
       items.push('Снижение гемоглобина менее 70 г/л и гематокрита менее 25%');
     if (values.indicationRbcThreshold === 'custom') {
@@ -52,6 +55,11 @@ export const formatIndications = (values: ProtocolValues) => {
     if (yes(values.indicationPlasmaFactorDeficiency)) {
       items.push('Дефицит плазменных факторов свёртывания крови');
     }
+    if (yes(values.indicationPlasmaFactorsBelow50)) {
+      items.push(
+        'Активность одного или нескольких факторов свёртывания крови составляет не более 50% от нормы, а препарат соответствующего фактора отсутствует.',
+      );
+    }
     if (yes(values.indicationPlasmaFibrinogenBleeding)) {
       items.push('Фибриноген менее 1,5 г/л при кровотечении');
     }
@@ -63,21 +71,14 @@ export const formatIndications = (values: ProtocolValues) => {
     }
   }
 
-  if (values.indicationComponent === 'platelets') {
-    if (yes(values.indicationPlateletHemorrhagicSyndrome)) {
-      items.push('Геморрагический синдром');
+  if (values.indicationComponent === 'platelets') items.push(...plateletIndicationTexts(values));
+
+  if (values.indicationComponent === 'granulocytes') {
+    if (yes(values.indicationGranulocyteNeutrophilsLow)) {
+      items.push(GRANULOCYTE_NEUTROPHIL_INDICATION);
     }
-    if (yes(values.indicationPlateletHighBleedingRisk)) {
-      items.push('Высокий риск кровотечения');
-    }
-    if (yes(values.indicationPlateletThrombocytopenia)) {
-      const plateletCount = values.indicationPlateletCount?.trim();
-      if (plateletCount) {
-        items.push(`Тромбоцитопения менее ${plateletCount} ×10⁹/л`);
-      }
-    }
-    if (yes(values.indicationPlateletOther) && values.indicationPlateletOtherText?.trim()) {
-      items.push(values.indicationPlateletOtherText.trim());
+    if (yes(values.indicationGranulocyteOther) && values.indicationGranulocyteOtherText?.trim()) {
+      items.push(values.indicationGranulocyteOtherText.trim());
     }
   }
 

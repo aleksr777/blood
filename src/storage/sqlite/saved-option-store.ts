@@ -29,9 +29,7 @@ export const rememberSavedOption = async (category: string, value: string) => {
     sql: `
       INSERT INTO saved_options (category, value, normalized_value, created_at, updated_at)
       VALUES ($category, $value, $normalizedValue, $now, $now)
-      ON CONFLICT(category, normalized_value) DO UPDATE SET
-        value = excluded.value,
-        updated_at = excluded.updated_at
+      ON CONFLICT(category, normalized_value) DO NOTHING
     `,
     bind: {
       $category: category,

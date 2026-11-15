@@ -7,6 +7,7 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
   const thresholdSelected = threshold === 'custom' || threshold === '70-25';
   const circulatoryDisturbances = values.indicationRbcCirculatoryDisturbances === '1';
   const hemicHypoxia = values.indicationRbcHemicHypoxia === '1';
+  const anemicSyndrome = values.indicationRbcAnemicSyndrome === '1';
   const hgb = values.indicationRbcHgb || '70';
   const hct = values.indicationRbcHct || '25';
 
@@ -42,6 +43,18 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
         }
       >
         Признаки гемической гипоксии
+      </Choice>
+      <Choice
+        type="checkbox"
+        name="indicationRbcAnemicSyndrome"
+        checked={anemicSyndrome}
+        onChange={() =>
+          onChange({
+            indicationRbcAnemicSyndrome: anemicSyndrome ? '' : '1',
+          })
+        }
+      >
+        Анемический синдром
       </Choice>
 
       <div className={styles.choiceRow}>

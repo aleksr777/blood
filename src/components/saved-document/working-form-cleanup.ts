@@ -39,6 +39,17 @@ export const cleanComponentRequestDraft = <T extends Record<string, unknown>>(va
   componentAbo: '',
   componentRh: '',
   quantity: '',
+  ...Object.fromEntries(
+    [
+      'componentCode',
+      'estimatedVolumeMl',
+      'transfusionIndicationCode',
+      'individualSelectionRequired',
+      'individualSelectionCode',
+    ]
+      .filter((field) => field in values)
+      .map((field) => [field, '']),
+  ),
   doctorName: '',
 });
 

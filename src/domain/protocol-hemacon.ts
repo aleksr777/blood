@@ -1,4 +1,5 @@
 import { isClockTime, isIsoDate, isLocalDateTime } from './date-time';
+import { getHemaconDateOrderWarning } from './hemacon-dates';
 
 export const normalizeComponentUnitNumber = (value?: string) => (value ?? '').replace(/\D/g, '');
 
@@ -42,7 +43,9 @@ export const getMissingProtocolFields = (values: Record<string, string>) =>
 
 export const getProtocolHemaconWarning = (values: Record<string, string>) => {
   const missing = getMissingProtocolFields(values);
-  return missing.length
-    ? `Сохранение и печать протокола недоступны.\n\nЗаполните обязательные поля:\n\n${missing.map(({ label }) => `• ${label}`).join('\n')}.`
-    : '';
+  if (missing.length)
+    return `Сохранение и печать протокола недоступны.\n\nЗаполните обязательные поля:\n\n${missing.map(({ label }) => `• ${label}`).join('\n')}.`;
+
+  const dateWarning = getHemaconDateOrderWarning(values);
+  return dateWarning ? `Сохранение и печать протокола недоступны.\n\n${dateWarning}` : '';
 };

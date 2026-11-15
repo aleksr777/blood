@@ -1,28 +1,15 @@
 import { getFormContentKey } from '../../domain/form-content';
-import {
-  hasStoredCurrentIndications,
-  hasStoredCurrentIndividualSelectionIndications,
-  readCurrentIndications,
-  readCurrentIndividualSelectionIndications,
-} from '../../storage/repositories/current-indications';
 import { normalizeDirectionIndications } from './direction-indications';
 
-export const getIndividualSelectionClearValues = (recipientId: number | null) => ({
+export const getIndividualSelectionClearValues = () => ({
   requiredComponent: '',
   quantity: '',
   medicalOrganization: '',
   directionDate: '',
   doctorName: '',
   doctorPhone: '',
-  indicationValues: normalizeDirectionIndications(
-    recipientId && hasStoredCurrentIndications(recipientId, 'erythrocytes')
-      ? readCurrentIndications(recipientId, 'erythrocytes')
-      : {},
-  ),
-  individualSelectionIndications:
-    recipientId && hasStoredCurrentIndividualSelectionIndications(recipientId)
-      ? readCurrentIndividualSelectionIndications(recipientId)
-      : '',
+  indicationValues: normalizeDirectionIndications({}),
+  individualSelectionIndications: '',
 });
 
 export const hasIndividualSelectionValuesToClear = (

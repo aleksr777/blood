@@ -32,6 +32,14 @@ const props = (): ComponentProps<typeof ProtocolToolbar> => ({
 
 afterEach(cleanup);
 
+it('uses the unnumbered print label when the section has only one page', () => {
+  const callbacks = props();
+  render(<ProtocolToolbar {...callbacks} pageCount={1} hemaconWarning="" />);
+  fireEvent.click(screen.getByRole('button', { name: 'Печать страницы' }));
+  expect(screen.queryByRole('button', { name: 'Печать страницы 1' })).toBeNull();
+  expect(callbacks.onPrintPage).toHaveBeenCalledWith(0);
+});
+
 it('disables Clear and Save when only recipient or reusable data remain', () => {
   const handlers = props();
   render(<ProtocolToolbar {...handlers} hasContent={false} />);
@@ -56,6 +64,22 @@ it('has no New blank button and keeps date-order warnings non-dismissible', () =
   expect(screen.queryByRole('button', { name: 'Закрыть предупреждение' })).toBeNull();
   rerender(<ProtocolToolbar {...handlers} hemaconWarning="" hemaconDateWarning="" />);
   expect(screen.queryByRole('alert')).toBeNull();
+});
+
+it('blocks saving invalid hemacon dates without duplicating the permanent date notice', () => {
+  const handlers = props();
+  const message = 'Дата заготовки должна быть раньше даты окончания срока годности.';
+  render(
+    <ProtocolToolbar
+      {...handlers}
+      hemaconWarning={`Сохранение и печать протокола недоступны.\n\n${message}`}
+      hemaconDateWarning={message}
+    />,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
+  expect(screen.getAllByRole('alert')).toHaveLength(1);
+  expect(screen.getByRole('alert').textContent).toContain(message);
+  expect(handlers.onSave).not.toHaveBeenCalled();
 });
 
 const expectWarningText = (message: string) => {

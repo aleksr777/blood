@@ -1,6 +1,7 @@
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { hasDocumentContent } from '../../domain/document-content';
+import { printPageLabel } from '../../domain/print-page-label';
 import { savedDocumentTitle } from '../saved-document/saved-document-title';
 import { useSavedDocumentList } from '../saved-document/saved-document-list';
 import ui from '../../styles/ui';
@@ -9,25 +10,14 @@ import { cleanComponentRequestDraft } from '../saved-document/working-form-clean
 import { usePendingSavedDocument } from '../saved-document/saved-document-navigation';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import { updateSavedRequestProfile } from '../saved-document/saved-request-profile';
-import { WarningNotice } from '../warning-notice/warning-notice';
 import { persistLocalDraft } from '../../storage/repositories/local-draft';
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   readCurrentRecipient,
   switchCurrentRecipient,
   updateCurrentRecipientProfile,
   type CurrentRecipient,
 } from '../../storage/repositories/current-recipient';
-import {
-  currentIndicationsForComponent,
-  hasStoredCurrentIndications,
-  hasStoredCurrentIndividualSelectionIndications,
-  readCurrentIndications,
-  readCurrentIndividualSelectionIndications,
-  writeCurrentIndications,
-  writeCurrentIndividualSelectionIndications,
-} from '../../storage/repositories/current-indications';
-import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedRequestDraft } from '../../storage/repositories/recipient-deletion';
 import {
   saveBloodRequestRecord,
@@ -37,113 +27,87 @@ import {
 } from '../../storage/repositories/recipients';
 import { SiteNavigation } from '../site-navigation/site-navigation';
 import { RecipientDatabaseModal } from '../transfusion-protocol/recipient-database-modal';
-import { getBloodGroupMismatch } from '../transfusion-protocol/blood-group-validation';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
 import { formatObstetricHistory } from '../transfusion-protocol/recipient-history-model';
-import {
-  formatAlloimmuneAntibodies,
-  formatRecipientAntigens,
-} from '../transfusion-protocol/recipient-examination-model';
-import {
-  formatIndications,
-  getIndicationComponent,
-} from '../transfusion-protocol/indications-model';
+import { formatRecipientAntigens } from '../transfusion-protocol/recipient-examination-model';
+import { ComponentRequestRecipientExamination } from './component-request-recipient-examination';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
-import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
-import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
-import { IndividualSelectionObstetricHistoryModal } from './individual-selection-obstetric-history-modal';
+import { ComponentRequestDetailsModal } from './component-request-details-modal';
+import { persistRequestOptions } from './request-saved-options';
+import { ComponentRequestForm } from './component-request-form';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
-import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
+import { sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
-import { AdaptiveRuledField } from './adaptive-ruled-field';
-import { hasStructuredObstetricHistory } from './direction-history';
-import styles from './individual-selection-direction.module.css';
+import {
+  readSavedRequestRecordId,
+  REQUEST_AUTO_FIELDS,
+  type RequestAutoField,
+} from './request-common';
+import styles from './component-request-page.module.css';
 
 const STORAGE_KEY = 'blood:component-request-direction-draft';
 const SAVED_RECORD_ID_STORAGE_KEY = `${STORAGE_KEY}:saved-record-id`;
 
-const loadSavedRecordId = () => {
-  try {
-    const raw = window.localStorage.getItem(SAVED_RECORD_ID_STORAGE_KEY);
-    if (!raw) return null;
-
-    const id = Number(raw);
-    return Number.isFinite(id) && id > 0 ? id : null;
-  } catch {
-    return null;
-  }
-};
-
-const TRANSFUSION_ORDER_TEXT: Record<string, string> = {
-  planned: 'плановая',
-  emergency: 'экстренная',
-};
-
-const COMPONENT_SELECTION_REQUIREMENT_TEXT: Record<string, string> = {
-  'not-required': 'индивидуальный подбор и подбор по фенотипу не требуется',
-  phenotype: 'требуется подбор по фенотипу',
-  individual: 'требуется индивидуальный подбор',
-};
-
-type AutoField =
-  | 'recipientAboRh'
-  | 'recipientPhenotype'
-  | 'recipientName'
-  | 'recipientAge'
-  | 'department'
-  | 'medicalRecordNumber'
-  | 'diagnosis'
-  | 'obstetricHistory'
-  | 'recipientSex';
-
-type DirectionDraft = Record<AutoField, string> & {
+type DirectionDraft = Record<RequestAutoField, string> & {
   sourceRecipientId: string;
   requiredComponent: string;
   componentAbo: string;
   componentRh: string;
   quantity: string;
+  componentCode: string;
+  estimatedVolumeMl: string;
+  transfusionIndicationCode: string;
+  individualSelectionRequired: string;
+  individualSelectionCode: string;
   transfusionOrder: string;
   componentSelectionRequirement: string;
   individualSelectionIndications: string;
   medicalOrganization: string;
   directionDate: string;
+  departmentPhone: string;
+  requestDateTime: string;
+  plannedTransfusionDateTime: string;
   doctorName: string;
   indicationValues: ProtocolValues;
   recipientProfileSnapshot: ProtocolValues;
-  autoValues: Partial<Record<AutoField, string>>;
+  autoValues: Partial<Record<RequestAutoField, string>>;
 };
 
-type Editor =
-  'organization' | 'component' | 'examination' | 'recipient' | 'obstetric' | 'footer' | null;
-
-const AUTO_FIELDS: AutoField[] = [
-  'recipientAboRh',
-  'recipientPhenotype',
-  'recipientName',
-  'recipientAge',
-  'department',
-  'medicalRecordNumber',
-  'diagnosis',
-  'obstetricHistory',
-  'recipientSex',
-];
+type Editor = 'organization' | 'component' | 'recipient' | 'footer' | null;
 
 const ORGANIZATION_FIELDS: RequestEditorField[] = [
   {
-    name: 'medicalOrganization',
-    label: 'Наименование ЛПУ',
-    savedOptionsCategory: 'medicalOrganization',
+    name: 'department',
+    label: 'Подразделение медицинской организации',
+  },
+  {
+    name: 'departmentPhone',
+    label: 'Контактный телефон подразделения',
+    savedOptionsCategory: 'componentRequestDepartmentPhone',
+  },
+  { name: 'requestDateTime', label: 'Дата и время подачи заявки', type: 'datetime-local' },
+  {
+    name: 'plannedTransfusionDateTime',
+    label: 'Предполагаемые дата и время трансфузии',
+    type: 'datetime-local',
+  },
+  {
+    name: 'transfusionOrder',
+    label: 'Форма оказания медицинской помощи',
+    type: 'select',
+    options: [
+      { value: 'emergency', label: 'Экстренная или неотложная' },
+      { value: 'planned', label: 'Плановая' },
+    ],
     wide: true,
   },
-  { name: 'department', label: 'Отделение', wide: true },
 ];
 
 const FOOTER_FIELDS: RequestEditorField[] = [
-  { name: 'directionDate', label: 'Дата направления', type: 'date' },
   {
     name: 'doctorName',
-    label: 'Врач, назначивший трансфузию',
+    label: 'Врач, проводящий трансфузию',
     savedOptionsCategory: 'individualSelectionDoctorName',
     wide: true,
   },
@@ -155,6 +119,11 @@ const emptyDraft = (): DirectionDraft => ({
   componentAbo: '',
   componentRh: '',
   quantity: '',
+  componentCode: '',
+  estimatedVolumeMl: '',
+  transfusionIndicationCode: '',
+  individualSelectionRequired: '',
+  individualSelectionCode: '',
   transfusionOrder: '',
   componentSelectionRequirement: '',
   individualSelectionIndications: '',
@@ -165,6 +134,9 @@ const emptyDraft = (): DirectionDraft => ({
   department: '',
   medicalRecordNumber: '',
   medicalOrganization: '',
+  departmentPhone: '',
+  requestDateTime: '',
+  plannedTransfusionDateTime: '',
   diagnosis: '',
   obstetricHistory: '',
   recipientSex: '',
@@ -178,6 +150,14 @@ const emptyDraft = (): DirectionDraft => ({
 const draftFromRecord = (values: unknown): DirectionDraft => {
   const next = restoreRequestDraft(emptyDraft(), values);
   next.quantity = sanitizeDoseQuantity(next.quantity);
+  const isLegacyRequest =
+    values !== null && typeof values === 'object' && !('individualSelectionRequired' in values);
+  if (isLegacyRequest) {
+    if (next.componentSelectionRequirement === 'individual')
+      next.individualSelectionRequired = 'yes';
+    if (next.componentSelectionRequirement === 'not-required')
+      next.individualSelectionRequired = 'no';
+  }
   return next;
 };
 
@@ -192,15 +172,10 @@ const loadDraft = (): DirectionDraft => {
 
 const currentAutoValues = async (
   recipient: CurrentRecipient | null,
-): Promise<Partial<Record<AutoField, string>>> => {
+): Promise<Partial<Record<RequestAutoField, string>>> => {
   if (!recipient) return {};
 
-  const protocolDraft = await loadProtocolDraft();
-  const sameRecipient = Number(protocolDraft.values.recipientId) === recipient.id;
-  const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
-
   const values: ProtocolValues = {
-    ...currentProtocolValues,
     ...recipient.profile,
     recipientId: String(recipient.id),
     recipientName: recipient.fullName,
@@ -222,7 +197,7 @@ const currentAutoValues = async (
 const mergeAutoValues = (
   current: DirectionDraft,
   recipient: CurrentRecipient | null,
-  autoValues: Partial<Record<AutoField, string>>,
+  autoValues: Partial<Record<RequestAutoField, string>>,
 ): DirectionDraft => {
   if (!recipient) return current;
 
@@ -237,29 +212,18 @@ const mergeAutoValues = (
     autoValues: { ...autoValues },
   };
 
-  AUTO_FIELDS.forEach((field) => {
+  REQUEST_AUTO_FIELDS.forEach((field) => {
     next[field] = autoValues[field] ?? '';
   });
 
   return next;
 };
 
-const activateOnKeyboard = (event: KeyboardEvent<HTMLElement>, action: () => void) => {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    action();
-  }
-};
-
-const formatDirectionDate = (value: string) => {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return '';
-
-  return `${match[3]}.${match[2]}.${match[1]}`;
-};
-
 export const ComponentRequest = () => {
-  const [initialStored] = useState(() => ({ draft: loadDraft(), id: loadSavedRecordId() }));
+  const [initialStored] = useState(() => ({
+    draft: loadDraft(),
+    id: readSavedRequestRecordId(STORAGE_KEY),
+  }));
   const documentState = useDocumentState<DirectionDraft>(
     () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
     cleanComponentRequestDraft,
@@ -283,7 +247,6 @@ export const ComponentRequest = () => {
     onOpen: () => setRegistryOpen(true),
   });
   const [status, setStatus] = useState('');
-  const [dismissedBloodGroupWarningKey, setDismissedBloodGroupWarningKey] = useState('');
   const refreshVersionRef = useRef(0);
   const profileEditVersionRef = useRef(0);
   const pendingProfileUpdateRef = useRef<Promise<void>>(Promise.resolve());
@@ -314,11 +277,6 @@ export const ComponentRequest = () => {
       setCurrentRecipient(recipient);
 
       const autoValues = await currentAutoValues(recipient);
-      const protocolDraft = recipient ? await loadProtocolDraft() : null;
-      const currentProtocolValues =
-        recipient && protocolDraft && Number(protocolDraft.values.recipientId) === recipient.id
-          ? protocolDraft.values
-          : {};
 
       if (hasSavedDocument() || refreshVersion !== refreshVersionRef.current) return;
       const current = baseDraft ?? draftRef.current;
@@ -336,64 +294,7 @@ export const ComponentRequest = () => {
               doctorName: current.doctorName,
             }
           : current;
-      let next = mergeAutoValues(base, recipient, autoValues);
-      if (recipient) {
-        if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
-          next = {
-            ...next,
-            individualSelectionIndications: readCurrentIndividualSelectionIndications(recipient.id),
-          };
-        } else if (recipientChanged) {
-          next = {
-            ...next,
-            individualSelectionIndications: '',
-          };
-        } else if (!hasSavedDocument() && next.individualSelectionIndications.trim()) {
-          writeCurrentIndividualSelectionIndications(
-            recipient.id,
-            next.individualSelectionIndications,
-          );
-        }
-
-        const component = getIndicationComponent(next.indicationValues);
-        if (component) {
-          if (hasStoredCurrentIndications(recipient.id, component)) {
-            next = {
-              ...next,
-              indicationValues: {
-                ...(recipientChanged ? {} : next.indicationValues),
-                ...readCurrentIndications(recipient.id, component),
-              },
-            };
-          } else {
-            const protocolIndications = currentIndicationsForComponent(
-              currentProtocolValues,
-              component,
-            );
-            const hasProtocolIndications = Object.entries(protocolIndications).some(
-              ([key, value]) => key !== 'indicationComponent' && value.trim() !== '',
-            );
-
-            if (hasProtocolIndications) {
-              writeCurrentIndications(recipient.id, component, protocolIndications);
-              next = {
-                ...next,
-                indicationValues: {
-                  ...(recipientChanged ? {} : next.indicationValues),
-                  ...protocolIndications,
-                },
-              };
-            } else if (!hasSavedDocument() && !recipientChanged) {
-              writeCurrentIndications(recipient.id, component, next.indicationValues);
-            } else if (recipientChanged) {
-              next = {
-                ...next,
-                indicationValues: { indicationComponent: component },
-              };
-            }
-          }
-        }
-      }
+      const next = mergeAutoValues(base, recipient, autoValues);
 
       if (
         hasSavedDocument() ||
@@ -482,13 +383,6 @@ export const ComponentRequest = () => {
       void updateExamination({ department: changes.department });
     }
 
-    if (currentRecipient && changes.individualSelectionIndications !== undefined) {
-      writeCurrentIndividualSelectionIndications(
-        currentRecipient.id,
-        changes.individualSelectionIndications,
-      );
-    }
-
     setDraft((current) => {
       const next = { ...current };
 
@@ -507,23 +401,10 @@ export const ComponentRequest = () => {
     if (documentState.isReadOnly()) return;
 
     setDraft((current) => {
-      const currentComponent = getIndicationComponent(current.indicationValues);
-      const component = changes.indicationComponent || currentComponent;
-      const componentChanged =
-        Boolean(changes.indicationComponent) && changes.indicationComponent !== currentComponent;
-      const sharedIndications =
-        !documentState.isActive() && currentRecipient && componentChanged && component
-          ? readCurrentIndications(currentRecipient.id, component)
-          : {};
       const indicationValues = {
         ...current.indicationValues,
-        ...sharedIndications,
         ...changes,
       };
-
-      if (!documentState.isActive() && currentRecipient && component) {
-        writeCurrentIndications(currentRecipient.id, component, indicationValues);
-      }
 
       const next = {
         ...current,
@@ -539,13 +420,7 @@ export const ComponentRequest = () => {
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
     const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
-    setDraft({
-      ...next,
-      individualSelectionIndications:
-        recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
-          ? readCurrentIndividualSelectionIndications(recipient.id)
-          : '',
-    });
+    setDraft(next);
     setStatus('');
   };
 
@@ -560,6 +435,7 @@ export const ComponentRequest = () => {
           kind: 'component-request',
           values: { ...draftRef.current },
         });
+        await persistRequestOptions(draftRef.current, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
         documentState.open(record, draftFromRecord(record.values), 'edit');
         documentState.setWorkingValues(cleanComponentRequestDraft);
         setEditor(null);
@@ -593,6 +469,7 @@ export const ComponentRequest = () => {
         kind: 'component-request',
         values: { ...draftToSave },
       });
+      await persistRequestOptions(draftToSave, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);
@@ -615,7 +492,7 @@ export const ComponentRequest = () => {
       await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
-      console.error('Не удалось выбрать реципиента для направления:', error);
+      console.error('Не удалось выбрать реципиента для заявки:', error);
       return false;
     }
   };
@@ -676,29 +553,6 @@ export const ComponentRequest = () => {
       recipientAge: draft.recipientAge,
     };
   }, [currentRecipient, draft, documentState.active]);
-
-  const bloodGroupMismatch = getBloodGroupMismatch({
-    ...examinationValues,
-    donorAbo: draft.componentAbo,
-    donorRh: draft.componentRh,
-  });
-
-  useEffect(() => {
-    if (!bloodGroupMismatch.key) {
-      setDismissedBloodGroupWarningKey('');
-    }
-  }, [bloodGroupMismatch.key]);
-
-  const bloodGroupWarning =
-    bloodGroupMismatch.key && bloodGroupMismatch.key !== dismissedBloodGroupWarningKey
-      ? bloodGroupMismatch.message
-      : '';
-
-  const dismissBloodGroupWarning = () => {
-    if (bloodGroupMismatch.key) {
-      setDismissedBloodGroupWarningKey(bloodGroupMismatch.key);
-    }
-  };
 
   const updateExamination = (changes: ProtocolValues) => {
     if (documentState.isActive()) {
@@ -764,136 +618,9 @@ export const ComponentRequest = () => {
     }
   }, [draft, editor]);
 
-  const selectedComponent = getIndicationComponent(draft.indicationValues);
-  const isErythrocytes = selectedComponent === 'erythrocytes';
-  const requiresIndividualSelection =
-    isErythrocytes && draft.componentSelectionRequirement === 'individual';
-  const transfusionOrderText = TRANSFUSION_ORDER_TEXT[draft.transfusionOrder] ?? '';
-  const componentSelectionRequirementText =
-    COMPONENT_SELECTION_REQUIREMENT_TEXT[draft.componentSelectionRequirement] ?? '';
-
-  const formSections = [
-    <div
-      key="organization"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('organization')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('organization'))}
-    >
-      <AdaptiveRuledField label="Наименование ЛПУ:" value={draft.medicalOrganization} />
-      <AdaptiveRuledField label="Отделение:" value={draft.department} />
-    </div>,
-
-    <div
-      key="recipient"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('recipient')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
-    >
-      <AdaptiveRuledField label="Ф.И.О. реципиента:" value={draft.recipientName} />
-      <AdaptiveRuledField label="Возраст:" value={draft.recipientAge} />
-      <AdaptiveRuledField label="№ медицинской карты:" value={draft.medicalRecordNumber} />
-      <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
-    </div>,
-
-    <div
-      key="examination"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('examination')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('examination'))}
-    >
-      <AdaptiveRuledField
-        label="Группа крови и резус-фактор реципиента:"
-        value={draft.recipientAboRh}
-      />
-      <AdaptiveRuledField label="Фенотип реципиента:" value={draft.recipientPhenotype} />
-      <AdaptiveRuledField
-        label="Аллоиммунные антитела:"
-        value={formatAlloimmuneAntibodies(examinationValues)}
-      />
-    </div>,
-
-    ...(draft.recipientSex === 'Женский'
-      ? [
-          <div
-            key="obstetric"
-            className={styles.fillSection}
-            role={documentState.readOnly ? undefined : 'button'}
-            tabIndex={documentState.readOnly ? -1 : 0}
-            onClick={() => setEditor('obstetric')}
-            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('obstetric'))}
-          >
-            <AdaptiveRuledField
-              label="Акушерский анамнез у женщин:"
-              value={
-                hasStructuredObstetricHistory(examinationValues)
-                  ? formatObstetricHistory(examinationValues)
-                  : draft.obstetricHistory
-              }
-            />
-          </div>,
-        ]
-      : []),
-
-    <div
-      key="component"
-      className={styles.fillSection}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('component')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('component'))}
-    >
-      <AdaptiveRuledField
-        label="Наименование требуемого компонента:"
-        value={draft.requiredComponent}
-      />
-      <AdaptiveRuledField
-        label="Группа крови и резус-фактор компонента:"
-        value={[draft.componentAbo, draft.componentRh].filter(Boolean).join(' ')}
-      />
-      <AdaptiveRuledField label="Количество:" value={formatDoseQuantity(draft.quantity)} />
-      <AdaptiveRuledField label="Порядок трансфузии:" value={transfusionOrderText} />
-      <AdaptiveRuledField
-        label="Показания к трансфузии:"
-        value={formatIndications(draft.indicationValues)}
-      />
-      {isErythrocytes && componentSelectionRequirementText && (
-        <AdaptiveRuledField label="" value={componentSelectionRequirementText} />
-      )}
-      {requiresIndividualSelection && (
-        <AdaptiveRuledField
-          label="Показания для индивидуального подбора:"
-          value={draft.individualSelectionIndications}
-        />
-      )}
-    </div>,
-
-    <div
-      key="footer"
-      className={`${styles.fillSection} ${styles.footerSection}`}
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('footer')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('footer'))}
-    >
-      <AdaptiveRuledField
-        label="Дата направления:"
-        value={formatDirectionDate(draft.directionDate)}
-      />
-
-      <AdaptiveRuledField label="Врач, назначивший трансфузию:" value={draft.doctorName} />
-    </div>,
-  ];
-
   const printPage = (page: 1 | 2) => {
-    const className = `print-individual-selection-page-${page}`;
+    const className = `print-component-request-page-${page}`;
     document.body.classList.add(className);
-
     try {
       window.print();
     } finally {
@@ -949,103 +676,26 @@ export const ComponentRequest = () => {
               className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
               onClick={() => printPage(1)}
             >
-              Печать страницы 1
+              {printPageLabel(1, 2)}
             </button>
             <button
               type="button"
               className={`${ui.primaryButton} ${ui.toolbarButton} print-button`}
               onClick={() => printPage(2)}
             >
-              Печать страницы 2
+              {printPageLabel(2, 2)}
             </button>
           </div>
           <AnimatedMessage message={status} className="toolbar-status" />
-          <WarningNotice
-            className="toolbar-blood-group-warning"
-            message={bloodGroupWarning}
-            onDismiss={dismissBloodGroupWarning}
-          />
         </div>
       </header>
 
-      <div className={styles.sheetWrap} data-document-paper>
-        <section
-          className={`${styles.sheet} ${styles.pageOne}`}
-          aria-label="Заявка в трансфузиологический кабинет, страница 1"
-        >
-          <div className={styles.pageContent}>
-            <h1 className={styles.title}>
-              Заявка в трансфузиологический кабинет на компоненты крови.
-            </h1>
-
-            {formSections}
-          </div>
-        </section>
-
-        <section
-          className={`${styles.sheet} ${styles.pageTwo} ${styles.issuedPage}`}
-          aria-label="Выдано из трансфузиологического кабинета, страница 2"
-        >
-          <div className={styles.issuedContent}>
-            <h2 className={styles.issuedTitle}>Выдано из трансфузиологического кабинета</h2>
-
-            <table className={styles.issuedTable}>
-              <colgroup>
-                <col style={{ width: '2%' }} />
-                <col style={{ width: '22.5%' }} />
-                <col style={{ width: '6.3%' }} />
-                <col style={{ width: '6.1%' }} />
-                <col style={{ width: '12%' }} />
-                <col style={{ width: '5.5%' }} />
-                <col style={{ width: '7.3%' }} />
-                <col style={{ width: '7.3%' }} />
-                <col style={{ width: '7.3%' }} />
-                <col style={{ width: '7.3%' }} />
-                <col style={{ width: '16.4%' }} />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>№</th>
-                  <th>Наименование компонента донорской крови</th>
-                  <th>Группа крови донора</th>
-                  <th>Резус-принадлежность</th>
-                  <th>Фенотип донора</th>
-                  <th>Объем (мл)</th>
-                  <th>№ контейнера</th>
-                  <th>Код донора</th>
-                  <th>Дата заготовки</th>
-                  <th>Срок годности</th>
-                  <th>Изготовитель</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 6 }, (_, index) => (
-                  <tr key={index}>
-                    {Array.from({ length: 11 }, (_, cellIndex) => (
-                      <td key={cellIndex}>&nbsp;</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <div className={styles.issuedFooter}>
-              <div className={styles.issuedFooterRow}>
-                <span className={styles.issuedFooterLabel}>Дата:</span>
-                <span className={styles.issuedDateLine} />
-              </div>
-              <div className={styles.issuedFooterRow}>
-                <span className={styles.issuedFooterLabel}>Получил компоненты крови:</span>
-                <span className={styles.issuedSignatureLine} />
-              </div>
-              <div className={styles.issuedFooterRow}>
-                <span className={styles.issuedFooterLabel}>Выдал компоненты крови:</span>
-                <span className={styles.issuedSignatureLine} />
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
+      <ComponentRequestForm
+        values={draft}
+        examination={examinationValues}
+        readOnly={documentState.readOnly}
+        onEdit={setEditor}
+      />
 
       {editor === 'recipient' && (
         <IndividualSelectionRecipientModal
@@ -1058,42 +708,19 @@ export const ComponentRequest = () => {
           }}
           onSelectRecipient={documentState.active ? () => false : selectRecipient}
           onClose={() => setEditor(null)}
-        />
-      )}
-
-      {editor === 'obstetric' && draft.recipientSex === 'Женский' && (
-        <IndividualSelectionObstetricHistoryModal
-          values={examinationValues}
-          onChange={updateExamination}
-          onClose={() => setEditor(null)}
-        />
+        >
+          <ComponentRequestRecipientExamination
+            values={examinationValues}
+            onChange={updateExamination}
+          />
+        </IndividualSelectionRecipientModal>
       )}
 
       {editor === 'component' && (
-        <IndividualSelectionComponentModal
-          requiredComponent={draft.requiredComponent}
-          componentAbo={draft.componentAbo}
-          componentRh={draft.componentRh}
-          quantity={draft.quantity}
-          transfusionOrder={draft.transfusionOrder}
-          componentSelectionRequirement={draft.componentSelectionRequirement}
-          individualSelectionIndications={draft.individualSelectionIndications}
-          indicationValues={draft.indicationValues}
-          showRequestOptions
-          bloodGroupWarning={bloodGroupWarning}
-          onDismissBloodGroupWarning={dismissBloodGroupWarning}
-          onLocalChange={updateFields}
+        <ComponentRequestDetailsModal
+          values={draft}
+          onChange={updateFields}
           onIndicationsChange={updateIndications}
-          onClose={() => setEditor(null)}
-        />
-      )}
-
-      {editor === 'examination' && (
-        <IndividualSelectionExaminationModal
-          values={examinationValues}
-          bloodGroupWarning={bloodGroupWarning}
-          onDismissBloodGroupWarning={dismissBloodGroupWarning}
-          onChange={updateExamination}
           onClose={() => setEditor(null)}
         />
       )}

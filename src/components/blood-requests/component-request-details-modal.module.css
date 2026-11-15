@@ -1,0 +1,64 @@
+.modal {
+  --modal-width: 58rem;
+}
+
+.root {
+  display: grid;
+  gap: 1rem;
+}
+
+.dependentFields {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  transition: opacity var(--ui-motion-fast) ease;
+}
+
+.dependentFields:disabled {
+  opacity: 0.58;
+}
+
+.grid {
+  composes: ui-form-grid from global;
+  align-items: end;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.selection {
+  composes: ui-fieldset from global;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.3rem;
+}
+
+.selectionReason {
+  composes: ui-field-label from global;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+
+.note {
+  composes: ui-help-text from global;
+  margin: 0;
+}
+
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wide {
+    grid-column: auto;
+  }
+}

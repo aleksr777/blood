@@ -17,7 +17,7 @@
 .error {
   margin-top: 0.8rem;
   color: var(--ui-danger-text);
-  font-size: 0.86rem;
+  font-size: var(--ui-font-small);
 }
 
 .actions {

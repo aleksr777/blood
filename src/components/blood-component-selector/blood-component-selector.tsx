@@ -1,5 +1,7 @@
 import { BLOOD_COMPONENTS, getBloodComponentNameCategory } from '../../domain/blood-components';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
+import { CodedComponentField } from './coded-component-field';
+import type { CodedComponent } from '../../domain/coded-component';
 import styles from './blood-component-selector.module.css';
 
 export type BloodComponentSelection = { group: string; name: string };
@@ -7,7 +9,11 @@ export type BloodComponentSelection = { group: string; name: string };
 type Props = BloodComponentSelection & {
   inputName?: string;
   fixedGroup?: string;
+  lastSelectedGroup?: string;
   showName?: boolean;
+  catalogOptions?: readonly CodedComponent[];
+  selectedCode?: string;
+  onCodedChange?: (component: CodedComponent) => void;
   onChange: (selection: BloodComponentSelection) => void;
 };
 
@@ -16,7 +22,11 @@ export const BloodComponentSelector = ({
   name,
   inputName = 'componentName',
   fixedGroup,
+  lastSelectedGroup,
   showName = true,
+  catalogOptions,
+  selectedCode,
+  onCodedChange,
   onChange,
 }: Props) => {
   const selectedGroup = fixedGroup || group;
@@ -38,7 +48,15 @@ export const BloodComponentSelector = ({
             data-component={value}
             aria-pressed={selectedGroup === value}
             disabled={Boolean(fixedGroup)}
-            onClick={() => onChange({ group: value, name: value === selectedGroup ? name : '' })}
+            onClick={() =>
+              onChange({
+                group: value === selectedGroup ? '' : value,
+                name:
+                  value === selectedGroup || (!selectedGroup && lastSelectedGroup === value)
+                    ? name
+                    : '',
+              })
+            }
           >
             {label}
           </button>
@@ -46,18 +64,30 @@ export const BloodComponentSelector = ({
       </div>
       {showName && selected && category && (
         <div className={styles.name}>
-          <div className={styles.label}>Наименование компонента донорской крови</div>
-          <SavedOptionsField
-            key={category}
-            name={inputName}
-            label="Наименование компонента донорской крови"
-            category={category}
-            fixedOptions={[...selected.names]}
-            value={name}
-            rememberOnBlur
-            wrapOptions
-            onChange={(nextName) => onChange({ group: selectedGroup, name: nextName })}
-          />
+          {catalogOptions ? (
+            <CodedComponentField
+              group={selectedGroup}
+              inputName={inputName}
+              code={selectedCode ?? ''}
+              name={name}
+              options={catalogOptions}
+              onChange={(component) => onCodedChange?.(component)}
+            />
+          ) : (
+            <>
+              <div className={styles.label}>Наименование компонента донорской крови</div>
+              <SavedOptionsField
+                key={category}
+                name={inputName}
+                label="Наименование компонента донорской крови"
+                category={category}
+                fixedOptions={[...selected.names]}
+                value={name}
+                wrapOptions
+                onChange={(nextName) => onChange({ group: selectedGroup, name: nextName })}
+              />
+            </>
+          )}
         </div>
       )}
     </fieldset>

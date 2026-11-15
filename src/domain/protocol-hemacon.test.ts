@@ -49,3 +49,12 @@ it('unlocks only with all required values, including midnight and leap-day dates
     }),
   ).toBe('');
 });
+
+it.each([
+  ['2026-11-01', '2026-11-01'],
+  ['2026-12-01', '2026-11-01'],
+])('blocks a hemacon collected on %s with expiration %s', (collectionDate, expirationDate) => {
+  expect(getProtocolHemaconWarning({ ...complete, collectionDate, expirationDate })).toContain(
+    'Дата заготовки должна быть раньше даты окончания срока годности.',
+  );
+});

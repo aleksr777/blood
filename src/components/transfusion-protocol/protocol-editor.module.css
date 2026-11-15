@@ -18,16 +18,28 @@
   composes: ui-form-grid from global;
 }
 
+.componentDependentFields {
+  grid-column: 1 / -1;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  transition: opacity var(--ui-motion-fast) ease;
+}
+
+.componentDependentFields:disabled {
+  opacity: 0.58;
+}
+
 .fieldLabel {
   composes: ui-field-label from global;
 }
 
 .calculatedValue {
+  composes: ui-body-text from global;
   min-height: var(--control-height);
   padding: var(--control-padding-y) 0;
-  color: var(--ui-text);
-  font-size: 0.9rem;
-  font-weight: 500;
 }
 
 .wide {
@@ -35,11 +47,12 @@
 }
 
 .sectionTitle {
-  margin: 0 0 0.75rem;
-  color: var(--ui-text);
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.4;
+  composes: ui-section-title from global;
+}
+
+.section {
+  composes: ui-form-section from global;
+  grid-column: 1 / -1;
 }
 
 .generalGroup {
@@ -118,8 +131,14 @@
   left: 0;
   display: grid;
   gap: 0.1rem;
-  max-height: 12rem;
+  --dropdown-natural-max-height: 12rem;
+
+  max-height: min(var(--dropdown-natural-max-height), var(--dropdown-viewport-max-height, 100dvh));
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-scrollbar-thumb) var(--ui-surface-hover);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-0.35rem) scale(0.985);
@@ -136,8 +155,15 @@
   left: 50%;
   min-width: 7.5rem;
   translate: -50% 0;
-  max-height: 8rem;
+  --dropdown-natural-max-height: 8rem;
+
   font-size: 0.78rem;
+}
+
+.departmentField[data-dropdown-placement='above'] .historyDropdown {
+  top: auto;
+  bottom: calc(100% + 0.3rem);
+  transform-origin: bottom center;
 }
 
 .historyDropdownCompact .customSelectOption {

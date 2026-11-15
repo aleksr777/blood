@@ -106,3 +106,24 @@ it('clears requested component details while preserving indications and request 
   });
   expect(draft.requiredComponent).toBe('Эритроцитная взвесь');
 });
+
+it('clears Appendix 17 component codes without removing recipient and organization details', () => {
+  const draft = {
+    recipientName: 'Иванов Иван Иванович',
+    department: 'ОРИТ',
+    requiredComponent: 'Плазма свежезамороженная',
+    componentCode: 'СЗП',
+    estimatedVolumeMl: '450',
+    transfusionIndicationCode: '4.1',
+    individualSelectionRequired: 'yes',
+    individualSelectionCode: '3',
+  };
+  const result = cleanComponentRequestDraft(draft);
+  expect(result.recipientName).toBe(draft.recipientName);
+  expect(result.department).toBe(draft.department);
+  expect(result.componentCode).toBe('');
+  expect(result.estimatedVolumeMl).toBe('');
+  expect(result.transfusionIndicationCode).toBe('');
+  expect(result.individualSelectionRequired).toBe('');
+  expect(result.individualSelectionCode).toBe('');
+});

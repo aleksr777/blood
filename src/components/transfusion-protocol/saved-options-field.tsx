@@ -5,14 +5,12 @@ import {
   loadSavedOptions,
   removeSavedOption,
   renameSavedOption,
-  rememberSavedOption,
   subscribeSavedOptions,
   type SavedOptionRecord,
 } from '../../storage/repositories/saved-options';
 import { SavedOptionItem } from './saved-option-item';
 import { useOverlayDropdown } from './use-overlay-dropdown';
 import styles from './protocol-editor.module.css';
-
 const normalizeValue = (value: string) =>
   value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
@@ -22,7 +20,6 @@ type Props = {
   category: string;
   value: string;
   fixedOptions?: string[];
-  rememberOnBlur?: boolean;
   disabled?: boolean;
   wrapOptions?: boolean;
   onChange: (value: string, previousOptionValue?: string) => void;
@@ -34,7 +31,6 @@ export const SavedOptionsField = ({
   category,
   value,
   fixedOptions = [],
-  rememberOnBlur = false,
   disabled = false,
   wrapOptions = false,
   onChange,
@@ -43,7 +39,7 @@ export const SavedOptionsField = ({
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const { rootRef, dropdownState } = useOverlayDropdown(open, setOpen);
+  const { rootRef, dropdownRef, dropdownState } = useOverlayDropdown(open, setOpen);
 
   useEffect(() => {
     let active = true;
@@ -102,12 +98,9 @@ export const SavedOptionsField = ({
         ? 'Не удалось загрузить список'
         : 'Сохранённых вариантов нет';
 
-  const normalizedFixedOptions = new Set(
-    fixedOptions.map((option) => option.trim().toLocaleLowerCase('ru-RU')),
-  );
-  const editableItems = items.filter(
-    (item) => !normalizedFixedOptions.has(item.value.trim().toLocaleLowerCase('ru-RU')),
-  );
+  const normalizedFixedOptions = new Set(fixedOptions.map(normalizeValue));
+  const isFixed = (option: string) => normalizedFixedOptions.has(normalizeValue(option));
+  const editableItems = items.filter((item) => !isFixed(item.value));
 
   return (
     <div ref={rootRef} className={styles.departmentField}>
@@ -120,13 +113,6 @@ export const SavedOptionsField = ({
           value={value}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
-          onBlur={() => {
-            if (!isolated && rememberOnBlur && value.trim()) {
-              void rememberSavedOption(category, value).catch((error: unknown) =>
-                console.error(`Не удалось сохранить значение ${category}:`, error),
-              );
-            }
-          }}
         />
         <button
           type="button"
@@ -140,27 +126,13 @@ export const SavedOptionsField = ({
         </button>
       </div>
       <div
+        ref={dropdownRef}
         className={[styles.historyDropdown, wrapOptions ? styles.historyDropdownWrap : '']
           .filter(Boolean)
           .join(' ')}
         data-state={dropdownState}
         aria-hidden={dropdownState !== 'open'}
       >
-        {fixedOptions.map((option) => (
-          <div key={option} className={styles.historyFixedRow}>
-            <button
-              type="button"
-              className={styles.historyValue}
-              title={option}
-              onClick={() => {
-                onChange(option);
-                setOpen(false);
-              }}
-            >
-              {option}
-            </button>
-          </div>
-        ))}
         {editableItems.length === 0 && fixedOptions.length === 0 ? (
           <div className={styles.historyEmpty}>{emptyText}</div>
         ) : (
@@ -179,6 +151,21 @@ export const SavedOptionsField = ({
             />
           ))
         )}
+        {fixedOptions.map((option) => (
+          <div key={option} className={styles.historyFixedRow}>
+            <button
+              type="button"
+              className={styles.historyValue}
+              title={option}
+              onClick={() => {
+                onChange(option);
+                setOpen(false);
+              }}
+            >
+              {option}
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

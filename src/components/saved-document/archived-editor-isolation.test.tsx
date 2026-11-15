@@ -34,7 +34,6 @@ it('allows local text/selection but blocks shared option writes and incoming opt
         label="Врач"
         category="doctorName"
         value="Готовый вариант"
-        rememberOnBlur
         onChange={onChange}
       />
     </SavedDocumentScope>,
@@ -65,20 +64,19 @@ it('allows local text/selection but blocks shared option writes and incoming opt
   expect(storage.remove).not.toHaveBeenCalled();
 });
 
-it('keeps normal working-form option persistence available', async () => {
+it('keeps normal working-form option management available without auto-persisting drafts', async () => {
   render(
     <SavedOptionsField
       name="doctorName"
       label="Врач"
       category="doctorName"
       value="Новый вариант"
-      rememberOnBlur
       onChange={vi.fn()}
     />,
   );
   await screen.findByText('Готовый вариант');
   fireEvent.blur(screen.getByRole('textbox', { name: 'Врач' }));
-  expect(storage.remember).toHaveBeenCalledWith('doctorName', 'Новый вариант');
+  expect(storage.remember).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Показать сохранённые варианты: Врач' }));
   expect(screen.getByRole('button', { name: 'Изменить значение' })).toBeDefined();
 });

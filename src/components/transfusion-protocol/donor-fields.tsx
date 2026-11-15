@@ -7,7 +7,10 @@ import {
 } from './blood-group-options';
 import { BloodGroupSelectField } from './blood-group-select-field';
 import { DONOR_ANTIGENS } from './donor-model';
-import { inferBloodComponentGroup } from '../../domain/blood-components';
+import {
+  componentGroupChanges,
+  selectedBloodComponentGroup,
+} from '../../domain/blood-components';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-examination-fields.module.css';
@@ -19,10 +22,7 @@ type Props = {
 };
 
 export const DonorFields = ({ values, onChange, showComponentSelector = true }: Props) => {
-  const selectedComponent =
-    values.componentGroup ||
-    values.indicationComponent ||
-    inferBloodComponentGroup(values.componentName);
+  const selectedComponent = selectedBloodComponentGroup(values, values.componentName);
   const donorRh = normalizeBloodGroupRh(values.donorRh);
   const bloodGroupTone = getBloodGroupTone(donorRh);
 
@@ -32,9 +32,8 @@ export const DonorFields = ({ values, onChange, showComponentSelector = true }: 
         <BloodComponentSelector
           group={selectedComponent}
           name={values.componentName ?? ''}
-          onChange={({ group, name }) =>
-            onChange({ componentGroup: group, indicationComponent: group, componentName: name })
-          }
+          lastSelectedGroup={values.lastSelectedComponentGroup}
+          onChange={({ group, name }) => onChange(componentGroupChanges(values, group, name))}
         />
       )}
 

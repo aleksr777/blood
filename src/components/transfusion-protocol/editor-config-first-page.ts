@@ -55,6 +55,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     fields: [
       { name: 'indications', label: 'indications' },
       { name: 'componentGroup', label: 'componentGroup' },
+      { name: 'lastSelectedComponentGroup', label: 'lastSelectedComponentGroup' },
       { name: 'componentName', label: 'Наименование компонента донорской крови' },
       { name: 'indicationComponent', label: 'indicationComponent' },
       { name: 'indicationRbcBloodLoss', label: 'indicationRbcBloodLoss' },
@@ -142,6 +143,7 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
     size: 'medium',
     fields: [
       { name: 'componentGroup', label: 'Группа компонентов крови' },
+      { name: 'lastSelectedComponentGroup', label: 'lastSelectedComponentGroup' },
       {
         name: 'componentName',
         label: 'Точное наименование компонента донорской крови',

@@ -56,21 +56,23 @@ it('keeps new custom names in the draft without saving them on blur', () => {
   expect(rememberSavedOption).not.toHaveBeenCalled();
 });
 
-it('shows only component names in the coded request dropdown while returning codes', () => {
-  const onCodeChange = vi.fn();
+it('shows code-prefixed names in the request selector while keeping codes separate', () => {
+  const onCodedChange = vi.fn();
   render(
     <BloodComponentSelector
       group="granulocytes"
       name=""
       catalogOptions={componentCatalogForGroup('granulocytes')}
       selectedCode=""
-      onCodeChange={onCodeChange}
+      onCodedChange={onCodedChange}
       onChange={vi.fn()}
     />,
   );
-  const option = screen.getByRole('option', { name: firstName }) as HTMLOptionElement;
-  expect(option.value).toBe('ГКО');
-  expect(option.textContent).toBe(firstName);
-  fireEvent.change(screen.getByRole('combobox'), { target: { value: 'ГКО' } });
-  expect(onCodeChange).toHaveBeenCalledWith('ГКО');
+  const input = screen.getByRole('textbox', { name: 'Идентификационный код' });
+  fireEvent.click(screen.getByRole('button', {
+    name: 'Показать сохранённые варианты: Идентификационный код',
+  }));
+  fireEvent.click(screen.getByRole('button', { name: `ГКО. ${firstName}` }));
+  expect(onCodedChange).toHaveBeenCalledWith({ code: 'ГКО', name: firstName });
+  expect(input).toBeTruthy();
 });

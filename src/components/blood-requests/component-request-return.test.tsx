@@ -156,16 +156,17 @@ it('сохраняет новые графы приложения № 17 чер�
   fireEvent.click(screen.getByText('Эритроцитная взвесь'));
   const dialog = within(screen.getByRole('dialog'));
   expect(dialog.queryByLabelText('Идентификационный код компонента (графа 6)')).toBeNull();
-  const componentSelect = dialog.getByLabelText('Наименование компонента донорской крови');
-  expect(within(componentSelect).queryByRole('option', { name: /КТ-ЛП/ })).toBeNull();
-  expect(
-    within(componentSelect).getByRole('option', {
-      name: 'Эритроцитная взвесь лейкоредуцированная',
-    }),
-  ).toBeTruthy();
-  fireEvent.change(componentSelect, {
-    target: { value: 'ЭВ-Л' },
-  });
+  const componentInput = dialog.getByRole('textbox', { name: 'Идентификационный код' });
+  fireEvent.click(dialog.getByRole('button', {
+    name: 'Показать сохранённые варианты: Идентификационный код',
+  }));
+  expect(dialog.queryByRole('button', { name: /КТ-ЛП\./ })).toBeNull();
+  fireEvent.click(dialog.getByRole('button', {
+    name: 'ЭВ-Л. Эритроцитная взвесь лейкоредуцированная',
+  }));
+  expect((componentInput as HTMLInputElement).value).toBe(
+    'ЭВ-Л. Эритроцитная взвесь лейкоредуцированная',
+  );
   fireEvent.change(dialog.getByLabelText('Код показания к трансфузии (графа 8)'), {
     target: { value: '1.1' },
   });
@@ -198,18 +199,18 @@ it('при смене группы показывает только её код
   fireEvent.click(screen.getByText('Эритроцитная взвесь лейкоредуцированная'));
   const dialog = within(screen.getByRole('dialog'));
   fireEvent.click(dialog.getByRole('button', { name: 'Плазма' }));
-  const componentSelect = dialog.getByLabelText(
-    'Наименование компонента донорской крови',
-  ) as HTMLSelectElement;
-  expect(componentSelect.value).toBe('');
-  expect(within(componentSelect).queryByRole('option', { name: /ЭВ-Л —/ })).toBeNull();
-  expect(
-    within(componentSelect).getByRole('option', {
-      name: 'Криопреципитат лиофилизированный',
-    }),
-  ).toBeTruthy();
-  fireEvent.change(componentSelect, { target: { value: 'КРИО-Л' } });
-  expect(componentSelect.value).toBe('КРИО-Л');
+  const componentInput = dialog.getByRole('textbox', {
+    name: 'Идентификационный код',
+  }) as HTMLInputElement;
+  expect(componentInput.value).toBe('');
+  fireEvent.click(dialog.getByRole('button', {
+    name: 'Показать сохранённые варианты: Идентификационный код',
+  }));
+  expect(dialog.queryByRole('button', { name: /ЭВ-Л\./ })).toBeNull();
+  fireEvent.click(dialog.getByRole('button', {
+    name: 'КРИО-Л. Криопреципитат лиофилизированный',
+  }));
+  expect(componentInput.value).toBe('КРИО-Л. Криопреципитат лиофилизированный');
   expect(
     (dialog.getByLabelText('Код показания к трансфузии (графа 8)') as HTMLSelectElement).value,
   ).toBe('');

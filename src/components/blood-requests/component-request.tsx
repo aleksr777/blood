@@ -620,12 +620,25 @@ export const ComponentRequest = () => {
 
   const printPage = (page: 1 | 2) => {
     const className = `print-component-request-page-${page}`;
-    document.body.classList.add(className);
-    try {
-      window.print();
-    } finally {
+    const root = document.documentElement;
+    const restorePrintLayout = () => {
       document.body.classList.remove(className);
-    }
+      delete root.dataset.requestPrintRotated;
+      window.removeEventListener('afterprint', restorePrintLayout);
+    };
+    document.body.classList.add(className);
+    root.dataset.requestPrintRotated = 'true';
+    window.addEventListener('afterprint', restorePrintLayout);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        try {
+          window.print();
+        } catch (error) {
+          restorePrintLayout();
+          throw error;
+        }
+      });
+    });
   };
 
   return (

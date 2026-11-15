@@ -19,10 +19,8 @@ vi.mock('../../storage/sqlite/database-client', () => ({
   },
 }));
 const key = 'blood:component-request-direction-draft';
-const openCodes = () =>
-  fireEvent.click(screen.getByRole('button', {
-    name: 'Показать сохранённые варианты: Идентификационный код',
-  }));
+const codedOptionsLabel = 'Показать сохранённые варианты: Идентификационный код';
+const openCodes = () => fireEvent.click(screen.getByRole('button', { name: codedOptionsLabel }));
 const chooseCode = (name: string) => fireEvent.click(screen.getByRole('button', { name }));
 const profile = {
   recipientId: '1',

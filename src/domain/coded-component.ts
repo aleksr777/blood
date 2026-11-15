@@ -16,5 +16,4 @@ export const parseCodedComponent = (
   return match ? { code: match[1].trim(), name: match[2] } : { code: '', name: value };
 };
 
-export const codedComponentOptionCategory = (group: string) =>
-  `componentRequestCode:${group}`;
+export const codedComponentOptionCategory = (group: string) => `componentRequestCode:${group}`;

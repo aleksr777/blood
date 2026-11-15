@@ -33,9 +33,9 @@ const CodedHarness = () => {
 
 it('shows custom entries above immutable coded options and populates both fields', async () => {
   render(<CodedHarness />);
-  const input = screen.getByRole('textbox', { name: 'Идентификационный код' });
+  const input = screen.getByRole('textbox', { name: 'Идентификационный код (графа 6)' });
   const open = screen.getByRole('button', {
-    name: 'Показать сохранённые варианты: Идентификационный код',
+    name: 'Показать сохранённые варианты: Идентификационный код (графа 6)',
   });
   fireEvent.click(open);
   const custom = await screen.findByRole('button', { name: 'МОЙ-1. Пользовательский компонент' });

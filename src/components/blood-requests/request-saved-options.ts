@@ -1,5 +1,12 @@
-import { BLOOD_COMPONENTS, getBloodComponentNameCategory, inferBloodComponentGroup } from '../../domain/blood-components';
-import { persistDocumentOptions, type DocumentOption } from '../../storage/repositories/document-options';
+import {
+  BLOOD_COMPONENTS,
+  getBloodComponentNameCategory,
+  inferBloodComponentGroup,
+} from '../../domain/blood-components';
+import {
+  persistDocumentOptions,
+  type DocumentOption,
+} from '../../storage/repositories/document-options';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import type { RequestEditorField } from './request-editor-modal';
 

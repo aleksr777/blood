@@ -7,8 +7,7 @@ export type DocumentOption = {
   fixedOptions?: readonly string[];
 };
 
-const normalize = (value: string) =>
-  value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
+const normalize = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
 
 // Call only after the document record has been successfully written to the database.
 // A failed dictionary update must not turn a successfully saved document into an error.

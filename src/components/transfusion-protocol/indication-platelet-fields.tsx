@@ -2,7 +2,7 @@ import {
   PLATELET_INDICATION_OPTIONS,
   PLATELET_THRESHOLD_DEFAULT,
 } from '../../domain/platelet-indications';
-import { Choice, type IndicationProps } from './indication-controls';
+import { Choice, OtherChoice, type IndicationProps } from './indication-controls';
 import styles from './indications-fields.module.css';
 
 export const PlateletIndications = ({ values, onChange }: IndicationProps) => {
@@ -49,6 +49,13 @@ export const PlateletIndications = ({ values, onChange }: IndicationProps) => {
           {label}
         </Choice>
       ))}
+      <OtherChoice
+        name="indicationPlateletOther"
+        label="Другие показания"
+        checked={values.indicationPlateletOther === '1'}
+        text={values.indicationPlateletOtherText ?? ''}
+        onChange={(changes) => onChange({ ...changes, indicationPlateletVersion: '2' })}
+      />
     </>
   );
 };

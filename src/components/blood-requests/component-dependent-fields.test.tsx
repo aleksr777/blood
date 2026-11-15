@@ -33,11 +33,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const dependentFields = () => {
-  const element = document.querySelector('fieldset[data-component-dependent]');
-  expect(element).not.toBeNull();
-  return element as HTMLFieldSetElement;
-};
+const dependentFields = () =>
+  document.querySelector('fieldset[data-component-dependent]') as HTMLFieldSetElement;
 
 const emptyDetails: ComponentRequestDetailsValues = {
   requiredComponent: '',

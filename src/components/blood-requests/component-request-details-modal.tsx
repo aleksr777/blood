@@ -34,12 +34,11 @@ export const ComponentRequestDetailsModal = ({
     ({ code }) => code === values.transfusionIndicationCode,
   );
 
-  const selectComponent = (code: string) => {
-    const component = catalogOptions.find((option) => option.code === code);
-    const options = indicationOptionsForComponent(component?.code || '', group);
+  const selectComponent = ({ code, name }: { code: string; name: string }) => {
+    const options = indicationOptionsForComponent(code, group);
     onChange({
-      componentCode: component?.code || '',
-      requiredComponent: component?.name || '',
+      componentCode: code,
+      requiredComponent: name,
       ...(values.transfusionIndicationCode &&
       !options.some((item) => item.code === values.transfusionIndicationCode)
         ? { transfusionIndicationCode: '' }
@@ -60,7 +59,7 @@ export const ComponentRequestDetailsModal = ({
           inputName="requiredComponent"
           catalogOptions={catalogOptions}
           selectedCode={selectedCode}
-          onCodeChange={selectComponent}
+          onCodedChange={selectComponent}
           onChange={({ group: nextGroup, name }) => {
             onIndicationsChange({ componentGroup: nextGroup, indicationComponent: nextGroup });
             onChange({

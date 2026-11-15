@@ -8,11 +8,14 @@ import {
   type DocumentOption,
 } from '../../storage/repositories/document-options';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
+import { componentCatalogForGroup } from './component-request-catalog';
+import { codedComponentOptionCategory, formatCodedComponent } from '../../domain/coded-component';
 import type { RequestEditorField } from './request-editor-modal';
 
 type RequestOptionValues = {
   department?: string;
   requiredComponent?: string;
+  componentCode?: string;
   indicationValues?: ProtocolValues;
 };
 
@@ -37,6 +40,16 @@ export const persistRequestOptions = (
       category: componentCategory,
       value: values.requiredComponent,
       fixedOptions: fixedNames,
+    });
+  }
+  if (componentCategory && values.componentCode?.trim() && values.requiredComponent?.trim()) {
+    choices.push({
+      category: codedComponentOptionCategory(group),
+      value: formatCodedComponent({
+        code: values.componentCode.trim(),
+        name: values.requiredComponent.trim(),
+      }),
+      fixedOptions: componentCatalogForGroup(group).map(formatCodedComponent),
     });
   }
 

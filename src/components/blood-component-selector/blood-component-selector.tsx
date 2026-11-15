@@ -1,5 +1,7 @@
 import { BLOOD_COMPONENTS, getBloodComponentNameCategory } from '../../domain/blood-components';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
+import { CodedComponentField } from './coded-component-field';
+import type { CodedComponent } from '../../domain/coded-component';
 import styles from './blood-component-selector.module.css';
 
 export type BloodComponentSelection = { group: string; name: string };
@@ -8,9 +10,9 @@ type Props = BloodComponentSelection & {
   inputName?: string;
   fixedGroup?: string;
   showName?: boolean;
-  catalogOptions?: readonly { code: string; name: string }[];
+  catalogOptions?: readonly CodedComponent[];
   selectedCode?: string;
-  onCodeChange?: (code: string) => void;
+  onCodedChange?: (component: CodedComponent) => void;
   onChange: (selection: BloodComponentSelection) => void;
 };
 
@@ -22,7 +24,7 @@ export const BloodComponentSelector = ({
   showName = true,
   catalogOptions,
   selectedCode,
-  onCodeChange,
+  onCodedChange,
   onChange,
 }: Props) => {
   const selectedGroup = fixedGroup || group;
@@ -53,24 +55,14 @@ export const BloodComponentSelector = ({
       {showName && selected && category && (
         <div className={styles.name}>
           {catalogOptions ? (
-            <label>
-              <span className={styles.label}>Наименование компонента донорской крови</span>
-              <select
-                name={inputName}
-                value={selectedCode || ''}
-                onChange={(event) => onCodeChange?.(event.target.value)}
-              >
-                <option value="">Выберите компонент донорской крови</option>
-                {selectedCode && !catalogOptions.some(({ code }) => code === selectedCode) && (
-                  <option value={selectedCode}>{name || 'Ранее выбранный компонент'}</option>
-                )}
-                {catalogOptions.map(({ code, name: componentName }) => (
-                  <option key={code} value={code}>
-                    {componentName}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <CodedComponentField
+              group={selectedGroup}
+              inputName={inputName}
+              code={selectedCode ?? ''}
+              name={name}
+              options={catalogOptions}
+              onChange={(component) => onCodedChange?.(component)}
+            />
           ) : (
             <>
               <div className={styles.label}>Наименование компонента донорской крови</div>

@@ -52,7 +52,7 @@ const openNames = () =>
     }),
   );
 
-it('toggles off the chosen group and clears its component name', async () => {
+it('toggles off the chosen group without erasing its stored name', async () => {
   render(<Harness />);
   expect(
     screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }),
@@ -63,8 +63,9 @@ it('toggles off the chosen group and clears its component name', async () => {
   fireEvent.change(nameInput(), { target: { value: 'Мой компонент' } });
   fireEvent.click(erythrocytes);
   expect(erythrocytes.getAttribute('aria-pressed')).toBe('false');
-  expect(screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }))
-    .toBeNull();
+  expect(
+    screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }),
+  ).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Плазма' }));
   expect(nameInput().value).toBe('');
   openNames();
@@ -113,10 +114,11 @@ it('allows deselection of a group inferred from a legacy component name', async 
   );
   expect(nameInput().value).toBe('Отмытые эритроциты');
   fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));
-  expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: '' });
+  expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: 'Отмытые эритроциты' });
   expect(onIndicationsChange).toHaveBeenCalledWith({
     componentGroup: '',
     indicationComponent: '',
+    lastSelectedComponentGroup: 'erythrocytes',
   });
   await waitFor(() => expect(loadSavedOptions).toHaveBeenCalledWith('componentName:erythrocytes'));
 });

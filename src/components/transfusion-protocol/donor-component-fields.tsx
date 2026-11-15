@@ -1,5 +1,9 @@
 import type { ComponentProps } from 'react';
-import { BLOOD_COMPONENTS, inferBloodComponentGroup } from '../../domain/blood-components';
+import {
+  BLOOD_COMPONENTS,
+  componentGroupChanges,
+  selectedBloodComponentGroup,
+} from '../../domain/blood-components';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
 import { DonorDetailsFields } from './donor-details-fields';
 import { IndicationsFields } from './indications-fields';
@@ -7,10 +11,7 @@ import styles from './protocol-editor.module.css';
 
 export const DonorComponentFields = (props: ComponentProps<typeof DonorDetailsFields>) => {
   const { values, onChange } = props;
-  const group =
-    values.componentGroup ||
-    values.indicationComponent ||
-    inferBloodComponentGroup(values.componentName);
+  const group = selectedBloodComponentGroup(values, values.componentName);
   const hasComponentGroup = BLOOD_COMPONENTS.some(({ value }) => value === group);
 
   return (
@@ -18,9 +19,8 @@ export const DonorComponentFields = (props: ComponentProps<typeof DonorDetailsFi
       <BloodComponentSelector
         group={group}
         name={values.componentName ?? ''}
-        onChange={({ group, name }) =>
-          onChange({ componentGroup: group, indicationComponent: group, componentName: name })
-        }
+        lastSelectedGroup={values.lastSelectedComponentGroup}
+        onChange={({ group, name }) => onChange(componentGroupChanges(values, group, name))}
       />
       <fieldset
         className={`${styles.grid} ${styles.componentDependentFields}`}

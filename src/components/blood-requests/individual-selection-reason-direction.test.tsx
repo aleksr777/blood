@@ -25,12 +25,22 @@ const stored = {
 };
 
 beforeEach(() => {
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  );
   window.localStorage.clear();
   window.sessionStorage.clear();
   adoptCurrentRecipientFromValues(stored.recipientProfileSnapshot);
   window.localStorage.setItem(storageKey, JSON.stringify(stored));
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 it('stores and prints only the description when a direction indication is chosen', async () => {
   const { container } = render(<IndividualSelectionDirection />);

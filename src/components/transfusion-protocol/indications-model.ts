@@ -1,5 +1,5 @@
 import { GRANULOCYTE_NEUTROPHIL_INDICATION } from '../../domain/granulocyte-indications';
-import { PLATELET_INDICATION_OPTIONS } from '../../domain/platelet-indications';
+import { plateletIndicationTexts } from '../../domain/platelet-indications';
 import type { ProtocolValues } from './protocol-types';
 
 export const getIndicationComponent = (values: ProtocolValues) =>
@@ -71,24 +71,7 @@ export const formatIndications = (values: ProtocolValues) => {
     }
   }
 
-  if (values.indicationComponent === 'platelets') {
-    for (const [name, label] of PLATELET_INDICATION_OPTIONS) {
-      if (yes(values[name])) items.push(label);
-    }
-    // Preserve the wording of indications saved before the structured list was introduced.
-    if (yes(values.indicationPlateletHighBleedingRisk)) {
-      items.push('Высокий риск кровотечения');
-    }
-    if (yes(values.indicationPlateletThrombocytopenia)) {
-      const plateletCount = values.indicationPlateletCount?.trim();
-      if (plateletCount) {
-        items.push(`Тромбоцитопения менее ${plateletCount} ×10⁹/л`);
-      }
-    }
-    if (yes(values.indicationPlateletOther) && values.indicationPlateletOtherText?.trim()) {
-      items.push(values.indicationPlateletOtherText.trim());
-    }
-  }
+  if (values.indicationComponent === 'platelets') items.push(...plateletIndicationTexts(values));
 
   if (values.indicationComponent === 'granulocytes') {
     if (yes(values.indicationGranulocyteNeutrophilsLow)) {

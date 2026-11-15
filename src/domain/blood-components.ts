@@ -64,8 +64,7 @@ export const componentGroupChanges = (
   componentGroup: group,
   indicationComponent: group,
   componentName: name,
-  lastSelectedComponentGroup:
-    group || selectedBloodComponentGroup(values, values.componentName),
+  lastSelectedComponentGroup: group || selectedBloodComponentGroup(values, values.componentName),
 });
 
 export const visibleProtocolComponentValues = <T extends Record<string, string>>(values: T): T =>

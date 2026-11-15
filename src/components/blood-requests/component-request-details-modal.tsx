@@ -1,6 +1,6 @@
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
 import Modal from '../modal/modal';
-import { inferBloodComponentGroup } from '../../domain/blood-components';
+import { BLOOD_COMPONENTS, inferBloodComponentGroup } from '../../domain/blood-components';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import type { ComponentRequestDetailsValues } from './component-request-details-types';
 import { ComponentRequestQuantityFields } from './component-request-quantity-fields';
@@ -26,6 +26,7 @@ export const ComponentRequestDetailsModal = ({
     values.indicationValues.componentGroup ||
     values.indicationValues.indicationComponent ||
     inferBloodComponentGroup(values.requiredComponent);
+  const hasSelectedComponent = BLOOD_COMPONENTS.some(({ value }) => value === group);
   const catalogOptions = componentCatalogForGroup(group);
   // Keep older saved requests readable even when a code is no longer selectable.
   const selectedCode = values.componentCode;
@@ -48,7 +49,7 @@ export const ComponentRequestDetailsModal = ({
 
   return (
     <Modal
-      title="Компонент крови и показания (приложение № 17)"
+      title="Компонент крови и показания"
       onClose={onClose}
       className={styles.modal}
     >
@@ -69,13 +70,19 @@ export const ComponentRequestDetailsModal = ({
           }}
         />
 
-        <ComponentRequestQuantityFields
-          values={values}
-          indications={indications}
-          selectedIndication={selectedIndication}
-          onChange={onChange}
-        />
-        <ComponentRequestIndividualSelectionFields values={values} onChange={onChange} />
+        <fieldset
+          className={styles.dependentFields}
+          disabled={!hasSelectedComponent}
+          data-component-dependent
+        >
+          <ComponentRequestQuantityFields
+            values={values}
+            indications={indications}
+            selectedIndication={selectedIndication}
+            onChange={onChange}
+          />
+          <ComponentRequestIndividualSelectionFields values={values} onChange={onChange} />
+        </fieldset>
         <p className={styles.note}>
           Коды показаний приведены по приложению № 18 к приказу № 447н. Выбор кода должен
           соответствовать клиническим данным реципиента.

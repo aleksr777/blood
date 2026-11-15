@@ -46,13 +46,15 @@ it('can deselect a group in the indications editor and switch to another group',
   expect(onChange).toHaveBeenLastCalledWith({
     componentGroup: '',
     indicationComponent: '',
-    componentName: '',
+    componentName: 'Отмытые эритроциты',
+    lastSelectedComponentGroup: 'erythrocytes',
   });
   fireEvent.click(screen.getByRole('button', { name: 'Плазма' }));
   expect(onChange).toHaveBeenLastCalledWith({
     componentGroup: 'plasma-cryo',
     indicationComponent: 'plasma-cryo',
     componentName: '',
+    lastSelectedComponentGroup: 'plasma-cryo',
   });
 });
 
@@ -102,6 +104,7 @@ it('keeps the component name and indications editable in the selection direction
   expect(onIndicationsChange).toHaveBeenLastCalledWith({
     componentGroup: 'plasma-cryo',
     indicationComponent: 'plasma-cryo',
+    lastSelectedComponentGroup: 'plasma-cryo',
   });
   expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: '' });
 });

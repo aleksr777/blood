@@ -120,6 +120,7 @@ it('changes the component and indication group together from the single selector
     componentGroup: 'plasma-cryo',
     indicationComponent: 'plasma-cryo',
     componentName: '',
+    lastSelectedComponentGroup: 'plasma-cryo',
   });
   expect(nameInput().value).toBe('');
   expect(screen.queryByRole('checkbox', { name: 'Признаки гемической гипоксии' })).toBeNull();

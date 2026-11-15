@@ -141,7 +141,8 @@
   white-space: pre-wrap;
 }
 
-.componentName {
+.componentName,
+.indicationDescription {
   display: block;
   margin-top: 1mm;
   font-size: 7pt;

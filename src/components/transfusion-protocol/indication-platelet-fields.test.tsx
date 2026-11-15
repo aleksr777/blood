@@ -85,7 +85,10 @@ it('передаёт новые четыре формулировки и ред�
     ...values,
   });
   expect(text).toBe(
-    ['Количество тромбоцитов менее 75 × 10⁹/л.', ...PLATELET_INDICATION_OPTIONS.map(([, label]) => label)].join(' '),
+    [
+      'Количество тромбоцитов менее 75 × 10⁹/л.',
+      ...PLATELET_INDICATION_OPTIONS.map(([, label]) => label),
+    ].join(' '),
   );
   expect(
     formatIndications({

@@ -1,4 +1,7 @@
-import { inferBloodComponentGroup, selectedBloodComponentGroup } from '../../domain/blood-components';
+import {
+  inferBloodComponentGroup,
+  selectedBloodComponentGroup,
+} from '../../domain/blood-components';
 import { getIndicationComponent } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 

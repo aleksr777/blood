@@ -6,8 +6,10 @@ export const normalizeDirectionIndications = (
   values: ProtocolValues = {},
   componentName = '',
 ): ProtocolValues => {
-  const component =
-    getIndicationComponent(values) || inferBloodComponentGroup(componentName) || 'erythrocytes';
+  const groupWasCleared = values.componentGroup === '' && values.indicationComponent === '';
+  const component = groupWasCleared
+    ? ''
+    : getIndicationComponent(values) || inferBloodComponentGroup(componentName) || 'erythrocytes';
 
   return { ...values, componentGroup: component, indicationComponent: component };
 };

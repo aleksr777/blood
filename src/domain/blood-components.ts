@@ -46,3 +46,27 @@ export const inferBloodComponentGroup = (name = '') => {
   if (normalized.includes('гранулоц')) return 'granulocytes';
   return '';
 };
+
+export const selectedBloodComponentGroup = (
+  values: { componentGroup?: string; indicationComponent?: string },
+  componentName = '',
+) => {
+  if (values.componentGroup !== undefined) return values.componentGroup;
+  if (values.indicationComponent !== undefined) return values.indicationComponent;
+  return inferBloodComponentGroup(componentName);
+};
+
+export const componentGroupChanges = (
+  values: { componentGroup?: string; indicationComponent?: string; componentName?: string },
+  group: string,
+  name: string,
+) => ({
+  componentGroup: group,
+  indicationComponent: group,
+  componentName: name,
+  lastSelectedComponentGroup:
+    group || selectedBloodComponentGroup(values, values.componentName),
+});
+
+export const visibleProtocolComponentValues = <T extends Record<string, string>>(values: T): T =>
+  selectedBloodComponentGroup(values, values.componentName) ? values : ({} as T);

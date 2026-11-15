@@ -284,10 +284,30 @@ it('позволяет выбрать и отредактировать конт
   fireEvent.change(phoneInput, { target: { value: '+79009998877' } });
   fireEvent(screen.getByRole('dialog'), new Event('cancel', { bubbles: true, cancelable: true }));
   expect(screen.getByText('+79009998877')).toBeTruthy();
+  expect(database.rememberSavedOption).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
   await waitFor(() =>
     expect(database.rememberSavedOption).toHaveBeenCalledWith(
       'componentRequestDepartmentPhone',
       '+79009998877',
     ),
   );
+});
+
+it('не сохраняет новый телефон в справочник, если запись документа в БД завершилась ошибкой', async () => {
+  vi.mocked(database.saveBloodRequestRecord).mockRejectedValueOnce(new Error('Ошибка записи'));
+  render(<ComponentRequest />);
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Подразделение, сроки и форма оказания помощи' }),
+  );
+  const dialog = within(screen.getByRole('dialog'));
+  fireEvent.change(dialog.getByRole('textbox', { name: 'Контактный телефон подразделения' }), {
+    target: { value: '+79005551122' },
+  });
+  fireEvent(screen.getByRole('dialog'), new Event('cancel', { bubbles: true, cancelable: true }));
+  expect(database.rememberSavedOption).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
+  await screen.findByText('Ошибка записи');
+  expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce();
+  expect(database.rememberSavedOption).not.toHaveBeenCalled();
 });

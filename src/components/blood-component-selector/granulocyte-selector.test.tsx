@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { useState } from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { componentCatalogForGroup } from '../blood-requests/component-request-catalog';
 import { rememberSavedOption } from '../../storage/repositories/saved-options';
@@ -46,18 +46,14 @@ it('offers a fourth component group with exactly two immutable granulocyte prese
   expect(rememberSavedOption).not.toHaveBeenCalled();
 });
 
-it('saves user-entered names separately and never changes the official preset list', async () => {
+it('keeps new custom names in the draft without saving them on blur', () => {
   render(<Harness />);
   fireEvent.click(screen.getByRole('button', { name: 'Гранулоциты' }));
-  const input = screen.getByRole('textbox', { name: selectName });
+  const input = screen.getByRole('textbox', { name: selectName }) as HTMLInputElement;
   fireEvent.change(input, { target: { value: 'Индивидуальный компонент' } });
   fireEvent.blur(input);
-  await waitFor(() =>
-    expect(rememberSavedOption).toHaveBeenCalledWith(
-      'componentName:granulocytes',
-      'Индивидуальный компонент',
-    ),
-  );
+  expect(input.value).toBe('Индивидуальный компонент');
+  expect(rememberSavedOption).not.toHaveBeenCalled();
 });
 
 it('shows only component names in the coded request dropdown while returning codes', () => {

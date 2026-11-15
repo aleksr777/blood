@@ -23,9 +23,7 @@ export const rememberDepartment = async (name: string) => {
     sql: `
       INSERT INTO departments (name, normalized_name, created_at, updated_at)
       VALUES ($name, $normalizedName, $now, $now)
-      ON CONFLICT(normalized_name) DO UPDATE SET
-        name = excluded.name,
-        updated_at = excluded.updated_at
+      ON CONFLICT(normalized_name) DO NOTHING
     `,
     bind: {
       $name: value,

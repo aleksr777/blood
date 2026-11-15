@@ -173,7 +173,7 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
             <tr className={styles.valuesRow}>
               <td {...edit('recipient')}>
                 {values.recipientName}
-                {recipientBirthDate && <div>{formatDirectionDate(recipientBirthDate)}</div>}
+                {recipientBirthDate && <div>Дата рождения: {formatDirectionDate(recipientBirthDate)}</div>}
                 {values.diagnosis && <div className={styles.wrapText}>{values.diagnosis}</div>}
               </td>
               <td {...edit('recipient')}>{values.medicalRecordNumber}</td>

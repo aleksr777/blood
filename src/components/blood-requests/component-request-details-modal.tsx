@@ -48,11 +48,7 @@ export const ComponentRequestDetailsModal = ({
   };
 
   return (
-    <Modal
-      title="Компонент крови и показания"
-      onClose={onClose}
-      className={styles.modal}
-    >
+    <Modal title="Компонент крови и показания" onClose={onClose} className={styles.modal}>
       <div className={styles.root}>
         <BloodComponentSelector
           group={group}

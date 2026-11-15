@@ -1,3 +1,4 @@
+import { selectedBloodComponentGroup } from '../../domain/blood-components';
 import type { ProtocolValues } from './protocol-types';
 
 export const DONOR_ANTIGENS = [
@@ -18,3 +19,8 @@ export const formatDonorAntigens = (values: ProtocolValues) => {
     values[name] ? [`${symbol}${values[name]}`] : [],
   ).join(' ');
 };
+
+export const formatDonorAntigensForComponent = (values: ProtocolValues) =>
+  selectedBloodComponentGroup(values, values.componentName) === 'erythrocytes'
+    ? formatDonorAntigens(values)
+    : '';

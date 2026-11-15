@@ -68,10 +68,10 @@ it('shows code-prefixed names in the request selector while keeping codes separa
       onChange={vi.fn()}
     />,
   );
-  const input = screen.getByRole('textbox', { name: 'Идентификационный код' });
+  const input = screen.getByRole('textbox', { name: 'Идентификационный код (графа 6)' });
   fireEvent.click(
     screen.getByRole('button', {
-      name: 'Показать сохранённые варианты: Идентификационный код',
+      name: 'Показать сохранённые варианты: Идентификационный код (графа 6)',
     }),
   );
   fireEvent.click(screen.getByRole('button', { name: `ГКО. ${firstName}` }));

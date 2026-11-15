@@ -30,10 +30,10 @@ afterEach(() => {
 
 const group = { componentGroup: 'platelets', indicationComponent: 'platelets' };
 
-it('uses the four-item platelet checklist in the transfusion protocol', () => {
+it('uses the platelet checklist including other indications in the transfusion protocol', () => {
   const onChange = vi.fn();
   render(<IndicationsFields values={group} onChange={onChange} />);
-  expect(screen.getAllByRole('checkbox')).toHaveLength(4);
+  expect(screen.getAllByRole('checkbox')).toHaveLength(5);
   expect(screen.getByRole('textbox', { name: 'Порог количества тромбоцитов' })).toBeTruthy();
   fireEvent.click(
     screen.getByRole('checkbox', { name: 'Планируется инвазивное медицинское вмешательство.' }),
@@ -44,7 +44,7 @@ it('uses the four-item platelet checklist in the transfusion protocol', () => {
   });
 });
 
-it('uses the same checklist in the individual selection direction', () => {
+it('uses the same expanded checklist in the individual selection direction', () => {
   const onIndicationsChange = vi.fn();
   render(
     <IndividualSelectionComponentModal
@@ -57,7 +57,7 @@ it('uses the same checklist in the individual selection direction', () => {
       onClose={() => {}}
     />,
   );
-  expect(screen.getAllByRole('checkbox')).toHaveLength(4);
+  expect(screen.getAllByRole('checkbox')).toHaveLength(5);
   const threshold = screen.getByRole('textbox', {
     name: 'Порог количества тромбоцитов',
   }) as HTMLInputElement;

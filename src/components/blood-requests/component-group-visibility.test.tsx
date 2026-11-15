@@ -90,7 +90,7 @@ it('hides donor details from the protocol until the component group is reselecte
         <DonorBlock
           key={part}
           part={part}
-          values={{ ...values, componentGroup: group }}
+          values={{ ...values, componentGroup: group, indicationComponent: group }}
           onOpenBlock={() => {}}
         />
       ))}

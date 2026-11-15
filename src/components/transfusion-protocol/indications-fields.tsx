@@ -37,7 +37,7 @@ export const IndicationsFields = ({
         )}
 
         {component && (
-          <fieldset className={styles.group}>
+          <div>
             <div className={styles.choiceGrid}>
               {component === 'erythrocytes' && (
                 <ErythrocyteIndications values={values} onChange={onChange} />
@@ -52,7 +52,7 @@ export const IndicationsFields = ({
                 <GranulocyteIndications values={values} onChange={onChange} />
               )}
             </div>
-          </fieldset>
+          </div>
         )}
       </div>
     </IndicationsAutoHeight>

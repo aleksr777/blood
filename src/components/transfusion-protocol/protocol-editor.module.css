@@ -32,11 +32,9 @@
 }
 
 .calculatedValue {
+  composes: ui-body-text from global;
   min-height: var(--control-height);
   padding: var(--control-padding-y) 0;
-  color: var(--ui-text);
-  font-size: 0.9rem;
-  font-weight: 500;
 }
 
 .wide {
@@ -44,11 +42,12 @@
 }
 
 .sectionTitle {
-  margin: 0 0 0.75rem;
-  color: var(--ui-text);
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.4;
+  composes: ui-section-title from global;
+}
+
+.section {
+  composes: ui-form-section from global;
+  grid-column: 1 / -1;
 }
 
 .generalGroup {

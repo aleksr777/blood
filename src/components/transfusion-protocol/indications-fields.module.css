@@ -24,10 +24,6 @@
   min-width: 0;
 }
 
-.group {
-  composes: ui-fieldset from global;
-}
-
 .choiceGrid {
   display: grid;
   gap: 0.55rem;
@@ -45,13 +41,11 @@
 }
 
 .choiceRow {
+  composes: ui-body-text from global;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
-  color: var(--ui-text);
-  font-size: 0.9rem;
-  font-weight: 500;
 }
 
 .shortNumber {

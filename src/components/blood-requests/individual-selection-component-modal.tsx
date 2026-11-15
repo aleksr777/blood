@@ -141,134 +141,116 @@ export const IndividualSelectionComponentModal = ({
         </div>
 
         {showRequestOptions && (
-          <>
-            <div className={styles.bloodGroupGrid}>
-              <BloodGroupSelectField
-                name="componentAbo"
-                label="Группа крови AB0 компонента"
-                options={ABO_OPTIONS}
-                value={componentAbo}
-                tone={componentBloodGroupTone}
-                onChange={(value) => onLocalChange({ componentAbo: value })}
-              />
-              <BloodGroupSelectField
-                name="componentRh"
-                label="Резус-принадлежность компонента"
-                options={RH_OPTIONS}
-                value={normalizedComponentRh}
-                tone={componentBloodGroupTone}
-                onChange={(value) => onLocalChange({ componentRh: value })}
-              />
-            </div>
-          </>
+          <div className={styles.bloodGroupGrid}>
+            <BloodGroupSelectField
+              name="componentAbo"
+              label="Группа крови AB0 компонента"
+              options={ABO_OPTIONS}
+              value={componentAbo}
+              tone={componentBloodGroupTone}
+              onChange={(value) => onLocalChange({ componentAbo: value })}
+            />
+            <BloodGroupSelectField
+              name="componentRh"
+              label="Резус-принадлежность компонента"
+              options={RH_OPTIONS}
+              value={normalizedComponentRh}
+              tone={componentBloodGroupTone}
+              onChange={(value) => onLocalChange({ componentRh: value })}
+            />
+          </div>
         )}
 
         {showRequestOptions && isErythrocytes && (
-          <>
-            <div className={styles.divider} />
-
-            <fieldset className={styles.optionGroup}>
-              <legend>Подбор компонента</legend>
-              <div className={styles.radioOptions}>
-                <Choice
-                  type="radio"
-                  name="componentRequestSelectionRequirement"
-                  checked={componentSelectionRequirement === 'not-required'}
-                  onChange={() => setComponentSelectionRequirement('not-required')}
-                >
-                  индивидуальный подбор и подбор по фенотипу не требуется
-                </Choice>
-                <Choice
-                  type="radio"
-                  name="componentRequestSelectionRequirement"
-                  checked={componentSelectionRequirement === 'phenotype'}
-                  onChange={() => setComponentSelectionRequirement('phenotype')}
-                >
-                  требуется подбор по фенотипу
-                </Choice>
-                <Choice
-                  type="radio"
-                  name="componentRequestSelectionRequirement"
-                  checked={componentSelectionRequirement === 'individual'}
-                  onChange={() => setComponentSelectionRequirement('individual')}
-                >
-                  требуется индивидуальный подбор
-                </Choice>
-              </div>
-              {componentSelectionRequirement && (
-                <button
-                  type="button"
-                  className={styles.resetSelectionButton}
-                  onClick={() => setComponentSelectionRequirement('')}
-                >
-                  Сбросить выбор
-                </button>
-              )}
-            </fieldset>
-          </>
+          <fieldset className={styles.optionGroup}>
+            <legend>Подбор компонента</legend>
+            <div className={styles.radioOptions}>
+              <Choice
+                type="radio"
+                name="componentRequestSelectionRequirement"
+                checked={componentSelectionRequirement === 'not-required'}
+                onChange={() => setComponentSelectionRequirement('not-required')}
+              >
+                индивидуальный подбор и подбор по фенотипу не требуется
+              </Choice>
+              <Choice
+                type="radio"
+                name="componentRequestSelectionRequirement"
+                checked={componentSelectionRequirement === 'phenotype'}
+                onChange={() => setComponentSelectionRequirement('phenotype')}
+              >
+                требуется подбор по фенотипу
+              </Choice>
+              <Choice
+                type="radio"
+                name="componentRequestSelectionRequirement"
+                checked={componentSelectionRequirement === 'individual'}
+                onChange={() => setComponentSelectionRequirement('individual')}
+              >
+                требуется индивидуальный подбор
+              </Choice>
+            </div>
+            {componentSelectionRequirement && (
+              <button
+                type="button"
+                className={styles.resetSelectionButton}
+                onClick={() => setComponentSelectionRequirement('')}
+              >
+                Сбросить выбор
+              </button>
+            )}
+          </fieldset>
         )}
 
         {showRequestOptions && (
-          <>
-            <div className={styles.divider} />
-
-            <fieldset className={styles.optionGroup}>
-              <legend>Порядок трансфузии</legend>
-              <div className={styles.radioOptions}>
-                <Choice
-                  type="radio"
-                  name="componentRequestTransfusionOrder"
-                  checked={transfusionOrder === 'planned'}
-                  onChange={() => onLocalChange({ transfusionOrder: 'planned' })}
-                >
-                  плановая
-                </Choice>
-                <Choice
-                  type="radio"
-                  name="componentRequestTransfusionOrder"
-                  checked={transfusionOrder === 'emergency'}
-                  onChange={() => onLocalChange({ transfusionOrder: 'emergency' })}
-                >
-                  экстренная
-                </Choice>
-              </div>
-            </fieldset>
-          </>
+          <fieldset className={styles.optionGroup}>
+            <legend>Порядок трансфузии</legend>
+            <div className={styles.radioOptions}>
+              <Choice
+                type="radio"
+                name="componentRequestTransfusionOrder"
+                checked={transfusionOrder === 'planned'}
+                onChange={() => onLocalChange({ transfusionOrder: 'planned' })}
+              >
+                плановая
+              </Choice>
+              <Choice
+                type="radio"
+                name="componentRequestTransfusionOrder"
+                checked={transfusionOrder === 'emergency'}
+                onChange={() => onLocalChange({ transfusionOrder: 'emergency' })}
+              >
+                экстренная
+              </Choice>
+            </div>
+          </fieldset>
         )}
 
         {hasSelectedComponent && (
-          <>
-            <div className={styles.divider} />
-
-            <section className={styles.indicationsSection}>
-              <div className={styles.sectionTitle}>Показания к трансфузии</div>
-              <IndicationsFields
-                values={effectiveIndicationValues}
-                showComponentSelector={false}
-                onChange={handleIndicationsChange}
-              />
-            </section>
-          </>
+          <section className={styles.indicationsSection}>
+            <h3 className={styles.sectionTitle}>Показания к трансфузии</h3>
+            <IndicationsFields
+              values={effectiveIndicationValues}
+              showComponentSelector={false}
+              onChange={handleIndicationsChange}
+            />
+          </section>
         )}
 
         {(!showRequestOptions || requiresIndividualSelection) && (
-          <>
-            <div className={styles.divider} />
-
-            <div className={styles.localGrid}>
-              <label className={styles.wide}>
-                <span>Показания для индивидуального подбора</span>
-                <FormTextarea
-                  value={individualSelectionIndications}
-                  onChange={(event) =>
-                    onLocalChange({
-                      individualSelectionIndications: event.target.value,
-                    })
-                  }
-                />
-              </label>
-            </div>
-          </>
+          <div className={styles.localGrid}>
+            <label className={styles.wide}>
+              <span>Показания для индивидуального подбора</span>
+              <FormTextarea
+                value={individualSelectionIndications}
+                onChange={(event) =>
+                  onLocalChange({
+                    individualSelectionIndications: event.target.value,
+                  })
+                }
+              />
+            </label>
+          </div>
         )}
       </div>
     </Modal>

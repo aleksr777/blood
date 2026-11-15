@@ -24,11 +24,6 @@
   composes: ui-form-grid from global;
 }
 
-.divider {
-  height: 1px;
-  background: var(--ui-border);
-}
-
 .optionGroup {
   composes: ui-fieldset from global;
 }
@@ -45,14 +40,11 @@
 }
 
 .indicationsSection {
-  display: grid;
-  gap: 0.75rem;
+  composes: ui-form-section from global;
 }
 
 .sectionTitle {
-  color: var(--ui-text);
-  font-size: 0.95rem;
-  font-weight: 700;
+  composes: ui-section-title from global;
 }
 
 @media (max-width: 680px) {

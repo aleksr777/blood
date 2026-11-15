@@ -29,11 +29,9 @@
 }
 
 .label {
+  composes: ui-field-label from global;
   display: block;
   margin-bottom: 0;
-  color: var(--ui-text);
-  font-size: 0.9rem;
-  font-weight: 600;
 }
 
 .search {
@@ -95,7 +93,7 @@
 .empty {
   margin-top: 0.2rem;
   color: var(--ui-text-muted);
-  font-size: 0.82rem;
+  font-size: var(--ui-font-small);
 }
 
 .header {
@@ -111,7 +109,7 @@
 
 .title {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--ui-font-section);
   overflow-wrap: anywhere;
 }
 
@@ -157,15 +155,15 @@
 }
 
 .categoryTitle {
-  font-size: 0.95rem;
+  font-size: var(--ui-font-section);
   font-weight: 700;
-  line-height: 1.25;
+  line-height: var(--ui-line-height);
 }
 
 .categoryMeta {
   color: var(--ui-text-muted);
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: var(--ui-font-small);
+  font-weight: 400;
 }
 
 .categoryHeader {
@@ -184,7 +182,7 @@
 .categoryHeading {
   min-width: 0;
   color: var(--ui-text-strong);
-  font-size: 0.95rem;
+  font-size: var(--ui-font-section);
   font-weight: 700;
 }
 

@@ -8,9 +8,7 @@
 }
 
 .summary {
-  color: var(--ui-text-muted);
-  font-size: 0.84rem;
-  font-weight: 600;
+  composes: ui-help-text from global;
 }
 
 .list {
@@ -46,11 +44,10 @@
 }
 
 .empty {
+  composes: ui-help-text from global;
   border: 1px dashed var(--ui-border);
   border-radius: 0.65rem;
   padding: 1.25rem;
-  color: var(--ui-text-muted);
-  font-size: 0.88rem;
   text-align: center;
 }
 

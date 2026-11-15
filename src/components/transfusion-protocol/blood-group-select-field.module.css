@@ -3,10 +3,7 @@
 }
 
 .label {
-  margin-bottom: 0.4rem;
-  color: var(--ui-text);
-  font-size: 0.9rem;
-  font-weight: 600;
+  composes: ui-field-label from global;
 }
 
 .antigenLabel {

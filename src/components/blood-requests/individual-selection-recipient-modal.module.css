@@ -15,11 +15,9 @@
 }
 
 .calculatedValue {
+  composes: ui-body-text from global;
   min-height: var(--control-height);
   padding: var(--control-padding-y) 0;
-  color: var(--ui-text);
-  font-size: 0.9rem;
-  font-weight: 500;
 }
 
 @media (max-width: 680px) {
@@ -34,6 +32,4 @@
 
 .examination {
   margin-top: 1rem;
-  border-top: 1px solid var(--ui-border);
-  padding-top: 0.8rem;
 }

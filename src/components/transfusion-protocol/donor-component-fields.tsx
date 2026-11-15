@@ -27,11 +27,11 @@ export const DonorComponentFields = (props: ComponentProps<typeof DonorDetailsFi
         disabled={!hasComponentGroup}
         data-component-dependent
       >
-        <section className={styles.wide} aria-label="Показания к трансфузии">
+        <section className={styles.section} aria-label="Показания к трансфузии">
           <h3 className={styles.sectionTitle}>Показания к трансфузии</h3>
           <IndicationsFields values={values} onChange={onChange} showComponentSelector={false} />
         </section>
-        <section className={styles.wide} aria-label="Данные гемакона">
+        <section className={styles.section} aria-label="Данные гемакона">
           <h3 className={styles.sectionTitle}>Данные гемакона</h3>
           <div className={styles.grid}>
             <DonorDetailsFields {...props} />

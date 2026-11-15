@@ -13,10 +13,8 @@
 }
 
 .groupTitle {
+  composes: ui-field-label from global;
   margin-bottom: -0.55rem;
-  color: var(--ui-text);
-  font-size: 0.95rem;
-  font-weight: 700;
 }
 
 .antibodies {
@@ -34,13 +32,11 @@
 }
 
 .description {
+  composes: ui-field-label from global;
   display: flex;
   margin-top: 0.8rem;
   flex-direction: column;
   gap: 0.4rem;
-  color: var(--ui-text);
-  font-size: 0.9rem;
-  font-weight: 600;
 }
 
 .description textarea {

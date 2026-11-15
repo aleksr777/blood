@@ -9,6 +9,7 @@
 
 .grid {
   composes: ui-form-grid from global;
+  align-items: end;
 }
 
 .wide {
@@ -26,15 +27,16 @@
 }
 
 .selectionReason {
-  display: block;
+  composes: ui-field-label from global;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
   margin-top: 0.9rem;
 }
 
 .note {
+  composes: ui-help-text from global;
   margin: 0;
-  color: var(--ui-muted);
-  font-size: 0.82rem;
-  line-height: 1.5;
 }
 
 @media (max-width: 680px) {

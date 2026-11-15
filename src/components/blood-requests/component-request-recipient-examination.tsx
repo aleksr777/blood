@@ -8,7 +8,7 @@ type Props = {
 };
 
 export const ComponentRequestRecipientExamination = ({ values, onChange }: Props) => (
-  <section aria-label="Группа крови и антигены реципиента">
+  <section className={styles.examination} aria-label="Группа крови и антигены реципиента">
     <h3 className={styles.examinationTitle}>Группа крови и антигены реципиента</h3>
     <RecipientExaminationFields
       values={values}

@@ -20,7 +20,7 @@
 
 .value {
   color: var(--ui-text-strong);
-  font-size: 1rem;
+  font-size: var(--ui-font-control);
   font-weight: 600;
 }
 
@@ -47,7 +47,7 @@
 .hint,
 .empty {
   color: var(--ui-text-muted);
-  font-size: 0.82rem;
+  font-size: var(--ui-font-small);
 }
 
 .hint {
@@ -61,7 +61,7 @@
 
 .existingTitle {
   color: var(--ui-text);
-  font-size: 0.82rem;
+  font-size: var(--ui-font-small);
   font-weight: 600;
 }
 
@@ -74,7 +74,7 @@
 .existingMeta {
   margin-top: 0.2rem;
   color: var(--ui-text-muted);
-  font-size: 0.82rem;
+  font-size: var(--ui-font-small);
 }
 
 .existingDetails {
@@ -90,7 +90,7 @@
   grid-template-columns: minmax(9rem, 0.7fr) minmax(0, 1.3fr);
   gap: 0.7rem;
   color: var(--ui-text-muted);
-  font-size: 0.82rem;
+  font-size: var(--ui-font-small);
 }
 
 .existingDetail strong {
@@ -133,8 +133,8 @@
 .existingIntro {
   margin: 0;
   color: var(--ui-text-muted);
-  font-size: 0.88rem;
-  line-height: 1.4;
+  font-size: var(--ui-font-control);
+  line-height: var(--ui-line-height);
 }
 
 .matchList {

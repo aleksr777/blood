@@ -46,6 +46,10 @@
   --ui-motion-normal: 180ms;
   --ui-font-small: 0.82rem;
   --ui-font-control: 0.9rem;
+  --ui-font-section: 0.9rem;
+  --ui-font-dialog-title: 1.25rem;
+  --ui-line-height: 1.5;
+  --ui-section-padding: 1rem;
   --page-title-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
   --control-height: 34px;
   --button-height: 32px;

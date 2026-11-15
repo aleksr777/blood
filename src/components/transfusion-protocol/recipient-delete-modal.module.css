@@ -3,18 +3,17 @@
 }
 
 .text {
-  color: var(--ui-text-strong);
-  line-height: 1.45;
+  composes: ui-body-text from global;
 }
 
 .warning,
 .error {
   margin-top: 0.7rem;
-  font-size: 0.86rem;
+  font-size: var(--ui-font-small);
 }
 
 .warning {
-  color: var(--ui-text-muted);
+  composes: ui-help-text from global;
 }
 
 .error {

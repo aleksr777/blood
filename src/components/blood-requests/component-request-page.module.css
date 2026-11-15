@@ -8,10 +8,11 @@
 }
 
 .examinationTitle {
-  margin: 0 0 0.65rem;
-  color: var(--ui-text-strong);
-  font-size: 0.98rem;
-  font-weight: 700;
+  composes: ui-section-title from global;
+}
+
+.examination {
+  composes: ui-form-section from global;
 }
 
 @media print {

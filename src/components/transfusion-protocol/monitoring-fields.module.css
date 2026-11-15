@@ -33,9 +33,7 @@
 }
 
 .legacyValue {
-  color: var(--ui-text-muted);
-  font-size: 0.8rem;
-  font-weight: 400;
+  composes: ui-help-text from global;
   overflow-wrap: anywhere;
 }
 

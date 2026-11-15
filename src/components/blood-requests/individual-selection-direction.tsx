@@ -52,6 +52,7 @@ import {
 } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
+import { individualSelectionReasonLabel } from './individual-selection-reason-select';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
@@ -819,7 +820,7 @@ export const IndividualSelectionDirection = () => {
       />
       <AdaptiveRuledField
         label="Показания для индивидуального подбора:"
-        value={visibleComponent.individualSelectionIndications}
+        value={individualSelectionReasonLabel(visibleComponent.individualSelectionIndications)}
       />
     </div>,
 
@@ -862,7 +863,7 @@ export const IndividualSelectionDirection = () => {
     draft.obstetricHistory,
     visibleComponent.requiredComponent,
     visibleComponent.quantity,
-    visibleComponent.individualSelectionIndications,
+    individualSelectionReasonLabel(visibleComponent.individualSelectionIndications),
     draft.directionDate,
     draft.doctorName,
     draft.doctorPhone,

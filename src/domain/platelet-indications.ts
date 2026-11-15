@@ -52,8 +52,7 @@ export const plateletIndicationTexts = (values: Record<string, string>) => {
     }
     if (values.indicationPlateletHemorrhagicSyndrome === '1')
       items.push('Геморрагический синдром.');
-    if (values.indicationPlateletHighBleedingRisk === '1')
-      items.push('Высокий риск кровотечения.');
+    if (values.indicationPlateletHighBleedingRisk === '1') items.push('Высокий риск кровотечения.');
     if (values.indicationPlateletThrombocytopenia === '1' && values.indicationPlateletCount?.trim())
       items.push(`Тромбоцитопения менее ${values.indicationPlateletCount.trim()} ×10⁹/л.`);
   }

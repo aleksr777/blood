@@ -1,4 +1,7 @@
-import { PLATELET_INDICATION_OPTIONS } from '../domain/platelet-indications';
+import {
+  LEGACY_PLATELET_INDICATION_OPTIONS,
+  PLATELET_INDICATION_OPTIONS,
+} from '../domain/platelet-indications';
 
 export const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
   erythrocytes: [
@@ -36,7 +39,8 @@ export const INDICATION_FIELDS_BY_COMPONENT: Record<string, string[]> = {
   platelets: [
     'indications',
     ...PLATELET_INDICATION_OPTIONS.map(([name]) => name),
-    'indicationPlateletHighBleedingRisk',
+    ...LEGACY_PLATELET_INDICATION_OPTIONS.map(([name]) => name),
+    'indicationPlateletVersion',
     'indicationPlateletThrombocytopenia',
     'indicationPlateletCount',
     'indicationPlateletOther',

@@ -28,7 +28,6 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
-
 const storedRequest: ComponentRequestDetailsValues = {
   requiredComponent: 'Эритроцитная взвесь лейкоредуцированная',
   componentCode: 'ЭВ-Л',
@@ -39,7 +38,6 @@ const storedRequest: ComponentRequestDetailsValues = {
   individualSelectionCode: '3',
   indicationValues: { componentGroup: 'erythrocytes', indicationComponent: 'erythrocytes' },
 };
-
 const RequestHarness = () => {
   const [values, setValues] = useState(storedRequest);
   return (
@@ -59,7 +57,6 @@ const RequestHarness = () => {
     </>
   );
 };
-
 it('restores code, name, quantity, and indications after deselecting and reselecting', () => {
   render(<RequestHarness />);
   const button = screen.getByRole('button', { name: 'Эритроциты' });
@@ -69,7 +66,8 @@ it('restores code, name, quantity, and indications after deselecting and reselec
   expect(cleared.componentCode).toBe('ЭВ-Л');
   expect(cleared.requiredComponent).toBe(storedRequest.requiredComponent);
   expect(cleared.transfusionIndicationCode).toBe('1.1');
-  expect(screen.getByRole('spinbutton', { name: 'Количество, единиц (графа 7)' }).matches(':disabled')).toBe(true);
+  const quantity = screen.getByRole('spinbutton', { name: 'Количество, единиц (графа 7)' });
+  expect(quantity.matches(':disabled')).toBe(true);
   fireEvent.click(button);
   expect(
     (screen.getByRole('textbox', { name: 'Идентификационный код (графа 6)' }) as HTMLInputElement)
@@ -80,7 +78,6 @@ it('restores code, name, quantity, and indications after deselecting and reselec
       .value,
   ).toBe('2');
 });
-
 const DirectionHarness = () => {
   const [local, setLocal] = useState({
     requiredComponent: 'Отмытые эритроциты',
@@ -106,14 +103,14 @@ const DirectionHarness = () => {
     </>
   );
 };
-
 it('preserves direction inputs through deselecting and reselecting the group', () => {
   render(<DirectionHarness />);
   const erythrocytes = screen.getByRole('button', { name: 'Эритроциты' });
   fireEvent.click(erythrocytes);
   expect(screen.getByTestId('local').textContent).toContain('Отмытые эритроциты');
   expect(screen.getByTestId('local').textContent).toContain('Причина подбора');
-  expect(screen.getByRole('textbox', { name: 'Показания для индивидуального подбора' }).matches(':disabled')).toBe(true);
+  const reason = screen.getByRole('textbox', { name: 'Показания для индивидуального подбора' });
+  expect(reason.matches(':disabled')).toBe(true);
   fireEvent.click(erythrocytes);
   expect(
     (screen.getByRole('textbox', { name: 'Наименование компонента донорской крови' }) as HTMLInputElement)

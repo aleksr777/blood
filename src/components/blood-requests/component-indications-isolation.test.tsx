@@ -50,15 +50,15 @@ it('keeps indications and hemacon data within their own page after navigation', 
   ).toBe(false);
   fireEvent.click(direction.getByRole('checkbox', { name: 'Признаки гемической гипоксии' }));
   fireEvent.change(
-    direction.getByRole('textbox', { name: 'Показания для индивидуального подбора' }),
+    direction.getByRole('combobox', { name: 'Показания для индивидуального подбора' }),
     {
-      target: { value: 'Собственное показание направления' },
+      target: { value: 'Аллоиммунные антитела к эритроцитам' },
     },
   );
   closeEditor();
   await waitFor(() =>
     expect(readDraft(directionKey).individualSelectionIndications).toBe(
-      'Собственное показание направления',
+      'Аллоиммунные антитела к эритроцитам',
     ),
   );
   expect(readDraft(directionKey).indicationValues.indicationRbcHemicHypoxia).toBe('1');
@@ -80,11 +80,11 @@ it('keeps indications and hemacon data within their own page after navigation', 
   ).toBe(true);
   expect(
     (
-      restoredDirection.getByRole('textbox', {
+      restoredDirection.getByRole('combobox', {
         name: 'Показания для индивидуального подбора',
-      }) as HTMLTextAreaElement
+      }) as HTMLSelectElement
     ).value,
-  ).toBe('Собственное показание направления');
+  ).toBe('Аллоиммунные антитела к эритроцитам');
   closeEditor();
   await navigate('Заявка в трансфузиологический кабинет', 'component-request');
   openRequest();

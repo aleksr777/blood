@@ -8,6 +8,8 @@ vi.mock('../../storage/sqlite/database-client', () => ({
   database: {
     loadProtocolDraft: vi.fn(async () => ({ values: {}, protocolRecordId: null, updatedAt: 0 })),
     listProtocolRecords: vi.fn(async () => []),
+    listSavedOptions: vi.fn(async () => []),
+    listDepartments: vi.fn(async () => []),
     saveBloodRequestRecord: vi.fn(),
   },
 }));

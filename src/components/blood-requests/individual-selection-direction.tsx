@@ -57,7 +57,7 @@ import { IndividualSelectionRecipientModal } from './individual-selection-recipi
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
-import { normalizeDirectionIndications } from './direction-indications';
+import { normalizeDirectionIndications, visibleDirectionComponentValues } from './direction-indications';
 import { persistRequestOptions } from './request-saved-options';
 import {
   getIndividualSelectionClearValues,
@@ -690,6 +690,7 @@ export const IndividualSelectionDirection = () => {
     }
   }, [draft, editor]);
 
+  const visibleComponent = visibleDirectionComponentValues(draft);
   const formSections = [
     <div
       key="organization"
@@ -803,16 +804,16 @@ export const IndividualSelectionDirection = () => {
     >
       <AdaptiveRuledField
         label="Наименование требуемого компонента:"
-        value={draft.requiredComponent}
+        value={visibleComponent.requiredComponent}
       />
-      <AdaptiveRuledField label="Количество:" value={formatDoseQuantity(draft.quantity)} />
+      <AdaptiveRuledField label="Количество:" value={formatDoseQuantity(visibleComponent.quantity)} />
       <AdaptiveRuledField
         label="Показания к трансфузии:"
-        value={formatIndications(draft.indicationValues)}
+        value={formatIndications(visibleComponent.indicationValues)}
       />
       <AdaptiveRuledField
         label="Показания для индивидуального подбора:"
-        value={draft.individualSelectionIndications}
+        value={visibleComponent.individualSelectionIndications}
       />
     </div>,
 
@@ -845,7 +846,7 @@ export const IndividualSelectionDirection = () => {
     draft.recipientAboRh,
     draft.recipientPhenotype,
     formatAlloimmuneAntibodies(examinationValues),
-    formatIndications(draft.indicationValues),
+    formatIndications(visibleComponent.indicationValues),
     ...TRANSFUSION_HISTORY_FIELDS.map(({ statusName, textName }) =>
       formatHistoryValue(examinationValues, statusName, textName),
     ),
@@ -853,9 +854,9 @@ export const IndividualSelectionDirection = () => {
     draft.recipientSex,
     formatObstetricHistory(examinationValues),
     draft.obstetricHistory,
-    draft.requiredComponent,
-    draft.quantity,
-    draft.individualSelectionIndications,
+    visibleComponent.requiredComponent,
+    visibleComponent.quantity,
+    visibleComponent.individualSelectionIndications,
     draft.directionDate,
     draft.doctorName,
     draft.doctorPhone,

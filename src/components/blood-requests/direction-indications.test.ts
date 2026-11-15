@@ -9,6 +9,8 @@ it.each<[ProtocolValues | undefined, string, string]>([
   [{ indicationComponent: 'platelets', indicationPlateletCount: '50' }, '', 'platelets'],
   [{}, 'Свежезамороженная плазма', 'plasma-cryo'],
   [{ componentGroup: 'platelets' }, 'Отмытые эритроциты', 'platelets'],
+  [{ componentGroup: '', indicationComponent: '' }, '', ''],
+  [{ componentGroup: '', indicationComponent: '' }, 'Отмытые эритроциты', ''],
 ])(
   'restores a direction group without replacing an existing selection: %j, %s',
   (values, name, group) => {

@@ -3,10 +3,7 @@ import { ErythrocyteIndications } from './indication-erythrocyte-fields';
 import { GranulocyteIndications } from './indication-granulocyte-fields';
 import { IndicationsAutoHeight } from './indications-auto-height';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
-import {
-  componentGroupChanges,
-  selectedBloodComponentGroup,
-} from '../../domain/blood-components';
+import { componentGroupChanges, selectedBloodComponentGroup } from '../../domain/blood-components';
 import { PlasmaIndications } from './indication-plasma-fields';
 import { PlateletIndications } from './indication-platelet-fields';
 import styles from './indications-fields.module.css';

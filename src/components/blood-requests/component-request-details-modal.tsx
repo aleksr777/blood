@@ -67,7 +67,7 @@ export const ComponentRequestDetailsModal = ({
               requiredComponent: switched ? '' : name,
               ...(switched ? { componentCode: '', transfusionIndicationCode: '' } : {}),
             });
-          }
+          }}
         />
 
         <fieldset

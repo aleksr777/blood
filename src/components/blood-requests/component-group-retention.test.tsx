@@ -61,7 +61,8 @@ it('restores code, name, quantity, and indications after deselecting and reselec
   render(<RequestHarness />);
   const button = screen.getByRole('button', { name: 'Эритроциты' });
   fireEvent.click(button);
-  const cleared = JSON.parse(screen.getByTestId('draft').textContent!) as ComponentRequestDetailsValues;
+  const raw = screen.getByTestId('draft').textContent ?? '{}';
+  const cleared = JSON.parse(raw) as ComponentRequestDetailsValues;
   expect(cleared.indicationValues.componentGroup).toBe('');
   expect(cleared.componentCode).toBe('ЭВ-Л');
   expect(cleared.requiredComponent).toBe(storedRequest.requiredComponent);
@@ -69,14 +70,11 @@ it('restores code, name, quantity, and indications after deselecting and reselec
   const quantity = screen.getByRole('spinbutton', { name: 'Количество, единиц (графа 7)' });
   expect(quantity.matches(':disabled')).toBe(true);
   fireEvent.click(button);
-  expect(
-    (screen.getByRole('textbox', { name: 'Идентификационный код (графа 6)' }) as HTMLInputElement)
-      .value,
-  ).toContain('ЭВ-Л');
-  expect(
-    (screen.getByRole('spinbutton', { name: 'Количество, единиц (графа 7)' }) as HTMLInputElement)
-      .value,
-  ).toBe('2');
+  const codeInput = screen.getByRole('textbox', {
+    name: 'Идентификационный код (графа 6)',
+  }) as HTMLInputElement;
+  expect(codeInput.value).toContain('ЭВ-Л');
+  expect((quantity as HTMLInputElement).value).toBe('2');
 });
 const DirectionHarness = () => {
   const [local, setLocal] = useState({
@@ -112,12 +110,9 @@ it('preserves direction inputs through deselecting and reselecting the group', (
   const reason = screen.getByRole('textbox', { name: 'Показания для индивидуального подбора' });
   expect(reason.matches(':disabled')).toBe(true);
   fireEvent.click(erythrocytes);
-  expect(
-    (screen.getByRole('textbox', { name: 'Наименование компонента донорской крови' }) as HTMLInputElement)
-      .value,
-  ).toBe('Отмытые эритроциты');
-  expect(
-    (screen.getByRole('textbox', { name: 'Показания для индивидуального подбора' }) as HTMLTextAreaElement)
-      .value,
-  ).toBe('Причина подбора');
+  const name = screen.getByRole('textbox', {
+    name: 'Наименование компонента донорской крови',
+  }) as HTMLInputElement;
+  expect(name.value).toBe('Отмытые эритроциты');
+  expect((reason as HTMLTextAreaElement).value).toBe('Причина подбора');
 });

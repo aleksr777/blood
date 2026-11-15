@@ -1,4 +1,4 @@
-import { FormTextarea } from '../form-input/form-input';
+import { IndividualSelectionReasonSelect } from './individual-selection-reason-select';
 import Modal from '../modal/modal';
 import { IndicationsFields } from '../transfusion-protocol/indications-fields';
 import {
@@ -98,17 +98,10 @@ export const IndividualSelectionComponentModal = ({
           )}
 
           <div className={styles.localGrid}>
-            <label className={styles.wide}>
-              <span>Показания для индивидуального подбора</span>
-              <FormTextarea
-                value={individualSelectionIndications}
-                onChange={(event) =>
-                  onLocalChange({
-                    individualSelectionIndications: event.target.value,
-                  })
-                }
-              />
-            </label>
+            <IndividualSelectionReasonSelect
+              value={individualSelectionIndications}
+              onChange={(value) => onLocalChange({ individualSelectionIndications: value })}
+            />
           </div>
         </fieldset>
       </div>

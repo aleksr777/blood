@@ -1,6 +1,6 @@
 import { visibleProtocolComponentValues } from '../../domain/blood-components';
 import { formatComponentUnitNumber } from './component-unit-number';
-import { formatDonorAntigens } from './donor-model';
+import { formatDonorAntigensForComponent } from './donor-model';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatIndications } from './indications-model';
 import {
@@ -138,7 +138,7 @@ const DonorBlockContents = ({ values, onOpenBlock, part }: ChunkProps) => (
             colSpan={3}
             className="span-3"
             label="Антигены эритроцитов донора"
-            value={formatDonorAntigens(values)}
+            value={formatDonorAntigensForComponent(values)}
           />
         </tr>
       </>

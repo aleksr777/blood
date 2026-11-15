@@ -9,6 +9,7 @@ export type BloodComponentSelection = { group: string; name: string };
 type Props = BloodComponentSelection & {
   inputName?: string;
   fixedGroup?: string;
+  lastSelectedGroup?: string;
   showName?: boolean;
   catalogOptions?: readonly CodedComponent[];
   selectedCode?: string;
@@ -21,6 +22,7 @@ export const BloodComponentSelector = ({
   name,
   inputName = 'componentName',
   fixedGroup,
+  lastSelectedGroup,
   showName = true,
   catalogOptions,
   selectedCode,
@@ -46,7 +48,15 @@ export const BloodComponentSelector = ({
             data-component={value}
             aria-pressed={selectedGroup === value}
             disabled={Boolean(fixedGroup)}
-            onClick={() => onChange({ group: value === selectedGroup ? '' : value, name: '' })}
+            onClick={() =>
+              onChange({
+                group: value === selectedGroup ? '' : value,
+                name:
+                  value === selectedGroup || (!selectedGroup && lastSelectedGroup === value)
+                    ? name
+                    : '',
+              })
+            }
           >
             {label}
           </button>

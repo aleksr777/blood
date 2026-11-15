@@ -84,6 +84,15 @@ it.each(['donor', 'indications'] as const)(
     expect(anemic.matches(':disabled')).toBe(false);
     fireEvent.click(anemic);
     expect(onSave).toHaveBeenLastCalledWith({ indicationRbcAnemicSyndrome: '1' });
+    fireEvent.click(select);
+    expect(select.getAttribute('aria-pressed')).toBe('false');
+    expect(dependent.disabled).toBe(true);
+    expect(name.isConnected).toBe(false);
+    expect(onSave).toHaveBeenLastCalledWith({
+      componentGroup: '',
+      indicationComponent: '',
+      componentName: '',
+    });
   },
 );
 

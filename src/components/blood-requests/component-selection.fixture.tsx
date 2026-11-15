@@ -41,7 +41,7 @@ vi.mock('../scrollbar/custom-scrollbar', () => ({ default: () => null }));
 export const requestKey = 'blood:component-request-direction-draft';
 export const directionKey = 'blood:individual-selection-direction-draft';
 export const nameLabel = 'Наименование компонента донорской крови';
-export const codeLabel = 'Идентификационный код';
+export const codeLabel = 'Идентификационный код (графа 6)';
 const profile = { recipientId: '1', recipientName: 'Тестовый реципиент' };
 const initialGroup = { componentGroup: 'erythrocytes', indicationComponent: 'erythrocytes' };
 export const readDraft = (key: string) => JSON.parse(window.localStorage.getItem(key)!);

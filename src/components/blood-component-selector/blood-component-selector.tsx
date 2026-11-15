@@ -81,7 +81,6 @@ export const BloodComponentSelector = ({
                 category={category}
                 fixedOptions={[...selected.names]}
                 value={name}
-                rememberOnBlur
                 wrapOptions
                 onChange={(nextName) => onChange({ group: selectedGroup, name: nextName })}
               />

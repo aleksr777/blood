@@ -4,7 +4,7 @@ import { BoundedNumberInput } from '../bounded-number-input/bounded-number-input
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { CustomSelectField } from './custom-select-field';
 import { DepartmentField } from './department-field';
-import { getSavedOptionCategory, isSharedSavedOptionCategory } from './saved-field-config';
+import { getSavedOptionCategory } from './saved-field-config';
 import { RecipientField } from './recipient-field';
 import { SavedOptionsField } from './saved-options-field';
 import styles from './protocol-editor.module.css';
@@ -138,7 +138,6 @@ export const ProtocolFieldControl = ({
           name={field.name}
           label={field.label}
           category={category}
-          rememberOnBlur={isSharedSavedOptionCategory(category)}
           value={value}
           onChange={change}
         />

@@ -1,8 +1,5 @@
 import { FormInput, FormTextarea } from '../form-input/form-input';
-import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { useEffect, useState } from 'react';
-import { rememberDepartment } from '../../storage/repositories/departments';
-import { rememberSavedOption } from '../../storage/repositories/saved-options';
 import Modal from '../modal/modal';
 import { DepartmentField } from '../transfusion-protocol/department-field';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
@@ -26,7 +23,6 @@ type Props = {
 };
 
 export const RequestEditorModal = ({ title, fields, values, onChange, onClose }: Props) => {
-  const isolated = useSavedDocumentScope();
   const [draft, setDraft] = useState<Record<string, string>>(() =>
     Object.fromEntries(fields.map(({ name }) => [name, values[name] ?? ''])),
   );
@@ -40,34 +36,8 @@ export const RequestEditorModal = ({ title, fields, values, onChange, onClose }:
     onChange({ [name]: value });
   };
 
-  const handleClose = () => {
-    if (isolated) {
-      onClose();
-      return;
-    }
-    fields.forEach((field) => {
-      const value = draft[field.name]?.trim();
-      if (!value) return;
-
-      if (field.name === 'department') {
-        void rememberDepartment(value).catch((error: unknown) => {
-          console.error('Не удалось сохранить отделение:', error);
-        });
-        return;
-      }
-
-      if (!field.savedOptionsCategory) return;
-
-      void rememberSavedOption(field.savedOptionsCategory, value).catch((error: unknown) => {
-        console.error(`Не удалось сохранить вариант поля ${field.name}:`, error);
-      });
-    });
-
-    onClose();
-  };
-
   return (
-    <Modal title={title} onClose={handleClose} className={styles.modal}>
+    <Modal title={title} onClose={onClose} className={styles.modal}>
       <div className={styles.grid}>
         {fields.map((field) => (
           <label key={field.name} className={field.wide ? styles.wide : undefined}>

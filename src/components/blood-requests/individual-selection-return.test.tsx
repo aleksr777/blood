@@ -102,3 +102,31 @@ it('clears staff after saving while retaining the component, indications and dat
     }),
   );
 });
+
+it('saves and prints the selected indication wording without its catalog code', async () => {
+  const { container } = render(<IndividualSelectionDirection />);
+  fireEvent.click(
+    screen.getByRole('button', { name: /Наименование требуемого компонента:/ }),
+  );
+  const select = screen.getByRole('combobox', {
+    name: 'Показания для индивидуального подбора',
+  });
+  const description = 'Аллоиммунные антитела к эритроцитам';
+  fireEvent.change(select, { target: { value: description } });
+  await waitFor(() =>
+    expect(JSON.parse(window.localStorage.getItem(key)!).individualSelectionIndications).toBe(
+      description,
+    ),
+  );
+  expect(container.querySelector('[data-document-paper]')?.textContent).toContain(description);
+});
+
+it('prints a description instead of a code in older saved direction drafts', () => {
+  window.localStorage.setItem(
+    key,
+    JSON.stringify({ ...working, individualSelectionIndications: '3' }),
+  );
+  const { container } = render(<IndividualSelectionDirection />);
+  const printed = container.querySelector('[data-document-paper]')?.textContent ?? '';
+  expect(printed).toContain('Аллоиммунные антитела к эритроцитам');
+});

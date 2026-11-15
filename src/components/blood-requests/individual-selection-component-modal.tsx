@@ -66,43 +66,49 @@ export const IndividualSelectionComponentModal = ({
           onChange={handleComponentChange}
         />
 
-        <div className={styles.localGrid}>
-          <label className={styles.quantityField}>
-            <span>Количество доз</span>
-            <BoundedIntegerInput
-              name="quantity"
-              min={1}
-              max={99}
-              value={quantity}
-              onChange={(value) => onLocalChange({ quantity: value })}
-            />
-          </label>
-        </div>
+        <fieldset
+          className={styles.dependentFields}
+          disabled={!hasSelectedComponent}
+          data-component-dependent
+        >
+          <div className={styles.localGrid}>
+            <label className={styles.quantityField}>
+              <span>Количество доз</span>
+              <BoundedIntegerInput
+                name="quantity"
+                min={1}
+                max={99}
+                value={quantity}
+                onChange={(value) => onLocalChange({ quantity: value })}
+              />
+            </label>
+          </div>
 
-        {hasSelectedComponent && (
-          <section className={styles.indicationsSection}>
-            <h3 className={styles.sectionTitle}>Показания к трансфузии</h3>
-            <IndicationsFields
-              values={effectiveIndicationValues}
-              showComponentSelector={false}
-              onChange={handleIndicationsChange}
-            />
-          </section>
-        )}
+          {hasSelectedComponent && (
+            <section className={styles.indicationsSection}>
+              <h3 className={styles.sectionTitle}>Показания к трансфузии</h3>
+              <IndicationsFields
+                values={effectiveIndicationValues}
+                showComponentSelector={false}
+                onChange={handleIndicationsChange}
+              />
+            </section>
+          )}
 
-        <div className={styles.localGrid}>
-          <label className={styles.wide}>
-            <span>Показания для индивидуального подбора</span>
-            <FormTextarea
-              value={individualSelectionIndications}
-              onChange={(event) =>
-                onLocalChange({
-                  individualSelectionIndications: event.target.value,
-                })
-              }
-            />
-          </label>
-        </div>
+          <div className={styles.localGrid}>
+            <label className={styles.wide}>
+              <span>Показания для индивидуального подбора</span>
+              <FormTextarea
+                value={individualSelectionIndications}
+                onChange={(event) =>
+                  onLocalChange({
+                    individualSelectionIndications: event.target.value,
+                  })
+                }
+              />
+            </label>
+          </div>
+        </fieldset>
       </div>
     </Modal>
   );

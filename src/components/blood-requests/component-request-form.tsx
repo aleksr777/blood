@@ -38,7 +38,6 @@ type Props = {
   readOnly: boolean;
   onEdit: (section: Section) => void;
 };
-
 const DISPLAY_CARE_FORM: Record<string, string> = {
   planned: 'плановая трансфузия',
   emergency: 'экстренная или неотложная',
@@ -76,7 +75,6 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
 
   const headerEdit = (index: number) =>
     index < 10 ? edit(index < 5 ? 'recipient' : 'component') : {};
-
   const recipientBirthDate =
     examination.recipientBirthDate || values.recipientProfileSnapshot.recipientBirthDate;
   const [legacyAbo = '', legacyRh = ''] = values.recipientAboRh.split(' ');

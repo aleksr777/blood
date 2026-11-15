@@ -5,7 +5,7 @@ import {
   BloodComponentSelector,
   type BloodComponentSelection,
 } from '../blood-component-selector/blood-component-selector';
-import { BLOOD_COMPONENTS, inferBloodComponentGroup } from '../../domain/blood-components';
+import { BLOOD_COMPONENTS, selectedBloodComponentGroup } from '../../domain/blood-components';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { BoundedIntegerInput } from '../bounded-integer-input/bounded-integer-input';
 import styles from './individual-selection-component-modal.module.css';
@@ -29,10 +29,7 @@ export const IndividualSelectionComponentModal = ({
   onIndicationsChange,
   onClose,
 }: Props) => {
-  const component =
-    indicationValues.componentGroup ||
-    indicationValues.indicationComponent ||
-    inferBloodComponentGroup(requiredComponent);
+  const component = selectedBloodComponentGroup(indicationValues, requiredComponent);
   const effectiveIndicationValues = {
     ...indicationValues,
     componentGroup: component,
@@ -51,7 +48,11 @@ export const IndividualSelectionComponentModal = ({
       group !== indicationValues.componentGroup ||
       group !== indicationValues.indicationComponent
     ) {
-      handleIndicationsChange({ componentGroup: group, indicationComponent: group });
+      handleIndicationsChange({
+        componentGroup: group,
+        indicationComponent: group,
+        lastSelectedComponentGroup: group || component,
+      });
     }
     onLocalChange({ requiredComponent: name });
   };
@@ -61,6 +62,7 @@ export const IndividualSelectionComponentModal = ({
       <div className={styles.root}>
         <BloodComponentSelector
           group={component ?? ''}
+          lastSelectedGroup={indicationValues.lastSelectedComponentGroup}
           name={requiredComponent}
           inputName="requiredComponent"
           onChange={handleComponentChange}

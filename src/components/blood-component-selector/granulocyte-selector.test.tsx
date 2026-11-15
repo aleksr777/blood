@@ -69,9 +69,11 @@ it('shows code-prefixed names in the request selector while keeping codes separa
     />,
   );
   const input = screen.getByRole('textbox', { name: 'Идентификационный код' });
-  fireEvent.click(screen.getByRole('button', {
-    name: 'Показать сохранённые варианты: Идентификационный код',
-  }));
+  fireEvent.click(
+    screen.getByRole('button', {
+      name: 'Показать сохранённые варианты: Идентификационный код',
+    }),
+  );
   fireEvent.click(screen.getByRole('button', { name: `ГКО. ${firstName}` }));
   expect(onCodedChange).toHaveBeenCalledWith({ code: 'ГКО', name: firstName });
   expect(input).toBeTruthy();

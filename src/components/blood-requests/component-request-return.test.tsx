@@ -19,6 +19,11 @@ vi.mock('../../storage/sqlite/database-client', () => ({
   },
 }));
 const key = 'blood:component-request-direction-draft';
+const openCodes = () =>
+  fireEvent.click(screen.getByRole('button', {
+    name: 'Показать сохранённые варианты: Идентификационный код',
+  }));
+const chooseCode = (name: string) => fireEvent.click(screen.getByRole('button', { name }));
 const profile = {
   recipientId: '1',
   recipientName: 'Рабочий реципиент',
@@ -157,13 +162,9 @@ it('сохраняет новые графы приложения № 17 чер�
   const dialog = within(screen.getByRole('dialog'));
   expect(dialog.queryByLabelText('Идентификационный код компонента (графа 6)')).toBeNull();
   const componentInput = dialog.getByRole('textbox', { name: 'Идентификационный код' });
-  fireEvent.click(dialog.getByRole('button', {
-    name: 'Показать сохранённые варианты: Идентификационный код',
-  }));
+  openCodes();
   expect(dialog.queryByRole('button', { name: /КТ-ЛП\./ })).toBeNull();
-  fireEvent.click(dialog.getByRole('button', {
-    name: 'ЭВ-Л. Эритроцитная взвесь лейкоредуцированная',
-  }));
+  chooseCode('ЭВ-Л. Эритроцитная взвесь лейкоредуцированная');
   expect((componentInput as HTMLInputElement).value).toBe(
     'ЭВ-Л. Эритроцитная взвесь лейкоредуцированная',
   );
@@ -203,13 +204,9 @@ it('при смене группы показывает только её код
     name: 'Идентификационный код',
   }) as HTMLInputElement;
   expect(componentInput.value).toBe('');
-  fireEvent.click(dialog.getByRole('button', {
-    name: 'Показать сохранённые варианты: Идентификационный код',
-  }));
+  openCodes();
   expect(dialog.queryByRole('button', { name: /ЭВ-Л\./ })).toBeNull();
-  fireEvent.click(dialog.getByRole('button', {
-    name: 'КРИО-Л. Криопреципитат лиофилизированный',
-  }));
+  chooseCode('КРИО-Л. Криопреципитат лиофилизированный');
   expect(componentInput.value).toBe('КРИО-Л. Криопреципитат лиофилизированный');
   expect(
     (dialog.getByLabelText('Код показания к трансфузии (графа 8)') as HTMLSelectElement).value,

@@ -46,7 +46,9 @@ it('shows custom entries above immutable coded options and populates both fields
   fireEvent.click(custom);
   expect((input as HTMLInputElement).value).toBe('МОЙ-1. Пользовательский компонент');
   expect(screen.getByLabelText('Код компонента').textContent).toBe('МОЙ-1');
-  expect(screen.getByLabelText('Название компонента').textContent).toBe('Пользовательский компонент');
+  expect(screen.getByLabelText('Название компонента').textContent).toBe(
+    'Пользовательский компонент',
+  );
   fireEvent.change(input, { target: { value: 'МОЙ-2. Новый вариант' } });
   expect(screen.getByLabelText('Код компонента').textContent).toBe('МОЙ-2');
   expect(screen.getByLabelText('Название компонента').textContent).toBe('Новый вариант');

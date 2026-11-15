@@ -112,7 +112,7 @@ it('блокирует количество и показания в напра�
   const dependent = dependentFields();
   expect(dependent.disabled).toBe(true);
   const quantity = screen.getByRole('spinbutton', { name: 'Количество доз' });
-  const indication = screen.getByRole('textbox', {
+  const indication = screen.getByRole('combobox', {
     name: 'Показания для индивидуального подбора',
   });
   expect(quantity.matches(':disabled')).toBe(true);

@@ -68,6 +68,7 @@ import { RequestEditorModal, type RequestEditorField } from './request-editor-mo
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
 import { normalizeDirectionIndications } from './direction-indications';
+import { persistRequestOptions } from './request-saved-options';
 import {
   getIndividualSelectionClearValues,
   hasIndividualSelectionValuesToClear,
@@ -551,6 +552,7 @@ export const IndividualSelectionDirection = () => {
           kind: 'individual-selection-direction',
           values: { ...draftRef.current },
         });
+        await persistRequestOptions(draftRef.current, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
         documentState.open(record, draftFromRecord(record.values), 'edit');
         documentState.setWorkingValues(clearIndividualSelectionStaff);
         setEditor(null);
@@ -586,6 +588,7 @@ export const IndividualSelectionDirection = () => {
         kind: 'individual-selection-direction',
         values: { ...draftToSave },
       });
+      await persistRequestOptions(draftToSave, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);

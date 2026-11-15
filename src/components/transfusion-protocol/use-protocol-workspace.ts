@@ -23,6 +23,7 @@ import { getComponentUnitNumberWarning } from './component-unit-number';
 import { getMissingProtocolFields, getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { getHemaconDateOrderWarning } from '../../domain/hemacon-dates';
 import { getIndicationComponent } from './indications-model';
+import { persistProtocolOptions } from './saved-field-config';
 import {
   getExpiredReagentWarnings,
   getHemaconExpirationWarning,
@@ -243,6 +244,7 @@ export const useProtocolWorkspace = () => {
       try {
         const savedValues = { ...values, recipientId: String(document.record.recipientId) };
         const record = await updateProtocolRecord(document.record.id, savedValues);
+        await persistProtocolOptions(savedValues);
         document.open(record, record.values, 'edit');
         document.setWorkingValues(cleanProtocolDraft);
         setActiveBlock(null);
@@ -262,6 +264,7 @@ export const useProtocolWorkspace = () => {
 
     try {
       const record = await saveProtocolRecord(values);
+      await persistProtocolOptions(values);
       setRecordId(record.id);
       const savedValues = { ...values, recipientId: String(record.recipientId) };
       setValues(savedValues);

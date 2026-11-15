@@ -44,6 +44,7 @@ import { ComponentRequestRecipientExamination } from './component-request-recipi
 import { getIndicationComponent } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { ComponentRequestDetailsModal } from './component-request-details-modal';
+import { persistRequestOptions } from './request-saved-options';
 import { ComponentRequestForm } from './component-request-form';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
@@ -538,6 +539,7 @@ export const ComponentRequest = () => {
           kind: 'component-request',
           values: { ...draftRef.current },
         });
+        await persistRequestOptions(draftRef.current, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
         documentState.open(record, draftFromRecord(record.values), 'edit');
         documentState.setWorkingValues(cleanComponentRequestDraft);
         setEditor(null);
@@ -571,6 +573,7 @@ export const ComponentRequest = () => {
         kind: 'component-request',
         values: { ...draftToSave },
       });
+      await persistRequestOptions(draftToSave, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);

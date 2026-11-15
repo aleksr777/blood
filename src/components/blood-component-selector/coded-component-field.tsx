@@ -16,14 +16,7 @@ type Props = {
   onChange: (component: CodedComponent) => void;
 };
 
-export const CodedComponentField = ({
-  group,
-  inputName,
-  code,
-  name,
-  options,
-  onChange,
-}: Props) => {
+export const CodedComponentField = ({ group, inputName, code, name, options, onChange }: Props) => {
   const label = 'Идентификационный код';
   return (
     <>

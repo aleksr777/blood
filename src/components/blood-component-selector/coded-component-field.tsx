@@ -17,7 +17,7 @@ type Props = {
 };
 
 export const CodedComponentField = ({ group, inputName, code, name, options, onChange }: Props) => {
-  const label = 'Идентификационный код';
+  const label = 'Идентификационный код (графа 6)';
   return (
     <>
       <div className={styles.label}>{label}</div>

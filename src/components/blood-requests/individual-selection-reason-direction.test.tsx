@@ -1,8 +1,17 @@
 // @vitest-environment jsdom
+import type { ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { adoptCurrentRecipientFromValues } from '../../storage/repositories/current-recipient';
 import { IndividualSelectionDirection } from './individual-selection-direction';
+
+vi.mock('../modal/modal', () => ({
+  default: ({ title, children }: { title: string; children: ReactNode }) => (
+    <section role="dialog" aria-label={title}>
+      {children}
+    </section>
+  ),
+}));
 
 vi.mock('../../storage/sqlite/database-client', () => ({
   database: {

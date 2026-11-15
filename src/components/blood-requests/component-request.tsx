@@ -492,7 +492,7 @@ export const ComponentRequest = () => {
       await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
-      console.error('Не удалось выбрать реципиента для направления:', error);
+      console.error('Не удалось выбрать реципиента для заявки:', error);
       return false;
     }
   };

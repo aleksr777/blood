@@ -77,3 +77,6 @@ export const formatRequestDateTime = (value: string) => {
 
 export const formatRequestedQuantity = (units: string, volumeMl: string) =>
   [units ? `${units} ед.` : '', volumeMl ? `≈ ${volumeMl} мл` : ''].filter(Boolean).join(', ');
+
+export const individualSelectionReasonLabel = (value: string) =>
+  INDIVIDUAL_SELECTION_INDICATIONS.find(({ code }) => code === value)?.label ?? value;

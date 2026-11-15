@@ -109,5 +109,5 @@ export default tseslint.config(
     rules: {
       'max-lines': ['warn', { max }],
     },
-  }))
+  })),
 );

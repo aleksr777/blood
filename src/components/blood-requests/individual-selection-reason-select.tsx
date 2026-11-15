@@ -1,8 +1,8 @@
-import { INDIVIDUAL_SELECTION_INDICATIONS } from './component-request-447n';
+import {
+  INDIVIDUAL_SELECTION_INDICATIONS,
+  individualSelectionReasonLabel,
+} from './component-request-447n';
 import styles from './individual-selection-component-modal.module.css';
-
-export const individualSelectionReasonLabel = (value: string) =>
-  INDIVIDUAL_SELECTION_INDICATIONS.find(({ code }) => code === value)?.label ?? value;
 
 type Props = {
   value: string;

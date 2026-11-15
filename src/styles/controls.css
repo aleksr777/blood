@@ -129,7 +129,6 @@
     cursor: default;
   }
 
-
   /* Chromium/WebKit: keep native select semantics while constraining its picker. */
   @supports (appearance: base-select) {
     select:not([multiple]):not([size]),

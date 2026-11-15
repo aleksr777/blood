@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
-import { INDIVIDUAL_SELECTION_INDICATIONS } from './component-request-447n';
 import {
-  IndividualSelectionReasonSelect,
+  INDIVIDUAL_SELECTION_INDICATIONS,
   individualSelectionReasonLabel,
-} from './individual-selection-reason-select';
+} from './component-request-447n';
+import { IndividualSelectionReasonSelect } from './individual-selection-reason-select';
 
 afterEach(cleanup);
 

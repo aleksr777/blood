@@ -52,7 +52,7 @@ import {
 } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
-import { individualSelectionReasonLabel } from './individual-selection-reason-select';
+import { individualSelectionReasonLabel } from './component-request-447n';
 import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';

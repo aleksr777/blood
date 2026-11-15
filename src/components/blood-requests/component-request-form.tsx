@@ -100,7 +100,6 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
           кабинет трансфузиологии, отделение трансфузиологии (отделение переливания крови) для
           клинического использования
         </div>
-
         <div
           {...edit('organization')}
           className={`${styles.metadataSection} ${styles.editable} ${readOnly ? styles.readOnly : ''}`}

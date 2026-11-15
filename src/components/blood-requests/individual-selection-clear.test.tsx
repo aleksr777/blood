@@ -6,10 +6,6 @@ import {
   adoptCurrentRecipientFromValues,
   readCurrentRecipient,
 } from '../../storage/repositories/current-recipient';
-import {
-  writeCurrentIndications,
-  writeCurrentIndividualSelectionIndications,
-} from '../../storage/repositories/current-indications';
 import { IndividualSelectionDirection } from './individual-selection-direction';
 
 vi.mock('../../storage/sqlite/database-client', () => ({
@@ -51,22 +47,14 @@ it('disables clearing for recipient data and the default erythrocyte group alone
   expect(saveButton().disabled).toBe(true);
 });
 
-it.each(['transfusion', 'individual-selection'])(
-  'does not offer clearing only shared %s indications',
-  async (kind) => {
-    if (kind === 'transfusion')
-      writeCurrentIndications(1, 'erythrocytes', { indicationRbcOngoingBleeding: '1' });
-    else writeCurrentIndividualSelectionIndications(1, 'Показания к индивидуальному подбору');
-    await open();
-    await waitFor(() => expect(saveButton().disabled).toBe(false));
-    expect(clearButton().disabled).toBe(true);
-  },
-);
+it('ignores obsolete shared indications and keeps the blank form empty', async () => {
+  window.localStorage.setItem('blood:current-indications', JSON.stringify({ recipientId: 1 }));
+  await open();
+  expect(clearButton().disabled).toBe(true);
+  expect(saveButton().disabled).toBe(true);
+});
 
-it('clears local fields once, preserves shared data, and disables the button after clearing and reopening', async () => {
-  writeCurrentIndications(1, 'erythrocytes', { indicationRbcOngoingBleeding: '1' });
-  writeCurrentIndividualSelectionIndications(1, 'Показания к подбору');
-  const shared = window.localStorage.getItem('blood:current-indications');
+it('clears its own fields and indications while preserving recipient data', async () => {
   const recipient = readCurrentRecipient();
   await open({
     requiredComponent: 'Отмытые эритроциты',
@@ -75,6 +63,12 @@ it('clears local fields once, preserves shared data, and disables the button aft
     directionDate: '2026-10-30',
     doctorName: 'Врач',
     doctorPhone: '123',
+    individualSelectionIndications: 'Показания к подбору',
+    indicationValues: {
+      componentGroup: 'erythrocytes',
+      indicationComponent: 'erythrocytes',
+      indicationRbcOngoingBleeding: '1',
+    },
   });
   expect(clearButton().disabled).toBe(false);
   fireEvent.click(clearButton());
@@ -92,13 +86,12 @@ it('clears local fields once, preserves shared data, and disables the button aft
     recipientName: profile.recipientName,
     diagnosis: profile.diagnosis,
     medicalRecordNumber: profile.medicalRecordNumber,
-    individualSelectionIndications: 'Показания к подбору',
-    indicationValues: { componentGroup: 'erythrocytes', indicationRbcOngoingBleeding: '1' },
+    individualSelectionIndications: '',
+    indicationValues: { componentGroup: 'erythrocytes' },
   });
   expect(readCurrentRecipient()).toEqual(recipient);
-  expect(window.localStorage.getItem('blood:current-indications')).toBe(shared);
   expect(clearButton().disabled).toBe(true);
-  expect(saveButton().disabled).toBe(false);
+  expect(saveButton().disabled).toBe(true);
   expect(database.saveBloodRequestRecord).not.toHaveBeenCalled();
   cleanup();
   render(<IndividualSelectionDirection />);

@@ -1,4 +1,3 @@
-import { resetCurrentIndications } from './current-indications';
 import { savePreviousRequestDrafts } from './request-drafts';
 import { runRecipientOperation } from './recipient-operation-queue';
 import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
@@ -513,7 +512,6 @@ const switchRecipient = async (
     }),
   ]);
 
-  if (storedRecipient?.id !== recipient.id) resetCurrentIndications(recipient.id);
   writeCurrentRecipient(recipient);
 
   return {

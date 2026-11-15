@@ -1,4 +1,3 @@
-import { clearCurrentIndicationsForRecipient } from './current-indications';
 import { clearCurrentRecipientIfMatches, readCurrentRecipient } from './current-recipient';
 import { loadProtocolDraft, saveProtocolDraft } from './protocol-draft';
 import { loadRegistrationDraft, saveRegistrationDraft } from './registration-draft';
@@ -101,7 +100,6 @@ const clearRecipientFromCurrentForms = async (recipientId: number) => {
     'individual-selection-direction',
   );
 
-  clearCurrentIndicationsForRecipient(recipientId);
   clearCurrentRecipientIfMatches(recipientId);
 
   return {

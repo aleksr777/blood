@@ -5,14 +5,8 @@ import {
   readCurrentRecipient,
   recipientProfileValuesForForms,
 } from '../../storage/repositories/current-recipient';
-import {
-  hasStoredCurrentIndications,
-  readCurrentIndications,
-  writeCurrentIndications,
-} from '../../storage/repositories/current-indications';
 import { loadProtocolDraft, saveProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
-import { getIndicationComponent } from './indications-model';
 import { reagentDefaultsForNewBlank } from './reagent-defaults';
 import type { ProtocolValues } from './protocol-types';
 
@@ -72,19 +66,7 @@ export const useProtocolDraft = ({
             const baseValues = recipientChanged
               ? clearRecipientLinkedValues(draftValues, previousRecipientId)
               : draftValues;
-            const mergedValues = mergeRecipientProfileValues(baseValues, currentRecipient);
-            const component = getIndicationComponent(mergedValues);
-
-            if (component) {
-              mergedValues.indicationComponent = component;
-              if (hasStoredCurrentIndications(currentRecipient.id, component)) {
-                Object.assign(mergedValues, readCurrentIndications(currentRecipient.id, component));
-              } else if (!recipientChanged) {
-                writeCurrentIndications(currentRecipient.id, component, mergedValues);
-              }
-            }
-
-            setValues(mergedValues);
+            setValues(mergeRecipientProfileValues(baseValues, currentRecipient));
           }
           setRecordId(null);
           setLastInputAt(draft.updatedAt);

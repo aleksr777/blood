@@ -5,10 +5,6 @@ import {
   switchCurrentRecipient,
   syncCurrentRecipientProfile,
 } from '../../storage/repositories/current-recipient';
-import {
-  readCurrentIndications,
-  writeCurrentIndications,
-} from '../../storage/repositories/current-indications';
 import { clearProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedValues } from '../../storage/repositories/recipient-linked-values';
 import {
@@ -22,7 +18,6 @@ import { getBloodGroupMismatch } from './blood-group-validation';
 import { getComponentUnitNumberWarning } from './component-unit-number';
 import { getMissingProtocolFields, getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
 import { getHemaconDateOrderWarning } from '../../domain/hemacon-dates';
-import { getIndicationComponent } from './indications-model';
 import { persistProtocolOptions } from './saved-field-config';
 import {
   getExpiredReagentWarnings,
@@ -161,31 +156,13 @@ export const useProtocolWorkspace = () => {
       setRecordId(null);
     }
 
-    const selectedComponent = nextValues.componentGroup || nextValues.indicationComponent || '';
-    const currentComponent = getIndicationComponent(values);
-    const currentRecipient = readCurrentRecipient();
-    const componentChanged = Boolean(selectedComponent) && selectedComponent !== currentComponent;
-    const sharedIndications =
-      componentChanged && currentRecipient && Number(values.recipientId) === currentRecipient.id
-        ? readCurrentIndications(currentRecipient.id, selectedComponent)
-        : {};
-    const appliedValues = {
-      ...sharedIndications,
-      ...nextValues,
-    };
-
-    const merged = { ...values, ...appliedValues };
-    if (hasReagentDefaultUpdate(appliedValues)) {
+    const merged = { ...values, ...nextValues };
+    if (hasReagentDefaultUpdate(nextValues)) {
       saveReagentDefaults(merged);
     }
-    setValues((current) => ({ ...current, ...appliedValues }));
+    setValues((current) => ({ ...current, ...nextValues }));
 
-    const activeComponent = getIndicationComponent(merged);
-    if (activeComponent && currentRecipient && Number(merged.recipientId) === currentRecipient.id) {
-      writeCurrentIndications(currentRecipient.id, activeComponent, merged);
-    }
-
-    void syncCurrentRecipientProfile(appliedValues, {
+    void syncCurrentRecipientProfile(nextValues, {
       kind: 'protocol',
       values: merged,
       recordId: editingSavedRecord ? null : recordId,

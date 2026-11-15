@@ -18,16 +18,6 @@ import {
   updateCurrentRecipientProfile,
   type CurrentRecipient,
 } from '../../storage/repositories/current-recipient';
-import {
-  currentIndicationsForComponent,
-  hasStoredCurrentIndications,
-  hasStoredCurrentIndividualSelectionIndications,
-  readCurrentIndications,
-  readCurrentIndividualSelectionIndications,
-  writeCurrentIndications,
-  writeCurrentIndividualSelectionIndications,
-} from '../../storage/repositories/current-indications';
-import { loadProtocolDraft } from '../../storage/repositories/protocol-draft';
 import { clearRecipientLinkedRequestDraft } from '../../storage/repositories/recipient-deletion';
 import {
   saveBloodRequestRecord,
@@ -41,7 +31,6 @@ import { formatRecipientAge } from '../transfusion-protocol/recipient-demographi
 import { formatObstetricHistory } from '../transfusion-protocol/recipient-history-model';
 import { formatRecipientAntigens } from '../transfusion-protocol/recipient-examination-model';
 import { ComponentRequestRecipientExamination } from './component-request-recipient-examination';
-import { getIndicationComponent } from '../transfusion-protocol/indications-model';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { ComponentRequestDetailsModal } from './component-request-details-modal';
 import { persistRequestOptions } from './request-saved-options';
@@ -186,12 +175,7 @@ const currentAutoValues = async (
 ): Promise<Partial<Record<RequestAutoField, string>>> => {
   if (!recipient) return {};
 
-  const protocolDraft = await loadProtocolDraft();
-  const sameRecipient = Number(protocolDraft.values.recipientId) === recipient.id;
-  const currentProtocolValues = sameRecipient ? protocolDraft.values : {};
-
   const values: ProtocolValues = {
-    ...currentProtocolValues,
     ...recipient.profile,
     recipientId: String(recipient.id),
     recipientName: recipient.fullName,
@@ -293,11 +277,6 @@ export const ComponentRequest = () => {
       setCurrentRecipient(recipient);
 
       const autoValues = await currentAutoValues(recipient);
-      const protocolDraft = recipient ? await loadProtocolDraft() : null;
-      const currentProtocolValues =
-        recipient && protocolDraft && Number(protocolDraft.values.recipientId) === recipient.id
-          ? protocolDraft.values
-          : {};
 
       if (hasSavedDocument() || refreshVersion !== refreshVersionRef.current) return;
       const current = baseDraft ?? draftRef.current;
@@ -315,62 +294,7 @@ export const ComponentRequest = () => {
               doctorName: current.doctorName,
             }
           : current;
-      let next = mergeAutoValues(base, recipient, autoValues);
-      if (recipient) {
-        if (hasStoredCurrentIndividualSelectionIndications(recipient.id)) {
-          next = {
-            ...next,
-            individualSelectionIndications: readCurrentIndividualSelectionIndications(recipient.id),
-          };
-        } else if (recipientChanged) {
-          next = {
-            ...next,
-            individualSelectionIndications: '',
-          };
-        } else if (!hasSavedDocument() && next.individualSelectionIndications.trim()) {
-          writeCurrentIndividualSelectionIndications(
-            recipient.id,
-            next.individualSelectionIndications,
-          );
-        }
-
-        const component = getIndicationComponent(next.indicationValues);
-        if (component) {
-          if (hasStoredCurrentIndications(recipient.id, component)) {
-            next = {
-              ...next,
-              indicationValues: {
-                ...(recipientChanged ? {} : next.indicationValues),
-                ...readCurrentIndications(recipient.id, component),
-                indicationComponent: component,
-              },
-            };
-          } else {
-            const protocolIndications = currentIndicationsForComponent(
-              currentProtocolValues,
-              component,
-            );
-            if (Object.values(protocolIndications).some((value) => value.trim())) {
-              writeCurrentIndications(recipient.id, component, protocolIndications);
-              next = {
-                ...next,
-                indicationValues: {
-                  ...(recipientChanged ? {} : next.indicationValues),
-                  ...protocolIndications,
-                  indicationComponent: component,
-                },
-              };
-            } else if (!hasSavedDocument() && !recipientChanged) {
-              writeCurrentIndications(recipient.id, component, next.indicationValues);
-            } else if (recipientChanged) {
-              next = {
-                ...next,
-                indicationValues: { indicationComponent: component },
-              };
-            }
-          }
-        }
-      }
+      const next = mergeAutoValues(base, recipient, autoValues);
 
       if (
         hasSavedDocument() ||
@@ -459,13 +383,6 @@ export const ComponentRequest = () => {
       void updateExamination({ department: changes.department });
     }
 
-    if (currentRecipient && changes.individualSelectionIndications !== undefined) {
-      writeCurrentIndividualSelectionIndications(
-        currentRecipient.id,
-        changes.individualSelectionIndications,
-      );
-    }
-
     setDraft((current) => {
       const next = { ...current };
 
@@ -484,23 +401,10 @@ export const ComponentRequest = () => {
     if (documentState.isReadOnly()) return;
 
     setDraft((current) => {
-      const currentComponent = getIndicationComponent(current.indicationValues);
-      const component = changes.indicationComponent || currentComponent;
-      const componentChanged =
-        Boolean(changes.indicationComponent) && changes.indicationComponent !== currentComponent;
-      const sharedIndications =
-        !documentState.isActive() && currentRecipient && componentChanged && component
-          ? readCurrentIndications(currentRecipient.id, component)
-          : {};
       const indicationValues = {
         ...current.indicationValues,
-        ...sharedIndications,
         ...changes,
       };
-
-      if (!documentState.isActive() && currentRecipient && component) {
-        writeCurrentIndications(currentRecipient.id, component, indicationValues);
-      }
 
       const next = {
         ...current,
@@ -516,13 +420,7 @@ export const ComponentRequest = () => {
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
     const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
-    setDraft({
-      ...next,
-      individualSelectionIndications:
-        recipient && hasStoredCurrentIndividualSelectionIndications(recipient.id)
-          ? readCurrentIndividualSelectionIndications(recipient.id)
-          : '',
-    });
+    setDraft(next);
     setStatus('');
   };
 

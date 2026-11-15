@@ -3,11 +3,6 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { GRANULOCYTE_NEUTROPHIL_INDICATION } from '../../domain/granulocyte-indications';
 import { INDICATION_FIELDS_BY_COMPONENT } from '../../storage/indication-fields';
-import {
-  currentIndicationsForComponent,
-  readCurrentIndications,
-  writeCurrentIndications,
-} from '../../storage/repositories/current-indications';
 import { getProtocolBlockConfig } from './editor-config';
 import { GranulocyteIndications } from './indication-granulocyte-fields';
 import { formatIndications } from './indications-model';
@@ -55,28 +50,9 @@ it('expands the other-reason textarea and prints both indications in order', () 
   );
 });
 
-it('persists granulocyte fields independently of erythrocyte indications', () => {
+it('includes granulocyte fields in the protocol editor', () => {
   const names = getProtocolBlockConfig('donor').fields.map(({ name }) => name);
   for (const field of INDICATION_FIELDS_BY_COMPONENT.granulocytes) {
     expect(names).toContain(field);
   }
-  const values = {
-    indicationGranulocyteNeutrophilsLow: '1',
-    indicationGranulocyteOther: '1',
-    indicationGranulocyteOtherText: 'Сохранённый текст',
-    indicationRbcHemicHypoxia: '1',
-  };
-  expect(currentIndicationsForComponent(values, 'granulocytes')).toEqual({
-    indicationGranulocyteNeutrophilsLow: '1',
-    indicationGranulocyteOther: '1',
-    indicationGranulocyteOtherText: 'Сохранённый текст',
-  });
-  writeCurrentIndications(17, 'granulocytes', values);
-  expect(readCurrentIndications(17, 'granulocytes')).toEqual(
-    expect.objectContaining({
-      indicationGranulocyteNeutrophilsLow: '1',
-      indicationGranulocyteOther: '1',
-      indicationGranulocyteOtherText: 'Сохранённый текст',
-    }),
-  );
 });

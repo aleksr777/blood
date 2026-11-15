@@ -34,7 +34,7 @@ it('does not restore another document selection from a legacy shared indication 
   expect(
     (screen.getByRole('checkbox', { name: 'Признаки гемической гипоксии' }) as HTMLInputElement)
       .checked,
-  ).toBe(true);
+  ).toBe(false);
   closeEditor();
   await navigate('Заявка в трансфузиологический кабинет', 'component-request');
   openRequest();

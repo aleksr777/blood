@@ -102,7 +102,6 @@ it('retains a legacy request name when its missing group is inferred and selecte
       quantity="2"
       individualSelectionIndications=""
       indicationValues={{}}
-      showRequestOptions
       onLocalChange={onLocalChange}
       onIndicationsChange={onIndicationsChange}
       onClose={() => undefined}

@@ -67,7 +67,6 @@ it('persists granulocyte fields independently of erythrocyte indications', () =>
     indicationRbcHemicHypoxia: '1',
   };
   expect(currentIndicationsForComponent(values, 'granulocytes')).toEqual({
-    indicationComponent: 'granulocytes',
     indicationGranulocyteNeutrophilsLow: '1',
     indicationGranulocyteOther: '1',
     indicationGranulocyteOtherText: 'Сохранённый текст',

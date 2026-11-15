@@ -14,7 +14,6 @@ const legacyLineBaselines = {
   'src/components/blood-requests/component-request-form.tsx': 229,
   'src/components/blood-requests/component-request-return.test.tsx': 293,
   'src/components/blood-requests/component-request.tsx': 858,
-  'src/components/blood-requests/individual-selection-component-modal.tsx': 276,
   'src/components/blood-requests/individual-selection-direction.tsx': 1136,
   'src/components/modal/use-modal-auto-height.ts': 175,
   'src/components/saved-document/working-form-cleanup.test.ts': 129,

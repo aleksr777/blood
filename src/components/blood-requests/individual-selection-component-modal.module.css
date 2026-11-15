@@ -20,25 +20,6 @@
   max-width: 100%;
 }
 
-.bloodGroupGrid {
-  composes: ui-form-grid from global;
-}
-
-.optionGroup {
-  composes: ui-fieldset from global;
-}
-
-.radioOptions {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.resetSelectionButton {
-  composes: ui-text-button from global;
-  width: fit-content;
-  margin-top: 0.65rem;
-}
-
 .indicationsSection {
   composes: ui-form-section from global;
 }
@@ -48,8 +29,7 @@
 }
 
 @media (max-width: 680px) {
-  .localGrid,
-  .bloodGroupGrid {
+  .localGrid {
     grid-template-columns: 1fr;
   }
 

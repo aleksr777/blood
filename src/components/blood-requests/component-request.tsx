@@ -342,6 +342,7 @@ export const ComponentRequest = () => {
               indicationValues: {
                 ...(recipientChanged ? {} : next.indicationValues),
                 ...readCurrentIndications(recipient.id, component),
+                indicationComponent: component,
               },
             };
           } else {
@@ -349,17 +350,14 @@ export const ComponentRequest = () => {
               currentProtocolValues,
               component,
             );
-            const hasProtocolIndications = Object.entries(protocolIndications).some(
-              ([key, value]) => key !== 'indicationComponent' && value.trim() !== '',
-            );
-
-            if (hasProtocolIndications) {
+            if (Object.values(protocolIndications).some((value) => value.trim())) {
               writeCurrentIndications(recipient.id, component, protocolIndications);
               next = {
                 ...next,
                 indicationValues: {
                   ...(recipientChanged ? {} : next.indicationValues),
                   ...protocolIndications,
+                  indicationComponent: component,
                 },
               };
             } else if (!hasSavedDocument() && !recipientChanged) {

@@ -363,11 +363,7 @@ export const IndividualSelectionDirection = () => {
             currentProtocolValues,
             component,
           );
-          const hasProtocolIndications = Object.entries(protocolIndications).some(
-            ([key, value]) => key !== 'indicationComponent' && value.trim() !== '',
-          );
-
-          if (hasProtocolIndications) {
+          if (Object.values(protocolIndications).some((value) => value.trim())) {
             writeCurrentIndications(recipient.id, component, protocolIndications);
             next = {
               ...next,

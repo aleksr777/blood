@@ -10,12 +10,17 @@ type StoredState = {
   individualSelectionIndicationsSet: boolean;
 };
 
-const componentPrefix = (component: string) => {
-  if (component === 'erythrocytes') return 'indicationRbc';
-  if (component === 'plasma-cryo') return 'indicationPlasma';
-  if (component === 'platelets') return 'indicationPlatelet';
-  if (component === 'granulocytes') return 'indicationGranulocyte';
-  return '';
+// A component selection belongs to its document. The shared recipient cache
+// contains only indication fields, even when reading data written by older versions.
+export const currentIndicationsForComponent = (
+  values: ProtocolValuesRecord,
+  component: string,
+): ProtocolValuesRecord => {
+  const fields = INDICATION_FIELDS_BY_COMPONENT[component];
+  if (!Array.isArray(fields)) return {};
+  return Object.fromEntries(
+    fields.flatMap((field) => (typeof values[field] === 'string' ? [[field, values[field]]] : [])),
+  );
 };
 
 const readState = (): StoredState | null => {
@@ -38,11 +43,7 @@ const readState = (): StoredState | null => {
       Object.entries(parsed.byComponent).map(([component, values]) => [
         component,
         values && typeof values === 'object' && !Array.isArray(values)
-          ? Object.fromEntries(
-              Object.entries(values).filter(
-                (entry): entry is [string, string] => typeof entry[1] === 'string',
-              ),
-            )
+          ? currentIndicationsForComponent(values, component)
           : {},
       ]),
     );
@@ -70,20 +71,6 @@ const writeState = (state: StoredState) => {
   }
 };
 
-export const currentIndicationsForComponent = (
-  values: ProtocolValuesRecord,
-  component: string,
-): ProtocolValuesRecord => {
-  const prefix = componentPrefix(component);
-  if (!prefix) return {};
-  return {
-    indicationComponent: component,
-    ...Object.fromEntries(
-      Object.entries(values).filter(([key]) => key === 'indications' || key.startsWith(prefix)),
-    ),
-  };
-};
-
 export const hasStoredCurrentIndications = (recipientId: number, component: string) => {
   const state = readState();
   return Boolean(state && state.recipientId === recipientId && state.byComponent[component]);
@@ -94,16 +81,15 @@ export const readCurrentIndications = (
   component: string,
 ): ProtocolValuesRecord => {
   const state = readState();
-  const emptyValues = Object.fromEntries(
-    (INDICATION_FIELDS_BY_COMPONENT[component] ?? []).map((field) => [field, '']),
-  );
+  const fields = INDICATION_FIELDS_BY_COMPONENT[component];
+  if (!Array.isArray(fields)) return {};
+  const emptyValues = Object.fromEntries(fields.map((field) => [field, '']));
   if (!state || state.recipientId !== recipientId) {
-    return { ...emptyValues, indicationComponent: component };
+    return emptyValues;
   }
 
   return {
     ...emptyValues,
-    indicationComponent: component,
     ...(state.byComponent[component] ?? {}),
   };
 };
@@ -113,7 +99,11 @@ export const writeCurrentIndications = (
   component: string,
   values: ProtocolValuesRecord,
 ) => {
-  if (!Number.isFinite(recipientId) || recipientId <= 0 || !componentPrefix(component)) {
+  if (
+    !Number.isFinite(recipientId) ||
+    recipientId <= 0 ||
+    !Array.isArray(INDICATION_FIELDS_BY_COMPONENT[component])
+  ) {
     return;
   }
 

@@ -30,7 +30,7 @@ afterEach(() => {
 });
 
 const nameLabel = 'Наименование компонента донорской крови';
-it('selects protocol indications by group while preserving an existing name for the same group', () => {
+it('can deselect a group in the indications editor and switch to another group', () => {
   const onChange = vi.fn();
   render(
     <IndicationsFields
@@ -44,9 +44,9 @@ it('selects protocol indications by group while preserving an existing name for 
   expect(onChange).toHaveBeenLastCalledWith({ indicationRbcHemicHypoxia: '1' });
   fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));
   expect(onChange).toHaveBeenLastCalledWith({
-    componentGroup: 'erythrocytes',
-    indicationComponent: 'erythrocytes',
-    componentName: 'Отмытые эритроциты',
+    componentGroup: '',
+    indicationComponent: '',
+    componentName: '',
   });
   fireEvent.click(screen.getByRole('button', { name: 'Плазма' }));
   expect(onChange).toHaveBeenLastCalledWith({

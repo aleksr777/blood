@@ -90,7 +90,6 @@ const DonorBlockContents = ({ values, onOpenBlock, part }: ChunkProps) => (
         </tr>
       </>
     )}
-
     {part === 'main' && (
       <>
         <SectionTitle>Данные о донорской крови или ее компоненте</SectionTitle>
@@ -110,7 +109,6 @@ const DonorBlockContents = ({ values, onOpenBlock, part }: ChunkProps) => (
         </tr>
       </>
     )}
-
     {part === 'blood' && (
       <>
         <tr>
@@ -145,7 +143,6 @@ const DonorBlockContents = ({ values, onOpenBlock, part }: ChunkProps) => (
         </tr>
       </>
     )}
-
     {part === 'dates' && (
       <tr>
         <LabeledCell
@@ -164,15 +161,12 @@ const DonorBlockContents = ({ values, onOpenBlock, part }: ChunkProps) => (
     )}
   </tbody>
 );
-
 export const DonorBlock = (props: ChunkProps) => (
   <DonorBlockContents {...props} values={visibleProtocolComponentValues(props.values)} />
 );
-
 export const SelectionBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   const status = getSelectionStatus(values);
   const performed = status === SELECTION_STATUS.performed;
-
   return (
     <tbody
       className="fill-block"
@@ -186,7 +180,6 @@ export const SelectionBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
           <SectionTitle>
             {performed ? 'Результаты индивидуального подбора' : 'Индивидуальный подбор'}
           </SectionTitle>
-
           {!performed ? (
             <tr className="row-selection-summary">
               <td colSpan={6}>

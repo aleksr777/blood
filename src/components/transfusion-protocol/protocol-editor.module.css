@@ -25,6 +25,11 @@
   margin: 0;
   border: 0;
   padding: 0;
+  transition: opacity var(--ui-motion-fast) ease;
+}
+
+.componentDependentFields:disabled {
+  opacity: 0.58;
 }
 
 .fieldLabel {

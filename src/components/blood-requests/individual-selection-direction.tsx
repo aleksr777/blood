@@ -189,7 +189,6 @@ const currentAutoValues = async (
     recipientId: String(recipient.id),
     recipientName: recipient.fullName,
   };
-
   return {
     autoValues: {
       recipientAboRh: [values.recipientAbo, values.recipientRh].filter(Boolean).join(' '),
@@ -497,7 +496,6 @@ export const IndividualSelectionDirection = () => {
       return next;
     });
   };
-
   const updateIndications = (changes: ProtocolValues) => {
     if (documentState.isReadOnly()) return;
 
@@ -528,7 +526,6 @@ export const IndividualSelectionDirection = () => {
       return next;
     });
   };
-
   const clear = async () => {
     if (documentState.isActive() || !canClear) return;
     const recipient = readCurrentRecipient();

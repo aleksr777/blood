@@ -193,7 +193,6 @@ export const useProtocolWorkspace = () => {
       console.error('Не удалось синхронизировать данные реципиента:', error),
     );
   };
-
   const selectRecipient = async (recipient: RecipientRecord) => {
     try {
       document.close();
@@ -227,7 +226,6 @@ export const useProtocolWorkspace = () => {
       return false;
     }
   };
-
   const validateHemacon = () => {
     const warning = getProtocolHemaconWarning(values);
     if (!warning) return true;
@@ -235,7 +233,6 @@ export const useProtocolWorkspace = () => {
     setActiveBlock(getMissingProtocolFields(values)[0]?.block ?? 'donor');
     return false;
   };
-
   const saveToDatabase = async () => {
     if (!hasContent) return false;
     if (document.active) {

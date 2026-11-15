@@ -52,15 +52,19 @@ const openNames = () =>
     }),
   );
 
-it('requires a group and clears an incompatible name only when the group actually changes', async () => {
+it('toggles off the chosen group and clears its component name', async () => {
   render(<Harness />);
   expect(
     screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }),
   ).toBeNull();
-  fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));
+  const erythrocytes = screen.getByRole('button', { name: 'Эритроциты' });
+  fireEvent.click(erythrocytes);
+  expect(erythrocytes.getAttribute('aria-pressed')).toBe('true');
   fireEvent.change(nameInput(), { target: { value: 'Мой компонент' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));
-  expect(nameInput().value).toBe('Мой компонент');
+  fireEvent.click(erythrocytes);
+  expect(erythrocytes.getAttribute('aria-pressed')).toBe('false');
+  expect(screen.queryByRole('textbox', { name: 'Наименование компонента донорской крови' }))
+    .toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Плазма' }));
   expect(nameInput().value).toBe('');
   openNames();
@@ -93,7 +97,7 @@ it('offers platelet names without leaking the previous group presets', async () 
   await waitFor(() => expect(loadSavedOptions).toHaveBeenCalledWith('componentName:platelets'));
 });
 
-it('retains a legacy request name when its missing group is inferred and selected', async () => {
+it('allows deselection of a group inferred from a legacy component name', async () => {
   const onLocalChange = vi.fn();
   const onIndicationsChange = vi.fn();
   render(
@@ -109,10 +113,10 @@ it('retains a legacy request name when its missing group is inferred and selecte
   );
   expect(nameInput().value).toBe('Отмытые эритроциты');
   fireEvent.click(screen.getByRole('button', { name: 'Эритроциты' }));
-  expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: 'Отмытые эритроциты' });
+  expect(onLocalChange).toHaveBeenLastCalledWith({ requiredComponent: '' });
   expect(onIndicationsChange).toHaveBeenCalledWith({
-    componentGroup: 'erythrocytes',
-    indicationComponent: 'erythrocytes',
+    componentGroup: '',
+    indicationComponent: '',
   });
   await waitFor(() => expect(loadSavedOptions).toHaveBeenCalledWith('componentName:erythrocytes'));
 });

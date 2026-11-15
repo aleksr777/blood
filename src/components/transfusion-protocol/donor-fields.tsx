@@ -7,10 +7,7 @@ import {
 } from './blood-group-options';
 import { BloodGroupSelectField } from './blood-group-select-field';
 import { DONOR_ANTIGENS } from './donor-model';
-import {
-  componentGroupChanges,
-  selectedBloodComponentGroup,
-} from '../../domain/blood-components';
+import { componentGroupChanges, selectedBloodComponentGroup } from '../../domain/blood-components';
 import { BloodComponentSelector } from '../blood-component-selector/blood-component-selector';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-examination-fields.module.css';

@@ -16,17 +16,18 @@ const thresholdLabel = 'Количество тромбоцитов менее';
 const thresholdInput = () =>
   screen.getByRole('textbox', { name: 'Порог количества тромбоцитов' }) as HTMLInputElement;
 
-it('показывает ровно четыре показания и текстовый порог 50 по умолчанию', () => {
+it('показывает пять пунктов, включая другие показания, и текстовый порог 50 по умолчанию', () => {
   render(<PlateletIndications values={{}} onChange={vi.fn()} />);
   expect(screen.getAllByRole('checkbox').map((item) => item.parentElement?.textContent)).toEqual([
     thresholdLabel,
     ...PLATELET_INDICATION_OPTIONS.map(([, label]) => label),
+    'Другие показания',
   ]);
   expect(thresholdInput().value).toBe('50');
   expect(thresholdInput().type).toBe('text');
   expect(thresholdInput().disabled).toBe(true);
   expect(screen.getByText('× 10⁹/л.')).toBeTruthy();
-  expect(screen.queryByText('Другие показания')).toBeNull();
+  expect(screen.getByRole('checkbox', { name: 'Другие показания' })).toBeTruthy();
   expect(screen.queryByText('Количество тромбоцитов менее 20 × 10⁹/л')).toBeNull();
 });
 

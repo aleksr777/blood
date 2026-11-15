@@ -33,7 +33,6 @@ export type ComponentRequestFormValues = {
 };
 
 type Section = 'organization' | 'recipient' | 'component' | 'footer';
-
 type Props = {
   values: ComponentRequestFormValues;
   examination: ProtocolValues;
@@ -60,7 +59,6 @@ const headers = [
   'Группа крови AB0 донора аллогенного КМ или ГСК',
   'Резус-принадлежность и антигены C, c, E, e, K, k донора аллогенного КМ или ГСК',
 ];
-
 export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: Props) => {
   const edit = (section: Section) => ({
     className: `${styles.editable} ${section === 'recipient' ? styles.recipientCell : ''} ${section === 'component' ? styles.componentCell : ''} ${readOnly ? styles.readOnly : ''}`,
@@ -74,7 +72,6 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
       }
     },
   });
-
   const headerEdit = (index: number) =>
     index < 10 ? edit(index < 5 ? 'recipient' : 'component') : {};
   const recipientBirthDate =

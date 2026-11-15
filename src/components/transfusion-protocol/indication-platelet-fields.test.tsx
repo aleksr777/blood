@@ -11,7 +11,6 @@ import { PlateletIndications } from './indication-platelet-fields';
 import { formatIndications } from './indications-model';
 
 afterEach(cleanup);
-
 const thresholdLabel = 'Количество тромбоцитов менее';
 const thresholdInput = () =>
   screen.getByRole('textbox', { name: 'Порог количества тромбоцитов' }) as HTMLInputElement;

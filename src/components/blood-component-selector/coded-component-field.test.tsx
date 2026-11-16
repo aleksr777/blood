@@ -64,3 +64,25 @@ it('parses free-text custom codes while preserving spaces during editing', () =>
     'ЭВ-Л. Эритроцитная взвесь',
   );
 });
+
+it('clears both code and name through the empty option before entering another component', () => {
+  render(<CodedHarness />);
+  const toggle = screen.getByRole('button', {
+    name: 'Показать сохранённые варианты: Идентификационный код (графа 6)',
+  });
+  const input = screen.getByRole('textbox', { name: 'Идентификационный код (графа 6)' });
+  fireEvent.click(toggle);
+  fireEvent.click(
+    screen.getByRole('button', { name: 'ЭВ-Л. Эритроцитная взвесь лейкоредуцированная' }),
+  );
+  fireEvent.click(toggle);
+  fireEvent.click(
+    screen.getByRole('button', { name: 'Очистить поле: Идентификационный код (графа 6)' }),
+  );
+  expect((input as HTMLInputElement).value).toBe('');
+  expect(document.activeElement).toBe(input);
+  expect(screen.getByLabelText('Код компонента').textContent).toBe('');
+  expect(screen.getByLabelText('Название компонента').textContent).toBe('');
+  fireEvent.change(input, { target: { value: 'Новый компонент' } });
+  expect(screen.getByLabelText('Название компонента').textContent).toBe('Новый компонент');
+});

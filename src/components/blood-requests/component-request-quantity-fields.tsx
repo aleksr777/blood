@@ -46,7 +46,7 @@ export const ComponentRequestQuantityFields = ({
           value={values.transfusionIndicationCode}
           onChange={(event) => onChange({ transfusionIndicationCode: event.target.value })}
         >
-          <option value="">Выберите показание</option>
+          <option value="" aria-label="Не указано" />
           {selectedIndication && !indications.includes(selectedIndication) && (
             <option value={selectedIndication.code}>
               {selectedIndication.code} — {selectedIndication.label}

@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { ComponentCommonIndications } from './indication-common-fields';
 import { Choice, OtherChoice, type IndicationProps } from './indication-controls';
 import styles from './indications-fields.module.css';
@@ -21,7 +22,6 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
         ongoingBleedingName="indicationRbcOngoingBleeding"
       />
       <Choice
-        type="checkbox"
         name="indicationRbcCirculatoryDisturbances"
         checked={circulatoryDisturbances}
         onChange={() =>
@@ -33,7 +33,6 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
         Циркуляторные нарушения
       </Choice>
       <Choice
-        type="checkbox"
         name="indicationRbcHemicHypoxia"
         checked={hemicHypoxia}
         onChange={() =>
@@ -45,7 +44,6 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
         Признаки гемической гипоксии
       </Choice>
       <Choice
-        type="checkbox"
         name="indicationRbcAnemicSyndrome"
         checked={anemicSyndrome}
         onChange={() =>
@@ -59,7 +57,6 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
 
       <div className={styles.choiceRow}>
         <Choice
-          type="checkbox"
           name="indicationRbcThreshold"
           checked={thresholdSelected}
           onChange={() =>
@@ -76,7 +73,7 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
         >
           Снижение гемоглобина менее
         </Choice>
-        <input
+        <FormInput
           className={styles.shortNumber}
           type="number"
           disabled={!thresholdSelected}
@@ -90,7 +87,7 @@ export const ErythrocyteIndications = ({ values, onChange }: IndicationProps) =>
           }
         />
         <span>г/л и гематокрита менее</span>
-        <input
+        <FormInput
           className={styles.shortNumber}
           type="number"
           disabled={!thresholdSelected}

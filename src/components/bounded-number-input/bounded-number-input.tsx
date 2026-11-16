@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { useEffect, useState } from 'react';
 
 type Props = {
@@ -31,7 +32,7 @@ export const BoundedNumberInput = ({
       Number(text) <= max);
 
   return (
-    <input
+    <FormInput
       name={name}
       type="number"
       inputMode={integer ? 'numeric' : 'decimal'}

@@ -1,4 +1,4 @@
-import { FormInput } from '../form-input/form-input';
+import { FormInput, FormSelect } from '../form-input/form-input';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
 import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
@@ -46,7 +46,7 @@ export const RegistrationPatientDetailsModal = ({
 
       <label>
         <span>Дата рождения</span>
-        <input
+        <FormInput
           name="recipientBirthDate"
           readOnly={savedDocument}
           type="date"
@@ -57,7 +57,7 @@ export const RegistrationPatientDetailsModal = ({
 
       <label>
         <span>Пол</span>
-        <select
+        <FormSelect
           name="recipientSex"
           value={values.recipientSex ?? ''}
           onChange={(event) => onChange({ recipientSex: event.target.value })}
@@ -65,7 +65,7 @@ export const RegistrationPatientDetailsModal = ({
           <option value="">Не указано</option>
           <option value="Мужской">Мужской</option>
           <option value="Женский">Женский</option>
-        </select>
+        </FormSelect>
       </label>
 
       <div>

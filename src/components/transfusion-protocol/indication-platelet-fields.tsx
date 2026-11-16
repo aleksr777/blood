@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import {
   PLATELET_INDICATION_OPTIONS,
   PLATELET_THRESHOLD_DEFAULT,
@@ -15,14 +16,13 @@ export const PlateletIndications = ({ values, onChange }: IndicationProps) => {
     <>
       <div className={styles.choiceRow}>
         <Choice
-          type="checkbox"
           name="indicationPlateletThrombocytopenia"
           checked={selected}
           onChange={() => change('indicationPlateletThrombocytopenia', selected ? '' : '1')}
         >
           Количество тромбоцитов менее
         </Choice>
-        <input
+        <FormInput
           aria-label="Порог количества тромбоцитов"
           name="indicationPlateletCount"
           className={styles.shortNumber}
@@ -41,7 +41,6 @@ export const PlateletIndications = ({ values, onChange }: IndicationProps) => {
       {PLATELET_INDICATION_OPTIONS.map(([name, label]) => (
         <Choice
           key={name}
-          type="checkbox"
           name={name}
           checked={values[name] === '1'}
           onChange={() => change(name, values[name] === '1' ? '' : '1')}

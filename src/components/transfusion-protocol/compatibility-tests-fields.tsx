@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { RadioOption } from '../radio-option/radio-option';
 import { useEffect } from 'react';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
@@ -90,7 +91,7 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
                 />
                 <label>
                   <span>Годен до</span>
-                  <input
+                  <FormInput
                     type="date"
                     name={reagent.expiration}
                     value={values[reagent.expiration] ?? ''}

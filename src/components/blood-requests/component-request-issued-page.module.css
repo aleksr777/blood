@@ -74,4 +74,9 @@
 .signatureLine {
   flex: 1 1 auto;
   min-width: 20mm;
+  height: auto;
+  min-height: 6mm;
+  padding: 0 1mm;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }

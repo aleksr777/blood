@@ -1,3 +1,4 @@
+import type { HTMLAttributes } from 'react';
 import styles from './component-request-issued-page.module.css';
 
 const columnWidths = [3, 20, 7, 7, 12, 6, 10, 8, 8, 8, 11];
@@ -16,7 +17,12 @@ const columnHeaders = [
   'Изготовитель',
 ];
 
-export const ComponentRequestIssuedPage = () => (
+type Props = {
+  doctorName: string;
+  footerEdit: HTMLAttributes<HTMLDivElement>;
+};
+
+export const ComponentRequestIssuedPage = ({ doctorName, footerEdit }: Props) => (
   <div className={styles.content}>
     <h2 className={styles.title}>Выдано из трансфузиологического кабинета</h2>
     <table className={styles.table} aria-label="Таблица выдачи компонентов крови">
@@ -47,9 +53,13 @@ export const ComponentRequestIssuedPage = () => (
         <span className={styles.footerLabel}>Дата:</span>
         <span className={styles.dateLine} />
       </div>
-      <div className={styles.footerRow}>
+      <div
+        {...footerEdit}
+        className={`${styles.footerRow} ${footerEdit.className ?? ''}`}
+        aria-label="Получил компоненты крови"
+      >
         <span className={styles.footerLabel}>Получил компоненты крови:</span>
-        <span className={styles.signatureLine} />
+        <span className={styles.signatureLine}>{doctorName}</span>
       </div>
       <div className={styles.footerRow}>
         <span className={styles.footerLabel}>Выдал компоненты крови:</span>

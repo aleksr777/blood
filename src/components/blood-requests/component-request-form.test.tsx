@@ -101,7 +101,7 @@ it('открывает переиспользуемые редакторы дл�
   fireEvent.keyDown(organization, { key: 'Enter' });
   fireEvent.click(screen.getByText('Иванов Иван Иванович'));
   fireEvent.click(screen.getByText('ЭВ-Л'));
-  fireEvent.click(screen.getByText('Петров Пётр Петрович'));
+  fireEvent.click(screen.getAllByText('Петров Пётр Петрович')[0]);
   expect(onEdit.mock.calls.map(([section]) => section)).toEqual([
     'organization',
     'organization',

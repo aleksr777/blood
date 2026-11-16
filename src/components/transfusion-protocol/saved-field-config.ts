@@ -9,12 +9,6 @@ const sharedCategories = new Map<string, string>(
     fields.map((field) => [field, category] as const),
   ),
 );
-const sharedCategoryNames = new Set<string>(
-  SHARED_SAVED_OPTION_GROUPS.map(({ category }) => category),
-);
-
-export const isSharedSavedOptionCategory = (category: string) => sharedCategoryNames.has(category);
-
 const SAVED_OPTION_FIELDS = new Set([
   'collectionOrganization',
   'selectionOrganization',

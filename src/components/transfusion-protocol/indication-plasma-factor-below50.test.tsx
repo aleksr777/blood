@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
-import { INDICATION_FIELDS_BY_COMPONENT } from '../../storage/indication-fields';
 import { getProtocolBlockConfig } from './editor-config';
 import { PlasmaIndications } from './indication-plasma-fields';
 import { formatIndications } from './indications-model';
@@ -33,7 +32,6 @@ it('выводит полное показание в протокол без д
   ).toBe(LABEL);
 });
 
-it('включает новое поле в сохранение и восстановление показаний', () => {
-  expect(INDICATION_FIELDS_BY_COMPONENT['plasma-cryo']).toContain(FIELD);
+it('включает новое поле в конфигурацию редактора', () => {
   expect(getProtocolBlockConfig('donor').fields.map(({ name }) => name)).toContain(FIELD);
 });

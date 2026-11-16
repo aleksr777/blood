@@ -11,7 +11,7 @@ export const DONOR_ANTIGENS = [
   { name: 'donorAntigenk', symbol: 'k', label: 'k' },
 ] as const;
 
-export const formatDonorAntigens = (values: ProtocolValues) => {
+const formatDonorAntigens = (values: ProtocolValues) => {
   const hasStructured = DONOR_ANTIGENS.some(({ name }) => Boolean(values[name]));
   if (!hasStructured) return values.donorAntigens ?? '';
 

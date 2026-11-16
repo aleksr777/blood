@@ -1,6 +1,6 @@
 import { FormInput } from '../form-input/form-input';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   loadSavedOptions,
   removeSavedOption,
@@ -9,6 +9,7 @@ import {
   type SavedOptionRecord,
 } from '../../storage/repositories/saved-options';
 import { SavedOptionItem } from './saved-option-item';
+import { EmptyInputOption } from './empty-input-option';
 import { useOverlayDropdown } from './use-overlay-dropdown';
 import styles from './protocol-editor.module.css';
 const normalizeValue = (value: string) =>
@@ -39,6 +40,7 @@ export const SavedOptionsField = ({
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const inputRef = useRef<HTMLInputElement>(null);
   const { rootRef, dropdownRef, dropdownState } = useOverlayDropdown(open, setOpen);
 
   useEffect(() => {
@@ -106,6 +108,7 @@ export const SavedOptionsField = ({
     <div ref={rootRef} className={styles.departmentField}>
       <div className={styles.departmentControl}>
         <FormInput
+          ref={inputRef}
           name={name}
           aria-label={label}
           type="text"
@@ -133,6 +136,14 @@ export const SavedOptionsField = ({
         data-state={dropdownState}
         aria-hidden={dropdownState !== 'open'}
       >
+        <EmptyInputOption
+          label={label}
+          onSelect={() => {
+            onChange('');
+            setOpen(false);
+            inputRef.current?.focus();
+          }}
+        />
         {editableItems.length === 0 && fixedOptions.length === 0 ? (
           <div className={styles.historyEmpty}>{emptyText}</div>
         ) : (

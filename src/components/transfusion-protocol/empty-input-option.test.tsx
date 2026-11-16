@@ -45,19 +45,23 @@ it('clears a selected option, focuses the field, and keeps saved options availab
   expect(screen.getByRole('button', { name: 'Сохранённое' })).toBeTruthy();
 });
 
-it('also clears the department field without deleting a saved department', async () => {
+it('allows direct editing of a chosen department without extra controls or a blank option', async () => {
   const Field = () => {
-    const [value, setValue] = useState('ОРИТ');
+    const [value, setValue] = useState('');
     return <DepartmentField value={value} onChange={setValue} />;
   };
   render(<Field />);
   const input = screen.getByRole('textbox') as HTMLInputElement;
   const toggle = screen.getByRole('button', { name: 'Показать ранее введённые отделения' });
   fireEvent.click(toggle);
-  await screen.findByRole('button', { name: 'ОРИТ' });
-  fireEvent.click(screen.getByRole('button', { name: 'Очистить поле: Отделение' }));
-  expect(input.value).toBe('');
-  expect(document.activeElement).toBe(input);
+  fireEvent.click(await screen.findByRole('button', { name: 'ОРИТ' }));
+  expect(input.value).toBe('ОРИТ');
+  expect(input.readOnly).toBe(false);
+  fireEvent.change(input, { target: { value: 'ОРИТ 2' } });
+  expect(input.value).toBe('ОРИТ 2');
   fireEvent.click(toggle);
+  expect(screen.queryByRole('button', { name: 'Очистить поле: Отделение' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Изменить значение' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Удалить значение' })).toBeNull();
   expect(screen.getByRole('button', { name: 'ОРИТ' })).toBeTruthy();
 });

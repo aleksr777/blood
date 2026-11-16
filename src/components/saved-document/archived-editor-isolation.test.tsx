@@ -64,7 +64,7 @@ it('allows local text/selection but blocks shared option writes and incoming opt
   expect(storage.remove).not.toHaveBeenCalled();
 });
 
-it('keeps normal working-form option management available without auto-persisting drafts', async () => {
+it('keeps free-text options editable without auto-persisting drafts', async () => {
   render(
     <SavedOptionsField
       name="doctorName"
@@ -78,7 +78,8 @@ it('keeps normal working-form option management available without auto-persistin
   fireEvent.blur(screen.getByRole('textbox', { name: 'Врач' }));
   expect(storage.remember).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Показать сохранённые варианты: Врач' }));
-  expect(screen.getByRole('button', { name: 'Изменить значение' })).toBeDefined();
+  expect(screen.queryByRole('button', { name: 'Изменить значение' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Удалить значение' })).toBeNull();
 });
 
 it('keeps archived department selection local and hides shared department management', async () => {

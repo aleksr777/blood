@@ -1,13 +1,7 @@
 import { FormInput } from '../form-input/form-input';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
-import { useEffect, useRef, useState } from 'react';
-import {
-  loadSavedOptions,
-  removeSavedOption,
-  renameSavedOption,
-  subscribeSavedOptions,
-  type SavedOptionRecord,
-} from '../../storage/repositories/saved-options';
+import { useRef, useState } from 'react';
+import { useSavedOptions } from './use-saved-options';
 import { SavedOptionItem } from './saved-option-item';
 import { EmptyInputOption } from './empty-input-option';
 import { useOverlayDropdown } from './use-overlay-dropdown';
@@ -23,6 +17,8 @@ type Props = {
   fixedOptions?: string[];
   disabled?: boolean;
   wrapOptions?: boolean;
+  departments?: boolean;
+  toggleLabel?: string;
   onChange: (value: string, previousOptionValue?: string) => void;
 };
 
@@ -34,64 +30,22 @@ export const SavedOptionsField = ({
   fixedOptions = [],
   disabled = false,
   wrapOptions = false,
+  departments = false,
+  toggleLabel,
   onChange,
 }: Props) => {
   const isolated = useSavedDocumentScope();
-  const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const inputRef = useRef<HTMLInputElement>(null);
+  const manualValue = useRef<string | null>(null);
   const { rootRef, dropdownRef, dropdownState } = useOverlayDropdown(open, setOpen);
-
-  useEffect(() => {
-    let active = true;
-    setStatus('loading');
-
-    void loadSavedOptions(category)
-      .then((nextItems) => {
-        if (!active) return;
-        setItems(nextItems);
-        setStatus('ready');
-      })
-      .catch((error: unknown) => {
-        console.error(`Не удалось загрузить список ${category}:`, error);
-        if (active) setStatus('error');
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [category]);
-
-  useEffect(
-    () =>
-      subscribeSavedOptions(category, ({ items: nextItems, edit }) => {
-        setItems(nextItems);
-        setStatus('ready');
-        if (!isolated && edit && normalizeValue(value) === normalizeValue(edit.previousValue)) {
-          onChange(edit.value, edit.previousValue);
-        }
-      }),
-    [category, value, onChange, isolated],
-  );
-
-  const rename = async (item: SavedOptionRecord, nextValue: string) => {
-    if (isolated) return;
-    try {
-      await renameSavedOption(category, item.id, nextValue.trim());
-    } catch (error) {
-      console.error(`Не удалось изменить значение ${category}:`, error);
-    }
-  };
-
-  const remove = async (item: SavedOptionRecord) => {
-    if (isolated) return;
-    try {
-      await removeSavedOption(category, item.id);
-    } catch (error) {
-      console.error(`Не удалось удалить значение ${category}:`, error);
-    }
-  };
+  const { items, status, rename, remove } = useSavedOptions({
+    category,
+    value,
+    onChange,
+    isolated,
+    departments,
+  });
 
   const emptyText =
     status === 'loading'
@@ -103,6 +57,11 @@ export const SavedOptionsField = ({
   const normalizedFixedOptions = new Set(fixedOptions.map(normalizeValue));
   const isFixed = (option: string) => normalizedFixedOptions.has(normalizeValue(option));
   const editableItems = items.filter((item) => !isFixed(item.value));
+  const hasFixedOptions = fixedOptions.length > 0;
+  const isListed =
+    isFixed(value) ||
+    editableItems.some((item) => normalizeValue(item.value) === normalizeValue(value));
+  const readOnly = hasFixedOptions && Boolean(value) && isListed && value !== manualValue.current;
 
   return (
     <div ref={rootRef} className={styles.departmentField}>
@@ -115,12 +74,16 @@ export const SavedOptionsField = ({
           autoComplete="off"
           value={value}
           disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
+          readOnly={readOnly}
+          onChange={(event) => {
+            manualValue.current = event.target.value;
+            onChange(event.target.value);
+          }}
         />
         <button
           type="button"
           className={styles.historyToggle}
-          aria-label={`Показать сохранённые варианты: ${label}`}
+          aria-label={toggleLabel ?? `Показать сохранённые варианты: ${label}`}
           aria-expanded={open}
           disabled={disabled}
           onClick={() => setOpen((current) => !current)}
@@ -136,24 +99,28 @@ export const SavedOptionsField = ({
         data-state={dropdownState}
         aria-hidden={dropdownState !== 'open'}
       >
-        <EmptyInputOption
-          label={label}
-          onSelect={() => {
-            onChange('');
-            setOpen(false);
-            inputRef.current?.focus();
-          }}
-        />
+        {hasFixedOptions && (
+          <EmptyInputOption
+            label={label}
+            onSelect={() => {
+              manualValue.current = '';
+              onChange('');
+              setOpen(false);
+              inputRef.current?.focus();
+            }}
+          />
+        )}
         {editableItems.length === 0 && fixedOptions.length === 0 ? (
           <div className={styles.historyEmpty}>{emptyText}</div>
         ) : (
           editableItems.map((item) => (
             <SavedOptionItem
-              editable={!isolated}
+              editable={hasFixedOptions && !isolated}
               key={item.id}
               item={item}
               label={label}
               onSelect={(selected) => {
+                manualValue.current = null;
                 onChange(selected.value);
                 setOpen(false);
               }}
@@ -169,6 +136,7 @@ export const SavedOptionsField = ({
               className={styles.historyValue}
               title={option}
               onClick={() => {
+                manualValue.current = null;
                 onChange(option);
                 setOpen(false);
               }}

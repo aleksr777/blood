@@ -17,6 +17,17 @@ export const FormInput = forwardRef<HTMLInputElement, ComponentPropsWithoutRef<'
 );
 FormInput.displayName = 'FormInput';
 
+export const FormCheckbox = forwardRef<
+  HTMLInputElement,
+  Omit<ComponentPropsWithoutRef<'input'>, 'type'>
+>((props, ref) => <FormInput {...props} ref={ref} type="checkbox" />);
+FormCheckbox.displayName = 'FormCheckbox';
+
+export const FormSelect = forwardRef<HTMLSelectElement, ComponentPropsWithoutRef<'select'>>(
+  (props, ref) => <select {...props} ref={ref} />,
+);
+FormSelect.displayName = 'FormSelect';
+
 export const FormTextarea = forwardRef<HTMLTextAreaElement, ComponentPropsWithoutRef<'textarea'>>(
   ({ maxLength = TEXTAREA_MAX_LENGTH, ...props }, ref) => (
     <textarea {...props} ref={ref} maxLength={maxLength} />

@@ -1,3 +1,4 @@
+import { FormSelect } from '../form-input/form-input';
 import { BoundedIntegerInput } from '../bounded-integer-input/bounded-integer-input';
 import { indicationOptionsForComponent, TRANSFUSION_INDICATIONS } from './component-request-447n';
 import type { ComponentRequestDetailsValues } from './component-request-details-types';
@@ -41,7 +42,7 @@ export const ComponentRequestQuantityFields = ({
       </label>
       <label className={styles.wide}>
         <span>Код показания к трансфузии (графа 8)</span>
-        <select
+        <FormSelect
           name="transfusionIndicationCode"
           value={values.transfusionIndicationCode}
           onChange={(event) => onChange({ transfusionIndicationCode: event.target.value })}
@@ -57,7 +58,7 @@ export const ComponentRequestQuantityFields = ({
               {code} — {label}
             </option>
           ))}
-        </select>
+        </FormSelect>
       </label>
     </div>
   </fieldset>

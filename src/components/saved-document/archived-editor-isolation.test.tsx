@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import { DepartmentField } from '../transfusion-protocol/department-field';
@@ -25,7 +25,7 @@ vi.mock('../../storage/repositories/departments', () => ({
 }));
 afterEach(cleanup);
 
-it('allows local text/selection but blocks shared option writes and incoming option renames in an archive', async () => {
+it('allows option controls but keeps incoming option renames from changing an archived document', async () => {
   const onChange = vi.fn();
   render(
     <SavedDocumentScope value={true}>
@@ -47,8 +47,8 @@ it('allows local text/selection but blocks shared option writes and incoming opt
   fireEvent.blur(screen.getByRole('textbox', { name: 'Врач' }));
   expect(storage.remember).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Показать сохранённые варианты: Врач' }));
-  expect(screen.queryByRole('button', { name: 'Изменить значение' })).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Удалить значение' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Изменить значение' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Удалить значение' })).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Готовый вариант' }));
   expect(onChange).toHaveBeenCalledWith('Готовый вариант');
   onChange.mockClear();
@@ -64,7 +64,7 @@ it('allows local text/selection but blocks shared option writes and incoming opt
   expect(storage.remove).not.toHaveBeenCalled();
 });
 
-it('keeps normal working-form option management available without auto-persisting drafts', async () => {
+it('keeps working-form option controls available without auto-persisting drafts', async () => {
   render(
     <SavedOptionsField
       name="doctorName"
@@ -78,10 +78,11 @@ it('keeps normal working-form option management available without auto-persistin
   fireEvent.blur(screen.getByRole('textbox', { name: 'Врач' }));
   expect(storage.remember).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Показать сохранённые варианты: Врач' }));
-  expect(screen.getByRole('button', { name: 'Изменить значение' })).toBeDefined();
+  expect(screen.getByRole('button', { name: 'Изменить значение' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Удалить значение' })).toBeTruthy();
 });
 
-it('keeps archived department selection local and hides shared department management', async () => {
+it('keeps archived department selection local and offers explicit option controls', async () => {
   const onChange = vi.fn();
   render(
     <SavedDocumentScope value={true}>
@@ -90,10 +91,34 @@ it('keeps archived department selection local and hides shared department manage
   );
   await screen.findByText('Сохранённое отделение');
   fireEvent.click(screen.getByRole('button', { name: 'Показать ранее введённые отделения' }));
-  expect(screen.queryByRole('button', { name: /Изменить отделение:/ })).toBeNull();
-  expect(screen.queryByRole('button', { name: /Удалить отделение:/ })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Изменить значение' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Удалить значение' })).toBeTruthy();
   fireEvent.click(screen.getByRole('button', { name: 'Сохранённое отделение' }));
   expect(onChange).toHaveBeenCalledWith('Сохранённое отделение');
   expect(storage.rename).not.toHaveBeenCalled();
   expect(storage.remove).not.toHaveBeenCalled();
+});
+
+it('updates the selected archived value only after an explicit successful list edit', async () => {
+  const onChange = vi.fn();
+  render(
+    <SavedDocumentScope value={true}>
+      <SavedOptionsField
+        name="doctorName"
+        label="Врач"
+        category="doctorName"
+        value="Готовый вариант"
+        onChange={onChange}
+      />
+    </SavedDocumentScope>,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Показать сохранённые варианты: Врач' }));
+  await screen.findByRole('button', { name: 'Готовый вариант' });
+  fireEvent.click(screen.getByRole('button', { name: 'Изменить значение' }));
+  fireEvent.change(screen.getByRole('textbox', { name: 'Изменить: Врач' }), {
+    target: { value: 'Новый вариант' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'Сохранить изменение' }));
+  await waitFor(() => expect(onChange).toHaveBeenCalledWith('Новый вариант', 'Готовый вариант'));
+  expect(storage.rename).toHaveBeenCalledWith('doctorName', 1, 'Новый вариант');
 });

@@ -37,7 +37,6 @@ const legacyLineBaselines = {
   'src/components/transfusion-protocol/use-protocol-workspace.ts': 434,
   'src/components/transfusion-registration/registration-transfusions-modal.tsx': 171,
   'src/components/transfusion-registration/transfusion-registration.tsx': 607,
-  'src/storage/repositories/current-indications.ts': 200,
   'src/storage/repositories/current-recipient.test.ts': 295,
   'src/storage/repositories/current-recipient.ts': 572,
   'src/storage/repositories/recipient-deletion.ts': 132,

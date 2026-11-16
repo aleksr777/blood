@@ -56,7 +56,9 @@ export const hasDocumentContent = (
   if (kind === 'registration') return hasRegistrationRows(values.registrationTransfusionRows);
 
   let content = Object.fromEntries(
-    Object.entries(values).filter(([name]) => !recipientAndReusableFields.has(name)),
+    Object.entries(values).filter(
+      ([name, value]) => !recipientAndReusableFields.has(name) && value !== '',
+    ),
   );
   if (kind === 'individual-selection-direction') {
     content = withoutDefaultErythrocytes(content);

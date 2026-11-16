@@ -162,6 +162,10 @@
       white-space: normal;
     }
 
+    select:not([multiple]):not([size]) option::checkmark {
+      display: none;
+    }
+
     select:not([multiple]):not([size]) option:is(:hover, :focus-visible, :checked) {
       background: var(--ui-accent-soft);
     }

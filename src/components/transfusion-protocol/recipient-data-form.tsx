@@ -1,4 +1,4 @@
-import { FormInput } from '../form-input/form-input';
+import { FormInput, FormSelect } from '../form-input/form-input';
 import type { PropsWithChildren } from 'react';
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { ModalDismissButton } from '../modal/modal';
@@ -48,7 +48,7 @@ export const RecipientDataForm = ({
         </label>
         <label>
           <span>Дата рождения</span>
-          <input
+          <FormInput
             name="recipientBirthDate"
             type="date"
             value={values.recipientBirthDate ?? ''}
@@ -57,7 +57,7 @@ export const RecipientDataForm = ({
         </label>
         <label>
           <span>Пол</span>
-          <select
+          <FormSelect
             name="recipientSex"
             value={values.recipientSex ?? ''}
             onChange={(event) => change('recipientSex', event.target.value)}
@@ -65,7 +65,7 @@ export const RecipientDataForm = ({
             <option value="">Не указано</option>
             <option value="Мужской">Мужской</option>
             <option value="Женский">Женский</option>
-          </select>
+          </FormSelect>
         </label>
         <label>
           <span>Возраст</span>

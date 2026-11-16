@@ -1,3 +1,4 @@
+import { FormInput } from '../form-input/form-input';
 import { Choice, type IndicationProps } from './indication-controls';
 import styles from './indications-fields.module.css';
 
@@ -22,7 +23,6 @@ export const ComponentCommonIndications = ({
     <>
       <div className={styles.choiceRow}>
         <Choice
-          type="checkbox"
           name={bloodLossName}
           checked={bloodLossChecked}
           onChange={() =>
@@ -38,7 +38,7 @@ export const ComponentCommonIndications = ({
         >
           Острая кровопотеря более
         </Choice>
-        <input
+        <FormInput
           className={styles.shortNumber}
           type="number"
           min="0"
@@ -51,7 +51,6 @@ export const ComponentCommonIndications = ({
       </div>
 
       <Choice
-        type="checkbox"
         name={ongoingBleedingName}
         checked={ongoing}
         onChange={() => onChange({ [ongoingBleedingName]: ongoing ? '' : '1' })}

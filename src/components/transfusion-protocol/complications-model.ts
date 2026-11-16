@@ -9,6 +9,7 @@ export type ComplicationsStatus = (typeof COMPLICATIONS_STATUS)[keyof typeof COM
 
 export const getComplicationsStatus = (values: ProtocolValues): ComplicationsStatus | '' => {
   const status = values.complicationsStatus;
+  if (status === '') return '';
 
   if (status === COMPLICATIONS_STATUS.none || status === COMPLICATIONS_STATUS.had) {
     return status;

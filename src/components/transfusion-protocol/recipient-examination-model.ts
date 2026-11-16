@@ -29,5 +29,5 @@ export const formatAlloimmuneAntibodies = (values: ProtocolValues) => {
   if (values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found) {
     return values.alloimmuneAntibodyDescription?.trim() ?? '';
   }
-  return values.alloimmuneAntibodies ?? '';
+  return values.alloimmuneAntibodyStatus === '' ? '' : (values.alloimmuneAntibodies ?? '');
 };

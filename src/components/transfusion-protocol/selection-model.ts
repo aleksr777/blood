@@ -16,6 +16,7 @@ const SELECTION_DETAIL_FIELDS = [
 
 export const getSelectionStatus = (values: ProtocolValues): SelectionStatus | '' => {
   const status = values.selectionStatus;
+  if (status === '') return '';
   if (status === SELECTION_STATUS.notPerformed || status === SELECTION_STATUS.performed) {
     return status;
   }

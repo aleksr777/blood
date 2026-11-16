@@ -2,7 +2,14 @@
 import { createRef } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
-import { FormInput, FormTextarea, TEXT_INPUT_MAX_LENGTH, TEXTAREA_MAX_LENGTH } from './form-input';
+import {
+  FormCheckbox,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  TEXT_INPUT_MAX_LENGTH,
+  TEXTAREA_MAX_LENGTH,
+} from './form-input';
 
 afterEach(cleanup);
 
@@ -74,4 +81,30 @@ it('forwards refs, names, classes and native change events without adding DOM wr
   expect(document.activeElement).toBe(input.current);
   fireEvent.change(input.current!, { target: { value: 'Реанимация' } });
   expect(onChange).toHaveBeenCalledOnce();
+});
+
+it('forwards native checkbox and select properties, refs, and change events', () => {
+  const checkbox = createRef<HTMLInputElement>();
+  const select = createRef<HTMLSelectElement>();
+  const onCheck = vi.fn();
+  const onSelect = vi.fn();
+  const { container } = render(
+    <>
+      <FormCheckbox ref={checkbox} aria-label="Флажок" name="checked" onChange={onCheck} />
+      <FormSelect ref={select} aria-label="Выбор" name="choice" defaultValue="" onChange={onSelect}>
+        <option value="">Не выбрано</option>
+        <option value="a">А</option>
+      </FormSelect>
+    </>,
+  );
+  expect([...container.children].map((element) => element.tagName)).toEqual(['INPUT', 'SELECT']);
+  expect(checkbox.current?.type).toBe('checkbox');
+  expect(checkbox.current?.name).toBe('checked');
+  expect(select.current?.name).toBe('choice');
+  fireEvent.click(checkbox.current!);
+  expect(checkbox.current?.checked).toBe(true);
+  expect(onCheck).toHaveBeenCalledOnce();
+  fireEvent.change(select.current!, { target: { value: 'a' } });
+  expect(select.current?.value).toBe('a');
+  expect(onSelect).toHaveBeenCalledOnce();
 });

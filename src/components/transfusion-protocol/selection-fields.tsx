@@ -1,3 +1,4 @@
+import { RadioOption } from '../radio-option/radio-option';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { getSelectionStatus, SELECTION_STATUS } from './selection-model';
 import type { ProtocolFieldConfig, ProtocolValues } from './protocol-types';
@@ -37,24 +38,26 @@ export const SelectionFields = ({ values, onChange }: Props) => {
       <fieldset className={styles.statusGroup}>
         <legend>Индивидуальный подбор</legend>
         <div className={styles.options}>
-          <label className={styles.option}>
-            <input
-              type="radio"
-              name="selectionStatus"
-              checked={status === SELECTION_STATUS.notPerformed}
-              onChange={() => onChange({ selectionStatus: SELECTION_STATUS.notPerformed })}
-            />
-            <span>Не проводился</span>
-          </label>
-          <label className={styles.option}>
-            <input
-              type="radio"
-              name="selectionStatus"
-              checked={status === SELECTION_STATUS.performed}
-              onChange={() => onChange({ selectionStatus: SELECTION_STATUS.performed })}
-            />
-            <span>Проводился</span>
-          </label>
+          <RadioOption
+            className={styles.option}
+            name="selectionStatus"
+            checked={status === SELECTION_STATUS.notPerformed}
+            onChange={(checked) =>
+              onChange({ selectionStatus: checked ? SELECTION_STATUS.notPerformed : '' })
+            }
+          >
+            Не проводился
+          </RadioOption>
+          <RadioOption
+            className={styles.option}
+            name="selectionStatus"
+            checked={status === SELECTION_STATUS.performed}
+            onChange={(checked) =>
+              onChange({ selectionStatus: checked ? SELECTION_STATUS.performed : '' })
+            }
+          >
+            Проводился
+          </RadioOption>
         </div>
       </fieldset>
 

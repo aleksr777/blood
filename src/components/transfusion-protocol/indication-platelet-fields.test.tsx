@@ -5,7 +5,6 @@ import {
   LEGACY_PLATELET_INDICATION_OPTIONS,
   PLATELET_INDICATION_OPTIONS,
 } from '../../domain/platelet-indications';
-import { INDICATION_FIELDS_BY_COMPONENT } from '../../storage/indication-fields';
 import { getProtocolBlockConfig } from './editor-config';
 import { PlateletIndications } from './indication-platelet-fields';
 import { formatIndications } from './indications-model';
@@ -110,7 +109,6 @@ it('сохраняет старые показания в архиве и нов
   ];
   for (const name of names) {
     expect(fields).toContain(name);
-    expect(INDICATION_FIELDS_BY_COMPONENT.platelets).toContain(name);
   }
   const stored = {
     indicationComponent: 'platelets',

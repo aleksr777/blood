@@ -35,7 +35,6 @@
   align-items: flex-start;
 }
 
-.choice input[type='radio'],
 .choice input[type='checkbox'] {
   margin: 0.1rem 0 0;
 }

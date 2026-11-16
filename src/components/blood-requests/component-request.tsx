@@ -609,7 +609,7 @@ export const ComponentRequest = () => {
         };
       case 'footer':
         return {
-          title: 'Дата и подпись',
+          title: 'Подпись врача',
           fields: FOOTER_FIELDS,
           values: valuesFor(FOOTER_FIELDS),
         };

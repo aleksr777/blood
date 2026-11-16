@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { DEFAULTED_RADIO_FIELDS } from '../../domain/form-content';
 import Modal from '../modal/modal';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { getProtocolBlockConfig, isDonorComponentBlock } from './editor-config';
@@ -35,7 +36,11 @@ type Props = {
 
 const getInitialValues = (blockId: ProtocolBlockId, values: ProtocolValues) => {
   const config = getProtocolBlockConfig(blockId);
-  return Object.fromEntries(config.fields.map(({ name }) => [name, values[name] ?? '']));
+  return Object.fromEntries(
+    config.fields.flatMap(({ name }) =>
+      DEFAULTED_RADIO_FIELDS.has(name) && !(name in values) ? [] : [[name, values[name] ?? '']],
+    ),
+  );
 };
 
 export const ProtocolEditorModal = ({

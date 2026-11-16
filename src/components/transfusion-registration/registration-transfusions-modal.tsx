@@ -1,3 +1,4 @@
+import { FormCheckbox } from '../form-input/form-input';
 import { useEffect, useMemo, useState } from 'react';
 import { listProtocolRecords, type ProtocolRecord } from '../../storage/repositories/recipients';
 import { transfusionOrderKey } from '../../domain/date-time';
@@ -137,8 +138,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
                         .filter(Boolean)
                         .join(' ')}
                     >
-                      <input
-                        type="checkbox"
+                      <FormCheckbox
                         checked={checked}
                         disabled={disabled}
                         onChange={() => toggleRecord(record.id)}

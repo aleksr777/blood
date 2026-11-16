@@ -213,7 +213,7 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
         className={`${styles.paper} ${styles.pageTwo}`}
         aria-label="Выдано из трансфузиологического кабинета, страница 2"
       >
-        <ComponentRequestIssuedPage />
+        <ComponentRequestIssuedPage doctorName={physician} footerEdit={edit('footer')} />
       </section>
     </div>
   );

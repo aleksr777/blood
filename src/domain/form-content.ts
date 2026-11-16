@@ -9,6 +9,24 @@ const TRACKING_FIELDS = new Set([
   'previousTransfusionsSuggestedText',
 ]);
 
+// An explicit empty radio value can differ from a missing field: missing fields
+// may use a default or infer a legacy selection from retained details.
+export const DEFAULTED_RADIO_FIELDS = new Set([
+  'selectionStatus',
+  'complicationsStatus',
+  'confirmedRecipientAboResult',
+  'confirmedDonorAboResult',
+  'planeTestResult',
+  'biologicalTestResult',
+]);
+
+const LEGACY_RADIO_TEXT: Record<string, string> = {
+  alloimmuneAntibodyStatus: 'alloimmuneAntibodies',
+  previousTransfusionsStatus: 'previousTransfusions',
+  previousReactionsStatus: 'previousReactions',
+  individualSelectionHistoryStatus: 'individualSelectionHistory',
+};
+
 const normalizeValue = (value: unknown): unknown => {
   if (typeof value === 'string') return value.replace(/\r\n?/g, '\n').trim() || undefined;
   if (value === null || value === undefined) return undefined;
@@ -21,6 +39,12 @@ const normalizeValue = (value: unknown): unknown => {
     .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
     .flatMap(([key, item]) => {
       if (key === 'previousTransfusionsSuggestedText') return [];
+      const legacyText = (value as Record<string, unknown>)[LEGACY_RADIO_TEXT[key]];
+      if (
+        item === '' &&
+        (DEFAULTED_RADIO_FIELDS.has(key) || (typeof legacyText === 'string' && legacyText.trim()))
+      )
+        return [[key, '']];
       const normalized = normalizeValue(item);
       return normalized === undefined ? [] : [[key, normalized]];
     });

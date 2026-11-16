@@ -7,7 +7,6 @@ export const GranulocyteIndications = ({ values, onChange }: IndicationProps) =>
   return (
     <>
       <Choice
-        type="checkbox"
         name="indicationGranulocyteNeutrophilsLow"
         checked={checked}
         onChange={() => onChange({ indicationGranulocyteNeutrophilsLow: checked ? '' : '1' })}

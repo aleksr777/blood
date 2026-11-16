@@ -1,3 +1,4 @@
+import { RadioOption } from '../radio-option/radio-option';
 import { FormTextarea } from '../form-input/form-input';
 import {
   ABO_OPTIONS,
@@ -26,6 +27,7 @@ export const RecipientExaminationFields = ({
   const setStatus = (status: string) =>
     onChange({
       alloimmuneAntibodyStatus: status,
+      ...(!status ? { alloimmuneAntibodies: '' } : {}),
     });
   return (
     <div className={styles.root}>
@@ -70,24 +72,22 @@ export const RecipientExaminationFields = ({
         <fieldset className={styles.antibodies}>
           <legend>Аллоиммунные антитела</legend>
           <div className={styles.radioGroup}>
-            <label className={styles.radio}>
-              <input
-                type="radio"
-                name="alloimmuneAntibodyStatus"
-                checked={values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.notFound}
-                onChange={() => setStatus(ANTIBODY_STATUS.notFound)}
-              />
-              <span>не найдены</span>
-            </label>
-            <label className={styles.radio}>
-              <input
-                type="radio"
-                name="alloimmuneAntibodyStatus"
-                checked={values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found}
-                onChange={() => setStatus(ANTIBODY_STATUS.found)}
-              />
-              <span>найдены</span>
-            </label>
+            <RadioOption
+              className={styles.radio}
+              name="alloimmuneAntibodyStatus"
+              checked={values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.notFound}
+              onChange={(checked) => setStatus(checked ? ANTIBODY_STATUS.notFound : '')}
+            >
+              не найдены
+            </RadioOption>
+            <RadioOption
+              className={styles.radio}
+              name="alloimmuneAntibodyStatus"
+              checked={values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found}
+              onChange={(checked) => setStatus(checked ? ANTIBODY_STATUS.found : '')}
+            >
+              найдены
+            </RadioOption>
           </div>
           {values.alloimmuneAntibodyStatus === ANTIBODY_STATUS.found && (
             <label className={styles.description}>

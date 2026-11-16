@@ -113,7 +113,6 @@ export const CustomSelectField = ({
             onClick={() => select(option)}
           >
             <span>{option || emptyLabel}</span>
-            {value === option && <span aria-hidden="true">✓</span>}
           </button>
         ))}
       </div>

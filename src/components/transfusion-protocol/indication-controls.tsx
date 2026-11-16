@@ -1,4 +1,4 @@
-import { FormTextarea } from '../form-input/form-input';
+import { FormCheckbox, FormTextarea } from '../form-input/form-input';
 import type { ReactNode } from 'react';
 import type { ProtocolValues } from './protocol-types';
 import styles from './indications-fields.module.css';
@@ -9,16 +9,15 @@ export type IndicationProps = {
 };
 
 type ChoiceProps = {
-  type: 'radio' | 'checkbox';
   name: string;
   checked: boolean;
   children: ReactNode;
   onChange: () => void;
 };
 
-export const Choice = ({ type, name, checked, children, onChange }: ChoiceProps) => (
+export const Choice = ({ name, checked, children, onChange }: ChoiceProps) => (
   <label className={styles.choice}>
-    <input type={type} name={name} checked={checked} onChange={onChange} />
+    <FormCheckbox name={name} checked={checked} onChange={onChange} />
     <span>{children}</span>
   </label>
 );
@@ -37,12 +36,7 @@ export const OtherChoice = ({
   onChange: (values: ProtocolValues) => void;
 }) => (
   <div>
-    <Choice
-      type="checkbox"
-      name={name}
-      checked={checked}
-      onChange={() => onChange({ [name]: checked ? '' : '1' })}
-    >
+    <Choice name={name} checked={checked} onChange={() => onChange({ [name]: checked ? '' : '1' })}>
       {label}
     </Choice>
     {checked && (

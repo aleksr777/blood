@@ -2,7 +2,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { GRANULOCYTE_NEUTROPHIL_INDICATION } from '../../domain/granulocyte-indications';
-import { INDICATION_FIELDS_BY_COMPONENT } from '../../storage/indication-fields';
 import { getProtocolBlockConfig } from './editor-config';
 import { GranulocyteIndications } from './indication-granulocyte-fields';
 import { formatIndications } from './indications-model';
@@ -52,7 +51,12 @@ it('expands the other-reason textarea and prints both indications in order', () 
 
 it('includes granulocyte fields in the protocol editor', () => {
   const names = getProtocolBlockConfig('donor').fields.map(({ name }) => name);
-  for (const field of INDICATION_FIELDS_BY_COMPONENT.granulocytes) {
+  for (const field of [
+    'indications',
+    'indicationGranulocyteNeutrophilsLow',
+    'indicationGranulocyteOther',
+    'indicationGranulocyteOtherText',
+  ]) {
     expect(names).toContain(field);
   }
 });

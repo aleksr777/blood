@@ -1,4 +1,4 @@
-import { FormInput, FormTextarea } from '../form-input/form-input';
+import { FormInput, FormTextarea, FormSelect } from '../form-input/form-input';
 import { useEffect, useState } from 'react';
 import Modal from '../modal/modal';
 import { DepartmentField } from '../transfusion-protocol/department-field';
@@ -61,7 +61,7 @@ export const RequestEditorModal = ({ title, fields, values, onChange, onClose }:
                 onChange={(event) => changeValue(field.name, event.target.value)}
               />
             ) : field.type === 'select' ? (
-              <select
+              <FormSelect
                 value={draft[field.name] ?? ''}
                 onChange={(event) => changeValue(field.name, event.target.value)}
               >
@@ -71,7 +71,7 @@ export const RequestEditorModal = ({ title, fields, values, onChange, onClose }:
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </FormSelect>
             ) : (
               <FormInput
                 type={field.type ?? 'text'}

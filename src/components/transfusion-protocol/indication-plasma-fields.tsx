@@ -23,7 +23,6 @@ export const PlasmaIndications = ({ values, onChange }: IndicationProps) => (
     {PLASMA_OPTIONS.map(([name, label]) => (
       <Choice
         key={name}
-        type="checkbox"
         name={name}
         checked={values[name] === '1'}
         onChange={() => onChange({ [name]: values[name] === '1' ? '' : '1' })}

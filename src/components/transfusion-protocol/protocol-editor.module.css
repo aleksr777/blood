@@ -90,6 +90,11 @@
   min-width: 0;
 }
 
+.departmentControl > input[readonly]:not(:disabled) {
+  background: var(--ui-surface);
+  color: var(--ui-text-strong);
+}
+
 .departmentControl > input:has(+ .historyToggle) {
   border-radius: var(--control-radius) 0 0 var(--control-radius);
 }
@@ -183,8 +188,10 @@
 }
 
 .historyRow {
+  --history-action-size: 26px;
+
   display: grid;
-  grid-template-columns: repeat(2, var(--button-height)) minmax(0, 1fr);
+  grid-template-columns: repeat(2, var(--history-action-size)) minmax(0, 1fr);
   align-items: center;
   gap: 0.15rem;
   min-height: var(--button-height);
@@ -222,9 +229,13 @@
 .historyEdit,
 .historyDelete,
 .historySave {
+  width: var(--history-action-size);
+  height: var(--history-action-size);
+  min-height: var(--history-action-size);
   border: 1px solid currentColor;
   border-radius: var(--ui-radius-small);
   background: var(--ui-surface);
+  font-size: 0.85rem;
   transition:
     background-color var(--ui-motion-fast) ease,
     color var(--ui-motion-fast) ease;

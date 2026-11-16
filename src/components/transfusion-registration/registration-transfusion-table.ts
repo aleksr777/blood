@@ -45,7 +45,12 @@ export const buildRegistrationTransfusionRow = (
   transfusionTime: record.values.startTime || record.values.endTime || '',
   doctorName: record.values.doctorName?.trim() ?? '',
   workerName: record.values.nurseName?.trim() ?? '',
-  complications: getComplicationsStatus(record.values) === COMPLICATIONS_STATUS.had ? 'Да' : 'Нет',
+  complications:
+    getComplicationsStatus(record.values) === COMPLICATIONS_STATUS.had
+      ? 'Да'
+      : getComplicationsStatus(record.values) === COMPLICATIONS_STATUS.none
+        ? 'Нет'
+        : '',
 });
 
 const rowOrderKey = (row: RegistrationTransfusionRow) => {

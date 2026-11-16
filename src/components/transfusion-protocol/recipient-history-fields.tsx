@@ -1,3 +1,4 @@
+import { RadioOption } from '../radio-option/radio-option';
 import { FormTextarea } from '../form-input/form-input';
 import { useEffect, useState } from 'react';
 import { PreviousTransfusionInput } from './previous-transfusion-input';
@@ -14,7 +15,6 @@ import {
 } from './recipient-history-model';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-history-fields.module.css';
-
 type Props = {
   applyDefaults?: boolean;
   values: ProtocolValues;
@@ -23,7 +23,6 @@ type Props = {
   showTransfusionHistory?: boolean;
   onChange: (values: ProtocolValues) => void;
 };
-
 const STATUS_OPTIONS = [
   [HISTORY_STATUS.none, 'Не было'],
   [HISTORY_STATUS.unknown, 'Не известно'],
@@ -145,15 +144,15 @@ export const RecipientHistoryFields = ({
 
                 <div className={styles.options}>
                   {STATUS_OPTIONS.map(([value, optionLabel]) => (
-                    <label key={value} className={styles.option}>
-                      <input
-                        type="radio"
-                        name={statusName}
-                        checked={status === value}
-                        onChange={() => changeStatus(statusName, value)}
-                      />
-                      <span>{optionLabel}</span>
-                    </label>
+                    <RadioOption
+                      key={value}
+                      className={styles.option}
+                      name={statusName}
+                      checked={status === value}
+                      onChange={(checked) => changeStatus(statusName, checked ? value : '')}
+                    >
+                      {optionLabel}
+                    </RadioOption>
                   ))}
                 </div>
 

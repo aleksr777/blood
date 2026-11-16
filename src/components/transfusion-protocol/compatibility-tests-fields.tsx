@@ -1,3 +1,4 @@
+import { RadioOption } from '../radio-option/radio-option';
 import { useEffect } from 'react';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { WarningNotice } from '../warning-notice/warning-notice';
@@ -7,13 +8,11 @@ import { updateReagentManufacturerFields } from './reagent-manufacturer-values';
 import { ProtocolFieldControl } from './protocol-field-control';
 import type { ProtocolValues } from './protocol-types';
 import styles from './compatibility-tests-fields.module.css';
-
 type Props = {
   applyDefaults?: boolean;
   values: ProtocolValues;
   onChange: (values: ProtocolValues) => void;
 };
-
 const DEFAULT_RESULTS = {
   confirmedRecipientAboResult: 'Подтверждено',
   confirmedDonorAboResult: 'Подтверждено',
@@ -63,7 +62,7 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
     if (!applyDefaults) return;
     const missingDefaults = Object.fromEntries(
       Object.entries(DEFAULT_RESULTS).filter(
-        ([name]) => !values[name] && (name !== 'planeTestResult' || isErythrocytes),
+        ([name]) => values[name] === undefined && (name !== 'planeTestResult' || isErythrocytes),
       ),
     );
 
@@ -120,7 +119,7 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
         {RADIO_GROUPS.map((group) => {
           if (group.name === 'planeTestResult' && !isErythrocytes) return null;
           const selected =
-            values[group.name] ||
+            values[group.name] ??
             (applyDefaults ? DEFAULT_RESULTS[group.name as keyof typeof DEFAULT_RESULTS] : '');
           const disabled = group.name === 'confirmedDonorAboResult' && !isErythrocytes;
 
@@ -134,13 +133,13 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
               <legend>{group.label}</legend>
               <div className={styles.options}>
                 {group.options.map((option) => (
-                  <label key={option} className={styles.option}>
-                    <input
-                      type="radio"
-                      name={group.name}
-                      checked={selected === option}
-                      onChange={() => change(group.name, option)}
-                    />
+                  <RadioOption
+                    key={option}
+                    className={styles.option}
+                    name={group.name}
+                    checked={selected === option}
+                    onChange={(checked) => change(group.name, checked ? option : '')}
+                  >
                     <span
                       className={
                         option === 'Не подтверждено' && selected === option
@@ -150,7 +149,7 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
                     >
                       {option}
                     </span>
-                  </label>
+                  </RadioOption>
                 ))}
               </div>
             </fieldset>

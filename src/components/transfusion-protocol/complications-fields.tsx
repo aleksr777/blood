@@ -1,3 +1,4 @@
+import { RadioOption } from '../radio-option/radio-option';
 import { useEffect } from 'react';
 import { ProtocolFieldControl } from './protocol-field-control';
 import { COMPLICATIONS_STATUS, getComplicationsStatus } from './complications-model';
@@ -44,30 +45,33 @@ export const ComplicationsFields = ({ values, onChange, applyDefaults = true }: 
       <fieldset className={styles.statusGroup}>
         <legend>Реакции и осложнения</legend>
         <div className={styles.options}>
-          <label className={styles.option}>
-            <input
-              type="radio"
-              name="complicationsStatus"
-              checked={status === COMPLICATIONS_STATUS.none}
-              onChange={() => onChange({ complicationsStatus: COMPLICATIONS_STATUS.none })}
-            />
-            <span>Не было</span>
-          </label>
-
-          <label className={styles.option}>
-            <input
-              type="radio"
-              name="complicationsStatus"
-              checked={status === COMPLICATIONS_STATUS.had}
-              onChange={() =>
-                onChange({
-                  complicationsStatus: COMPLICATIONS_STATUS.had,
-                  severity: values.severity || DEFAULT_SEVERITY,
-                })
-              }
-            />
-            <span>Были</span>
-          </label>
+          <RadioOption
+            className={styles.option}
+            name="complicationsStatus"
+            checked={status === COMPLICATIONS_STATUS.none}
+            onChange={(checked) =>
+              onChange({ complicationsStatus: checked ? COMPLICATIONS_STATUS.none : '' })
+            }
+          >
+            Не было
+          </RadioOption>
+          <RadioOption
+            className={styles.option}
+            name="complicationsStatus"
+            checked={status === COMPLICATIONS_STATUS.had}
+            onChange={(checked) =>
+              onChange(
+                checked
+                  ? {
+                      complicationsStatus: COMPLICATIONS_STATUS.had,
+                      severity: values.severity || DEFAULT_SEVERITY,
+                    }
+                  : { complicationsStatus: '' },
+              )
+            }
+          >
+            Были
+          </RadioOption>
         </div>
       </fieldset>
 

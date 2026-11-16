@@ -57,6 +57,17 @@ const GENERATED_TRANSFUSION_HISTORY_FIELDS = new Set([
   'previousTransfusions',
 ]);
 
+const LEGACY_HISTORY_TEXT: Record<string, string> = {
+  previousTransfusionsStatus: 'previousTransfusions',
+  previousReactionsStatus: 'previousReactions',
+  individualSelectionHistoryStatus: 'individualSelectionHistory',
+};
+
+const keepClearedHistoryStatus = (field: string, values: ProtocolValuesRecord) =>
+  field in LEGACY_HISTORY_TEXT &&
+  values[field] === '' &&
+  Boolean(values[LEGACY_HISTORY_TEXT[field]]?.trim());
+
 export const profileFromValues = (values: ProtocolValuesRecord) => {
   const hasGeneratedTransfusionHistory = Boolean(values.previousTransfusionsAutoText?.trim());
 
@@ -66,7 +77,9 @@ export const profileFromValues = (values: ProtocolValuesRecord) => {
         return [];
       }
 
-      return values[field] ? [[field, values[field]]] : [];
+      return values[field] || keepClearedHistoryStatus(field, values)
+        ? [[field, values[field]]]
+        : [];
     }),
   );
 };
@@ -85,7 +98,7 @@ export const mergeProfileValues = (
     }
 
     const value = values[field];
-    if (value) next[field] = value;
+    if (value || keepClearedHistoryStatus(field, { ...next, ...values })) next[field] = value;
     else delete next[field];
   });
 

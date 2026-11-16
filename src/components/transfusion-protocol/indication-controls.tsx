@@ -9,7 +9,7 @@ export type IndicationProps = {
 };
 
 type ChoiceProps = {
-  type: 'radio' | 'checkbox';
+  type: 'checkbox';
   name: string;
   checked: boolean;
   children: ReactNode;

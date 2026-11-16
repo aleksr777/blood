@@ -3,11 +3,9 @@ import { LabeledCell, SectionTitle } from './form-controls';
 import { MonitorTable } from './monitor-table';
 import type { ProtocolPageProps, ProtocolValues } from './protocol-types';
 import { formatDate } from './protocol-types';
-
 type ChunkProps = ProtocolPageProps & {
   part: string;
 };
-
 const REAGENT_ROWS = [
   {
     title: 'Цоликлон "анти-A"',
@@ -62,12 +60,13 @@ const LegacyReagentDetails = ({ values }: { values: ProtocolValues }) => (
 
 export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
   const detailedReagents = hasDetailedReagents(values);
-  const recipientAboConfirmed =
-    (values.confirmedRecipientAboResult || 'Подтверждено') === 'Подтверждено';
-  const donorAboConfirmed = (values.confirmedDonorAboResult || 'Подтверждено') === 'Подтверждено';
+  const recipientResult = values.confirmedRecipientAboResult ?? 'Подтверждено';
+  const donorResult = values.confirmedDonorAboResult ?? 'Подтверждено';
+  const recipientAboConfirmed = recipientResult === 'Подтверждено';
+  const donorAboConfirmed = donorResult === 'Подтверждено';
   const isErythrocytes = values.componentGroup === 'erythrocytes';
-  const planeTestResult = values.planeTestResult || 'Совместимо';
-  const biologicalTestResult = values.biologicalTestResult || 'Совместимо';
+  const planeTestResult = values.planeTestResult ?? 'Совместимо';
+  const biologicalTestResult = values.biologicalTestResult ?? 'Совместимо';
 
   return (
     <tbody
@@ -119,12 +118,12 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
               <span
                 className={[
                   'compatibility-inline-value',
-                  recipientAboConfirmed ? '' : 'compatibility-inline-value--below',
+                  recipientResult === 'Не подтверждено' ? 'compatibility-inline-value--below' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
               >
-                {recipientAboConfirmed ? values.recipientAbo : 'Не подтверждено'}
+                {recipientAboConfirmed ? values.recipientAbo : recipientResult}
               </span>
             </div>
           </td>
@@ -138,12 +137,12 @@ export const CompatibilityTestsBlock = ({ values, onOpenBlock, part }: ChunkProp
                 <span
                   className={[
                     'compatibility-inline-value',
-                    donorAboConfirmed ? '' : 'compatibility-inline-value--below',
+                    donorResult === 'Не подтверждено' ? 'compatibility-inline-value--below' : '',
                   ]
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  {donorAboConfirmed ? values.donorAbo : 'Не подтверждено'}
+                  {donorAboConfirmed ? values.donorAbo : donorResult}
                 </span>
               </div>
             </td>
@@ -191,7 +190,7 @@ export const ComplicationsBlock = ({ values, onOpenBlock, part }: ChunkProps) =>
             <div className="cell-value">Не было</div>
           </td>
         </tr>
-      ) : (
+      ) : status === COMPLICATIONS_STATUS.had ? (
         <tr className="row-complications">
           <LabeledCell
             colSpan={3}
@@ -206,7 +205,7 @@ export const ComplicationsBlock = ({ values, onOpenBlock, part }: ChunkProps) =>
             value={values.severity}
           />
         </tr>
-      )}
+      ) : null}
     </tbody>
   );
 };

@@ -169,8 +169,8 @@ it('сохраняет новые графы приложения № 17 чер�
   fireEvent.change(dialog.getByLabelText('Код показания к трансфузии (графа 8)'), {
     target: { value: '1.1' },
   });
-  fireEvent.change(dialog.getByLabelText('Код показания для индивидуального подбора (графа 10)'), {
-    target: { value: '3' },
+  fireEvent.change(dialog.getByRole('textbox', { name: /Показание для индивидуального подбора/ }), {
+    target: { value: '3 — Аллоиммунные антитела к эритроцитам' },
   });
   fireEvent(screen.getByRole('dialog'), new Event('cancel', { bubbles: true, cancelable: true }));
 

@@ -40,6 +40,8 @@ export const TRANSFUSION_INDICATIONS: IndicationOption[] = [
   { code: '6', type: 'granulocytes', label: 'Нейтрофилы < 0,5 × 10⁹/л' },
 ];
 
+export const INDIVIDUAL_SELECTION_REASON_CATEGORY = 'individualSelectionReason';
+
 export const INDIVIDUAL_SELECTION_INDICATIONS = [
   { code: '1', label: 'Гемолитические посттрансфузионные осложнения' },
   { code: '2', label: 'Беременность с признаками гемолитической болезни новорожденного' },

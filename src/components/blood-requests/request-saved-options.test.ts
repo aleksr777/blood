@@ -55,3 +55,29 @@ it('does not add a code-less draft to the coded options list', async () => {
     expect.any(String),
   );
 });
+
+it.each([
+  { individualSelectionRequired: 'yes', individualSelectionCode: 'Своя причина' },
+  { individualSelectionIndications: 'Своя причина' },
+])('saves a custom reason to the shared list on document save', async (reason) => {
+  await persistRequestOptions(
+    { ...reason, indicationValues: { componentGroup: 'erythrocytes' } },
+    [],
+  );
+  expect(rememberSavedOption).toHaveBeenCalledWith('individualSelectionReason', 'Своя причина');
+});
+
+it.each([
+  { individualSelectionRequired: 'yes', individualSelectionCode: '3' },
+  { individualSelectionIndications: 'Аллоиммунные антитела к эритроцитам' },
+  { individualSelectionRequired: 'no', individualSelectionCode: 'Скрытая причина' },
+])('does not save official or inactive reasons as custom options', async (reason) => {
+  await persistRequestOptions(
+    { ...reason, indicationValues: { componentGroup: 'erythrocytes' } },
+    [],
+  );
+  expect(rememberSavedOption).not.toHaveBeenCalledWith(
+    'individualSelectionReason',
+    expect.any(String),
+  );
+});

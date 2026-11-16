@@ -107,12 +107,12 @@ it('preserves direction inputs through deselecting and reselecting the group', (
   fireEvent.click(erythrocytes);
   expect(screen.getByTestId('local').textContent).toContain('Отмытые эритроциты');
   expect(screen.getByTestId('local').textContent).toContain('Причина подбора');
-  const reason = screen.getByRole('combobox', { name: 'Показания для индивидуального подбора' });
+  const reason = screen.getByRole('textbox', { name: 'Показания для индивидуального подбора' });
   expect(reason.matches(':disabled')).toBe(true);
   fireEvent.click(erythrocytes);
   const name = screen.getByRole('textbox', {
     name: 'Наименование компонента донорской крови',
   }) as HTMLInputElement;
   expect(name.value).toBe('Отмытые эритроциты');
-  expect((reason as HTMLSelectElement).value).toBe('Причина подбора');
+  expect((reason as HTMLInputElement).value).toBe('Причина подбора');
 });

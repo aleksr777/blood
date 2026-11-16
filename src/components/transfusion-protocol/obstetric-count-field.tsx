@@ -106,7 +106,6 @@ export const ObstetricCountField = ({ name, label, value, maximum, onChange }: P
                 onClick={() => select(option)}
               >
                 <span>{obstetricCountLabel(option)}</span>
-                {draft === obstetricCountLabel(option) && <span aria-hidden="true">✓</span>}
               </button>
             ))}
         </div>

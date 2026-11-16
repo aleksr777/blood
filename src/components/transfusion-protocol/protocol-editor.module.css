@@ -90,6 +90,11 @@
   min-width: 0;
 }
 
+.departmentControl > input[readonly]:not(:disabled) {
+  background: var(--ui-surface);
+  color: var(--ui-text-strong);
+}
+
 .departmentControl > input:has(+ .historyToggle) {
   border-radius: var(--control-radius) 0 0 var(--control-radius);
 }

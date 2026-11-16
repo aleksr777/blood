@@ -64,7 +64,7 @@ it('restores read-only state for an already selected built-in option', () => {
   );
 });
 
-it('allows direct editing without controls or an empty option when there are no fixed options', async () => {
+it('allows direct editing and offers list controls when there are no fixed options', async () => {
   render(<Field withFixed={false} />);
   const input = screen.getByRole('textbox', { name: 'Показание' }) as HTMLInputElement;
   toggle();
@@ -73,8 +73,8 @@ it('allows direct editing without controls or an empty option when there are no 
   fireEvent.change(input, { target: { value: 'Изменённый вариант' } });
   expect(input.value).toBe('Изменённый вариант');
   toggle();
-  expect(screen.queryByRole('button', { name: 'Изменить значение' })).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Удалить значение' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Изменить значение' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Удалить значение' })).toBeTruthy();
   expect(screen.queryByRole('button', { name: 'Очистить поле: Показание' })).toBeNull();
   expect(storage.rename).not.toHaveBeenCalled();
   expect(storage.remove).not.toHaveBeenCalled();

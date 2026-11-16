@@ -45,7 +45,7 @@ it('clears a selected option, focuses the field, and keeps saved options availab
   expect(screen.getByRole('button', { name: 'Сохранённое' })).toBeTruthy();
 });
 
-it('allows direct editing of a chosen department without extra controls or a blank option', async () => {
+it('allows direct editing of a chosen department and offers controls without a blank option', async () => {
   const Field = () => {
     const [value, setValue] = useState('');
     return <DepartmentField value={value} onChange={setValue} />;
@@ -61,7 +61,7 @@ it('allows direct editing of a chosen department without extra controls or a bla
   expect(input.value).toBe('ОРИТ 2');
   fireEvent.click(toggle);
   expect(screen.queryByRole('button', { name: 'Очистить поле: Отделение' })).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Изменить значение' })).toBeNull();
-  expect(screen.queryByRole('button', { name: 'Удалить значение' })).toBeNull();
+  expect(screen.getByRole('button', { name: 'Изменить значение' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Удалить значение' })).toBeTruthy();
   expect(screen.getByRole('button', { name: 'ОРИТ' })).toBeTruthy();
 });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   loadSavedOptions,
   removeSavedOption,
@@ -6,9 +6,16 @@ import {
   subscribeSavedOptions,
   type SavedOptionRecord,
 } from '../../storage/repositories/saved-options';
-import { loadDepartments } from '../../storage/repositories/departments';
+import {
+  loadDepartments,
+  removeDepartment,
+  renameDepartment,
+  type DepartmentRecord,
+} from '../../storage/repositories/departments';
 
 const normalize = (value: string) => value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ru-RU');
+const departmentOptions = (rows: DepartmentRecord[]) =>
+  rows.map(({ id, name }) => ({ id, value: name }));
 
 type Props = {
   category: string;
@@ -21,12 +28,14 @@ type Props = {
 export const useSavedOptions = ({ category, value, onChange, isolated, departments }: Props) => {
   const [items, setItems] = useState<SavedOptionRecord[]>([]);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const currentValue = useRef(value);
+  currentValue.current = value;
 
   useEffect(() => {
     let active = true;
     setStatus('loading');
     const load = departments
-      ? loadDepartments().then((rows) => rows.map(({ id, name }) => ({ id, value: name })))
+      ? loadDepartments().then(departmentOptions)
       : loadSavedOptions(category);
     void load
       .then((nextItems) => {
@@ -56,17 +65,28 @@ export const useSavedOptions = ({ category, value, onChange, isolated, departmen
   }, [category, value, onChange, isolated, departments]);
 
   const rename = async (item: SavedOptionRecord, nextValue: string) => {
-    if (isolated) return;
     try {
-      await renameSavedOption(category, item.id, nextValue.trim());
+      const trimmed = nextValue.trim().replace(/\s+/g, ' ');
+      if (departments) {
+        setItems(departmentOptions(await renameDepartment(item.id, trimmed)));
+      } else {
+        await renameSavedOption(category, item.id, trimmed);
+      }
+      if ((departments || isolated) && normalize(currentValue.current) === normalize(item.value))
+        onChange(trimmed, item.value);
     } catch (error) {
       console.error(`Не удалось изменить значение ${category}:`, error);
     }
   };
   const remove = async (item: SavedOptionRecord) => {
-    if (isolated) return;
     try {
-      await removeSavedOption(category, item.id);
+      if (departments) {
+        setItems(departmentOptions(await removeDepartment(item.id)));
+      } else {
+        await removeSavedOption(category, item.id);
+      }
+      if ((departments || isolated) && normalize(currentValue.current) === normalize(item.value))
+        onChange('', item.value);
     } catch (error) {
       console.error(`Не удалось удалить значение ${category}:`, error);
     }

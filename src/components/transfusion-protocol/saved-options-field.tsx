@@ -115,7 +115,7 @@ export const SavedOptionsField = ({
         ) : (
           editableItems.map((item) => (
             <SavedOptionItem
-              editable={hasFixedOptions && !isolated}
+              editable
               key={item.id}
               item={item}
               label={label}

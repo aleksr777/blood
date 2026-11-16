@@ -11,12 +11,19 @@ import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { componentCatalogForGroup } from './component-request-catalog';
 import { codedComponentOptionCategory, formatCodedComponent } from '../../domain/coded-component';
 import type { RequestEditorField } from './request-editor-modal';
+import {
+  INDIVIDUAL_SELECTION_INDICATIONS,
+  INDIVIDUAL_SELECTION_REASON_CATEGORY,
+} from './component-request-447n';
 
 type RequestOptionValues = {
   department?: string;
   requiredComponent?: string;
   componentCode?: string;
   indicationValues?: ProtocolValues;
+  individualSelectionRequired?: string;
+  individualSelectionCode?: string;
+  individualSelectionIndications?: string;
 };
 
 export const persistRequestOptions = (
@@ -35,6 +42,23 @@ export const persistRequestOptions = (
       ? [{ category: savedOptionsCategory, value }]
       : [];
   });
+  const selectionReason =
+    values.individualSelectionRequired === undefined
+      ? values.individualSelectionIndications
+      : values.individualSelectionRequired === 'yes'
+        ? values.individualSelectionCode
+        : '';
+  if (
+    group &&
+    selectionReason &&
+    !INDIVIDUAL_SELECTION_INDICATIONS.some(({ code }) => code === selectionReason)
+  ) {
+    choices.push({
+      category: INDIVIDUAL_SELECTION_REASON_CATEGORY,
+      value: selectionReason,
+      fixedOptions: INDIVIDUAL_SELECTION_INDICATIONS.map(({ label }) => label),
+    });
+  }
   if (componentCategory && values.requiredComponent) {
     choices.push({
       category: componentCategory,

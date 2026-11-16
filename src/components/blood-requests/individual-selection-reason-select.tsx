@@ -1,34 +1,45 @@
 import {
   INDIVIDUAL_SELECTION_INDICATIONS,
+  INDIVIDUAL_SELECTION_REASON_CATEGORY,
   individualSelectionReasonLabel,
 } from './component-request-447n';
+import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import styles from './individual-selection-component-modal.module.css';
 
 type Props = {
   value: string;
+  coded?: boolean;
   onChange: (value: string) => void;
 };
 
-export const IndividualSelectionReasonSelect = ({ value, onChange }: Props) => {
-  const selected = individualSelectionReasonLabel(value);
-  const isKnown = INDIVIDUAL_SELECTION_INDICATIONS.some(({ label }) => label === selected);
+export const IndividualSelectionReasonSelect = ({ value, coded = false, onChange }: Props) => {
+  const fixedOptions = INDIVIDUAL_SELECTION_INDICATIONS.map(({ code, label }) =>
+    coded ? `${code} — ${label}` : label,
+  );
+  const known = INDIVIDUAL_SELECTION_INDICATIONS.find(({ code }) => code === value);
+  const selected =
+    coded && known ? `${known.code} — ${known.label}` : individualSelectionReasonLabel(value);
+  const label = coded
+    ? 'Показание для индивидуального подбора (графа 10)'
+    : 'Показания для индивидуального подбора';
 
   return (
-    <label className={styles.wide}>
-      <span>Показания для индивидуального подбора</span>
-      <select
-        name="individualSelectionIndications"
+    <div className={styles.wide}>
+      <span>{label}</span>
+      <SavedOptionsField
+        name={coded ? 'individualSelectionCode' : 'individualSelectionIndications'}
+        label={label}
+        category={INDIVIDUAL_SELECTION_REASON_CATEGORY}
         value={selected}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        <option value="">Выберите показание</option>
-        {selected && !isKnown && <option value={selected}>{selected}</option>}
-        {INDIVIDUAL_SELECTION_INDICATIONS.map(({ code, label }) => (
-          <option key={code} value={label}>
-            {label}
-          </option>
-        ))}
-      </select>
-    </label>
+        fixedOptions={fixedOptions}
+        wrapOptions
+        onChange={(next) => {
+          const match = INDIVIDUAL_SELECTION_INDICATIONS.find(
+            ({ code, label: text }) => next === `${code} — ${text}` || next === text,
+          );
+          onChange(match ? (coded ? match.code : match.label) : next);
+        }}
+      />
+    </div>
   );
 };

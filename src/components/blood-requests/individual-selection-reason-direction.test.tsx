@@ -56,11 +56,12 @@ afterEach(() => {
 it('stores and prints only the description when a direction indication is chosen', async () => {
   const { container } = render(<IndividualSelectionDirection />);
   fireEvent.click(screen.getByRole('button', { name: /Наименование требуемого компонента:/ }));
-  const choice = screen.getByRole('combobox', {
-    name: 'Показания для индивидуального подбора',
-  }) as HTMLSelectElement;
-  expect(Array.from(choice.options).some((option) => option.textContent === '3')).toBe(false);
-  fireEvent.change(choice, { target: { value: description } });
+  fireEvent.click(
+    screen.getByRole('button', {
+      name: 'Показать сохранённые варианты: Показания для индивидуального подбора',
+    }),
+  );
+  fireEvent.click(screen.getByRole('button', { name: description }));
   await waitFor(() => {
     const draft = JSON.parse(window.localStorage.getItem(storageKey)!);
     expect(draft.individualSelectionIndications).toBe(description);

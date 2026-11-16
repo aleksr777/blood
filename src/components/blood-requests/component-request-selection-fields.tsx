@@ -1,5 +1,5 @@
 import { Choice } from '../transfusion-protocol/indication-controls';
-import { INDIVIDUAL_SELECTION_INDICATIONS } from './component-request-447n';
+import { IndividualSelectionReasonSelect } from './individual-selection-reason-select';
 import type { ComponentRequestDetailsValues } from './component-request-details-types';
 import styles from './component-request-details-modal.module.css';
 
@@ -32,21 +32,13 @@ export const ComponentRequestIndividualSelectionFields = ({ values, onChange }: 
       </Choice>
     </div>
     {values.individualSelectionRequired === 'yes' && (
-      <label className={styles.selectionReason}>
-        <span>Код показания для индивидуального подбора (графа 10)</span>
-        <select
-          name="individualSelectionCode"
+      <div className={styles.selectionReason}>
+        <IndividualSelectionReasonSelect
+          coded
           value={values.individualSelectionCode}
-          onChange={(event) => onChange({ individualSelectionCode: event.target.value })}
-        >
-          <option value="">Выберите показание</option>
-          {INDIVIDUAL_SELECTION_INDICATIONS.map(({ code, label }) => (
-            <option key={code} value={code}>
-              {code} — {label}
-            </option>
-          ))}
-        </select>
-      </label>
+          onChange={(value) => onChange({ individualSelectionCode: value })}
+        />
+      </div>
     )}
   </fieldset>
 );

@@ -7,22 +7,25 @@ import type { ProtocolValues } from './protocol-types';
 export const DonorComponentRow = ({ values }: { values: ProtocolValues }) => {
   const isErythrocytes =
     selectedBloodComponentGroup(values, values.componentName) === 'erythrocytes';
+  const cellSpan = isErythrocytes ? 2 : 3;
   return (
     <tr>
       <LabeledCell
-        colSpan={2}
+        colSpan={cellSpan}
+        className={`span-${cellSpan}`}
         label="N единицы компонента крови"
         value={formatComponentUnitNumber(values.componentUnitNumber)}
       />
       <LabeledCell
-        colSpan={isErythrocytes ? 1 : 4}
+        colSpan={cellSpan}
+        className={`span-${cellSpan}`}
         label="Количество (мл)"
         value={values.amountMl}
       />
       {isErythrocytes && (
         <LabeledCell
-          colSpan={3}
-          className="span-3"
+          colSpan={cellSpan}
+          className={`span-${cellSpan}`}
           label="Антигены эритроцитов донора"
           value={formatDonorAntigensForComponent(values)}
         />

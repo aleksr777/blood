@@ -56,7 +56,7 @@ it('respects explicitly selected group but supports erythrocyte legacy names', (
   expect(formatDonorAntigensForComponent(legacy)).toBe('C- K+');
 });
 
-it('does not print retained donor antigen values for non-erythrocyte components', () => {
+it('shows the donor antigen cell only for erythrocytes while retaining its values', () => {
   const renderBlock = (group: string) => (
     <table>
       <DonorBlock
@@ -70,8 +70,11 @@ it('does not print retained donor antigen values for non-erythrocyte components'
   const antigenValue = () =>
     screen.getByText('Антигены эритроцитов донора:').closest('td')?.textContent;
   expect(antigenValue()).toContain('C- K+');
-  rerender(renderBlock('platelets'));
-  expect(antigenValue()).not.toContain('C- K+');
+  for (const group of ['platelets', 'plasma-cryo', 'granulocytes', '']) {
+    rerender(renderBlock(group));
+    expect(screen.queryByText('Антигены эритроцитов донора:')).toBeNull();
+    expect(screen.getByText('Количество (мл):').closest('td')?.getAttribute('colspan')).toBe('4');
+  }
   rerender(renderBlock('erythrocytes'));
   expect(antigenValue()).toContain('C- K+');
 });

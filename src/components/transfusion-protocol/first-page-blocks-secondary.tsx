@@ -1,6 +1,5 @@
 import { visibleProtocolComponentValues } from '../../domain/blood-components';
-import { formatComponentUnitNumber } from './component-unit-number';
-import { formatDonorAntigensForComponent } from './donor-model';
+import { DonorComponentRow } from './donor-component-row';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatIndications } from './indications-model';
 import {
@@ -127,20 +126,7 @@ const DonorBlockContents = ({ values, onOpenBlock, part }: ChunkProps) => (
             value={formatRh(values.donorRh)}
           />
         </tr>
-        <tr>
-          <LabeledCell
-            colSpan={2}
-            label="N единицы компонента крови"
-            value={formatComponentUnitNumber(values.componentUnitNumber)}
-          />
-          <LabeledCell colSpan={1} label="Количество (мл)" value={values.amountMl} />
-          <LabeledCell
-            colSpan={3}
-            className="span-3"
-            label="Антигены эритроцитов донора"
-            value={formatDonorAntigensForComponent(values)}
-          />
-        </tr>
+        <DonorComponentRow values={values} />
       </>
     )}
     {part === 'dates' && (

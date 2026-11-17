@@ -69,11 +69,21 @@ it('shows the donor antigen cell only for erythrocytes while retaining its value
   const { rerender } = render(renderBlock('erythrocytes'));
   const antigenValue = () =>
     screen.getByText('Антигены эритроцитов донора:').closest('td')?.textContent;
+  const rowCells = () =>
+    Array.from(screen.getByText('Количество (мл):').closest('tr')?.querySelectorAll('td') ?? []);
   expect(antigenValue()).toContain('C- K+');
+  expect(rowCells().map((cell) => [cell.colSpan, cell.className])).toEqual([
+    [2, 'span-2'],
+    [2, 'span-2'],
+    [2, 'span-2'],
+  ]);
   for (const group of ['platelets', 'plasma-cryo', 'granulocytes', '']) {
     rerender(renderBlock(group));
     expect(screen.queryByText('Антигены эритроцитов донора:')).toBeNull();
-    expect(screen.getByText('Количество (мл):').closest('td')?.getAttribute('colspan')).toBe('4');
+    expect(rowCells().map((cell) => [cell.colSpan, cell.className])).toEqual([
+      [3, 'span-3'],
+      [3, 'span-3'],
+    ]);
   }
   rerender(renderBlock('erythrocytes'));
   expect(antigenValue()).toContain('C- K+');

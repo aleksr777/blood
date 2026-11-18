@@ -227,6 +227,7 @@ export const ComponentRequest = () => {
   const documentState = useDocumentState<DirectionDraft>(
     () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
     cleanComponentRequestDraft,
+    'blood:component-request-working-save',
   );
   const {
     values: draft,
@@ -417,6 +418,7 @@ export const ComponentRequest = () => {
 
   const clear = async () => {
     if (documentState.isActive() || !hasContent) return;
+    documentState.clearWorkingSave();
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
     const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
@@ -437,7 +439,6 @@ export const ComponentRequest = () => {
         });
         await persistRequestOptions(draftRef.current, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
         documentState.open(record, draftFromRecord(record.values), 'edit');
-        documentState.setWorkingValues(cleanComponentRequestDraft);
         setEditor(null);
         setStatus('Изменения сохранены в исходном бланке.');
         return true;
@@ -446,6 +447,7 @@ export const ComponentRequest = () => {
         return false;
       }
     }
+    if (!documentState.workingHasChanges) return true;
     await pendingProfileUpdateRef.current;
     const recipient = readCurrentRecipient();
     if (!recipient) {
@@ -466,6 +468,10 @@ export const ComponentRequest = () => {
 
       const record = await saveBloodRequestRecord({
         recipientId: recipient.id,
+        recordId:
+          documentState.workingRecord?.recipientId === recipient.id
+            ? documentState.workingRecord.id
+            : undefined,
         kind: 'component-request',
         values: { ...draftToSave },
       });
@@ -473,8 +479,7 @@ export const ComponentRequest = () => {
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);
-      documentState.open(record, draftToSave, 'edit');
-      documentState.setWorkingValues(cleanComponentRequestDraft(draftToSave));
+      documentState.markWorkingSaved(record, draftToSave);
       setStatus('Заявка сохранена.');
       return true;
     } catch (error) {
@@ -488,7 +493,8 @@ export const ComponentRequest = () => {
     ++profileEditVersionRef.current;
     try {
       documentState.close();
-      await switchCurrentRecipient(recipient);
+      const result = await switchCurrentRecipient(recipient);
+      if (result.changed) documentState.clearWorkingSave();
       await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
@@ -680,7 +686,12 @@ export const ComponentRequest = () => {
               type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
+              disabled={
+                !hasContent ||
+                (documentState.active
+                  ? !documentState.hasChanges
+                  : !documentState.workingHasChanges)
+              }
             >
               Сохранить
             </button>

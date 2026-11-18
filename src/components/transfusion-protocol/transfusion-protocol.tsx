@@ -12,14 +12,11 @@ import { ProtocolToolbar } from './protocol-toolbar';
 import { RecipientDatabaseModal } from './recipient-database-modal';
 import { ContinuationPage } from './second-page';
 import { useProtocolWorkspace } from './use-protocol-workspace';
-
 const INITIAL_PAGES: ProtocolChunkId[][] = [
   PROTOCOL_CHUNK_ORDER.slice(0, 9),
   PROTOCOL_CHUNK_ORDER.slice(9),
 ];
-
 const PAGE_FIT_TOLERANCE_PX = 2;
-
 const samePages = (left: ProtocolChunkId[][], right: ProtocolChunkId[][]) =>
   left.length === right.length &&
   left.every(
@@ -27,7 +24,6 @@ const samePages = (left: ProtocolChunkId[][], right: ProtocolChunkId[][]) =>
       page.length === right[pageIndex]?.length &&
       page.every((chunkId, chunkIndex) => chunkId === right[pageIndex][chunkIndex]),
   );
-
 export const TransfusionProtocol = () => {
   const workspace = useProtocolWorkspace();
   const original = workspace.document.originalValues;
@@ -48,7 +44,6 @@ export const TransfusionProtocol = () => {
     open: workspace.registryOpen,
     onOpen: () => workspace.setRegistryOpen(true),
   });
-
   useLayoutEffect(() => {
     const root = document.documentElement;
     root.dataset.protocolPrintBlocked = String(Boolean(workspace.hemaconWarning));
@@ -56,44 +51,35 @@ export const TransfusionProtocol = () => {
       delete root.dataset.protocolPrintBlocked;
     };
   }, [workspace.hemaconWarning]);
-
   useLayoutEffect(() => {
     const sheets = sheetsRef.current;
     if (!sheets) return undefined;
-
     const updatePagination = () => {
       const firstSheet = sheets.querySelector<HTMLElement>('.sheet--first');
       const continuationSheet = sheets.querySelector<HTMLElement>('.sheet--continuation');
       if (!firstSheet || !continuationSheet) return;
-
       const chunks = new Map<ProtocolChunkId, HTMLElement>();
       sheets.querySelectorAll<HTMLElement>('[data-protocol-chunk]').forEach((element) => {
         const chunkId = element.dataset.protocolChunk as ProtocolChunkId | undefined;
         if (chunkId) chunks.set(chunkId, element);
       });
-
       const firstChunk = chunks.get(PROTOCOL_CHUNK_ORDER[0]);
       if (!firstChunk || chunks.size !== PROTOCOL_CHUNK_ORDER.length) return;
-
       const firstStyle = window.getComputedStyle(firstSheet);
       const continuationStyle = window.getComputedStyle(continuationSheet);
       const firstZoom = Number.parseFloat(firstStyle.getPropertyValue('zoom')) || 1;
       const continuationZoom = Number.parseFloat(continuationStyle.getPropertyValue('zoom')) || 1;
-
       const firstPaddingBottom = Number.parseFloat(firstStyle.paddingBottom) * firstZoom;
       const firstCapacity =
         firstSheet.getBoundingClientRect().bottom -
         firstPaddingBottom -
         firstChunk.getBoundingClientRect().top;
-
       const continuationCapacity =
         (continuationSheet.clientHeight -
           Number.parseFloat(continuationStyle.paddingTop) -
           Number.parseFloat(continuationStyle.paddingBottom)) *
         continuationZoom;
-
       if (firstCapacity <= 0 || continuationCapacity <= 0) return;
-
       const nextPages: ProtocolChunkId[][] = [];
       let currentPage: ProtocolChunkId[] = [];
       let currentHeight = 0;
@@ -198,6 +184,7 @@ export const TransfusionProtocol = () => {
     >
       <ProtocolToolbar
         hasContent={workspace.hasContent}
+        workingHasChanges={workspace.document.workingHasChanges}
         document={workspace.document}
         documentTitle={savedDocumentTitle('protocol', workspace.values)}
         onReturnToList={savedList.returnToList}

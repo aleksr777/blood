@@ -60,3 +60,24 @@ it('keeps the working draft intact when editing is cancelled or another archive 
   );
   expect(result.current.workingValues).toEqual(working);
 });
+
+it('keeps a saved working form in draft mode and tracks later edits', () => {
+  const { result, unmount } = renderHook(() =>
+    useDocumentState(() => ({ ...working }), undefined, 'test:working-save'),
+  );
+  act(() => result.current.markWorkingSaved({ id: 42, recipientId: 1 }, working));
+  expect(result.current.mode).toBe('draft');
+  expect(result.current.values).toEqual(working);
+  expect(result.current.workingHasChanges).toBe(false);
+  act(() => result.current.setValues((values) => ({ ...values, doctorName: 'Другой врач' })));
+  expect(result.current.workingHasChanges).toBe(true);
+  expect(result.current.workingRecord?.id).toBe(42);
+  unmount();
+  const restored = renderHook(() =>
+    useDocumentState(() => ({ ...working }), undefined, 'test:working-save'),
+  );
+  expect(restored.result.current.workingHasChanges).toBe(false);
+  expect(restored.result.current.workingRecord?.id).toBe(42);
+  act(() => restored.result.current.clearWorkingSave());
+  expect(restored.result.current.workingRecord).toBeNull();
+});

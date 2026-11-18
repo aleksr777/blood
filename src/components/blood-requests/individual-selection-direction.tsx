@@ -234,6 +234,7 @@ export const IndividualSelectionDirection = () => {
   const documentState = useDocumentState<DirectionDraft>(
     () => (initialStored.id === null ? initialStored.draft : emptyDraft()),
     clearIndividualSelectionStaff,
+    'blood:individual-direction-working-save',
   );
   const {
     values: draft,
@@ -433,6 +434,7 @@ export const IndividualSelectionDirection = () => {
   };
   const clear = async () => {
     if (documentState.isActive() || !canClear) return;
+    documentState.clearWorkingSave();
     const recipient = readCurrentRecipient();
     const autoValues = await currentAutoValues(recipient);
     const next = mergeAutoValues(emptyDraft(), recipient, autoValues);
@@ -456,7 +458,6 @@ export const IndividualSelectionDirection = () => {
         });
         await persistRequestOptions(draftRef.current, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
         documentState.open(record, draftFromRecord(record.values), 'edit');
-        documentState.setWorkingValues(clearIndividualSelectionStaff);
         setEditor(null);
         setStatus('Изменения сохранены в исходном бланке.');
         return true;
@@ -465,6 +466,7 @@ export const IndividualSelectionDirection = () => {
         return false;
       }
     }
+    if (!documentState.workingHasChanges) return true;
     await pendingProfileUpdateRef.current;
     const recipient = readCurrentRecipient();
     if (!recipient) {
@@ -487,6 +489,10 @@ export const IndividualSelectionDirection = () => {
 
       const record = await saveBloodRequestRecord({
         recipientId: recipient.id,
+        recordId:
+          documentState.workingRecord?.recipientId === recipient.id
+            ? documentState.workingRecord.id
+            : undefined,
         kind: 'individual-selection-direction',
         values: { ...draftToSave },
       });
@@ -494,8 +500,7 @@ export const IndividualSelectionDirection = () => {
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);
-      documentState.open(record, draftToSave, 'edit');
-      documentState.setWorkingValues(clearIndividualSelectionStaff(draftToSave));
+      documentState.markWorkingSaved(record, draftToSave);
       setStatus('Направление сохранено.');
       return true;
     } catch (error) {
@@ -509,7 +514,8 @@ export const IndividualSelectionDirection = () => {
     ++profileEditVersionRef.current;
     try {
       documentState.close();
-      await switchCurrentRecipient(recipient);
+      const result = await switchCurrentRecipient(recipient);
+      if (result.changed) documentState.clearWorkingSave();
       await refreshCurrentData(readCurrentRecipient());
       return true;
     } catch (error) {
@@ -924,7 +930,12 @@ export const IndividualSelectionDirection = () => {
               type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
+              disabled={
+                !hasContent ||
+                (documentState.active
+                  ? !documentState.hasChanges
+                  : !documentState.workingHasChanges)
+              }
             >
               Сохранить
             </button>

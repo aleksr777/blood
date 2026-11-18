@@ -140,15 +140,15 @@ it.each(['view', 'edit'] as const)(
     expect(database.saveBloodRequestRecord).not.toHaveBeenCalled();
   },
 );
-
-it('preserves other request data when a working request is saved and closed', async () => {
+it('keeps the current request intact after saving', async () => {
   const { container } = render(<ComponentRequest />);
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await screen.findByRole('button', { name: 'К созданию нового бланка' });
-  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('edit');
+  await waitFor(() =>
+    expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true),
+  );
+  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('draft');
   expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true);
-  fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
-  await expectWorkingSelectionCleared();
+  expect(screen.getByText(working.requiredComponent)).toBeTruthy();
   expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce();
   const saved = vi.mocked(database.saveBloodRequestRecord).mock.calls[0][0].values;
   expect(saved.requiredComponent).toBe(working.requiredComponent);
@@ -212,7 +212,6 @@ it('при смене группы показывает только её код
   fireEvent(screen.getByRole('dialog'), new Event('cancel', { bubbles: true, cancelable: true }));
   expect(screen.getByText('КРИО-Л')).toBeTruthy();
 });
-
 it('не переносит старые сведения о доноре КМ/ГСК в заявку', async () => {
   window.localStorage.setItem(
     key,

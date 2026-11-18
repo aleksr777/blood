@@ -1,8 +1,13 @@
 .control {
   display: flex;
+  width: min(100%, 14rem);
   min-width: 0;
   align-items: center;
   gap: 0.35rem;
+}
+
+.time::-webkit-calendar-picker-indicator {
+  display: none;
 }
 
 .control input {

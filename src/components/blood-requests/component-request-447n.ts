@@ -1,6 +1,7 @@
 // Codes and indications for Appendix No. 17, completed under Appendix No. 18
 // to Ministry of Health Order No. 447n of 18 May 2026.
 import { COMPONENT_CODES } from './component-request-catalog';
+import { isClockTime, isIsoDate, splitLocalDateTime } from '../../domain/date-time';
 
 export { COMPONENT_CODES } from './component-request-catalog';
 
@@ -72,9 +73,14 @@ export const indicationOptionsForComponent = (code: string, group: string) => {
   return TRANSFUSION_INDICATIONS;
 };
 
+export const restoreRequestDateTime = (value: string, legacyDate: string, explicit: string) =>
+  value || (explicit ? '' : legacyDate);
+
 export const formatRequestDateTime = (value: string) => {
-  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
-  return match ? `${match[3]}.${match[2]}.${match[1]} ${match[4]}:${match[5]}` : '';
+  const [date, time] = splitLocalDateTime(value);
+  const formattedDate = isIsoDate(date) ? date.split('-').reverse().join('.') : '';
+  const formattedTime = isClockTime(time) ? time.slice(0, 5) : '';
+  return [formattedDate, formattedTime].filter(Boolean).join(' ');
 };
 
 export const formatRequestedQuantity = (units: string, volumeMl: string) =>

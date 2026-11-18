@@ -1,6 +1,7 @@
-import { FormInput, FormTextarea } from '../form-input/form-input';
+import { FormInput } from '../form-input/form-input';
+import { DateTimeInputs } from '../form-input/date-time-inputs';
 import { isSavedRecipientIdentityField } from '../../domain/saved-recipient-identity';
-import { BoundedNumberInput } from '../bounded-number-input/bounded-number-input';
+import { ProtocolBasicControl } from './protocol-basic-control';
 import { useSavedDocumentScope } from '../saved-document/saved-document-scope';
 import { CustomSelectField } from './custom-select-field';
 import { DepartmentField } from './department-field';
@@ -20,50 +21,6 @@ type Props = {
   onSelectRecipient?: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
 };
 
-const BasicControl = ({ field, value, onChange }: Pick<Props, 'field' | 'value' | 'onChange'>) => {
-  if (
-    field.type === 'number' &&
-    field.min !== undefined &&
-    Number(field.min) >= 0 &&
-    field.max !== undefined
-  ) {
-    return (
-      <BoundedNumberInput
-        name={field.name}
-        value={value}
-        min={Number(field.min)}
-        max={Number(field.max)}
-        step={field.step}
-        readOnly={field.readOnly}
-        onChange={(next) => onChange(field.name, next)}
-      />
-    );
-  }
-  if (field.type === 'textarea') {
-    return (
-      <FormTextarea
-        name={field.name}
-        value={value}
-        rows={4}
-        onChange={(event) => onChange(field.name, event.target.value)}
-      />
-    );
-  }
-
-  return (
-    <FormInput
-      name={field.name}
-      type={field.type ?? 'text'}
-      step={field.step}
-      min={field.min}
-      max={field.max}
-      value={value}
-      readOnly={field.readOnly}
-      onChange={(event) => onChange(field.name, event.target.value)}
-    />
-  );
-};
-
 export const ProtocolFieldControl = ({
   savedDocument = false,
   field,
@@ -76,6 +33,20 @@ export const ProtocolFieldControl = ({
   const className = field.wide ? styles.wide : undefined;
   const change = (nextValue: string, previousOptionValue?: string) =>
     onChange(field.name, nextValue, previousOptionValue);
+
+  if (field.type === 'datetime-local') {
+    return (
+      <div className={styles.wide}>
+        <DateTimeInputs
+          name={field.name}
+          label={field.label}
+          value={value}
+          readOnly={field.readOnly}
+          onChange={change}
+        />
+      </div>
+    );
+  }
 
   if ((savedDocument || isolated) && isSavedRecipientIdentityField(field.name)) {
     return (
@@ -148,7 +119,7 @@ export const ProtocolFieldControl = ({
   return (
     <label className={className}>
       <span>{field.label}</span>
-      <BasicControl field={field} value={value} onChange={onChange} />
+      <ProtocolBasicControl field={field} value={value} onChange={onChange} />
     </label>
   );
 };

@@ -1,0 +1,23 @@
+.group {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.legend {
+  composes: ui-field-label from global;
+  margin-bottom: 0.4rem;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

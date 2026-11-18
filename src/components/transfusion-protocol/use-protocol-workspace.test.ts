@@ -37,6 +37,7 @@ beforeEach(() => {
     updatedAt: 1000,
   }));
 });
+
 it('opening an archive never merges current data or saves an archived copy', async () => {
   const original = {
     id: 42,
@@ -95,7 +96,7 @@ it('archive editing updates its ID and keeps working data until returning to the
   expect(database.saveProtocolRecord).not.toHaveBeenCalled();
   expect(result.current.document.mode).toBe('edit');
   expect(result.current.document.hasChanges).toBe(false);
-  expect(result.current.document.workingValues).toEqual(working);
+  expect(result.current.document.workingValues).toEqual(cleanProtocolDraft(working));
   act(() => result.current.document.close());
   expect(result.current.values).toEqual(cleanProtocolDraft(working));
 });
@@ -112,14 +113,13 @@ it('retains non-hemacon protocol data after saving and returning to the working 
   });
   const working = structuredClone(result.current.values);
   await act(async () => result.current.saveToDatabase());
-  expect(result.current.document.mode).toBe('draft');
-  expect(result.current.document.workingHasChanges).toBe(false);
+  expect(result.current.document.mode).toBe('edit');
+  expect(result.current.document.hasChanges).toBe(false);
   expect(result.current.values).toEqual(working);
   act(() => result.current.document.close());
-  expect(result.current.values).toEqual(working);
+  expect(result.current.values).toEqual(cleanProtocolDraft(working));
   expect(database.saveProtocolRecord).toHaveBeenCalledTimes(1);
 });
-
 afterEach(cleanup);
 
 const openDraft = async (values: Record<string, string>) => {

@@ -1,4 +1,3 @@
-import { clearWorkingSaveSnapshots, matchesWorkingSave } from './working-save-snapshot';
 import { savePreviousRequestDrafts } from './request-drafts';
 import { runRecipientOperation } from './recipient-operation-queue';
 import { getProtocolHemaconWarning } from '../../domain/protocol-hemacon';
@@ -21,31 +20,39 @@ import type {
   ProtocolValuesRecord,
   RegistrationDraftState,
 } from '../sqlite/database-types';
+
 const CURRENT_RECIPIENT_STORAGE_KEY = 'blood:current-recipient';
+
 const recipientProfileFieldSet = new Set<string>(RECIPIENT_PROFILE_FIELDS);
+
 const reusableProtocolValues = (values: ProtocolValuesRecord) =>
   Object.fromEntries(
     Object.entries(values).filter(
       ([name]) => name.startsWith('reagent') || name === 'doctorName' || name === 'nurseName',
     ),
   );
+
 const getRecipientId = (values: ProtocolValuesRecord) => {
   const id = Number(values.recipientId);
   return Number.isFinite(id) && id > 0 ? id : null;
 };
+
 const generatedTransfusionHistoryValues = (values: ProtocolValuesRecord): ProtocolValuesRecord => {
   if (!values.previousTransfusionsAutoText?.trim()) return {};
+
   return {
     previousTransfusionsStatus: values.previousTransfusionsStatus ?? '',
     previousTransfusions: values.previousTransfusions ?? '',
     previousTransfusionsAutoText: values.previousTransfusionsAutoText,
   };
 };
+
 export type CurrentRecipient = {
   id: number;
   fullName: string;
   profile: ProtocolValuesRecord;
 };
+
 export type ActiveDraftOverride =
   | {
       kind: 'protocol';
@@ -57,6 +64,7 @@ export type ActiveDraftOverride =
       values: ProtocolValuesRecord;
       recordId: number | null;
     };
+
 export type RecipientSwitchResult = {
   changed: boolean;
   protocolSaved: boolean;
@@ -66,6 +74,7 @@ export type RecipientSwitchResult = {
   protocolRecordId: number | null;
   registrationRecordId: number | null;
 };
+
 export type RecipientProfileSyncResult = {
   recipient: RecipientRecord;
   protocolValues: ProtocolValuesRecord;
@@ -206,11 +215,7 @@ const savePreviousProtocol = async (draft: ProtocolDraftState, nextRecipientId: 
     return false;
   }
 
-  if (
-    draft.protocolRecordId !== null ||
-    matchesWorkingSave('blood:protocol-working-save', recipientId, draft.values)
-  )
-    return false;
+  if (draft.protocolRecordId !== null) return false;
 
   if (!hasDocumentContent('protocol', { ...draft.values, doctorName: '', nurseName: '' })) {
     return false;
@@ -228,11 +233,7 @@ const savePreviousRegistration = async (draft: RegistrationDraftState, nextRecip
     return false;
   }
 
-  if (
-    draft.registrationRecordId !== null ||
-    matchesWorkingSave('blood:registration-working-save', recipientId, draft.values)
-  )
-    return false;
+  if (draft.registrationRecordId !== null) return false;
 
   if (!hasDocumentContent('registration', draft.values)) {
     return false;
@@ -512,7 +513,6 @@ const switchRecipient = async (
   ]);
 
   writeCurrentRecipient(recipient);
-  clearWorkingSaveSnapshots();
 
   return {
     changed: true,

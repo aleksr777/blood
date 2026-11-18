@@ -1,4 +1,3 @@
-import { useWorkingSave } from './use-working-save';
 import { useCallback, useRef, useState, type SetStateAction } from 'react';
 import { preserveSavedRecipientIdentity } from '../../domain/saved-recipient-identity';
 import { getFormContentKey } from '../../domain/form-content';
@@ -29,13 +28,8 @@ type SavedState<T> = {
 export const useDocumentState = <T extends Record<string, unknown>>(
   initial: () => T,
   cleanWorkingValuesOnClose?: (values: T) => T,
-  workingSaveKey?: string,
 ) => {
   const [workingValues, setWorkingValues] = useState<T>(initial);
-  const { workingSave, markWorkingSaved, clearWorkingSave } = useWorkingSave<T>(
-    setWorkingValues,
-    workingSaveKey,
-  );
   const [saved, setSaved] = useState<SavedState<T> | null>(null);
   const savedRef = useRef(saved);
   const publish = useCallback((next: SavedState<T> | null) => {
@@ -84,14 +78,6 @@ export const useDocumentState = <T extends Record<string, unknown>>(
     setValues,
     workingValues,
     setWorkingValues,
-    workingRecord: workingSave?.record ?? null,
-    workingHasChanges:
-      !workingSave ||
-      String(workingValues.recipientId ?? workingValues.sourceRecipientId ?? '') !==
-        String(workingSave.values.recipientId ?? workingSave.values.sourceRecipientId ?? '') ||
-      getFormContentKey(workingValues) !== getFormContentKey(workingSave.values),
-    markWorkingSaved,
-    clearWorkingSave,
     mode,
     record: saved?.record ?? null,
     originalValues: saved?.original ?? null,

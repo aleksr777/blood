@@ -1,4 +1,3 @@
-import { matchesWorkingSave } from './working-save-snapshot';
 import { saveBloodRequestRecord } from './recipients';
 import { hasDocumentContent } from '../../domain/document-content';
 
@@ -33,13 +32,6 @@ export const savePreviousRequestDrafts = async (nextRecipientId: number) => {
     const content = { ...draft, medicalOrganization: '', doctorName: '', doctorPhone: '' };
     if (
       (!Number.isSafeInteger(savedRecordId) || savedRecordId <= 0) &&
-      !matchesWorkingSave(
-        kind === 'component-request'
-          ? 'blood:component-request-working-save'
-          : 'blood:individual-direction-working-save',
-        recipientId,
-        draft,
-      ) &&
       hasDocumentContent(kind, content)
     ) {
       await saveBloodRequestRecord({ recipientId, kind, values: draft });

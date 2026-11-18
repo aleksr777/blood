@@ -84,15 +84,14 @@ it.each(['view', 'edit'] as const)('clears only staff when returning from %s', a
   expect(database.saveBloodRequestRecord).not.toHaveBeenCalled();
 });
 
-it('retains staff and other values after saving the working direction', async () => {
+it('clears staff after saving while retaining the component, indications and date', async () => {
   const { container } = render(<IndividualSelectionDirection />);
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await waitFor(() =>
-    expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true),
-  );
-  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('draft');
+  await screen.findByRole('button', { name: 'К созданию нового бланка' });
+  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('edit');
   expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true);
-  expect(screen.getAllByText(working.doctorName).length).toBeGreaterThan(0);
+  fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
+  await expectStaffCleared();
   expect(database.saveBloodRequestRecord).toHaveBeenCalledOnce();
   expect(database.saveBloodRequestRecord).toHaveBeenCalledWith(
     expect.objectContaining({

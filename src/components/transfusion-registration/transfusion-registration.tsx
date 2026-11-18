@@ -37,13 +37,10 @@ import { formatDate, type ProtocolValues } from '../transfusion-protocol/protoco
 import { RegistrationPatientDetailsModal } from './registration-patient-details-modal';
 import { parseRegistrationTransfusionRows } from './registration-transfusion-table';
 import { RegistrationTransfusionsModal } from './registration-transfusions-modal';
+
 const ROW_COUNT = 14;
 export const TransfusionRegistration = () => {
-  const documentState = useDocumentState<ProtocolValues>(
-    () => ({}),
-    clearRegistrationTable,
-    'blood:registration-working-save',
-  );
+  const documentState = useDocumentState<ProtocolValues>(() => ({}), clearRegistrationTable);
   const {
     values,
     setValues,
@@ -64,6 +61,7 @@ export const TransfusionRegistration = () => {
   const [patientDetailsOpen, setPatientDetailsOpen] = useState(false);
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [status, setStatus] = useState('');
+
   const currentRecipientId = Number(values.recipientId);
   const currentRecipientAvailable = Number.isFinite(currentRecipientId) && currentRecipientId > 0;
   const storedCurrentRecipient = readCurrentRecipient();
@@ -76,14 +74,17 @@ export const TransfusionRegistration = () => {
     : formatRecipientAge(values.recipientBirthDate);
   const registrationRows = parseRegistrationTransfusionRows(values);
   const hasContent = hasDocumentContent('registration', values);
+
   usePendingSavedDocument('registration', (record, mode) => {
     void openRegistrationRecord(record, mode);
   });
+
   useEffect(() => {
     let active = true;
     void loadRegistrationDraft()
       .then((draft) => {
         if (!active) return;
+
         if (draft.registrationRecordId !== null) {
           if (!hasSavedDocument())
             openSavedDocument(
@@ -97,6 +98,7 @@ export const TransfusionRegistration = () => {
         }
         if (Object.keys(draft.values).length > 0) {
           const currentRecipient = readCurrentRecipient();
+
           if (!currentRecipient) {
             if (draft.registrationRecordId === null) {
               adoptCurrentRecipientFromValues(draft.values);
@@ -105,6 +107,7 @@ export const TransfusionRegistration = () => {
             setRecordId(draft.registrationRecordId);
             return;
           }
+
           const previousRecipientId = Number(draft.values.recipientId);
           const recipientChanged =
             Number.isFinite(previousRecipientId) &&
@@ -115,6 +118,7 @@ export const TransfusionRegistration = () => {
             : draft.values;
           const profileChanged =
             recipientChanged || hasRecipientProfileDifference(draft.values, currentRecipient);
+
           setWorkingValues({
             ...baseValues,
             ...recipientProfileValuesForForms(currentRecipient),
@@ -126,6 +130,7 @@ export const TransfusionRegistration = () => {
           );
           return;
         }
+
         const currentRecipient = readCurrentRecipient();
         if (currentRecipient) {
           setWorkingValues(recipientProfileValuesForForms(currentRecipient));
@@ -135,18 +140,22 @@ export const TransfusionRegistration = () => {
         console.error('Не удалось загрузить текущий лист регистрации:', error),
       )
       .finally(() => active && setDraftLoaded(true));
+
     return () => {
       active = false;
     };
   }, [openSavedDocument, setWorkingValues, hasSavedDocument]);
+
   useEffect(() => {
     if (!draftLoaded) return;
+
     if (Object.keys(documentState.workingValues).length === 0) {
       void clearRegistrationDraft().catch((error: unknown) =>
         console.error('Не удалось очистить текущий лист регистрации:', error),
       );
       return;
     }
+
     void saveRegistrationDraft({
       values: documentState.workingValues,
       registrationRecordId: recordId,
@@ -155,6 +164,7 @@ export const TransfusionRegistration = () => {
       console.error('Не удалось сохранить текущий лист регистрации:', error),
     );
   }, [draftLoaded, recordId, documentState.workingValues]);
+
   const selectRecipient = async (recipient: RecipientRecord) => {
     try {
       documentState.close();
@@ -164,7 +174,6 @@ export const TransfusionRegistration = () => {
         recordId,
       });
 
-      if (result.changed) documentState.clearWorkingSave();
       setRecordId(result.registrationRecordId);
       setValues(result.registrationValues);
 
@@ -208,6 +217,7 @@ export const TransfusionRegistration = () => {
           recipientId: String(documentState.record.recipientId),
         });
         documentState.open(record, record.values, 'edit');
+        documentState.setWorkingValues(clearRegistrationTable);
         setPatientDetailsOpen(false);
         setTableEditorOpen(false);
         setStatus('Изменения сохранены в исходном листе регистрации.');
@@ -232,21 +242,19 @@ export const TransfusionRegistration = () => {
     }
 
     try {
-      if (!documentState.workingHasChanges) return true;
-      const valuesToSave = {
+      const record = await saveRegistrationRecord({
         ...values,
         recipientAge: formatRecipientAge(values.recipientBirthDate),
-      };
-      const record =
-        documentState.workingRecord?.recipientId === Number(values.recipientId)
-          ? await updateRegistrationRecord(documentState.workingRecord.id, valuesToSave)
-          : await saveRegistrationRecord(valuesToSave);
+      });
+      setRecordId(record.id);
       const savedValues = {
         ...record.values,
         recipientId: String(record.recipientId),
       };
+      setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
-      documentState.markWorkingSaved(record, savedValues);
+      documentState.open(record, savedValues, 'edit');
+      documentState.setWorkingValues(clearRegistrationTable(savedValues));
       setRecordId(null);
       setStatus('Лист регистрации сохранён.');
       return true;
@@ -259,7 +267,6 @@ export const TransfusionRegistration = () => {
 
   const clearBlank = () => {
     if (documentState.active || !hasContent) return;
-    documentState.clearWorkingSave();
     const currentRecipient = readCurrentRecipient();
     setValues(currentRecipient ? recipientProfileValuesForForms(currentRecipient) : {});
     setRecordId(null);
@@ -400,12 +407,7 @@ export const TransfusionRegistration = () => {
               type="button"
               className={`${ui.successButton} ${ui.toolbarButton} save-button`}
               onClick={() => void save()}
-              disabled={
-                !hasContent ||
-                (documentState.active
-                  ? !documentState.hasChanges
-                  : !documentState.workingHasChanges)
-              }
+              disabled={!hasContent || (documentState.active && !documentState.hasChanges)}
             >
               Сохранить
             </button>

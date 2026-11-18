@@ -81,11 +81,7 @@ const getInitialActiveBlock = () => {
 const getInitialRegistryOpen = () => readStoredOpenWindow()?.type === 'registry';
 
 export const useProtocolWorkspace = () => {
-  const document = useDocumentState<ProtocolValues>(
-    () => ({}),
-    cleanProtocolDraft,
-    'blood:protocol-working-save',
-  );
+  const document = useDocumentState<ProtocolValues>(() => ({}), cleanProtocolDraft);
   const { values, setValues, open: openSavedDocument, isActive: hasSavedDocument } = document;
   const hasContent = hasDocumentContent('protocol', values);
   const [workingRecordId, setRecordId] = useState<number | null>(null);
@@ -183,7 +179,6 @@ export const useProtocolWorkspace = () => {
         recordId: workingRecordId,
       });
 
-      if (result.changed) document.clearWorkingSave();
       draft.touch();
       setComponentUnitNumberChecked(false);
       setDismissedComponentUnitWarningKey('');
@@ -225,6 +220,7 @@ export const useProtocolWorkspace = () => {
         const record = await updateProtocolRecord(document.record.id, savedValues);
         await persistProtocolOptions(savedValues);
         document.open(record, record.values, 'edit');
+        document.setWorkingValues(cleanProtocolDraft);
         setActiveBlock(null);
         setStatus('Изменения сохранены в исходном бланке.');
         return true;
@@ -241,15 +237,14 @@ export const useProtocolWorkspace = () => {
     }
 
     try {
-      if (!document.workingHasChanges) return true;
-      const record =
-        document.workingRecord?.recipientId === Number(values.recipientId)
-          ? await updateProtocolRecord(document.workingRecord.id, values)
-          : await saveProtocolRecord(values);
+      const record = await saveProtocolRecord(values);
       await persistProtocolOptions(values);
+      setRecordId(record.id);
       const savedValues = { ...values, recipientId: String(record.recipientId) };
+      setValues(savedValues);
       adoptCurrentRecipientFromValues(savedValues);
-      document.markWorkingSaved(record, savedValues);
+      document.open(record, savedValues, 'edit');
+      document.setWorkingValues(cleanProtocolDraft(savedValues));
       setRecordId(null);
       setStatus('Бланк сохранён.');
       return true;
@@ -262,7 +257,6 @@ export const useProtocolWorkspace = () => {
 
   const clearForm = () => {
     if (document.active || !hasContent) return;
-    document.clearWorkingSave();
     const currentRecipient = readCurrentRecipient();
     const nextValues = currentRecipient
       ? {

@@ -6,9 +6,9 @@ import { SiteNavigation } from '../site-navigation/site-navigation';
 import { WarningNotice } from '../warning-notice/warning-notice';
 import { SavedDocumentBar } from '../saved-document/saved-document-bar';
 import type { SavedDocumentControls } from '../saved-document/use-document-state';
+
 type Props = {
   hasContent: boolean;
-  workingHasChanges?: boolean;
   document?: SavedDocumentControls;
   documentTitle?: string;
   onReturnToList?: () => void;
@@ -33,9 +33,9 @@ type Props = {
   pageCount: number;
   onPrintPage: (pageIndex: number) => void;
 };
+
 export const ProtocolToolbar = ({
   hasContent,
-  workingHasChanges = true,
   document,
   documentTitle = 'Протокол трансфузии',
   onReturnToList,
@@ -67,13 +67,12 @@ export const ProtocolToolbar = ({
       ? hemaconWarning
       : '';
   const saveDisabled =
-    !hasContent ||
-    (document?.mode === 'draft' && !workingHasChanges) ||
-    document?.mode === 'view' ||
-    (document?.mode === 'edit' && !document.hasChanges);
+    !hasContent || document?.mode === 'view' || (document?.mode === 'edit' && !document.hasChanges);
+
   useEffect(() => {
     if (!visibleWarning) setShowHemaconWarning(false);
   }, [visibleWarning]);
+
   const runValidatedAction = (action: () => void) => {
     if (hemaconWarning) {
       setShowHemaconWarning(true);
@@ -82,6 +81,7 @@ export const ProtocolToolbar = ({
     setShowHemaconWarning(false);
     action();
   };
+
   return (
     <header className="app-header">
       <div className="toolbar-wrap">

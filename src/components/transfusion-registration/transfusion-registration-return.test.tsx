@@ -81,17 +81,16 @@ it.each(['view', 'edit'] as const)(
   },
 );
 
-it('keeps the working sheet and its table intact after saving', async () => {
+it('keeps all non-table data when saving a working sheet and returning to it', async () => {
   const { container } = render(<TransfusionRegistration />);
   await waitFor(() => expect(readCurrentRecipient()?.id).toBe(1));
   fireEvent.click(screen.getByRole('button', { name: /^Сохранить$/ }));
-  await waitFor(() =>
-    expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true),
-  );
-  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('draft');
+  await screen.findByRole('button', { name: 'К созданию нового бланка' });
+  expect(container.querySelector('main')?.getAttribute('data-document-mode')).toBe('edit');
   expect(screen.getByRole('button', { name: 'Сохранить' }).hasAttribute('disabled')).toBe(true);
   expect(screen.getByText('Рабочая таблица')).toBeTruthy();
-  expect(screen.getByText('Рабочая таблица')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'К созданию нового бланка' }));
+  await expectEmptyWorkingTable();
   expect(database.saveRegistrationRecord).toHaveBeenCalledOnce();
   expect(database.saveRegistrationRecord).toHaveBeenCalledWith(working);
 });

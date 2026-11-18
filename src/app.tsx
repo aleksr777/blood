@@ -4,6 +4,7 @@ import { IndividualSelectionDirection } from './components/blood-requests/indivi
 import CustomScrollbar from './components/scrollbar/custom-scrollbar';
 import { TransfusionProtocol } from './components/transfusion-protocol/transfusion-protocol';
 import { TransfusionRegistration } from './components/transfusion-registration/transfusion-registration';
+import { installPrintKeyboardGuard } from './domain/print-keyboard-guard';
 
 type AppPage = 'protocol' | 'registration' | 'summary-request' | 'component-request';
 type TransitionPhase = 'idle' | 'leaving' | 'entering';
@@ -24,6 +25,7 @@ const getPage = (): AppPage => {
 };
 
 const App = () => {
+  useEffect(() => installPrintKeyboardGuard(), []);
   const [page, setPage] = useState<AppPage>(getPage);
   const [transitionPhase, setTransitionPhase] = useState<TransitionPhase>('idle');
   const transitionTimerRef = useRef<number | null>(null);

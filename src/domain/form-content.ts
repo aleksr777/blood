@@ -4,6 +4,7 @@ import { normalizeComponentUnitNumber } from './protocol-hemacon';
 const TRACKING_FIELDS = new Set([
   'recipientId',
   'sourceRecipientId',
+  'requestDateTimeExplicit',
   'autoValues',
   'previousTransfusionsAutoText',
   'previousTransfusionsSuggestedText',

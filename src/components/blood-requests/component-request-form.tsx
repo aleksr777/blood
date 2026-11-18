@@ -106,10 +106,7 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
               </tr>
               <tr>
                 <th>Дата и время подачи заявки</th>
-                <td>
-                  {formatRequestDateTime(values.requestDateTime) ||
-                    formatDirectionDate(values.directionDate)}
-                </td>
+                <td>{formatRequestDateTime(values.requestDateTime)}</td>
               </tr>
               <tr>
                 <th>Предполагаемые дата и время трансфузии</th>

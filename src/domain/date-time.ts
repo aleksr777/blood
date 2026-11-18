@@ -12,6 +12,13 @@ export const isLocalDateTime = (value = '') => {
   return parts.length === 2 && isIsoDate(parts[0]) && isClockTime(parts[1]);
 };
 
+export const splitLocalDateTime = (value = ''): [string, string] => {
+  const [date = '', time = ''] = value.split('T');
+  return [date, time];
+};
+
+export const joinLocalDateTime = (date: string, time: string) => (time ? `${date}T${time}` : date);
+
 // Fixed-width local calendar values sort without time-zone or daylight-saving conversion.
 // Missing dates sort last; a missing time sorts after known times on the same date.
 export const transfusionOrderKey = (date = '', time = '') => {

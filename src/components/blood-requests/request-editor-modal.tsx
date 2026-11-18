@@ -1,4 +1,5 @@
-import { FormInput, FormTextarea, FormSelect } from '../form-input/form-input';
+import { FormInput, FormSelect, FormTextarea } from '../form-input/form-input';
+import { DateTimeInputs } from '../form-input/date-time-inputs';
 import { useEffect, useState } from 'react';
 import Modal from '../modal/modal';
 import { DepartmentField } from '../transfusion-protocol/department-field';
@@ -39,48 +40,59 @@ export const RequestEditorModal = ({ title, fields, values, onChange, onClose }:
   return (
     <Modal title={title} onClose={onClose} className={styles.modal}>
       <div className={styles.grid}>
-        {fields.map((field) => (
-          <label key={field.name} className={field.wide ? styles.wide : undefined}>
-            <span>{field.label}</span>
-            {field.name === 'department' ? (
-              <DepartmentField
-                value={draft[field.name] ?? ''}
-                onChange={(value) => changeValue(field.name, value)}
-              />
-            ) : field.savedOptionsCategory ? (
-              <SavedOptionsField
+        {fields.map((field) =>
+          field.type === 'datetime-local' ? (
+            <div key={field.name} className={styles.wide}>
+              <DateTimeInputs
                 name={field.name}
                 label={field.label}
-                category={field.savedOptionsCategory}
                 value={draft[field.name] ?? ''}
                 onChange={(value) => changeValue(field.name, value)}
               />
-            ) : field.type === 'textarea' ? (
-              <FormTextarea
-                value={draft[field.name] ?? ''}
-                onChange={(event) => changeValue(field.name, event.target.value)}
-              />
-            ) : field.type === 'select' ? (
-              <FormSelect
-                value={draft[field.name] ?? ''}
-                onChange={(event) => changeValue(field.name, event.target.value)}
-              >
-                <option value="">Не выбрано</option>
-                {field.options?.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </FormSelect>
-            ) : (
-              <FormInput
-                type={field.type ?? 'text'}
-                value={draft[field.name] ?? ''}
-                onChange={(event) => changeValue(field.name, event.target.value)}
-              />
-            )}
-          </label>
-        ))}
+            </div>
+          ) : (
+            <label key={field.name} className={field.wide ? styles.wide : undefined}>
+              <span>{field.label}</span>
+              {field.name === 'department' ? (
+                <DepartmentField
+                  value={draft[field.name] ?? ''}
+                  onChange={(value) => changeValue(field.name, value)}
+                />
+              ) : field.savedOptionsCategory ? (
+                <SavedOptionsField
+                  name={field.name}
+                  label={field.label}
+                  category={field.savedOptionsCategory}
+                  value={draft[field.name] ?? ''}
+                  onChange={(value) => changeValue(field.name, value)}
+                />
+              ) : field.type === 'textarea' ? (
+                <FormTextarea
+                  value={draft[field.name] ?? ''}
+                  onChange={(event) => changeValue(field.name, event.target.value)}
+                />
+              ) : field.type === 'select' ? (
+                <FormSelect
+                  value={draft[field.name] ?? ''}
+                  onChange={(event) => changeValue(field.name, event.target.value)}
+                >
+                  <option value="">Не выбрано</option>
+                  {field.options?.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </FormSelect>
+              ) : (
+                <FormInput
+                  type={field.type ?? 'text'}
+                  value={draft[field.name] ?? ''}
+                  onChange={(event) => changeValue(field.name, event.target.value)}
+                />
+              )}
+            </label>
+          ),
+        )}
       </div>
     </Modal>
   );

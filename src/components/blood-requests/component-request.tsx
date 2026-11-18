@@ -37,6 +37,7 @@ import { persistRequestOptions } from './request-saved-options';
 import { ComponentRequestForm } from './component-request-form';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
+import { restoreRequestDateTime } from './component-request-447n';
 import { sanitizeDoseQuantity } from './dose-quantity';
 import { restoreRequestDraft } from './request-draft-values';
 import {
@@ -67,6 +68,7 @@ type DirectionDraft = Record<RequestAutoField, string> & {
   directionDate: string;
   departmentPhone: string;
   requestDateTime: string;
+  requestDateTimeExplicit: string;
   plannedTransfusionDateTime: string;
   doctorName: string;
   indicationValues: ProtocolValues;
@@ -136,6 +138,7 @@ const emptyDraft = (): DirectionDraft => ({
   medicalOrganization: '',
   departmentPhone: '',
   requestDateTime: '',
+  requestDateTimeExplicit: '',
   plannedTransfusionDateTime: '',
   diagnosis: '',
   obstetricHistory: '',
@@ -149,6 +152,11 @@ const emptyDraft = (): DirectionDraft => ({
 
 const draftFromRecord = (values: unknown): DirectionDraft => {
   const next = restoreRequestDraft(emptyDraft(), values);
+  next.requestDateTime = restoreRequestDateTime(
+    next.requestDateTime,
+    next.directionDate,
+    next.requestDateTimeExplicit,
+  );
   next.quantity = sanitizeDoseQuantity(next.quantity);
   const isLegacyRequest =
     values !== null && typeof values === 'object' && !('individualSelectionRequired' in values);
@@ -362,31 +370,35 @@ export const ComponentRequest = () => {
 
   const updateFields = (changes: Record<string, string>) => {
     if (documentState.isReadOnly()) return;
+    const updates =
+      changes.requestDateTime === undefined
+        ? changes
+        : { ...changes, requestDateTimeExplicit: '1' };
     if (documentState.isActive()) {
       setDraft((current) => {
         const next = { ...current };
-        for (const [name, value] of Object.entries(changes)) {
+        for (const [name, value] of Object.entries(updates)) {
           if (name in next && name !== 'autoValues')
             (next as Record<string, unknown>)[name] = value;
         }
-        return changes.department !== undefined
+        return updates.department !== undefined
           ? updateSavedRequestProfile(
               next,
-              { department: changes.department },
+              { department: updates.department },
               documentState.record?.createdAt,
             )
           : next;
       });
       return;
     }
-    if (changes.department !== undefined && currentRecipient) {
-      void updateExamination({ department: changes.department });
+    if (updates.department !== undefined && currentRecipient) {
+      void updateExamination({ department: updates.department });
     }
 
     setDraft((current) => {
       const next = { ...current };
 
-      Object.entries(changes).forEach(([name, value]) => {
+      Object.entries(updates).forEach(([name, value]) => {
         if (name in next && name !== 'autoValues') {
           (next as Record<string, unknown>)[name] = value;
         }

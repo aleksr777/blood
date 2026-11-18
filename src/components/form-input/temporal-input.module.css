@@ -1,0 +1,49 @@
+.control {
+  display: flex;
+  width: min(100%, 14rem);
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.time::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+.control input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.clear {
+  display: inline-flex;
+  flex: 0 0 var(--control-height);
+  width: var(--control-height);
+  height: var(--control-height);
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  padding: 0;
+  background: var(--ui-surface);
+  color: var(--ui-text-muted);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.clear:hover:not(:disabled) {
+  border-color: var(--ui-accent);
+  color: var(--ui-text-strong);
+}
+
+.clear:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 1px;
+}
+
+.clear:disabled {
+  background: var(--ui-disabled-background);
+  color: var(--ui-text-disabled);
+  cursor: default;
+}

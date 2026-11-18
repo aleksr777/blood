@@ -16,26 +16,26 @@ export const DateTimeInputs = ({ name, label, value, readOnly, onChange }: Props
     <fieldset className={styles.group}>
       <legend className={styles.legend}>{label}</legend>
       <div className={styles.controls}>
-        <label>
-          <span>Дата</span>
+        <div>
           <FormInput
             name={`${name}Date`}
+            aria-label="Дата"
             type="date"
             value={date}
             readOnly={readOnly}
             onChange={(event) => onChange(joinLocalDateTime(event.target.value, time))}
           />
-        </label>
-        <label>
-          <span>Время</span>
+        </div>
+        <div>
           <FormInput
             name={`${name}Time`}
+            aria-label="Время"
             type="time"
             value={time}
             readOnly={readOnly}
             onChange={(event) => onChange(joinLocalDateTime(date, event.target.value))}
           />
-        </label>
+        </div>
       </div>
     </fieldset>
   );

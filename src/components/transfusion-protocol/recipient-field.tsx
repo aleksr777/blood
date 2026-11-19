@@ -1,19 +1,17 @@
 import ui from '../../styles/ui';
 import { useState } from 'react';
 import { createRecipient, type RecipientRecord } from '../../storage/repositories/recipients';
-import { FormInput } from '../form-input/form-input';
 import { RecipientNewModal } from './recipient-new-modal';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-field.module.css';
 
 type Props = {
   value: string;
-  onChange: (value: string) => void;
   onSelectRecipient: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
   onOpenRecipients: () => void;
 };
 
-export const RecipientField = ({ value, onChange, onSelectRecipient, onOpenRecipients }: Props) => {
+export const RecipientField = ({ value, onSelectRecipient, onOpenRecipients }: Props) => {
   const [newRecipientOpen, setNewRecipientOpen] = useState(false);
 
   const select = async (recipient: RecipientRecord) => {
@@ -30,13 +28,9 @@ export const RecipientField = ({ value, onChange, onSelectRecipient, onOpenRecip
   return (
     <>
       <div className={styles.control}>
-        <FormInput
-          name="recipientName"
-          aria-label="Фамилия, имя, отчество реципиента"
-          value={value}
-          placeholder="Фамилия, имя, отчество реципиента"
-          onChange={(event) => onChange(event.target.value)}
-        />
+        <div className={value ? styles.value : styles.placeholder}>
+          {value || 'Реципиент не выбран'}
+        </div>
         <div className={styles.actions}>
           <button
             type="button"

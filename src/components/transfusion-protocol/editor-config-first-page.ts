@@ -19,7 +19,6 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
       { name: 'transfusionDate', label: 'Дата трансфузии', type: 'date' },
       { name: 'department', label: 'Отделение' },
       { name: 'medicalRecordNumber', label: '№ медицинской карты' },
-      { name: 'diagnosis', label: 'Диагноз', type: 'textarea', wide: true },
       { name: 'startTime', label: 'Время начала трансфузии', type: 'time' },
       { name: 'endTime', label: 'Время окончания трансфузии', type: 'time' },
     ],

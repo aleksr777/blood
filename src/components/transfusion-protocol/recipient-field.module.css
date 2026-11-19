@@ -5,8 +5,29 @@
   gap: 0.65rem;
 }
 
-.control > input {
+.value,
+.placeholder {
+  display: flex;
   min-width: 0;
+  min-height: var(--control-height);
+  align-items: center;
+  padding: 0.2rem 0.25rem;
+  overflow: hidden;
+  background: transparent;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.value {
+  color: var(--ui-text-strong);
+  font-size: var(--ui-font-control);
+  font-weight: 600;
+}
+
+.placeholder {
+  color: var(--ui-text-muted);
+  font-weight: 400;
+  font-style: italic;
 }
 
 .actions,

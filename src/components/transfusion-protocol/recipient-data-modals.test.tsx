@@ -48,8 +48,7 @@ it('creates a recipient with the same complete data form and passes all entered 
   render(<RecipientNewModal onCreate={onCreate} onExisting={vi.fn()} onClose={onClose} />);
   expect(screen.getByRole('dialog', { name: 'Новый реципиент' })).toBeTruthy();
   fill();
-  fireEvent.click(screen.getByRole('button', { name: 'Пол' }));
-  fireEvent.click(screen.getByRole('option', { name: 'Женский' }));
+  fireEvent.change(screen.getByLabelText('Пол'), { target: { value: 'Женский' } });
   fireEvent.click(screen.getByRole('button', { name: 'Группа крови AB0' }));
   fireEvent.click(screen.getByRole('option', { name: 'A(II)' }));
   fireEvent.click(screen.getByRole('button', { name: 'Резус-принадлежность' }));

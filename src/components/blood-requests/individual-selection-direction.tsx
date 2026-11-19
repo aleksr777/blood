@@ -604,15 +604,10 @@ export const IndividualSelectionDirection = () => {
       current?.id === recipient.id
         ? {
             ...current,
-            fullName: changes.recipientName ?? current.fullName,
             profile: { ...current.profile, ...changes },
           }
         : current,
     );
-
-    if (changes.recipientName !== undefined && !changes.recipientName.trim()) {
-      return Promise.resolve();
-    }
 
     const operation = (async () => {
       try {

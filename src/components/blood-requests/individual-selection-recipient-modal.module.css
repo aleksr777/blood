@@ -2,6 +2,12 @@
   --modal-width: 52rem;
 }
 
+.topContent {
+  margin-bottom: 1rem;
+}
+
 .examination {
+  display: grid;
+  gap: 1rem;
   margin-top: 1rem;
 }

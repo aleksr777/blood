@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { adoptCurrentRecipientFromValues } from '../../storage/repositories/current-recipient';
@@ -27,26 +27,77 @@ vi.mock('../modal/modal', () => ({
 beforeEach(() => {
   window.localStorage.clear();
   window.sessionStorage.clear();
-  adoptCurrentRecipientFromValues({ recipientId: '1', recipientName: 'Тестовый реципиент' });
+  adoptCurrentRecipientFromValues({
+    recipientId: '1',
+    recipientName: 'Тестовый реципиент',
+    recipientSex: 'Женский',
+  });
 });
 afterEach(cleanup);
 
-it('opens recipient data from the department row and highlights it with recipient details', () => {
-  render(<IndividualSelectionDirection />);
+it('highlights all recipient, organization, examination and history rows together', async () => {
+  const { container } = render(<IndividualSelectionDirection />);
   const organization = screen.getAllByText('Наименование ЛПУ:')[0].closest('[data-form-section]');
   const department = screen.getAllByText('Отделение:')[0].closest('[data-form-section]');
   const recipientName = screen.getAllByText('Ф.И.О. реципиента:')[0].closest('[data-form-section]');
+  const bloodGroup = screen
+    .getAllByText('Группа крови и резус-фактор реципиента:')[0]
+    .closest('[data-form-section]');
+  const antigens = screen.getAllByText('Фенотип реципиента:')[0].closest('[data-form-section]');
+  const antibodies = screen
+    .getAllByText('Аллоиммунные антитела:')[0]
+    .closest('[data-form-section]');
   expect(department).toBe(recipientName);
-  expect(department).not.toBe(organization);
-  fireEvent.click(screen.getAllByText('Отделение:')[0]);
-  expect(screen.getByRole('dialog', { name: 'Данные реципиента' })).toBeTruthy();
-  expect(screen.getByRole('textbox', { name: 'Отделение' })).toBeTruthy();
+  expect(bloodGroup).toBe(recipientName);
+  expect(antigens).toBe(recipientName);
+  expect(antibodies).toBe(recipientName);
+  const history = screen
+    .getAllByText('Трансфузии компонентов крови в анамнезе:')[0]
+    .closest('[data-form-section]');
+  const obstetric = (await screen.findAllByText('Акушерский анамнез у женщин:'))[0].closest(
+    '[data-form-section]',
+  );
+  for (const section of [organization, department, history, obstetric]) {
+    expect(section?.hasAttribute('data-recipient-group')).toBe(true);
+  }
+  expect(obstetric?.getAttribute('data-recipient-position')).toBe('last');
+  const paper = container.querySelector('[data-document-paper]');
+  fireEvent.mouseMove(organization!);
+  expect(paper?.getAttribute('data-recipient-hovered')).toBe('true');
+  fireEvent.mouseMove(screen.getAllByText('Наименование требуемого компонента:')[0]);
+  expect(paper?.hasAttribute('data-recipient-hovered')).toBe(false);
 });
 
-it('edits only the organization name in the medical organization dialog', () => {
+it('opens the recipient dialog with examination inputs from the blood group row', () => {
+  render(<IndividualSelectionDirection />);
+  fireEvent.click(screen.getAllByText('Группа крови и резус-фактор реципиента:')[0]);
+  const dialog = screen.getByRole('dialog', { name: 'Данные реципиента' });
+  const examination = within(dialog).getByRole('group', {
+    name: 'Данные медицинского обследования реципиента',
+  });
+  expect(within(examination).getByRole('button', { name: 'Группа крови AB0' })).toBeTruthy();
+  expect(within(examination).getByRole('button', { name: 'Резус-принадлежность' })).toBeTruthy();
+  expect(within(examination).getByText('Антигены:')).toBeTruthy();
+  expect(within(examination).getByRole('group', { name: 'Аллоиммунные антитела' })).toBeTruthy();
+  expect(
+    screen.queryByRole('dialog', { name: 'Данные медицинского обследования реципиента' }),
+  ).toBeNull();
+});
+
+it('edits the organization name and patient data in one dialog', () => {
   render(<IndividualSelectionDirection />);
   fireEvent.click(screen.getAllByText('Наименование ЛПУ:')[0]);
-  expect(screen.getByRole('dialog', { name: 'Медицинская организация' })).toBeTruthy();
-  expect(screen.getByText('Наименование ЛПУ')).toBeTruthy();
-  expect(screen.queryByRole('textbox', { name: 'Отделение' })).toBeNull();
+  const dialog = screen.getByRole('dialog', { name: 'Данные реципиента' });
+  expect(within(dialog).getByRole('textbox', { name: 'Наименование ЛПУ' })).toBeTruthy();
+  expect(within(dialog).getByRole('textbox', { name: 'Отделение' })).toBeTruthy();
+  expect(within(dialog).getByRole('group', { name: 'Анамнез реципиента' })).toBeTruthy();
+  expect(screen.queryByRole('dialog', { name: 'Медицинская организация' })).toBeNull();
+});
+
+it('opens the same dialog from the transfusion history row', () => {
+  render(<IndividualSelectionDirection />);
+  fireEvent.click(screen.getAllByText('Трансфузии компонентов крови в анамнезе:')[0]);
+  const dialog = screen.getByRole('dialog', { name: 'Данные реципиента' });
+  expect(within(dialog).getByRole('group', { name: 'Анамнез реципиента' })).toBeTruthy();
+  expect(within(dialog).getByText('Акушерский анамнез')).toBeTruthy();
 });

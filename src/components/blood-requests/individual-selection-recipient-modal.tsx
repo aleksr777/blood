@@ -12,6 +12,7 @@ type Props = {
   onOpenRecipients: () => void;
   onSelectRecipient: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
   onClose: () => void;
+  topContent?: ReactNode;
   children?: ReactNode;
 };
 
@@ -22,9 +23,11 @@ export const IndividualSelectionRecipientModal = ({
   onOpenRecipients,
   onSelectRecipient,
   onClose,
+  topContent,
   children,
 }: Props) => (
   <Modal title="Данные реципиента" onClose={onClose} className={styles.modal}>
+    {topContent && <div className={styles.topContent}>{topContent}</div>}
     <PatientDetailsFields
       savedDocument={savedDocument}
       values={values}

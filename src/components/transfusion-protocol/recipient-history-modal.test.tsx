@@ -60,6 +60,7 @@ it.each(['protocol', 'direction'])(
   (source) => {
     const onChange = renderHistory(source);
     expect(screen.getByRole('dialog', { name: 'Анамнез реципиента' })).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Анамнез реципиента' })).toBeTruthy();
     expect(screen.getByRole('group', { name: 'Акушерский анамнез' })).toBeTruthy();
     expect(
       (screen.getByRole('spinbutton', { name: 'Количество беременностей' }) as HTMLInputElement)

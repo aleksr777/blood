@@ -1,6 +1,5 @@
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
-import { RecipientExaminationFields } from '../transfusion-protocol/recipient-examination-fields';
-import styles from './component-request-page.module.css';
+import { RecipientExaminationSection } from '../transfusion-protocol/recipient-input-sections';
 
 type Props = {
   values: ProtocolValues;
@@ -8,14 +7,10 @@ type Props = {
 };
 
 export const ComponentRequestRecipientExamination = ({ values, onChange }: Props) => (
-  <section className={styles.examination} aria-label="Группа крови и антигены реципиента">
-    <h3 className={styles.examinationTitle}>Группа крови и антигены реципиента</h3>
-    <RecipientExaminationFields
-      values={values}
-      showAlloimmuneAntibodies={false}
-      onChange={(changes) => {
-        void onChange(changes);
-      }}
-    />
-  </section>
+  <RecipientExaminationSection
+    title="Группа крови и антигены реципиента"
+    values={values}
+    showAlloimmuneAntibodies={false}
+    onChange={(changes) => void onChange(changes)}
+  />
 );

@@ -38,7 +38,7 @@ import {
   formatObstetricHistory,
   TRANSFUSION_HISTORY_FIELDS,
 } from '../transfusion-protocol/recipient-history-model';
-import { RecipientExaminationFields } from '../transfusion-protocol/recipient-examination-fields';
+import { RecipientExaminationSection } from '../transfusion-protocol/recipient-input-sections';
 import { RecipientHistoryModal } from '../transfusion-protocol/recipient-history-modal';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import { usePreviousTransfusionSuggestion } from '../transfusion-protocol/use-previous-transfusion-suggestion';
@@ -993,13 +993,10 @@ export const IndividualSelectionDirection = () => {
             </fieldset>
           }
         >
-          <fieldset className="ui-fieldset">
-            <legend>Данные медицинского обследования реципиента</legend>
-            <RecipientExaminationFields
-              values={examinationValues}
-              onChange={(changes) => void updateExamination(changes)}
-            />
-          </fieldset>
+          <RecipientExaminationSection
+            values={examinationValues}
+            onChange={(changes) => void updateExamination(changes)}
+          />
         </IndividualSelectionRecipientModal>
       )}
 

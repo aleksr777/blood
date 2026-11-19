@@ -1,0 +1,3 @@
+.section {
+  composes: ui-fieldset ui-full-width-stack from global;
+}

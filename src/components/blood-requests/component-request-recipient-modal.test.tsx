@@ -65,7 +65,8 @@ it('открывает одно окно для граф 1–5 с данными
   fireEvent.click(cells[4]);
   const dialog = within(screen.getByRole('dialog'));
   expect(dialog.getByRole('group', { name: 'Данные реципиента' })).toBeTruthy();
-  expect(dialog.getByText('Группа крови и антигены реципиента')).toBeTruthy();
+  expect(dialog.getByRole('group', { name: 'Группа крови и антигены реципиента' })).toBeTruthy();
+  expect(dialog.queryByRole('group', { name: 'Аллоиммунные антитела' })).toBeNull();
   expect(dialog.getByText('Группа крови AB0')).toBeTruthy();
   expect(dialog.getByText('Резус-принадлежность')).toBeTruthy();
   expect(dialog.getByText('Антигены:')).toBeTruthy();

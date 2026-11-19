@@ -2,8 +2,7 @@ import type { PropsWithChildren } from 'react';
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { ModalDismissButton } from '../modal/modal';
 import { PatientDetailsFields } from './patient-details-fields';
-import { RecipientExaminationFields } from './recipient-examination-fields';
-import { RecipientHistoryFields } from './recipient-history-fields';
+import { RecipientExaminationSection, RecipientHistorySection } from './recipient-input-sections';
 import type { ProtocolValues } from './protocol-types';
 import styles from './recipient-edit-modal.module.css';
 
@@ -41,12 +40,8 @@ export const RecipientDataForm = ({
           onChange={onChange}
           nameLabel="Фамилия, имя, отчество"
         />
-        <div className={styles.wide}>
-          <RecipientExaminationFields values={values} onChange={onChange} />
-        </div>
-        <div className={styles.wide}>
-          <RecipientHistoryFields values={values} onChange={onChange} />
-        </div>
+        <RecipientExaminationSection values={values} onChange={onChange} />
+        <RecipientHistorySection values={values} onChange={onChange} />
       </fieldset>
       {children}
       <AnimatedMessage message={error} className={styles.error} role="alert" />

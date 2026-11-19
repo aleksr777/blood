@@ -9,7 +9,7 @@ import { DonorComponentFields } from './donor-component-fields';
 import { MonitoringFields } from './monitoring-fields';
 import { PatientDetailsFields } from './patient-details-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
-import { RecipientExaminationFields } from './recipient-examination-fields';
+import { RecipientExaminationSection } from './recipient-input-sections';
 import { RecipientHistoryModal } from './recipient-history-modal';
 import { SelectionFields } from './selection-fields';
 import styles from './protocol-editor.module.css';
@@ -149,7 +149,7 @@ export const ProtocolEditorModal = ({
             )}
           </>
         ) : blockId === 'examination' ? (
-          <RecipientExaminationFields values={draft} onChange={changeValues} />
+          <RecipientExaminationSection values={draft} onChange={changeValues} showTitle={false} />
         ) : isDonorComponentBlock(blockId) ? (
           <DonorComponentFields
             fields={config.fields}

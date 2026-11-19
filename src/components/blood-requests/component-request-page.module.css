@@ -7,14 +7,6 @@
   margin-left: -16px;
 }
 
-.examinationTitle {
-  composes: ui-section-title from global;
-}
-
-.examination {
-  composes: ui-form-section from global;
-}
-
 @media print {
   .shell {
     width: 297mm;

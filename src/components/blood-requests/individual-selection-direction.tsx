@@ -106,7 +106,6 @@ const ORGANIZATION_FIELDS: RequestEditorField[] = [
     savedOptionsCategory: 'medicalOrganization',
     wide: true,
   },
-  { name: 'department', label: 'Отделение', wide: true },
 ];
 
 const FOOTER_FIELDS: RequestEditorField[] = [
@@ -711,7 +710,6 @@ export const IndividualSelectionDirection = () => {
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('organization'))}
     >
       <AdaptiveRuledField label="Наименование ЛПУ:" value={draft.medicalOrganization} />
-      <AdaptiveRuledField label="Отделение:" value={draft.department} />
     </div>,
 
     <div
@@ -723,6 +721,7 @@ export const IndividualSelectionDirection = () => {
       onClick={() => setEditor('recipient')}
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
     >
+      <AdaptiveRuledField label="Отделение:" value={draft.department} />
       <AdaptiveRuledField label="Ф.И.О. реципиента:" value={draft.recipientName} />
       <AdaptiveRuledField label="Возраст:" value={draft.recipientAge} />
       <AdaptiveRuledField label="№ медицинской карты:" value={draft.medicalRecordNumber} />

@@ -149,8 +149,8 @@ export const ProtocolEditorModal = ({
             {renderGeneralGroup('Данные реципиента', [
               'recipientName',
               'recipientBirthDate',
-              'recipientSex',
               'recipientAge',
+              'recipientSex',
             ])}
             {renderGeneralGroup('Госпитализация', ['department', 'medicalRecordNumber'])}
             {renderGeneralGroup(

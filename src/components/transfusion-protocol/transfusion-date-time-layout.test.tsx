@@ -10,7 +10,7 @@ vi.mock('../modal/modal', () => ({
 }));
 afterEach(cleanup);
 
-it('groups the transfusion date and both time fields in the same responsive grid', () => {
+it('places age after birth date and groups the transfusion date and times', () => {
   render(
     <ProtocolEditorModal
       blockId="general"
@@ -28,6 +28,11 @@ it('groups the transfusion date and both time fields in the same responsive grid
       onClose={vi.fn()}
     />,
   );
+  const recipient = screen.getByRole('group', { name: 'Данные реципиента' });
+  const recipientFields = recipient.querySelector('legend + div')?.children;
+  expect(recipientFields?.[1].textContent).toContain('Дата рождения');
+  expect(recipientFields?.[2].textContent).toContain('Возраст');
+  expect(recipientFields?.[3].textContent).toContain('Пол');
   const group = screen.getByRole('group', { name: 'Данные трансфузии' });
   const labels = ['Дата трансфузии', 'Время начала трансфузии', 'Время окончания трансфузии'];
   const fields = labels.map((text) => within(group).getByText(text).closest('label'));

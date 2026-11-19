@@ -70,8 +70,17 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.generalGroupGrid.recipientGrid {
+  grid-template-columns: 13rem 13rem minmax(0, 1fr);
+}
+
+.recipientGrid > :last-child {
+  grid-column: 1 / 3;
+}
+
 @media (max-width: 680px) {
-  .generalGroupGrid {
+  .generalGroupGrid,
+  .generalGroupGrid.recipientGrid {
     grid-template-columns: 1fr;
   }
 
@@ -80,6 +89,10 @@
   }
 
   .generalGroupGrid .wide {
+    grid-column: auto;
+  }
+
+  .recipientGrid > :last-child {
     grid-column: auto;
   }
 }

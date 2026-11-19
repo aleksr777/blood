@@ -30,6 +30,7 @@ it('places age after birth date and groups the transfusion date and times', () =
   );
   const recipient = screen.getByRole('group', { name: 'Данные реципиента' });
   const recipientFields = recipient.querySelector('legend + div')?.children;
+  expect(recipientFields?.[0].parentElement?.classList.contains(styles.recipientGrid)).toBe(true);
   expect(recipientFields?.[1].textContent).toContain('Дата рождения');
   expect(recipientFields?.[2].textContent).toContain('Возраст');
   expect(recipientFields?.[3].textContent).toContain('Пол');

@@ -194,6 +194,20 @@
   border-bottom-right-radius: 1mm;
 }
 
+.historySection {
+  border-radius: 0;
+}
+
+.historySection[data-history-position='first'] {
+  border-top-left-radius: 1mm;
+  border-top-right-radius: 1mm;
+}
+
+.historySection[data-history-position='last'] {
+  border-bottom-left-radius: 1mm;
+  border-bottom-right-radius: 1mm;
+}
+
 .adaptiveField {
   position: relative;
   min-width: 0;
@@ -307,6 +321,11 @@
 
   .sheetWrap[data-recipient-hovered='true'] [data-recipient-group],
   .sheetWrap[data-recipient-hovered='true'] [data-recipient-group] .adaptiveLabel {
+    background: var(--ui-accent-soft);
+  }
+
+  .sheetWrap[data-history-hovered='true'] [data-history-group],
+  .sheetWrap[data-history-hovered='true'] [data-history-group] .adaptiveLabel {
     background: var(--ui-accent-soft);
   }
 }

@@ -35,7 +35,7 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-it('highlights all recipient, organization, examination and history rows together', async () => {
+it('highlights recipient and history rows as separate groups', async () => {
   const { container } = render(<IndividualSelectionDirection />);
   const organization = screen.getAllByText('Наименование ЛПУ:')[0].closest('[data-form-section]');
   const department = screen.getAllByText('Отделение:')[0].closest('[data-form-section]');
@@ -57,15 +57,24 @@ it('highlights all recipient, organization, examination and history rows togethe
   const obstetric = (await screen.findAllByText('Акушерский анамнез у женщин:'))[0].closest(
     '[data-form-section]',
   );
-  for (const section of [organization, department, history, obstetric]) {
+  for (const section of [organization, department]) {
     expect(section?.hasAttribute('data-recipient-group')).toBe(true);
   }
-  expect(obstetric?.getAttribute('data-recipient-position')).toBe('last');
+  for (const section of [history, obstetric]) {
+    expect(section?.hasAttribute('data-history-group')).toBe(true);
+    expect(section?.hasAttribute('data-recipient-group')).toBe(false);
+  }
+  expect(department?.getAttribute('data-recipient-position')).toBe('last');
+  expect(obstetric?.getAttribute('data-history-position')).toBe('last');
   const paper = container.querySelector('[data-document-paper]');
   fireEvent.mouseMove(organization!);
   expect(paper?.getAttribute('data-recipient-hovered')).toBe('true');
-  fireEvent.mouseMove(screen.getAllByText('Наименование требуемого компонента:')[0]);
+  expect(paper?.hasAttribute('data-history-hovered')).toBe(false);
+  fireEvent.mouseMove(history!);
   expect(paper?.hasAttribute('data-recipient-hovered')).toBe(false);
+  expect(paper?.getAttribute('data-history-hovered')).toBe('true');
+  fireEvent.mouseMove(screen.getAllByText('Наименование требуемого компонента:')[0]);
+  expect(paper?.hasAttribute('data-history-hovered')).toBe(false);
 });
 
 it('opens the recipient dialog with examination inputs from the blood group row', () => {
@@ -90,14 +99,17 @@ it('edits the organization name and patient data in one dialog', () => {
   const dialog = screen.getByRole('dialog', { name: 'Данные реципиента' });
   expect(within(dialog).getByRole('textbox', { name: 'Наименование ЛПУ' })).toBeTruthy();
   expect(within(dialog).getByRole('textbox', { name: 'Отделение' })).toBeTruthy();
-  expect(within(dialog).getByRole('group', { name: 'Анамнез реципиента' })).toBeTruthy();
+  expect(within(dialog).queryByRole('group', { name: 'Анамнез реципиента' })).toBeNull();
   expect(screen.queryByRole('dialog', { name: 'Медицинская организация' })).toBeNull();
 });
 
-it('opens the same dialog from the transfusion history row', () => {
+it('opens the separate history dialog from the transfusion history row', () => {
   render(<IndividualSelectionDirection />);
   fireEvent.click(screen.getAllByText('Трансфузии компонентов крови в анамнезе:')[0]);
-  const dialog = screen.getByRole('dialog', { name: 'Данные реципиента' });
-  expect(within(dialog).getByRole('group', { name: 'Анамнез реципиента' })).toBeTruthy();
+  const dialog = screen.getByRole('dialog', { name: 'Анамнез реципиента' });
+  expect(
+    within(dialog).getByRole('group', { name: 'Трансфузии компонентов крови в анамнезе' }),
+  ).toBeTruthy();
   expect(within(dialog).getByText('Акушерский анамнез')).toBeTruthy();
+  expect(screen.queryByRole('dialog', { name: 'Данные реципиента' })).toBeNull();
 });

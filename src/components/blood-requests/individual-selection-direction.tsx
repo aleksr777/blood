@@ -39,7 +39,7 @@ import {
   TRANSFUSION_HISTORY_FIELDS,
 } from '../transfusion-protocol/recipient-history-model';
 import { RecipientExaminationFields } from '../transfusion-protocol/recipient-examination-fields';
-import { RecipientHistoryFields } from '../transfusion-protocol/recipient-history-fields';
+import { RecipientHistoryModal } from '../transfusion-protocol/recipient-history-modal';
 import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import { usePreviousTransfusionSuggestion } from '../transfusion-protocol/use-previous-transfusion-suggestion';
 import {
@@ -97,7 +97,7 @@ type DirectionDraft = Record<RequestAutoField, string> & {
   autoValues: Partial<Record<RequestAutoField, string>>;
 };
 
-type Editor = 'component' | 'recipient' | 'footer' | null;
+type Editor = 'component' | 'recipient' | 'history' | 'footer' | null;
 
 const MEDICAL_ORGANIZATION_OPTION: RequestEditorField = {
   name: 'medicalOrganization',
@@ -660,13 +660,15 @@ export const IndividualSelectionDirection = () => {
     return Object.keys(shared).length > 0 ? updateExamination(shared) : Promise.resolve();
   };
 
-  const handleRecipientHover = (event: MouseEvent<HTMLDivElement>) => {
-    const hovered =
-      !documentState.readOnly &&
-      event.target instanceof Element &&
-      event.target.closest('[data-recipient-group]');
-    if (hovered) event.currentTarget.dataset.recipientHovered = 'true';
+  const handleGroupedHover = (event: MouseEvent<HTMLDivElement>) => {
+    const target =
+      documentState.readOnly || !(event.target instanceof Element) ? null : event.target;
+    if (target?.closest('[data-recipient-group]'))
+      event.currentTarget.dataset.recipientHovered = 'true';
     else delete event.currentTarget.dataset.recipientHovered;
+    if (target?.closest('[data-history-group]'))
+      event.currentTarget.dataset.historyHovered = 'true';
+    else delete event.currentTarget.dataset.historyHovered;
   };
 
   const editorConfig = useMemo(() => {
@@ -713,6 +715,7 @@ export const IndividualSelectionDirection = () => {
       className={`${styles.fillSection} ${styles.recipientSection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
       data-form-section
       data-recipient-group
+      data-recipient-position="last"
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('recipient')}
@@ -737,18 +740,20 @@ export const IndividualSelectionDirection = () => {
     ...TRANSFUSION_HISTORY_FIELDS.map(({ label, statusName, textName }, index) => (
       <div
         key={statusName}
-        className={`${styles.fillSection} ${styles.recipientSection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
+        className={`${styles.fillSection} ${styles.historySection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
         data-form-section
-        data-recipient-group
-        data-recipient-position={
-          index === TRANSFUSION_HISTORY_FIELDS.length - 1 && draft.recipientSex !== 'Женский'
-            ? 'last'
-            : undefined
+        data-history-group
+        data-history-position={
+          index === 0
+            ? 'first'
+            : index === TRANSFUSION_HISTORY_FIELDS.length - 1 && draft.recipientSex !== 'Женский'
+              ? 'last'
+              : undefined
         }
         role={documentState.readOnly ? undefined : 'button'}
         tabIndex={documentState.readOnly || index > 0 ? -1 : 0}
-        onClick={() => setEditor('recipient')}
-        onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
+        onClick={() => setEditor('history')}
+        onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('history'))}
       >
         <AdaptiveRuledField
           label={`${label}:`}
@@ -766,14 +771,14 @@ export const IndividualSelectionDirection = () => {
       ? [
           <div
             key="obstetric"
-            className={`${styles.fillSection} ${styles.recipientSection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
+            className={`${styles.fillSection} ${styles.historySection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
             data-form-section
-            data-recipient-group
-            data-recipient-position="last"
+            data-history-group
+            data-history-position="last"
             role={documentState.readOnly ? undefined : 'button'}
             tabIndex={documentState.readOnly ? -1 : 0}
-            onClick={() => setEditor('recipient')}
-            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
+            onClick={() => setEditor('history')}
+            onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('history'))}
           >
             <AdaptiveRuledField
               label="Акушерский анамнез у женщин:"
@@ -936,9 +941,10 @@ export const IndividualSelectionDirection = () => {
       <div
         className={styles.sheetWrap}
         data-document-paper
-        onMouseMove={handleRecipientHover}
+        onMouseMove={handleGroupedHover}
         onMouseLeave={(event) => {
           delete event.currentTarget.dataset.recipientHovered;
+          delete event.currentTarget.dataset.historyHovered;
         }}
       >
         {pageStarts.map((start, index) => (
@@ -994,18 +1000,17 @@ export const IndividualSelectionDirection = () => {
               onChange={(changes) => void updateExamination(changes)}
             />
           </fieldset>
-          <fieldset className="ui-fieldset">
-            <legend>Анамнез реципиента</legend>
-            <RecipientHistoryFields
-              values={examinationValues}
-              applyDefaults={!documentState.active}
-              previousTransfusionSuggestion={
-                documentState.active ? '' : previousTransfusionSuggestion
-              }
-              onChange={(changes) => void updateHistory(changes)}
-            />
-          </fieldset>
         </IndividualSelectionRecipientModal>
+      )}
+
+      {editor === 'history' && (
+        <RecipientHistoryModal
+          values={examinationValues}
+          savedDocument={documentState.active}
+          previousTransfusionSuggestion={previousTransfusionSuggestion}
+          onChange={updateHistory}
+          onClose={() => setEditor(null)}
+        />
       )}
 
       {editor === 'component' && (

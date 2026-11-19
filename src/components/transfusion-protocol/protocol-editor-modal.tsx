@@ -7,8 +7,8 @@ import { CompatibilityTestsFields } from './compatibility-tests-fields';
 import { ComplicationsFields } from './complications-fields';
 import { DonorComponentFields } from './donor-component-fields';
 import { MonitoringFields } from './monitoring-fields';
+import { PatientDetailsFields } from './patient-details-fields';
 import { ProtocolFieldControl } from './protocol-field-control';
-import { formatRecipientAge } from './recipient-demographics';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { RecipientHistoryModal } from './recipient-history-modal';
 import { SelectionFields } from './selection-fields';
@@ -61,10 +61,6 @@ export const ProtocolEditorModal = ({
 }: Props) => {
   const config = getProtocolBlockConfig(blockId);
   const [draft, setDraft] = useState<ProtocolValues>(() => getInitialValues(blockId, values));
-  const displayedAge = savedDocument
-    ? archivedRecipientAge
-    : formatRecipientAge(draft.recipientBirthDate, draft.transfusionDate);
-
   useEffect(() => {
     setDraft(getInitialValues(blockId, values));
   }, [blockId, values]);
@@ -90,35 +86,20 @@ export const ProtocolEditorModal = ({
       savedDocument={savedDocument}
       key={field.name}
       field={field}
-      value={field.name === 'recipientAge' ? displayedAge : (draft[field.name] ?? '')}
+      value={draft[field.name] ?? ''}
       onChange={changeValue}
       onOpenRecipients={handleOpenRecipients}
       onSelectRecipient={onSelectRecipient}
     />
   );
 
-  const renderGeneralGroup = (
-    title: string,
-    fieldNames: string[],
-    layout: 'default' | 'recipient' | 'transfusion' = 'default',
-  ) => (
+  const renderGeneralGroup = (title: string, fieldNames: string[], transfusion = false) => (
     <fieldset className={styles.generalGroup}>
       <legend>{title}</legend>
-      <div
-        className={`${styles.generalGroupGrid} ${layout === 'recipient' ? styles.recipientGrid : ''} ${layout === 'transfusion' ? styles.transfusionGrid : ''}`}
-      >
+      <div className={`${styles.generalGroupGrid} ${transfusion ? styles.transfusionGrid : ''}`}>
         {fieldNames.flatMap((fieldName) => {
           const field = config.fields.find(({ name }) => name === fieldName);
           if (!field) return [];
-
-          if (field.name === 'recipientAge') {
-            return [
-              <div key={field.name}>
-                <div className={styles.fieldLabel}>{field.label}</div>
-                <div className={styles.calculatedValue}>{displayedAge || '—'}</div>
-              </div>,
-            ];
-          }
 
           return [renderStandardField(field)];
         })}
@@ -152,16 +133,19 @@ export const ProtocolEditorModal = ({
 
         {blockId === 'general' ? (
           <>
-            {renderGeneralGroup(
-              'Данные реципиента',
-              ['recipientName', 'recipientBirthDate', 'recipientAge', 'recipientSex'],
-              'recipient',
-            )}
-            {renderGeneralGroup('Госпитализация', ['department', 'medicalRecordNumber'])}
+            <PatientDetailsFields
+              values={{ ...draft, recipientId: values.recipientId }}
+              onChange={changeValues}
+              savedDocument={savedDocument}
+              archivedAge={archivedRecipientAge}
+              ageReferenceDate={draft.transfusionDate}
+              onOpenRecipients={handleOpenRecipients}
+              onSelectRecipient={onSelectRecipient}
+            />
             {renderGeneralGroup(
               'Данные трансфузии',
               ['requestDateTime', 'transfusionDate', 'startTime', 'endTime'],
-              'transfusion',
+              true,
             )}
           </>
         ) : blockId === 'examination' ? (

@@ -1,8 +1,7 @@
-import { FormInput, FormSelect } from '../form-input/form-input';
 import type { PropsWithChildren } from 'react';
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { ModalDismissButton } from '../modal/modal';
-import { formatRecipientAge } from './recipient-demographics';
+import { PatientDetailsFields } from './patient-details-fields';
 import { RecipientExaminationFields } from './recipient-examination-fields';
 import { RecipientHistoryFields } from './recipient-history-fields';
 import type { ProtocolValues } from './protocol-types';
@@ -28,7 +27,6 @@ export const RecipientDataForm = ({
   pendingLabel,
   children,
 }: Props) => {
-  const change = (name: string, value: string) => onChange({ [name]: value });
   return (
     <form
       noValidate
@@ -38,39 +36,11 @@ export const RecipientDataForm = ({
       }}
     >
       <fieldset className={styles.grid} disabled={busy}>
-        <label className={styles.wide}>
-          <span>Фамилия, имя, отчество</span>
-          <FormInput
-            name="recipientName"
-            value={values.recipientName ?? ''}
-            onChange={(event) => change('recipientName', event.target.value)}
-          />
-        </label>
-        <label>
-          <span>Дата рождения</span>
-          <FormInput
-            name="recipientBirthDate"
-            type="date"
-            value={values.recipientBirthDate ?? ''}
-            onChange={(event) => change('recipientBirthDate', event.target.value)}
-          />
-        </label>
-        <label>
-          <span>Пол</span>
-          <FormSelect
-            name="recipientSex"
-            value={values.recipientSex ?? ''}
-            onChange={(event) => change('recipientSex', event.target.value)}
-          >
-            <option value="">Не указано</option>
-            <option value="Мужской">Мужской</option>
-            <option value="Женский">Женский</option>
-          </FormSelect>
-        </label>
-        <label>
-          <span>Возраст</span>
-          <FormInput type="text" value={formatRecipientAge(values.recipientBirthDate)} readOnly />
-        </label>
+        <PatientDetailsFields
+          values={values}
+          onChange={onChange}
+          nameLabel="Фамилия, имя, отчество"
+        />
         <div className={styles.wide}>
           <RecipientExaminationFields values={values} onChange={onChange} />
         </div>

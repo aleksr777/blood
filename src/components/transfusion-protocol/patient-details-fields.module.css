@@ -1,0 +1,61 @@
+.group {
+  composes: ui-fieldset from global;
+  grid-column: 1 / -1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 13rem 13rem minmax(0, 1fr);
+  gap: 0.9rem 1.1rem;
+}
+
+.grid label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.4rem;
+  color: var(--ui-text);
+  font-size: var(--ui-font-control);
+  font-weight: 600;
+  line-height: var(--ui-line-height);
+}
+
+.fieldLabel {
+  composes: ui-field-label from global;
+}
+
+.calculatedValue {
+  composes: ui-body-text from global;
+  min-height: var(--control-height);
+  padding: var(--control-padding-y) 0;
+}
+
+.name,
+.details,
+.diagnosis {
+  grid-column: 1 / -1;
+}
+
+.sex {
+  grid-column: 1 / 3;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1.1rem;
+}
+
+@media (max-width: 680px) {
+  .grid,
+  .details {
+    grid-template-columns: 1fr;
+  }
+
+  .name,
+  .details,
+  .diagnosis,
+  .sex {
+    grid-column: auto;
+  }
+}

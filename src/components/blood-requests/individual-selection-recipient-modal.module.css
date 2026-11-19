@@ -2,34 +2,6 @@
   --modal-width: 52rem;
 }
 
-.grid {
-  composes: ui-form-grid from global;
-}
-
-.grid > :first-child {
-  grid-column: 1 / -1;
-}
-
-.fieldLabel {
-  composes: ui-field-label from global;
-}
-
-.calculatedValue {
-  composes: ui-body-text from global;
-  min-height: var(--control-height);
-  padding: var(--control-padding-y) 0;
-}
-
-@media (max-width: 680px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .grid > :first-child {
-    grid-column: auto;
-  }
-}
-
 .examination {
   margin-top: 1rem;
 }

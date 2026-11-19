@@ -265,8 +265,6 @@ const syncRecipientProfile = async (
     }),
   );
 
-  if (Object.keys(profilePatch).length === 0) return null;
-
   const activeValues = activeDraft.values;
   const recipientId = getRecipientId(activeValues);
   const fullName = activeValues.recipientName?.trim();
@@ -274,6 +272,8 @@ const syncRecipientProfile = async (
 
   const storedRecipient = readCurrentRecipient();
   if (storedRecipient && storedRecipient.id !== recipientId) return null;
+  const nameChanged = changes.recipientName !== undefined && fullName !== storedRecipient?.fullName;
+  if (Object.keys(profilePatch).length === 0 && !nameChanged) return null;
 
   const optimisticProfile = mergeProfileValues(
     storedRecipient?.profile ?? profileFromValues(activeValues),
@@ -533,6 +533,7 @@ export const updateCurrentRecipientProfile = async (
   if (storedRecipient && storedRecipient.id !== recipient.id) {
     throw new Error('Текущий реципиент изменён. Повторите ввод данных.');
   }
+  const fullName = changes.recipientName?.trim() || recipient.fullName;
 
   const optimisticProfile = mergeProfileValues(
     storedRecipient?.profile ?? recipient.profile,
@@ -540,7 +541,7 @@ export const updateCurrentRecipientProfile = async (
   );
   writeCurrentRecipientSnapshot({
     id: recipient.id,
-    fullName: recipient.fullName,
+    fullName,
     profile: optimisticProfile,
   });
 
@@ -552,7 +553,7 @@ export const updateCurrentRecipientProfile = async (
     const updatedRecipient = await updateRecipient(recipient.id, {
       ...changes,
       recipientId: String(recipient.id),
-      recipientName: recipient.fullName,
+      recipientName: fullName,
     });
     await switchRecipient(updatedRecipient);
     return updatedRecipient;

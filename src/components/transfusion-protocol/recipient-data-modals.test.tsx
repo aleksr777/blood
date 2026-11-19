@@ -7,6 +7,9 @@ import { RecipientEditModal } from './recipient-edit-modal';
 
 const state = vi.hoisted(() => ({ find: vi.fn() }));
 vi.mock('../../storage/repositories/recipients', () => ({ findRecipientsByName: state.find }));
+vi.mock('../../storage/repositories/departments', () => ({
+  loadDepartments: vi.fn(async () => [{ id: 1, name: 'ОРИТ' }]),
+}));
 vi.mock('../modal/modal', () => ({
   default: ({ title, children }: PropsWithChildren<{ title: string }>) => (
     <section role="dialog" aria-label={title}>
@@ -109,10 +112,13 @@ it('renames the editing modal and saves changes through the shared form', async 
   render(<RecipientEditModal recipient={existing} onSave={onSave} onClose={vi.fn()} />);
   expect(screen.getByRole('dialog', { name: 'Данные реципиента' })).toBeTruthy();
   fill();
+  fireEvent.click(screen.getByRole('button', { name: 'Показать ранее введённые отделения' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'ОРИТ' }));
+  expect((screen.getByLabelText('Отделение') as HTMLInputElement).value).toBe('ОРИТ');
   fireEvent.click(screen.getByRole('button', { name: 'Сохранить' }));
   await waitFor(() =>
     expect(onSave).toHaveBeenCalledWith(
-      expect.objectContaining({ recipientBirthDate: '1990-02-03' }),
+      expect.objectContaining({ recipientBirthDate: '1990-02-03', department: 'ОРИТ' }),
     ),
   );
 });

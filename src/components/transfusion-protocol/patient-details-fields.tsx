@@ -95,19 +95,10 @@ export const PatientDetailsFields = ({
           </label>
           <div>
             <div className={styles.fieldLabel}>Отделение</div>
-            {onOpenRecipients && onSelectRecipient ? (
-              <DepartmentField
-                value={values.department ?? ''}
-                onChange={(value) => change('department', value)}
-              />
-            ) : (
-              <FormInput
-                name="department"
-                aria-label="Отделение"
-                value={values.department ?? ''}
-                onChange={(event) => change('department', event.target.value)}
-              />
-            )}
+            <DepartmentField
+              value={values.department ?? ''}
+              onChange={(value) => change('department', value)}
+            />
           </div>
         </div>
         <label className={styles.diagnosis}>

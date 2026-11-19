@@ -182,8 +182,6 @@
 .physician,
 .signatureLine {
   min-height: 7mm;
-  border-bottom: 0.25mm solid #111;
-  padding: 1mm;
 }
 
 .signatureCaption {

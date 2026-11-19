@@ -1,5 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import styles from './individual-selection-direction.module.css';
+import { RuledText } from '../ruled-text/ruled-text';
 
 type AdaptiveRuledFieldProps = {
   label: string;
@@ -71,7 +72,7 @@ export const AdaptiveRuledField = ({ label, value, minRows = 1 }: AdaptiveRuledF
       ) : (
         <div className={styles.adaptiveSingleLine}>
           {label && <span className={styles.adaptiveSingleLabel}>{label}</span>}
-          <span className={styles.adaptiveSingleValue}>{value || ' '}</span>
+          <RuledText className={styles.adaptiveSingleValue}>{value || ' '}</RuledText>
         </div>
       )}
 

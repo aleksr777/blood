@@ -161,6 +161,8 @@
 }
 
 .footerSection .adaptiveSingleValue {
+  --ruled-bottom-gap: calc(var(--form-rule-offset) + 0.25mm);
+
   position: relative;
   border-bottom: 0;
 }
@@ -213,10 +215,7 @@
   flex: 1 1 auto;
   min-width: 20mm;
   height: var(--form-line-height);
-  border-bottom: var(--form-line-width) solid #111;
-  padding: 0 0.8mm;
   overflow: hidden;
-  font-weight: 400;
   white-space: pre-wrap;
 }
 
@@ -242,6 +241,7 @@
   line-height: var(--form-line-height);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+  transform: translateY(0.6mm);
 }
 
 .adaptiveMeasureValue {

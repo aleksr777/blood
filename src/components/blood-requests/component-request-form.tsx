@@ -1,3 +1,4 @@
+import { RuledText } from '../ruled-text/ruled-text';
 import type { KeyboardEvent } from 'react';
 import { formatDirectionDate } from './request-common';
 import { formatRequestDateTime, formatRequestedQuantity } from './component-request-447n';
@@ -196,8 +197,8 @@ export const ComponentRequestForm = ({ values, examination, readOnly, onEdit }: 
           className={`${styles.signature} ${styles.editable} ${readOnly ? styles.readOnly : ''}`}
         >
           <span>Врач, проводящий трансфузию:</span>
-          <span className={styles.physician}>{physician}</span>
-          <span className={styles.signatureLine} />
+          <RuledText className={styles.physician}>{physician}</RuledText>
+          <RuledText className={styles.signatureLine} />
           <span className={`${styles.signatureCaption} ${styles.signatureNameCaption}`}>
             Фамилия, имя, отчество (при наличии)
           </span>

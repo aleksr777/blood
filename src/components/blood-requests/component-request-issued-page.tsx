@@ -1,4 +1,5 @@
 import type { HTMLAttributes } from 'react';
+import { RuledText } from '../ruled-text/ruled-text';
 import styles from './component-request-issued-page.module.css';
 
 const columnWidths = [3, 20, 7, 7, 12, 6, 10, 8, 8, 8, 11];
@@ -51,7 +52,7 @@ export const ComponentRequestIssuedPage = ({ doctorName, footerEdit }: Props) =>
     <div className={styles.footer}>
       <div className={styles.footerRow}>
         <span className={styles.footerLabel}>Дата:</span>
-        <span className={styles.dateLine} />
+        <RuledText className={styles.dateLine} />
       </div>
       <div
         {...footerEdit}
@@ -59,11 +60,11 @@ export const ComponentRequestIssuedPage = ({ doctorName, footerEdit }: Props) =>
         aria-label="Получил компоненты крови"
       >
         <span className={styles.footerLabel}>Получил компоненты крови:</span>
-        <span className={styles.signatureLine}>{doctorName}</span>
+        <RuledText className={styles.signatureLine}>{doctorName}</RuledText>
       </div>
       <div className={styles.footerRow}>
         <span className={styles.footerLabel}>Выдал компоненты крови:</span>
-        <span className={styles.signatureLine} />
+        <RuledText className={styles.signatureLine} />
       </div>
     </div>
   </div>

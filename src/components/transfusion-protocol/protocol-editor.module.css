@@ -66,8 +66,16 @@
   gap: 0.9rem 1.1rem;
 }
 
+.generalGroupGrid.transfusionGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 @media (max-width: 680px) {
   .generalGroupGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .generalGroupGrid.transfusionGrid {
     grid-template-columns: 1fr;
   }
 

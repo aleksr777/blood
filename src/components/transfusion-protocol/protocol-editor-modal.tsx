@@ -97,10 +97,10 @@ export const ProtocolEditorModal = ({
     />
   );
 
-  const renderGeneralGroup = (title: string, fieldNames: string[]) => (
+  const renderGeneralGroup = (title: string, fieldNames: string[], transfusion = false) => (
     <fieldset className={styles.generalGroup}>
       <legend>{title}</legend>
-      <div className={styles.generalGroupGrid}>
+      <div className={`${styles.generalGroupGrid} ${transfusion ? styles.transfusionGrid : ''}`}>
         {fieldNames.flatMap((fieldName) => {
           const field = config.fields.find(({ name }) => name === fieldName);
           if (!field) return [];
@@ -153,12 +153,11 @@ export const ProtocolEditorModal = ({
               'recipientAge',
             ])}
             {renderGeneralGroup('Госпитализация', ['department', 'medicalRecordNumber'])}
-            {renderGeneralGroup('Данные трансфузии', [
-              'requestDateTime',
-              'transfusionDate',
-              'startTime',
-              'endTime',
-            ])}
+            {renderGeneralGroup(
+              'Данные трансфузии',
+              ['requestDateTime', 'transfusionDate', 'startTime', 'endTime'],
+              true,
+            )}
           </>
         ) : blockId === 'examination' ? (
           <RecipientExaminationFields values={draft} onChange={changeValues} />

@@ -1,13 +1,14 @@
 .root {
   position: relative;
   display: inline-flex;
-  flex: 0 0 var(--control-height);
+  flex: 0 0 var(--temporal-action-size);
 }
 
 .trigger {
   display: inline-flex;
-  width: var(--control-height);
-  height: var(--control-height);
+  width: var(--temporal-action-size);
+  height: var(--temporal-action-size);
+  min-height: var(--temporal-action-size);
   align-items: center;
   justify-content: center;
   border: 1px solid var(--control-border);

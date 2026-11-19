@@ -1,9 +1,11 @@
 .control {
+  --temporal-action-size: 1.75rem;
+
   display: flex;
-  width: min(100%, 14rem);
+  width: min(100%, 9.5rem);
   min-width: 0;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.2rem;
 }
 
 .time::-webkit-calendar-picker-indicator {
@@ -17,9 +19,10 @@
 
 .clear {
   display: inline-flex;
-  flex: 0 0 var(--control-height);
-  width: var(--control-height);
-  height: var(--control-height);
+  flex: 0 0 var(--temporal-action-size);
+  width: var(--temporal-action-size);
+  height: var(--temporal-action-size);
+  min-height: var(--temporal-action-size);
   align-items: center;
   justify-content: center;
   border: 1px solid var(--control-border);

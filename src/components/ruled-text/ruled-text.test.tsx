@@ -24,6 +24,8 @@ it('shares ruled text styling with the adaptive fields and supports truncation',
   expect(text?.getAttribute('title')).toBe('Полное значение');
   const visible = screen.getByText('Петров', { selector: `.${styles.value}` });
   expect(visible.parentElement?.classList.contains(styles.line)).toBe(true);
+  const label = screen.getByText('Врач:', { selector: `.${styles.label}` });
+  expect(label.parentElement).toBe(visible.parentElement?.parentElement);
 });
 
 it('uses the same ruled text for the physician on both request pages', () => {
@@ -33,4 +35,6 @@ it('uses the same ruled text for the physician on both request pages', () => {
   const names = screen.getAllByText(request.doctorName, { selector: `.${styles.value}` });
   expect(names).toHaveLength(2);
   expect(names.every((name) => name.parentElement?.classList.contains(styles.line))).toBe(true);
+  const label = screen.getByText('Получил компоненты крови:', { selector: `.${styles.label}` });
+  expect(label.parentElement).toBe(names[1].parentElement?.parentElement);
 });

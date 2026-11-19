@@ -1,5 +1,5 @@
 import type { HTMLAttributes } from 'react';
-import { RuledText } from '../ruled-text/ruled-text';
+import { RuledLabel, RuledText } from '../ruled-text/ruled-text';
 import styles from './component-request-issued-page.module.css';
 
 const columnWidths = [3, 20, 7, 7, 12, 6, 10, 8, 8, 8, 11];
@@ -51,7 +51,7 @@ export const ComponentRequestIssuedPage = ({ doctorName, footerEdit }: Props) =>
     </table>
     <div className={styles.footer}>
       <div className={styles.footerRow}>
-        <span className={styles.footerLabel}>Дата:</span>
+        <RuledLabel className={styles.footerLabel}>Дата:</RuledLabel>
         <RuledText className={styles.dateLine} />
       </div>
       <div
@@ -59,11 +59,11 @@ export const ComponentRequestIssuedPage = ({ doctorName, footerEdit }: Props) =>
         className={`${styles.footerRow} ${footerEdit.className ?? ''}`}
         aria-label="Получил компоненты крови"
       >
-        <span className={styles.footerLabel}>Получил компоненты крови:</span>
+        <RuledLabel className={styles.footerLabel}>Получил компоненты крови:</RuledLabel>
         <RuledText className={styles.signatureLine}>{doctorName}</RuledText>
       </div>
       <div className={styles.footerRow}>
-        <span className={styles.footerLabel}>Выдал компоненты крови:</span>
+        <RuledLabel className={styles.footerLabel}>Выдал компоненты крови:</RuledLabel>
         <RuledText className={styles.signatureLine} />
       </div>
     </div>

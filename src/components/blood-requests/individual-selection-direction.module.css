@@ -156,13 +156,13 @@
 .footerSection {
   --form-line-height: 14mm;
   --form-rule-offset: 3.5mm;
+  --ruled-bottom-gap: calc(var(--form-rule-offset) + 0.25mm);
+  --ruled-line-width: 0mm;
 
   line-height: var(--form-line-height);
 }
 
 .footerSection .adaptiveSingleValue {
-  --ruled-bottom-gap: calc(var(--form-rule-offset) + 0.25mm);
-
   position: relative;
   border-bottom: 0;
 }

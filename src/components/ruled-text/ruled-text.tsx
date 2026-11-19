@@ -11,3 +11,7 @@ export const RuledText = ({ children, className = '', truncate = false, ...props
     <span className={styles.value}>{children}</span>
   </span>
 );
+
+export const RuledLabel = ({ className = '', ...props }: ComponentPropsWithoutRef<'span'>) => (
+  <span {...props} className={[styles.label, className].filter(Boolean).join(' ')} />
+);

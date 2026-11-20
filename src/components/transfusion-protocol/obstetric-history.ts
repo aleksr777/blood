@@ -64,6 +64,7 @@ export const hasNoPregnancies = (values: ProtocolValues) =>
 
 export const isNewbornHistoryBlocked = (values: ProtocolValues) =>
   hasNoPregnancies(values) ||
+  (values.recipientBirthsCount !== undefined && !values.recipientBirthsCount.trim()) ||
   isObstetricCountNone(values.recipientBirthsCount) ||
   isObstetricValueUnknown(values.recipientBirthsCount);
 

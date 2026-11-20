@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { useState } from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { RecipientHistoryFields } from './recipient-history-fields';
+import { chooseCount, countInput, countRadio } from './obstetric-test-controls';
 import type { ProtocolValues } from './protocol-types';
 
 afterEach(cleanup);
@@ -13,7 +14,7 @@ const fields = [
   ['recipientSpontaneousAbortionsCount', 'Самопроизвольные аборты в анамнезе'],
 ] as const;
 
-it.each(fields)('keeps %s within 0–99 when editing and clearing', (name, label) => {
+it.each(fields)('offers cancellable choices and accepts 1–99 for %s', (name, label) => {
   const onChange = vi.fn();
   const History = () => {
     const [values, setValues] = useState<ProtocolValues>({
@@ -33,32 +34,36 @@ it.each(fields)('keeps %s within 0–99 when editing and clearing', (name, label
     );
   };
   render(<History />);
-  const input = screen.getByRole('spinbutton', { name: label }) as HTMLInputElement;
-  expect([input.min, input.max, input.step]).toEqual(['0', '99', '1']);
-  for (const value of ['0', '1', '99']) {
-    if (value === '1') {
-      fireEvent.click(screen.getByRole('button', { name: `Варианты: ${label}` }));
-      expect(screen.queryByRole('option', { name: '0' })).toBeNull();
-      expect(screen.getByRole('option', { name: 'Не было' })).toBeTruthy();
-      fireEvent.click(screen.getByRole('option', { name: value }));
-    } else fireEvent.change(input, { target: { value } });
+  const input = countInput(label);
+  expect([input.min, input.max, input.step]).toEqual(['1', '99', '1']);
+  for (const value of ['1', '99']) {
+    fireEvent.change(input, { target: { value } });
     expect(onChange).toHaveBeenLastCalledWith({ [name]: value });
-    expect(input.value).toBe(value === '0' ? 'Не было' : value);
+    expect(input.value).toBe(value);
   }
   onChange.mockClear();
-  for (const value of ['-1', '100', '999', '1.5', '1e1']) {
+  for (const value of ['0', '-1', '100', '999', '1.5', '1e1', '03']) {
     fireEvent.change(input, { target: { value } });
     expect(onChange).not.toHaveBeenCalled();
     expect(input.value).toBe('99');
   }
+  chooseCount(label, 'Не было');
+  expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ [name]: '0' }));
+  expect(countRadio(label, 'Не было').checked).toBe(true);
+  chooseCount(label, 'Не было');
+  expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ [name]: '' }));
+  expect(countRadio(label, 'Не было').checked).toBe(false);
+  chooseCount(label, 'Количество:');
+  expect(input.disabled).toBe(false);
+  fireEvent.change(input, { target: { value: '3' } });
+  expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ [name]: '3' }));
   fireEvent.change(input, { target: { value: '' } });
-  expect(input.value).toBe('');
-  expect(onChange).not.toHaveBeenCalled();
-  fireEvent.blur(input);
-  expect(onChange).toHaveBeenLastCalledWith({ [name]: 'Не известно' });
-  expect((screen.getByRole('textbox', { name: label }) as HTMLInputElement).value).toBe(
-    'Не известно',
-  );
+  expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ [name]: '' }));
+  expect(countRadio(label, 'Количество:').checked).toBe(true);
+  chooseCount(label, 'Количество:');
+  expect(countRadio(label, 'Количество:').checked).toBe(false);
+  chooseCount(label, 'Не известно');
+  expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ [name]: 'Не известно' }));
 });
 
 it('does not rewrite stored obstetric history when opening a saved document', () => {
@@ -72,13 +77,5 @@ it('does not rewrite stored obstetric history when opening a saved document', ()
     />,
   );
   expect(onChange).not.toHaveBeenCalled();
-  expect(
-    (screen.getByRole('spinbutton', { name: 'Количество беременностей' }) as HTMLInputElement)
-      .value,
-  ).toBe('100');
-  fireEvent.click(
-    screen.getByRole('button', { name: 'Гемолитическая болезнь новорождённого в анамнезе' }),
-  );
-  fireEvent.click(screen.getByRole('option', { name: 'Да' }));
-  expect(onChange).toHaveBeenLastCalledWith({ recipientHemolyticDiseaseNewbornHistory: 'Да' });
+  expect(countInput('Количество беременностей').value).toBe('100');
 });

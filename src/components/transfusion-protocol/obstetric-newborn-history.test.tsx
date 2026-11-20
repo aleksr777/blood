@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { ObstetricHistoryFields } from './obstetric-history-fields';
+import { chooseCount, countInput } from './obstetric-test-controls';
 import { formatObstetricHistory } from './obstetric-history';
 import type { ProtocolValues } from './protocol-types';
 
@@ -16,7 +17,7 @@ const stored = {
   recipientHemolyticDiseaseNewbornHistory: 'Да',
 };
 
-it.each(['0', '00', 'Не было', 'Не известно'])(
+it.each(['0', '00', 'Не было', 'Не известно', ''])(
   'blocks newborn history at %s births without rewriting an opened snapshot',
   (births) => {
     const values = Object.freeze({ ...stored, recipientBirthsCount: births });
@@ -45,8 +46,10 @@ it.each(['Не было', 'Не известно'])(
     };
     render(<Form />);
     const chooseBirths = (value: string) => {
-      fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество родов' }));
-      fireEvent.click(screen.getByRole('option', { name: value }));
+      if (value === '1') {
+        chooseCount('Количество родов', 'Количество:');
+        fireEvent.change(countInput('Количество родов'), { target: { value } });
+      } else chooseCount('Количество родов', value);
     };
     expect(formatObstetricHistory(current)).toContain('болезнь новорождённых отмечалась');
     chooseBirths(births);

@@ -33,9 +33,8 @@ it('keeps the selected count accessible without displaying a checkmark', () => {
       onChange={vi.fn()}
     />,
   );
-  fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество' }));
-  const list = screen.getByRole('listbox', { name: 'Количество' });
-  const selected = within(list).getByRole('option', { name: '2', selected: true });
-  expect(selected.textContent).toBe('2');
-  expect(list.textContent).not.toContain('✓');
+  const selected = screen.getByRole('radio', { name: 'Количество:' }) as HTMLInputElement;
+  expect(selected.checked).toBe(true);
+  expect((screen.getByRole('spinbutton') as HTMLInputElement).value).toBe('2');
+  expect(document.body.textContent).not.toContain('✓');
 });

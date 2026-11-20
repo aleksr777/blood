@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { ProtocolEditorModal } from './protocol-editor-modal';
 import { RecipientHistoryModal } from './recipient-history-modal';
+import { countInput } from './obstetric-test-controls';
 
 vi.mock('../modal/modal', () => ({
   default: ({ title, children }: { title: string; children: ReactNode }) => (
@@ -62,10 +63,7 @@ it.each(['protocol', 'direction'])(
     expect(screen.getByRole('dialog', { name: 'Анамнез реципиента' })).toBeTruthy();
     expect(screen.getByRole('group', { name: 'Анамнез реципиента' })).toBeTruthy();
     expect(screen.getByRole('group', { name: 'Акушерский анамнез' })).toBeTruthy();
-    expect(
-      (screen.getByRole('spinbutton', { name: 'Количество беременностей' }) as HTMLInputElement)
-        .value,
-    ).toBe('2');
+    expect(countInput('Количество беременностей').value).toBe('2');
     const reactions = screen.getByRole('textbox', {
       name: 'Реакции и осложнения на трансфузии в анамнезе',
     });

@@ -61,7 +61,28 @@ it.each(['Не было', 'Не известно'])(
     expect(screen.getByRole('button', { name: label }).matches(':disabled')).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: label }));
     expect(screen.queryByRole('option', { name: 'Не выбрано' })).toBeNull();
-    fireEvent.click(screen.getByRole('option', { name: 'Нет' }));
+    fireEvent.click(screen.getByRole('option', { name: 'Не было' }));
+    expect(current.recipientHemolyticDiseaseNewbornHistory).toBe('Не было');
     expect(formatObstetricHistory(current)).toContain('болезнь новорождённых не отмечалась');
+    fireEvent.click(screen.getByRole('button', { name: label }));
+    fireEvent.click(screen.getByRole('option', { name: 'Было' }));
+    expect(current.recipientHemolyticDiseaseNewbornHistory).toBe('Было');
+    expect(formatObstetricHistory(current)).toContain('болезнь новорождённых отмечалась');
   },
 );
+
+it.each([
+  ['Да', 'Было'],
+  ['Нет', 'Не было'],
+])('shows a saved %s choice as %s without rewriting the saved data', (saved, displayed) => {
+  const values = Object.freeze({ ...stored, recipientHemolyticDiseaseNewbornHistory: saved });
+  const onChange = vi.fn();
+  render(<ObstetricHistoryFields values={values} applyDefaults={false} onChange={onChange} />);
+  const control = screen.getByRole('button', { name: label });
+  expect(control.textContent).toContain(displayed);
+  fireEvent.click(control);
+  expect(screen.getByRole('option', { name: displayed, selected: true })).toBeTruthy();
+  expect(screen.queryByRole('option', { name: saved })).toBeNull();
+  expect(onChange).not.toHaveBeenCalled();
+  expect(values.recipientHemolyticDiseaseNewbornHistory).toBe(saved);
+});

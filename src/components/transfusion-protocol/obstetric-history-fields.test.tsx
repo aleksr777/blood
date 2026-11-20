@@ -62,8 +62,8 @@ it('clears excessive counts at zero pregnancies and re-enables fields for a posi
   fireEvent.change(births(), { target: { value: '1' } });
   expect(births().value).toBe('1');
   fireEvent.click(screen.getByRole('button', { name: newbornLabel }));
-  fireEvent.click(screen.getByRole('option', { name: 'Да' }));
-  expect(onChange).toHaveBeenLastCalledWith({ recipientHemolyticDiseaseNewbornHistory: 'Да' });
+  fireEvent.click(screen.getByRole('option', { name: 'Было' }));
+  expect(onChange).toHaveBeenLastCalledWith({ recipientHemolyticDiseaseNewbornHistory: 'Было' });
   chooseCount('Количество беременностей', 'Не было');
   chooseCount('Количество беременностей', 'Не известно');
   expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);

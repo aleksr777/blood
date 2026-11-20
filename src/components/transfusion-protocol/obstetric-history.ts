@@ -22,6 +22,11 @@ export const obstetricCountLabel = (value: string) =>
       ? OBSTETRIC_NONE
       : value;
 
+export const obstetricNewbornHistoryLabel = (value: string) => {
+  const normalized = value.trim().toLocaleLowerCase('ru-RU');
+  return normalized === 'да' ? 'Было' : normalized === 'нет' ? 'Не было' : value;
+};
+
 // Old documents have one status for the entire history. Keep that meaning until
 // the user explicitly edits an individual field, without changing the snapshot.
 export const obstetricValuesForEditing = (values: ProtocolValues): ProtocolValues =>
@@ -30,7 +35,9 @@ export const obstetricValuesForEditing = (values: ProtocolValues): ProtocolValue
       name,
       values.recipientObstetricHistoryStatus === 'unknown'
         ? OBSTETRIC_UNKNOWN
-        : (values[name] ?? ''),
+        : name === 'recipientHemolyticDiseaseNewbornHistory'
+          ? obstetricNewbornHistoryLabel(values[name] ?? '')
+          : (values[name] ?? ''),
     ]),
   );
 
@@ -97,9 +104,11 @@ export const formatObstetricHistory = (values: ProtocolValues) => {
   if (newbornHistory && !isNewbornHistoryBlocked(values)) {
     switch (newbornHistory.toLocaleLowerCase('ru-RU')) {
       case 'да':
+      case 'было':
         parts.push('Гемолитическая болезнь новорождённых отмечалась');
         break;
       case 'нет':
+      case 'не было':
         parts.push('Гемолитическая болезнь новорождённых не отмечалась');
         break;
       default:

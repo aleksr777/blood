@@ -21,12 +21,6 @@ const DETAIL_FIELDS: ProtocolFieldConfig[] = [
     label: 'Фамилия, имя, отчество ответственного лица',
     wide: true,
   },
-  {
-    name: 'compatibilityConclusion',
-    label: 'Заключение',
-    type: 'select',
-    options: ['Совместимо', 'Несовместимо'],
-  },
 ];
 
 export const SelectionFields = ({ values, onChange }: Props) => {
@@ -71,6 +65,24 @@ export const SelectionFields = ({ values, onChange }: Props) => {
               onChange={changeValue}
             />
           ))}
+          <fieldset className={styles.conclusionGroup}>
+            <legend>Заключение</legend>
+            <div className={styles.options}>
+              {['Совместимо', 'Несовместимо'].map((option) => (
+                <RadioOption
+                  key={option}
+                  className={styles.option}
+                  name="compatibilityConclusion"
+                  checked={values.compatibilityConclusion === option}
+                  onChange={(checked) =>
+                    changeValue('compatibilityConclusion', checked ? option : '')
+                  }
+                >
+                  {option}
+                </RadioOption>
+              ))}
+            </div>
+          </fieldset>
         </div>
       )}
     </div>

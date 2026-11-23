@@ -23,6 +23,13 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+const findCachedResponse = async (cache, request) => {
+  const cached = await cache.match(request, { ignoreSearch: true });
+  if (cached) return cached;
+  if (request.mode === 'navigate') return cache.match(APP_ROOT);
+  return undefined;
+};
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   const url = new URL(request.url);
@@ -31,13 +38,15 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
-      const cached = await cache.match(request, { ignoreSearch: true });
-      if (cached) return cached;
-      if (request.mode === 'navigate') {
-        const app = await cache.match(APP_ROOT);
-        if (app) return app;
+      try {
+        const response = await fetch(request, { cache: 'no-store' });
+        if (response.ok) return response;
+        return (await findCachedResponse(cache, request)) ?? response;
+      } catch (error) {
+        const cached = await findCachedResponse(cache, request);
+        if (cached) return cached;
+        throw error;
       }
-      return fetch(request);
     }),
   );
 });

@@ -2,11 +2,14 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { expect, it } from 'vitest';
 
-it('starts from cached assets after the network is disconnected', async () => {
+it('loads current assets from the network and falls back to a complete offline version', async () => {
   const listeners = new Map<string, (event: unknown) => void>();
   const stored = new Map<string, Map<string, string>>();
   const root = 'https://example.test/blood/';
   const cacheName = 'blood-static-current';
+  let online = true;
+  let responseOk = true;
+  const requests: string[] = [];
   stored.set('blood-static-old', new Map());
   const cacheStorage = {
     open: async (name: string) => {
@@ -36,7 +39,11 @@ it('starts from cached assets after the network is disconnected', async () => {
     {
       URL,
       caches: cacheStorage,
-      fetch: () => Promise.reject(new Error('Network is disconnected')),
+      fetch: async (request: { url: string }, options: { cache: string }) => {
+        requests.push(`${request.url} (${options.cache})`);
+        if (!online) throw new Error('Network is disconnected');
+        return { ok: responseOk, url: request.url };
+      },
       self: {
         registration: { scope: root },
         location: { origin: 'https://example.test' },
@@ -72,9 +79,27 @@ it('starts from cached assets after the network is disconnected', async () => {
   expect(stored.has('blood-static-old')).toBe(false);
   expect(stored.get(cacheName)?.size).toBe(3);
   await expect(
+    run('fetch', { request: { method: 'GET', mode: 'navigate', url: root } }),
+  ).resolves.toEqual({ ok: true, url: root });
+  await expect(
+    run('fetch', { request: { method: 'GET', mode: 'cors', url: `${root}assets/sqlite.wasm` } }),
+  ).resolves.toEqual({ ok: true, url: `${root}assets/sqlite.wasm` });
+  expect(requests).toEqual([`${root} (no-store)`, `${root}assets/sqlite.wasm (no-store)`]);
+  expect(stored.get(cacheName)?.size).toBe(3);
+
+  responseOk = false;
+  await expect(
+    run('fetch', { request: { method: 'GET', mode: 'navigate', url: root } }),
+  ).resolves.toBe(root);
+
+  online = false;
+  await expect(
     run('fetch', { request: { method: 'GET', mode: 'navigate', url: `${root}archive` } }),
   ).resolves.toBe(root);
   await expect(
     run('fetch', { request: { method: 'GET', mode: 'cors', url: `${root}assets/sqlite.wasm` } }),
   ).resolves.toBe(`${root}assets/sqlite.wasm`);
+  await expect(
+    run('fetch', { request: { method: 'GET', mode: 'cors', url: `${root}assets/missing.js` } }),
+  ).rejects.toThrow('Network is disconnected');
 });

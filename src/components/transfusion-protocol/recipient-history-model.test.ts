@@ -75,5 +75,5 @@ it('preserves unrecognized stored count text and an explicit negative newborn hi
       recipientPregnanciesCount: 'неизвестно',
       recipientHemolyticDiseaseNewbornHistory: 'Нет',
     }),
-  ).toBe('Количество беременностей не известно.');
+  ).toBe('Количество беременностей - не известно.');
 });

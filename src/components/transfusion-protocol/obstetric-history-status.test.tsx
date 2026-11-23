@@ -56,9 +56,9 @@ it('prints unknown values separately and hides inactive newborn history', () => 
       }
     }
   }
-  const message = screen.getByText(/Количество беременностей не известно/);
+  const message = screen.getByText(/Количество беременностей - не известно/);
   expect(message.textContent).toBe(
-    'Количество беременностей не известно. Количество родов - не известно. ' +
+    'Количество беременностей - не известно. Количество родов - не известно. ' +
       'Количество самопроизвольных абортов - не известно.',
   );
   expect(message.closest('td')?.getAttribute('colspan')).toBe('6');
@@ -107,7 +107,7 @@ it('keeps a legacy unknown snapshot untouched until editing an individual field'
 it('prints unknown legacy history by active field and preserves the profile field', () => {
   const values = { ...counts, recipientObstetricHistoryStatus: 'unknown' };
   const unknownText =
-    'Количество беременностей не известно. Количество родов - не известно. ' +
+    'Количество беременностей - не известно. Количество родов - не известно. ' +
     'Количество самопроизвольных абортов - не известно.';
   expect(formatObstetricHistory(values)).toBe(unknownText);
   expect(formatObstetricHistory({ ...values, recipientPregnanciesCount: '0' })).toBe(unknownText);

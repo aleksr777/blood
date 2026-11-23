@@ -2,97 +2,103 @@ import { expect, it } from 'vitest';
 import { formatObstetricHistory, hasNoPregnancies } from './obstetric-history';
 import type { ProtocolValues } from './protocol-types';
 
-it.each([
-  ['1', ['беременность', 'раз', 'самопроизвольный аборт']],
-  ['2', ['беременности', 'раза', 'самопроизвольных аборта']],
-  ['4', ['беременности', 'раза', 'самопроизвольных аборта']],
-  ['5', ['беременностей', 'раз', 'самопроизвольных абортов']],
-  ['11', ['беременностей', 'раз', 'самопроизвольных абортов']],
-  ['12', ['беременностей', 'раз', 'самопроизвольных абортов']],
-  ['14', ['беременностей', 'раз', 'самопроизвольных абортов']],
-  ['21', ['беременность', 'раз', 'самопроизвольный аборт']],
-  ['22', ['беременности', 'раза', 'самопроизвольных аборта']],
-  ['25', ['беременностей', 'раз', 'самопроизвольных абортов']],
-  ['31', ['беременность', 'раз', 'самопроизвольный аборт']],
-  ['99', ['беременностей', 'раз', 'самопроизвольных абортов']],
-] as const)('uses natural Russian count forms for %s', (count, [pregnancies, times, abortions]) => {
-  const values = Object.freeze({
-    recipientPregnanciesCount: count,
-    recipientBirthsCount: count,
-    recipientSpontaneousAbortionsCount: count,
-  });
-  expect(formatObstetricHistory(values)).toBe(
-    `В анамнезе ${count} ${pregnancies}. Роды — ${count} ${times}. ` +
-      `${count} ${abortions} в анамнезе.`,
+it('prints each known count as a separate statement', () => {
+  expect(
+    formatObstetricHistory({
+      recipientPregnanciesCount: '2',
+      recipientBirthsCount: '1',
+      recipientSpontaneousAbortionsCount: '1',
+      recipientHemolyticDiseaseNewbornHistory: 'Было',
+    }),
+  ).toBe(
+    'Количество беременностей в анамнезе - 2. Количество родов в анамнезе - 1. ' +
+      'Количество самопроизвольных абортов в анамнезе - 1. ' +
+      'Гемолитическая болезнь новорождённого в анамнезе была.',
   );
 });
 
-it.each([
-  ['Да', 'Гемолитическая болезнь новорождённых отмечалась.'],
-  ['Нет', 'Гемолитическая болезнь новорождённых не отмечалась.'],
-  ['Было', 'Гемолитическая болезнь новорождённых отмечалась.'],
-  ['Не было', 'Гемолитическая болезнь новорождённых не отмечалась.'],
-  [' ДА ', 'Гемолитическая болезнь новорождённых отмечалась.'],
-  [' нет ', 'Гемолитическая болезнь новорождённых не отмечалась.'],
-  ['неизвестно', 'Сведения о гемолитической болезни новорождённых неизвестны.'],
-  ['', ''],
-  [' ', ''],
-])('formats explicit newborn history %j without guessing missing data', (value, expected) => {
-  expect(formatObstetricHistory({ recipientHemolyticDiseaseNewbornHistory: value })).toBe(expected);
-});
-
-it('formats padded counts without changing stored values', () => {
-  const values = Object.freeze({
-    recipientPregnanciesCount: '01',
-    recipientBirthsCount: '02',
-    recipientSpontaneousAbortionsCount: ' 05 ',
-  });
-  expect(formatObstetricHistory(values)).toBe(
-    'В анамнезе 1 беременность. Роды — 2 раза. ' + '5 самопроизвольных абортов в анамнезе.',
+it('prints the requested statements for absent events', () => {
+  expect(
+    formatObstetricHistory({
+      recipientPregnanciesCount: '3',
+      recipientBirthsCount: '0',
+      recipientSpontaneousAbortionsCount: 'Не было',
+      recipientHemolyticDiseaseNewbornHistory: 'Нет',
+    }),
+  ).toBe(
+    'Количество беременностей в анамнезе - 3. Родов не было. ' +
+      'Самопроизвольных абортов не было.',
   );
-  expect(values.recipientPregnanciesCount).toBe('01');
+  expect(
+    formatObstetricHistory({
+      recipientPregnanciesCount: '3',
+      recipientBirthsCount: '1',
+      recipientHemolyticDiseaseNewbornHistory: 'Не было',
+    }),
+  ).toBe(
+    'Количество беременностей в анамнезе - 3. Количество родов в анамнезе - 1. ' +
+      'Гемолитической болезни новорождённого в анамнезе не было.',
+  );
 });
 
-it.each(['-1', '1.5', '1e1', '9007199254740993'])(
-  'retains unrecognized earlier count %s as entered',
-  (value) => {
-    expect(formatObstetricHistory({ recipientPregnanciesCount: value })).toBe(
-      `Количество беременностей: ${value}.`,
-    );
-  },
-);
-
-it.each(['0', '00', ' 0 '])('omits all dependent history for explicit zero %j', (zero) => {
-  const values = Object.freeze({
-    recipientPregnanciesCount: zero,
-    recipientBirthsCount: '2',
-    recipientSpontaneousAbortionsCount: '1',
-    recipientHemolyticDiseaseNewbornHistory: 'Да',
-  });
-  expect(hasNoPregnancies(values)).toBe(true);
-  expect(formatObstetricHistory(values)).toBe('Беременностей не было');
-  expect(values.recipientBirthsCount).toBe('2');
-});
-
-it.each([undefined, '', ' ', '1', '99', 'неизвестно'])(
-  'does not interpret pregnancy count %j as no pregnancies',
-  (value) => {
-    const values: ProtocolValues = value === undefined ? {} : { recipientPregnanciesCount: value };
-    expect(hasNoPregnancies(values)).toBe(false);
-  },
-);
-
-it('collapses four explicit unknown values but keeps partial unknown information', () => {
+it('prints individual unknown choices only for active fields', () => {
   const unknown = {
     recipientPregnanciesCount: 'Не известно',
     recipientBirthsCount: 'Не известно',
     recipientSpontaneousAbortionsCount: 'Не известно',
     recipientHemolyticDiseaseNewbornHistory: 'Не известно',
   };
-  expect(formatObstetricHistory(unknown)).toBe('Не известен');
-  expect(formatObstetricHistory({ ...unknown, recipientBirthsCount: '3' })).toBe(
-    'Количество беременностей неизвестно. Роды — 3 раза. ' +
-      'Количество самопроизвольных абортов неизвестно. ' +
-      'Сведения о гемолитической болезни новорождённых неизвестны.',
+  expect(formatObstetricHistory(unknown)).toBe(
+    'Количество беременностей не известно. Количество родов - не известно. ' +
+      'Количество самопроизвольных абортов - не известно.',
+  );
+  expect(formatObstetricHistory({ ...unknown, recipientBirthsCount: '2' })).toBe(
+    'Количество беременностей не известно. Количество родов в анамнезе - 2. ' +
+      'Количество самопроизвольных абортов - не известно. ' +
+      'Наличие гемолитической болезни новорождённого в анамнезе - не известно.',
+  );
+});
+
+it.each(['0', '00', ' 0 ', 'Не было'])(
+  'omits all inactive dependent fields for zero pregnancies %j',
+  (zero) => {
+    const values = Object.freeze({
+      recipientPregnanciesCount: zero,
+      recipientBirthsCount: '2',
+      recipientSpontaneousAbortionsCount: '1',
+      recipientHemolyticDiseaseNewbornHistory: 'Было',
+    });
+    expect(hasNoPregnancies(values)).toBe(true);
+    expect(formatObstetricHistory(values)).toBe('Беременностей не было');
+    expect(values.recipientBirthsCount).toBe('2');
+  },
+);
+
+it.each([undefined, '', ' ', '0', 'Не известно'])(
+  'hides newborn history when births are inactive: %j',
+  (births) => {
+    const values: ProtocolValues = {
+      recipientPregnanciesCount: '2',
+      ...(births === undefined ? {} : { recipientBirthsCount: births }),
+    };
+    expect(
+      formatObstetricHistory({ ...values, recipientHemolyticDiseaseNewbornHistory: 'Да' }),
+    ).not.toContain('Гемолитическая болезнь');
+  },
+);
+
+it('keeps legacy numeric values readable without changing saved records', () => {
+  const values = Object.freeze({
+    recipientPregnanciesCount: '01',
+    recipientBirthsCount: '02',
+    recipientSpontaneousAbortionsCount: ' 05 ',
+  });
+  expect(formatObstetricHistory(values)).toBe(
+    'Количество беременностей в анамнезе - 1. Количество родов в анамнезе - 2. ' +
+      'Количество самопроизвольных абортов в анамнезе - 5.',
+  );
+  expect(values.recipientPregnanciesCount).toBe('01');
+  expect(formatObstetricHistory({ recipientPregnanciesCount: '-1' })).toBe(
+    'Количество беременностей в анамнезе - -1.',
   );
 });

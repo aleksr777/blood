@@ -51,7 +51,9 @@ it.each(['Не было', 'Не известно'])(
         fireEvent.change(countInput('Количество родов'), { target: { value } });
       } else chooseCount('Количество родов', value);
     };
-    expect(formatObstetricHistory(current)).toContain('болезнь новорождённого в анамнезе была');
+    expect(formatObstetricHistory(current)).toContain(
+      'В анамнезе была гемолитическая болезнь новорождённого',
+    );
     chooseBirths(births);
     expect(current.recipientBirthsCount).toBe(births === 'Не было' ? '0' : births);
     expect(current.recipientHemolyticDiseaseNewbornHistory).toBe('Не известно');
@@ -67,7 +69,9 @@ it.each(['Не было', 'Не известно'])(
     fireEvent.click(screen.getByRole('button', { name: label }));
     fireEvent.click(screen.getByRole('option', { name: 'Было' }));
     expect(current.recipientHemolyticDiseaseNewbornHistory).toBe('Было');
-    expect(formatObstetricHistory(current)).toContain('болезнь новорождённого в анамнезе была');
+    expect(formatObstetricHistory(current)).toContain(
+      'В анамнезе была гемолитическая болезнь новорождённого',
+    );
   },
 );
 

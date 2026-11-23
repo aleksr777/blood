@@ -85,7 +85,7 @@ export const formatObstetricHistory = (values: ProtocolValues) => {
     switch (newbornHistory.toLocaleLowerCase('ru-RU')) {
       case 'да':
       case 'было':
-        parts.push('Гемолитическая болезнь новорождённого в анамнезе была');
+        parts.push('В анамнезе была гемолитическая болезнь новорождённого');
         break;
       case 'нет':
       case 'не было':

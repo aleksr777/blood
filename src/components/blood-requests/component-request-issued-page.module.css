@@ -62,9 +62,7 @@
 
 .dateLine,
 .signatureLine {
-  display: block;
   height: 6mm;
-  border-bottom: 0.25mm solid #111;
 }
 
 .dateLine {
@@ -76,7 +74,5 @@
   min-width: 20mm;
   height: auto;
   min-height: 6mm;
-  padding: 0 1mm;
-  line-height: 1.2;
   overflow-wrap: anywhere;
 }

@@ -22,3 +22,8 @@
   gap: 1rem 1.25rem;
   min-width: 0;
 }
+
+.conclusionGroup {
+  composes: ui-fieldset from global;
+  grid-column: 1 / -1;
+}

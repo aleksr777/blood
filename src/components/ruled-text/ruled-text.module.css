@@ -1,0 +1,34 @@
+.line {
+  box-sizing: border-box;
+  display: inline-flex;
+  min-width: 0;
+  align-items: flex-end;
+  border-bottom: var(--ruled-line-width, var(--form-line-width, 0.25mm)) solid #111;
+  padding: 0 0.8mm var(--ruled-bottom-gap, 0.25mm);
+  font-weight: 400;
+  line-height: var(--ruled-text-line-height, 1.05);
+  text-align: left;
+}
+
+.label {
+  display: inline-flex;
+  align-items: flex-end;
+  align-self: stretch;
+  padding-bottom: calc(
+    var(--ruled-bottom-gap, 0.25mm) + var(--ruled-line-width, var(--form-line-width, 0.25mm))
+  );
+  line-height: var(--ruled-text-line-height, 1.05);
+}
+
+.value {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: inherit;
+  white-space: inherit;
+}
+
+.truncate .value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

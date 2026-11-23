@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 import { useState } from 'react';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { ObstetricHistoryFields } from './obstetric-history-fields';
+import { chooseCount, countInput, countRadio } from './obstetric-test-controls';
 import { formatObstetricHistory } from './obstetric-history';
 import { HistoryBlock } from './first-page-blocks-secondary';
 import { hasStructuredObstetricHistory } from '../blood-requests/direction-history';
@@ -25,7 +26,7 @@ const labels = [
   'Гемолитическая болезнь новорождённого в анамнезе',
 ];
 
-it('lets each field be unknown and prints one common message when all four are unknown', () => {
+it('prints unknown values separately and hides inactive newborn history', () => {
   const Form = () => {
     const [values, setValues] = useState<ProtocolValues>(counts);
     return (
@@ -42,14 +43,12 @@ it('lets each field be unknown and prints one common message when all four are u
   };
   render(<Form />);
   for (const [index, label] of labels.slice(0, 3).entries()) {
-    fireEvent.click(screen.getByRole('button', { name: `Варианты: ${label}` }));
-    const list = screen.getByRole('listbox', { name: label });
-    expect(within(list).queryByRole('option', { name: 'Не выбрано' })).toBeNull();
-    fireEvent.click(within(list).getByRole('option', { name: 'Не известно' }));
+    chooseCount(label, 'Не известно');
     if (index === 0) {
       for (const countLabel of labels.slice(1, 3)) {
-        const input = screen.getByRole('spinbutton', { name: countLabel }) as HTMLInputElement;
-        expect([input.value, input.max]).toEqual(['1', '99']);
+        const input = countInput(countLabel);
+        expect(input.max).toBe('99');
+        chooseCount(countLabel, 'Количество:');
         fireEvent.change(input, { target: { value: '99' } });
         expect(input.value).toBe('99');
         fireEvent.change(input, { target: { value: '100' } });
@@ -57,13 +56,16 @@ it('lets each field be unknown and prints one common message when all four are u
       }
     }
   }
-  expect(screen.getByText('Не известен').closest('td')?.getAttribute('colspan')).toBe('6');
-  for (const input of screen.getAllByRole('textbox'))
-    expect(input.matches(':disabled')).toBe(false);
-  fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
-  fireEvent.click(screen.getByRole('option', { name: '2' }));
-  expect(screen.queryByText('Не известен')).toBeNull();
-  expect(screen.getByText(/Количество родов неизвестно/)).toBeTruthy();
+  const message = screen.getByText(/Количество беременностей - не известно/);
+  expect(message.closest('.cell-value')?.textContent).toBe(
+    'Количество беременностей - не известно. Количество родов - не известно. ' +
+      'Количество самопроизвольных абортов - не известно.',
+  );
+  expect(message.closest('td')?.getAttribute('colspan')).toBe('6');
+  chooseCount('Количество беременностей', 'Количество:');
+  fireEvent.change(countInput('Количество беременностей'), { target: { value: '2' } });
+  expect(screen.getByText(/Количество беременностей в анамнезе - 2/)).toBeTruthy();
+  expect(screen.getByText(/Количество родов - не известно/)).toBeTruthy();
   expect(screen.getByRole('button', { name: labels[3] }).matches(':disabled')).toBe(true);
 });
 
@@ -76,10 +78,8 @@ it('defaults new history to zero pregnancies without filling missing saved histo
     recipientSpontaneousAbortionsCount: 'Не известно',
     recipientHemolyticDiseaseNewbornHistory: 'Не известно',
   });
-  expect((screen.getByRole('textbox', { name: labels[0] }) as HTMLInputElement).value).toBe(
-    'Не было',
-  );
-  expect(screen.getByRole('textbox', { name: labels[1] }).matches(':disabled')).toBe(true);
+  expect(countRadio(labels[0], 'Не было').checked).toBe(true);
+  expect(countInput(labels[1]).matches(':disabled')).toBe(true);
   onChange.mockClear();
   rerender(<ObstetricHistoryFields values={{}} applyDefaults={false} onChange={onChange} />);
   expect(onChange).not.toHaveBeenCalled();
@@ -90,13 +90,10 @@ it('keeps a legacy unknown snapshot untouched until editing an individual field'
   const onChange = vi.fn();
   render(<ObstetricHistoryFields values={values} applyDefaults={false} onChange={onChange} />);
   expect(onChange).not.toHaveBeenCalled();
-  expect(screen.getAllByRole('textbox').map((input) => (input as HTMLInputElement).value)).toEqual([
-    'Не известно',
-    'Не известно',
-    'Не известно',
-  ]);
-  fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
-  fireEvent.click(screen.getByRole('option', { name: '2' }));
+  for (const label of labels.slice(0, 3))
+    expect(countRadio(label, 'Не известно').checked).toBe(true);
+  chooseCount('Количество беременностей', 'Количество:');
+  fireEvent.change(countInput('Количество беременностей'), { target: { value: '2' } });
   expect(onChange).toHaveBeenCalledWith({
     recipientObstetricHistoryStatus: 'known',
     recipientPregnanciesCount: '2',
@@ -107,10 +104,13 @@ it('keeps a legacy unknown snapshot untouched until editing an individual field'
   expect(values.recipientBirthsCount).toBe('1');
 });
 
-it('prints only the unknown status in one full-width obstetric cell and preserves the profile field', () => {
+it('prints unknown legacy history by active field and preserves the profile field', () => {
   const values = { ...counts, recipientObstetricHistoryStatus: 'unknown' };
-  expect(formatObstetricHistory(values)).toBe('Не известен');
-  expect(formatObstetricHistory({ ...values, recipientPregnanciesCount: '0' })).toBe('Не известен');
+  const unknownText =
+    'Количество беременностей - не известно. Количество родов - не известно. ' +
+    'Количество самопроизвольных абортов - не известно.';
+  expect(formatObstetricHistory(values)).toBe(unknownText);
+  expect(formatObstetricHistory({ ...values, recipientPregnanciesCount: '0' })).toBe(unknownText);
   expect(hasStructuredObstetricHistory({ recipientObstetricHistoryStatus: 'unknown' })).toBe(true);
   expect(profileFromValues(values).recipientObstetricHistoryStatus).toBe('unknown');
   render(
@@ -118,7 +118,7 @@ it('prints only the unknown status in one full-width obstetric cell and preserve
       <HistoryBlock values={values} part="main" onOpenBlock={vi.fn()} />
     </table>,
   );
-  const message = screen.getByText('Не известен');
+  const message = screen.getByText('Количество беременностей - не известно.');
+  expect(message.closest('.cell-value')?.textContent).toBe(unknownText);
   expect(message.closest('td')?.getAttribute('colspan')).toBe('6');
-  expect(screen.queryByText(/беременности в анамнезе/)).toBeNull();
 });

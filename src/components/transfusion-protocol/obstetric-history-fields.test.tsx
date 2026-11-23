@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { RecipientHistoryFields } from './recipient-history-fields';
+import { chooseCount, countInput, countRadio } from './obstetric-test-controls';
 import type { ProtocolValues } from './protocol-types';
 
 afterEach(cleanup);
@@ -15,64 +16,58 @@ const stored = {
   recipientHemolyticDiseaseNewbornHistory: 'Да',
 };
 
-it.each(['0', '00'])(
-  'clears excessive counts at %s and re-enables the fields when pregnancies are entered',
-  (zero) => {
-    const onChange = vi.fn();
-    const History = () => {
-      const [values, setValues] = useState<ProtocolValues>(stored);
-      return (
-        <RecipientHistoryFields
-          values={values}
-          applyDefaults={false}
-          showTransfusionHistory={false}
-          onChange={(changes) => {
-            onChange(changes);
-            setValues((current) => ({ ...current, ...changes }));
-          }}
-        />
-      );
-    };
-    render(<History />);
-    const pregnancy = screen.getByRole('spinbutton', { name: 'Количество беременностей' });
-    const births = () =>
-      screen.getByLabelText('Количество родов', { selector: 'input' }) as HTMLInputElement;
-    const controls = () => [
-      births(),
-      screen.getByLabelText('Самопроизвольные аборты в анамнезе', { selector: 'input' }),
-      screen.getByRole('button', { name: newbornLabel }),
-    ];
-    fireEvent.change(pregnancy, { target: { value: zero } });
-    expect(onChange).toHaveBeenLastCalledWith({
-      recipientPregnanciesCount: zero,
-      recipientBirthsCount: 'Не известно',
-      recipientSpontaneousAbortionsCount: 'Не известно',
-      recipientHemolyticDiseaseNewbornHistory: 'Не известно',
-    });
-    expect(pregnancy.matches(':disabled')).toBe(false);
-    for (const control of controls()) expect(control.matches(':disabled')).toBe(true);
-    onChange.mockClear();
-    fireEvent.change(births(), { target: { value: '3' } });
-    expect(onChange).not.toHaveBeenCalled();
-    expect(births().value).toBe('Не известно');
-    expect((pregnancy as HTMLInputElement).value).toBe('Не было');
-    fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
-    fireEvent.click(screen.getByRole('option', { name: '1' }));
-    for (const control of controls().slice(0, 2)) expect(control.matches(':disabled')).toBe(false);
-    expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);
-    expect(births().value).toBe('Не известно');
-    fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество родов' }));
-    fireEvent.click(screen.getByRole('option', { name: '1' }));
-    expect(births().value).toBe('1');
-    fireEvent.click(screen.getByRole('button', { name: newbornLabel }));
-    fireEvent.click(screen.getByRole('option', { name: 'Да' }));
-    expect(onChange).toHaveBeenLastCalledWith({ recipientHemolyticDiseaseNewbornHistory: 'Да' });
-    fireEvent.change(pregnancy, { target: { value: zero } });
-    fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество беременностей' }));
-    fireEvent.click(screen.getByRole('option', { name: 'Не известно' }));
-    expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);
-  },
-);
+it('clears excessive counts at zero pregnancies and re-enables fields for a positive count', () => {
+  const onChange = vi.fn();
+  const History = () => {
+    const [values, setValues] = useState<ProtocolValues>(stored);
+    return (
+      <RecipientHistoryFields
+        values={values}
+        applyDefaults={false}
+        showTransfusionHistory={false}
+        onChange={(changes) => {
+          onChange(changes);
+          setValues((current) => ({ ...current, ...changes }));
+        }}
+      />
+    );
+  };
+  render(<History />);
+  const pregnancy = countInput('Количество беременностей');
+  const births = () => countInput('Количество родов');
+  const controls = () => [
+    countRadio('Количество родов', 'Не известно'),
+    countRadio('Самопроизвольные аборты в анамнезе', 'Не известно'),
+    screen.getByRole('button', { name: newbornLabel }),
+  ];
+  chooseCount('Количество беременностей', 'Не было');
+  expect(onChange).toHaveBeenLastCalledWith({
+    recipientPregnanciesCount: '0',
+    recipientBirthsCount: 'Не известно',
+    recipientSpontaneousAbortionsCount: 'Не известно',
+    recipientHemolyticDiseaseNewbornHistory: 'Не известно',
+  });
+  expect(countRadio('Количество беременностей', 'Не было').matches(':disabled')).toBe(false);
+  for (const control of controls()) expect(control.matches(':disabled')).toBe(true);
+  onChange.mockClear();
+  fireEvent.change(births(), { target: { value: '3' } });
+  expect(onChange).not.toHaveBeenCalled();
+  expect(countRadio('Количество родов', 'Не известно').checked).toBe(true);
+  expect(countRadio('Количество беременностей', 'Не было').checked).toBe(true);
+  chooseCount('Количество беременностей', 'Количество:');
+  fireEvent.change(pregnancy, { target: { value: '1' } });
+  for (const control of controls().slice(0, 2)) expect(control.matches(':disabled')).toBe(false);
+  expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);
+  chooseCount('Количество родов', 'Количество:');
+  fireEvent.change(births(), { target: { value: '1' } });
+  expect(births().value).toBe('1');
+  fireEvent.click(screen.getByRole('button', { name: newbornLabel }));
+  fireEvent.click(screen.getByRole('option', { name: 'Было' }));
+  expect(onChange).toHaveBeenLastCalledWith({ recipientHemolyticDiseaseNewbornHistory: 'Было' });
+  chooseCount('Количество беременностей', 'Не было');
+  chooseCount('Количество беременностей', 'Не известно');
+  expect(screen.getByRole('button', { name: newbornLabel }).matches(':disabled')).toBe(true);
+});
 
 it('does not alter stored values when zero-pregnancy history is opened', () => {
   const onChange = vi.fn();

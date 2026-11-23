@@ -10,10 +10,6 @@
   padding: 0;
 }
 
-.wide {
-  grid-column: 1 / -1;
-}
-
 .error {
   margin-top: 0.8rem;
   color: var(--ui-danger-text);
@@ -40,7 +36,4 @@
     grid-template-columns: 1fr;
   }
 
-  .wide {
-    grid-column: auto;
-  }
 }

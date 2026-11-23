@@ -1,4 +1,5 @@
 import { visibleProtocolComponentValues } from '../../domain/blood-components';
+import { SentenceWrappedText } from '../ruled-text/sentence-wrapped-text';
 import { DonorComponentRow } from './donor-component-row';
 import { LabeledCell, SectionTitle } from './form-controls';
 import { formatIndications } from './indications-model';
@@ -38,7 +39,11 @@ export const HistoryBlock = ({ values, onOpenBlock, part }: ChunkProps) => {
       <SectionTitle>Анамнез реципиента</SectionTitle>
       {obstetricHistory && (
         <tr className="row-history row-obstetric-history">
-          <LabeledCell colSpan={6} label="Акушерский анамнез" value={obstetricHistory} />
+          <LabeledCell
+            colSpan={6}
+            label="Акушерский анамнез"
+            value={<SentenceWrappedText value={obstetricHistory} />}
+          />
         </tr>
       )}
       <tr className="row-history">

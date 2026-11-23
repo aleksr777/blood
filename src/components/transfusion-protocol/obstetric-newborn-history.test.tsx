@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { ObstetricHistoryFields } from './obstetric-history-fields';
+import { chooseCount, countInput } from './obstetric-test-controls';
 import { formatObstetricHistory } from './obstetric-history';
 import type { ProtocolValues } from './protocol-types';
 
@@ -16,7 +17,7 @@ const stored = {
   recipientHemolyticDiseaseNewbornHistory: 'Да',
 };
 
-it.each(['0', '00', 'Не было', 'Не известно'])(
+it.each(['0', '00', 'Не было', 'Не известно', ''])(
   'blocks newborn history at %s births without rewriting an opened snapshot',
   (births) => {
     const values = Object.freeze({ ...stored, recipientBirthsCount: births });
@@ -45,10 +46,14 @@ it.each(['Не было', 'Не известно'])(
     };
     render(<Form />);
     const chooseBirths = (value: string) => {
-      fireEvent.click(screen.getByRole('button', { name: 'Варианты: Количество родов' }));
-      fireEvent.click(screen.getByRole('option', { name: value }));
+      if (value === '1') {
+        chooseCount('Количество родов', 'Количество:');
+        fireEvent.change(countInput('Количество родов'), { target: { value } });
+      } else chooseCount('Количество родов', value);
     };
-    expect(formatObstetricHistory(current)).toContain('болезнь новорождённых отмечалась');
+    expect(formatObstetricHistory(current)).toContain(
+      'В анамнезе была гемолитическая болезнь новорождённого',
+    );
     chooseBirths(births);
     expect(current.recipientBirthsCount).toBe(births === 'Не было' ? '0' : births);
     expect(current.recipientHemolyticDiseaseNewbornHistory).toBe('Не известно');
@@ -58,7 +63,30 @@ it.each(['Не было', 'Не известно'])(
     expect(screen.getByRole('button', { name: label }).matches(':disabled')).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: label }));
     expect(screen.queryByRole('option', { name: 'Не выбрано' })).toBeNull();
-    fireEvent.click(screen.getByRole('option', { name: 'Нет' }));
-    expect(formatObstetricHistory(current)).toContain('болезнь новорождённых не отмечалась');
+    fireEvent.click(screen.getByRole('option', { name: 'Не было' }));
+    expect(current.recipientHemolyticDiseaseNewbornHistory).toBe('Не было');
+    expect(formatObstetricHistory(current)).toContain('болезни новорождённого в анамнезе не было');
+    fireEvent.click(screen.getByRole('button', { name: label }));
+    fireEvent.click(screen.getByRole('option', { name: 'Было' }));
+    expect(current.recipientHemolyticDiseaseNewbornHistory).toBe('Было');
+    expect(formatObstetricHistory(current)).toContain(
+      'В анамнезе была гемолитическая болезнь новорождённого',
+    );
   },
 );
+
+it.each([
+  ['Да', 'Было'],
+  ['Нет', 'Не было'],
+])('shows a saved %s choice as %s without rewriting the saved data', (saved, displayed) => {
+  const values = Object.freeze({ ...stored, recipientHemolyticDiseaseNewbornHistory: saved });
+  const onChange = vi.fn();
+  render(<ObstetricHistoryFields values={values} applyDefaults={false} onChange={onChange} />);
+  const control = screen.getByRole('button', { name: label });
+  expect(control.textContent).toContain(displayed);
+  fireEvent.click(control);
+  expect(screen.getByRole('option', { name: displayed, selected: true })).toBeTruthy();
+  expect(screen.queryByRole('option', { name: saved })).toBeNull();
+  expect(onChange).not.toHaveBeenCalled();
+  expect(values.recipientHemolyticDiseaseNewbornHistory).toBe(saved);
+});

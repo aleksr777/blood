@@ -1,3 +1,4 @@
+import { RuledText } from '../ruled-text/ruled-text';
 import { AnimatedMessage } from '../animated-reveal/animated-message';
 import { SavedDocumentPage } from '../saved-document/saved-document-page';
 import { hasDocumentContent } from '../../domain/document-content';
@@ -37,7 +38,6 @@ import { formatDate, type ProtocolValues } from '../transfusion-protocol/protoco
 import { RegistrationPatientDetailsModal } from './registration-patient-details-modal';
 import { parseRegistrationTransfusionRows } from './registration-transfusion-table';
 import { RegistrationTransfusionsModal } from './registration-transfusions-modal';
-
 const ROW_COUNT = 14;
 export const TransfusionRegistration = () => {
   const documentState = useDocumentState<ProtocolValues>(() => ({}), clearRegistrationTable);
@@ -61,7 +61,6 @@ export const TransfusionRegistration = () => {
   const [patientDetailsOpen, setPatientDetailsOpen] = useState(false);
   const [tableEditorOpen, setTableEditorOpen] = useState(false);
   const [status, setStatus] = useState('');
-
   const currentRecipientId = Number(values.recipientId);
   const currentRecipientAvailable = Number.isFinite(currentRecipientId) && currentRecipientId > 0;
   const storedCurrentRecipient = readCurrentRecipient();
@@ -74,17 +73,14 @@ export const TransfusionRegistration = () => {
     : formatRecipientAge(values.recipientBirthDate);
   const registrationRows = parseRegistrationTransfusionRows(values);
   const hasContent = hasDocumentContent('registration', values);
-
   usePendingSavedDocument('registration', (record, mode) => {
     void openRegistrationRecord(record, mode);
   });
-
   useEffect(() => {
     let active = true;
     void loadRegistrationDraft()
       .then((draft) => {
         if (!active) return;
-
         if (draft.registrationRecordId !== null) {
           if (!hasSavedDocument())
             openSavedDocument(
@@ -452,36 +448,38 @@ export const TransfusionRegistration = () => {
           >
             <div className="registration-patient-line registration-patient-line--name">
               <span>Фамилия, имя, отчество (при наличии):</span>
-              <span className="registration-blank registration-blank--name">
+              <RuledText truncate className="registration-blank registration-blank--name">
                 {values.recipientName ?? ''}
-              </span>
+              </RuledText>
             </div>
 
             <div className="registration-patient-line registration-patient-line--meta">
               <span className="registration-meta-group">
                 <span>Дата рождения:</span>
-                <span className="registration-blank registration-blank--date">
+                <RuledText truncate className="registration-blank registration-blank--date">
                   {recipientBirthDate}
-                </span>
+                </RuledText>
               </span>
               <span className="registration-meta-group">
                 <span>Пол:</span>
-                <span className="registration-blank registration-blank--sex">
+                <RuledText truncate className="registration-blank registration-blank--sex">
                   {values.recipientSex ?? ''}
-                </span>
+                </RuledText>
               </span>
               <span className="registration-meta-group">
                 <span>Возраст:</span>
-                <span className="registration-blank registration-blank--age">{recipientAge}</span>
+                <RuledText truncate className="registration-blank registration-blank--age">
+                  {recipientAge}
+                </RuledText>
               </span>
               <span className="registration-meta-group">
                 <span>№ медицинской карты:</span>
-                <span className="registration-blank registration-blank--card">
+                <RuledText truncate className="registration-blank registration-blank--card">
                   {values.medicalRecordNumber ?? ''}
-                </span>
+                </RuledText>
               </span>
               <span>№ палаты</span>
-              <span className="registration-blank registration-blank--room" />
+              <RuledText className="registration-blank registration-blank--room" />
             </div>
           </div>
 

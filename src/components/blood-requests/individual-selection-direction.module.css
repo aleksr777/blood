@@ -156,6 +156,8 @@
 .footerSection {
   --form-line-height: 14mm;
   --form-rule-offset: 3.5mm;
+  --ruled-bottom-gap: calc(var(--form-rule-offset) + 0.25mm);
+  --ruled-line-width: 0mm;
 
   line-height: var(--form-line-height);
 }
@@ -176,6 +178,20 @@
 
 .footerSection .adaptiveRules {
   top: calc(0mm - var(--form-rule-offset));
+}
+
+.recipientSection {
+  border-radius: 0;
+}
+
+.recipientSection[data-recipient-position='first'] {
+  border-top-left-radius: 1mm;
+  border-top-right-radius: 1mm;
+}
+
+.recipientSection[data-recipient-position='last'] {
+  border-bottom-left-radius: 1mm;
+  border-bottom-right-radius: 1mm;
 }
 
 .historySection {
@@ -213,10 +229,7 @@
   flex: 1 1 auto;
   min-width: 20mm;
   height: var(--form-line-height);
-  border-bottom: var(--form-line-width) solid #111;
-  padding: 0 0.8mm;
   overflow: hidden;
-  font-weight: 400;
   white-space: pre-wrap;
 }
 
@@ -242,6 +255,7 @@
   line-height: var(--form-line-height);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
+  transform: translateY(0.6mm);
 }
 
 .adaptiveMeasureValue {
@@ -305,8 +319,13 @@
     background: var(--ui-accent-soft);
   }
 
-  .sheetWrap[data-history-hovered='true'] .historySection,
-  .sheetWrap[data-history-hovered='true'] .historySection .adaptiveLabel {
+  .sheetWrap[data-recipient-hovered='true'] [data-recipient-group],
+  .sheetWrap[data-recipient-hovered='true'] [data-recipient-group] .adaptiveLabel {
+    background: var(--ui-accent-soft);
+  }
+
+  .sheetWrap[data-history-hovered='true'] [data-history-group],
+  .sheetWrap[data-history-hovered='true'] [data-history-group] .adaptiveLabel {
     background: var(--ui-accent-soft);
   }
 }

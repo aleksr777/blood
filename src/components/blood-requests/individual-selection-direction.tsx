@@ -38,7 +38,9 @@ import {
   formatObstetricHistory,
   TRANSFUSION_HISTORY_FIELDS,
 } from '../transfusion-protocol/recipient-history-model';
+import { RecipientExaminationSection } from '../transfusion-protocol/recipient-input-sections';
 import { RecipientHistoryModal } from '../transfusion-protocol/recipient-history-modal';
+import { SavedOptionsField } from '../transfusion-protocol/saved-options-field';
 import { usePreviousTransfusionSuggestion } from '../transfusion-protocol/use-previous-transfusion-suggestion';
 import {
   generatedDirectionHistory,
@@ -53,7 +55,6 @@ import {
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import { IndividualSelectionComponentModal } from './individual-selection-component-modal';
 import { individualSelectionReasonLabel } from './component-request-447n';
-import { IndividualSelectionExaminationModal } from './individual-selection-examination-modal';
 import { IndividualSelectionRecipientModal } from './individual-selection-recipient-modal';
 import { RequestEditorModal, type RequestEditorField } from './request-editor-modal';
 import { formatDoseQuantity, sanitizeDoseQuantity } from './dose-quantity';
@@ -96,18 +97,13 @@ type DirectionDraft = Record<RequestAutoField, string> & {
   autoValues: Partial<Record<RequestAutoField, string>>;
 };
 
-type Editor =
-  'organization' | 'component' | 'examination' | 'recipient' | 'history' | 'footer' | null;
+type Editor = 'component' | 'recipient' | 'history' | 'footer' | null;
 
-const ORGANIZATION_FIELDS: RequestEditorField[] = [
-  {
-    name: 'medicalOrganization',
-    label: 'Наименование ЛПУ',
-    savedOptionsCategory: 'medicalOrganization',
-    wide: true,
-  },
-  { name: 'department', label: 'Отделение', wide: true },
-];
+const MEDICAL_ORGANIZATION_OPTION: RequestEditorField = {
+  name: 'medicalOrganization',
+  label: 'Наименование ЛПУ',
+  savedOptionsCategory: 'medicalOrganization',
+};
 
 const FOOTER_FIELDS: RequestEditorField[] = [
   { name: 'directionDate', label: 'Дата направления', type: 'date' },
@@ -454,7 +450,10 @@ export const IndividualSelectionDirection = () => {
           kind: 'individual-selection-direction',
           values: { ...draftRef.current },
         });
-        await persistRequestOptions(draftRef.current, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
+        await persistRequestOptions(draftRef.current, [
+          MEDICAL_ORGANIZATION_OPTION,
+          ...FOOTER_FIELDS,
+        ]);
         documentState.open(record, draftFromRecord(record.values), 'edit');
         documentState.setWorkingValues(clearIndividualSelectionStaff);
         setEditor(null);
@@ -490,7 +489,7 @@ export const IndividualSelectionDirection = () => {
         kind: 'individual-selection-direction',
         values: { ...draftToSave },
       });
-      await persistRequestOptions(draftToSave, [...ORGANIZATION_FIELDS, ...FOOTER_FIELDS]);
+      await persistRequestOptions(draftToSave, [MEDICAL_ORGANIZATION_OPTION, ...FOOTER_FIELDS]);
 
       draftRef.current = draftToSave;
       setDraft(draftToSave);
@@ -604,10 +603,15 @@ export const IndividualSelectionDirection = () => {
       current?.id === recipient.id
         ? {
             ...current,
+            fullName: changes.recipientName ?? current.fullName,
             profile: { ...current.profile, ...changes },
           }
         : current,
     );
+
+    if (changes.recipientName !== undefined && !changes.recipientName.trim()) {
+      return Promise.resolve();
+    }
 
     const operation = (async () => {
       try {
@@ -656,12 +660,14 @@ export const IndividualSelectionDirection = () => {
     return Object.keys(shared).length > 0 ? updateExamination(shared) : Promise.resolve();
   };
 
-  const handleHistoryHover = (event: MouseEvent<HTMLDivElement>) => {
-    const hovered =
-      !documentState.readOnly &&
-      event.target instanceof Element &&
-      event.target.closest('[data-history-group]');
-    if (hovered) event.currentTarget.dataset.historyHovered = 'true';
+  const handleGroupedHover = (event: MouseEvent<HTMLDivElement>) => {
+    const target =
+      documentState.readOnly || !(event.target instanceof Element) ? null : event.target;
+    if (target?.closest('[data-recipient-group]'))
+      event.currentTarget.dataset.recipientHovered = 'true';
+    else delete event.currentTarget.dataset.recipientHovered;
+    if (target?.closest('[data-history-group]'))
+      event.currentTarget.dataset.historyHovered = 'true';
     else delete event.currentTarget.dataset.historyHovered;
   };
 
@@ -677,12 +683,6 @@ export const IndividualSelectionDirection = () => {
       );
 
     switch (editor) {
-      case 'organization':
-        return {
-          title: 'Медицинская организация',
-          fields: ORGANIZATION_FIELDS,
-          values: valuesFor(ORGANIZATION_FIELDS),
-        };
       case 'footer':
         return {
           title: 'Дата и подпись',
@@ -698,41 +698,34 @@ export const IndividualSelectionDirection = () => {
   const formSections = [
     <div
       key="organization"
-      className={styles.fillSection}
+      className={`${styles.fillSection} ${styles.recipientSection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
       data-form-section
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('organization')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('organization'))}
-    >
-      <AdaptiveRuledField label="Наименование ЛПУ:" value={draft.medicalOrganization} />
-      <AdaptiveRuledField label="Отделение:" value={draft.department} />
-    </div>,
-
-    <div
-      key="recipient"
-      className={styles.fillSection}
-      data-form-section
+      data-recipient-group
+      data-recipient-position="first"
       role={documentState.readOnly ? undefined : 'button'}
       tabIndex={documentState.readOnly ? -1 : 0}
       onClick={() => setEditor('recipient')}
       onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
     >
+      <AdaptiveRuledField label="Наименование ЛПУ:" value={draft.medicalOrganization} />
+    </div>,
+
+    <div
+      key="recipient"
+      className={`${styles.fillSection} ${styles.recipientSection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
+      data-form-section
+      data-recipient-group
+      data-recipient-position="last"
+      role={documentState.readOnly ? undefined : 'button'}
+      tabIndex={documentState.readOnly ? -1 : 0}
+      onClick={() => setEditor('recipient')}
+      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('recipient'))}
+    >
+      <AdaptiveRuledField label="Отделение:" value={draft.department} />
       <AdaptiveRuledField label="Ф.И.О. реципиента:" value={draft.recipientName} />
       <AdaptiveRuledField label="Возраст:" value={draft.recipientAge} />
       <AdaptiveRuledField label="№ медицинской карты:" value={draft.medicalRecordNumber} />
       <AdaptiveRuledField label="Диагноз:" value={draft.diagnosis} />
-    </div>,
-
-    <div
-      key="examination"
-      className={styles.fillSection}
-      data-form-section
-      role={documentState.readOnly ? undefined : 'button'}
-      tabIndex={documentState.readOnly ? -1 : 0}
-      onClick={() => setEditor('examination')}
-      onKeyDown={(event) => activateOnKeyboard(event, () => setEditor('examination'))}
-    >
       <AdaptiveRuledField
         label="Группа крови и резус-фактор реципиента:"
         value={draft.recipientAboRh}
@@ -753,9 +746,9 @@ export const IndividualSelectionDirection = () => {
         data-history-position={
           index === 0
             ? 'first'
-            : index === TRANSFUSION_HISTORY_FIELDS.length - 1
+            : index === TRANSFUSION_HISTORY_FIELDS.length - 1 && draft.recipientSex !== 'Женский'
               ? 'last'
-              : 'middle'
+              : undefined
         }
         role={documentState.readOnly ? undefined : 'button'}
         tabIndex={documentState.readOnly || index > 0 ? -1 : 0}
@@ -778,8 +771,10 @@ export const IndividualSelectionDirection = () => {
       ? [
           <div
             key="obstetric"
-            className={styles.fillSection}
+            className={`${styles.fillSection} ${styles.historySection} ${documentState.readOnly ? styles.fillSectionInactive : ''}`}
             data-form-section
+            data-history-group
+            data-history-position="last"
             role={documentState.readOnly ? undefined : 'button'}
             tabIndex={documentState.readOnly ? -1 : 0}
             onClick={() => setEditor('history')}
@@ -787,6 +782,7 @@ export const IndividualSelectionDirection = () => {
           >
             <AdaptiveRuledField
               label="Акушерский анамнез у женщин:"
+              wrapSentences={hasStructuredObstetricHistory(examinationValues)}
               value={
                 hasStructuredObstetricHistory(examinationValues)
                   ? formatObstetricHistory(examinationValues)
@@ -946,8 +942,9 @@ export const IndividualSelectionDirection = () => {
       <div
         className={styles.sheetWrap}
         data-document-paper
-        onMouseMove={handleHistoryHover}
+        onMouseMove={handleGroupedHover}
         onMouseLeave={(event) => {
+          delete event.currentTarget.dataset.recipientHovered;
           delete event.currentTarget.dataset.historyHovered;
         }}
       >
@@ -983,7 +980,25 @@ export const IndividualSelectionDirection = () => {
           }}
           onSelectRecipient={documentState.active ? () => false : selectRecipient}
           onClose={() => setEditor(null)}
-        />
+          topContent={
+            <fieldset className="ui-fieldset">
+              <legend>Медицинская организация</legend>
+              <div className="ui-field-label">Наименование ЛПУ</div>
+              <SavedOptionsField
+                name="medicalOrganization"
+                label="Наименование ЛПУ"
+                category="medicalOrganization"
+                value={draft.medicalOrganization}
+                onChange={(value) => updateFields({ medicalOrganization: value })}
+              />
+            </fieldset>
+          }
+        >
+          <RecipientExaminationSection
+            values={examinationValues}
+            onChange={(changes) => void updateExamination(changes)}
+          />
+        </IndividualSelectionRecipientModal>
       )}
 
       {editor === 'history' && (
@@ -1004,14 +1019,6 @@ export const IndividualSelectionDirection = () => {
           indicationValues={draft.indicationValues}
           onLocalChange={updateFields}
           onIndicationsChange={updateIndications}
-          onClose={() => setEditor(null)}
-        />
-      )}
-
-      {editor === 'examination' && (
-        <IndividualSelectionExaminationModal
-          values={examinationValues}
-          onChange={updateExamination}
           onClose={() => setEditor(null)}
         />
       )}

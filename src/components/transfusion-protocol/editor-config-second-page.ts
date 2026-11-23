@@ -26,8 +26,6 @@ export const secondPageBlockConfigs: ProtocolBlockConfig[] = [
       {
         name: 'compatibilityConclusion',
         label: 'Заключение',
-        type: 'select',
-        options: ['Совместимо', 'Несовместимо'],
       },
     ],
   },

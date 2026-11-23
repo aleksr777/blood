@@ -58,18 +58,35 @@
   cursor: default;
 }
 
-.obstetricGrid input {
+.obstetricGrid input:not([type='radio']) {
   width: 6rem;
   max-width: 100%;
 }
 
 .countField {
-  width: 12rem;
-  max-width: 100%;
+  min-width: 0;
 }
 
-.countField input {
-  width: 100%;
+.countLabel {
+  composes: ui-field-label from global;
+}
+
+.countOptions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem 1rem;
+}
+
+.countQuantity {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.countQuantity input[type='number'] {
+  width: 4.5rem;
 }
 
 .obstetricField[data-type='select'] [aria-haspopup='listbox'] {

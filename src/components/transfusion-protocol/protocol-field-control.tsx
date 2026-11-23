@@ -68,6 +68,7 @@ export const ProtocolFieldControl = ({
         <div className={styles.fieldLabel}>{field.label}</div>
         <RecipientField
           value={value}
+          onChange={change}
           onSelectRecipient={onSelectRecipient ?? (() => undefined)}
           onOpenRecipients={onOpenRecipients ?? (() => undefined)}
         />

@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { ProtocolEditorModal } from './protocol-editor-modal';
+import { chooseCount, countRadio } from './obstetric-test-controls';
 import type { ProtocolValues } from './protocol-types';
 
 vi.mock('../modal/modal', () => ({
@@ -46,15 +47,13 @@ it('keeps unknown choices in all fields after the protocol receives updated valu
   };
   render(<Editor />);
   for (const label of [
-    'Варианты: Количество беременностей',
-    'Варианты: Количество родов',
-    'Варианты: Самопроизвольные аборты в анамнезе',
+    'Количество беременностей',
+    'Количество родов',
+    'Самопроизвольные аборты в анамнезе',
   ]) {
-    fireEvent.click(screen.getByRole('button', { name: label }));
-    fireEvent.click(screen.getByRole('option', { name: 'Не известно' }));
+    chooseCount(label, 'Не известно');
+    expect(countRadio(label, 'Не известно').checked).toBe(true);
   }
-  for (const control of screen.getAllByRole('textbox'))
-    expect((control as HTMLInputElement).value).toBe('Не известно');
   fireEvent.click(screen.getByRole('button', { name: 'Готово' }));
   expect(onClose).toHaveBeenCalledWith(
     expect.objectContaining({

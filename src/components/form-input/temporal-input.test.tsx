@@ -72,8 +72,19 @@ it('respects read-only and disabled date fields', () => {
     </>,
   );
   expect(screen.queryByRole('button', { name: 'Очистить дату' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Выбрать дату' })).toBeNull();
   expect(
     (screen.getByRole('button', { name: 'Очистить время' }) as HTMLButtonElement).disabled,
   ).toBe(true);
   expect(onChange).not.toHaveBeenCalled();
+});
+
+it('opens the native date picker from its separate button', () => {
+  render(<FormInput type="date" aria-label="Дата рождения" value="2026-11-18" readOnly={false} />);
+  const input = screen.getByLabelText('Дата рождения') as HTMLInputElement;
+  const showPicker = vi.fn();
+  input.showPicker = showPicker;
+  fireEvent.click(screen.getByRole('button', { name: 'Выбрать дату' }));
+  expect(showPicker).toHaveBeenCalledOnce();
+  expect(input.value).toBe('2026-11-18');
 });

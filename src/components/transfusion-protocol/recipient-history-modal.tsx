@@ -1,5 +1,5 @@
 import Modal from '../modal/modal';
-import { RecipientHistoryFields } from './recipient-history-fields';
+import { RecipientHistorySection } from './recipient-input-sections';
 import type { ProtocolValues } from './protocol-types';
 import styles from './protocol-editor.module.css';
 
@@ -20,11 +20,12 @@ export const RecipientHistoryModal = ({
 }: Props) => (
   <Modal title="Анамнез реципиента" onClose={onClose} className={styles.large}>
     <div className={styles.grid}>
-      <RecipientHistoryFields
+      <RecipientHistorySection
         values={values}
         applyDefaults={!savedDocument}
         previousTransfusionSuggestion={savedDocument ? '' : previousTransfusionSuggestion}
         onChange={(changes) => void onChange(changes)}
+        showTitle={false}
       />
     </div>
   </Modal>

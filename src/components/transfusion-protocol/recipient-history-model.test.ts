@@ -51,9 +51,9 @@ it('keeps positive counts and separately entered newborn history with mixed zero
       recipientHemolyticDiseaseNewbornHistory: 'Да',
     }),
   ).toBe(
-    'В анамнезе 2 беременности. Роды — 1 раз. ' +
+    'Количество беременностей в анамнезе - 2. Количество родов в анамнезе - 1. ' +
       'Самопроизвольных абортов не было. ' +
-      'Гемолитическая болезнь новорождённых отмечалась.',
+      'В анамнезе была гемолитическая болезнь новорождённого.',
   );
 });
 
@@ -75,7 +75,5 @@ it('preserves unrecognized stored count text and an explicit negative newborn hi
       recipientPregnanciesCount: 'неизвестно',
       recipientHemolyticDiseaseNewbornHistory: 'Нет',
     }),
-  ).toBe(
-    'Количество беременностей неизвестно. ' + 'Гемолитическая болезнь новорождённых не отмечалась.',
-  );
+  ).toBe('Количество беременностей - не известно.');
 });

@@ -28,7 +28,7 @@ const DEFAULTS = {
 export const ObstetricHistoryFields = ({ values, onChange, applyDefaults = true }: Props) => {
   const editableValues = obstetricValuesForEditing(values);
   const missingDefaults = applyDefaults
-    ? Object.fromEntries(Object.entries(DEFAULTS).filter(([name]) => !editableValues[name]?.trim()))
+    ? Object.fromEntries(Object.entries(DEFAULTS).filter(([name]) => values[name] === undefined))
     : {};
   const displayedValues = { ...editableValues, ...missingDefaults };
   const noPregnancies = hasNoPregnancies(displayedValues);
@@ -42,7 +42,7 @@ export const ObstetricHistoryFields = ({ values, onChange, applyDefaults = true 
   useEffect(() => {
     if (!applyDefaults || values.recipientObstetricHistoryStatus === 'unknown') return;
     const defaults = Object.fromEntries(
-      Object.entries(DEFAULTS).filter(([name]) => !values[name]?.trim()),
+      Object.entries(DEFAULTS).filter(([name]) => values[name] === undefined),
     );
     if (Object.keys(defaults).length) onChange(defaults);
   }, [applyDefaults, values, onChange]);
@@ -81,6 +81,7 @@ export const ObstetricHistoryFields = ({ values, onChange, applyDefaults = true 
               key={field.name}
               className={styles.obstetricField}
               data-type={field.type}
+              aria-label={field.type === 'number' ? field.label : undefined}
               disabled={disabled}
             >
               {field.type === 'number' ? (

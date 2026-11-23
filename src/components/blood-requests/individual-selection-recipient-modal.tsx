@@ -1,41 +1,9 @@
 import type { ReactNode } from 'react';
 import type { RecipientRecord } from '../../storage/repositories/recipients';
 import Modal from '../modal/modal';
-import { ProtocolFieldControl } from '../transfusion-protocol/protocol-field-control';
-import { formatRecipientAge } from '../transfusion-protocol/recipient-demographics';
-import type { ProtocolFieldConfig, ProtocolValues } from '../transfusion-protocol/protocol-types';
+import { PatientDetailsFields } from '../transfusion-protocol/patient-details-fields';
+import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 import styles from './individual-selection-recipient-modal.module.css';
-
-const RECIPIENT_NAME_FIELD: ProtocolFieldConfig = {
-  name: 'recipientName',
-  label: 'Фамилия, имя, отчество реципиента',
-  wide: true,
-};
-
-const BIRTH_DATE_FIELD: ProtocolFieldConfig = {
-  name: 'recipientBirthDate',
-  label: 'Дата рождения',
-  type: 'date',
-};
-
-const SEX_FIELD: ProtocolFieldConfig = {
-  name: 'recipientSex',
-  label: 'Пол',
-  type: 'select',
-  options: ['Мужской', 'Женский'],
-};
-
-const MEDICAL_RECORD_FIELD: ProtocolFieldConfig = {
-  name: 'medicalRecordNumber',
-  label: '№ медицинской карты',
-};
-
-const DIAGNOSIS_FIELD: ProtocolFieldConfig = {
-  name: 'diagnosis',
-  label: 'Диагноз',
-  type: 'textarea',
-  wide: true,
-};
 
 type Props = {
   savedDocument?: boolean;
@@ -44,6 +12,7 @@ type Props = {
   onOpenRecipients: () => void;
   onSelectRecipient: (recipient: RecipientRecord) => void | boolean | Promise<void | boolean>;
   onClose: () => void;
+  topContent?: ReactNode;
   children?: ReactNode;
 };
 
@@ -54,62 +23,18 @@ export const IndividualSelectionRecipientModal = ({
   onOpenRecipients,
   onSelectRecipient,
   onClose,
+  topContent,
   children,
-}: Props) => {
-  const changeValue = (name: string, value: string) => {
-    void onRecipientChange({ [name]: value });
-  };
-
-  return (
-    <Modal title="Данные реципиента" onClose={onClose} className={styles.modal}>
-      <div className={styles.grid}>
-        <ProtocolFieldControl
-          savedDocument={savedDocument}
-          field={RECIPIENT_NAME_FIELD}
-          value={values.recipientName ?? ''}
-          onChange={changeValue}
-          onOpenRecipients={onOpenRecipients}
-          onSelectRecipient={onSelectRecipient}
-        />
-
-        <ProtocolFieldControl
-          savedDocument={savedDocument}
-          field={BIRTH_DATE_FIELD}
-          value={values.recipientBirthDate ?? ''}
-          onChange={changeValue}
-        />
-
-        <ProtocolFieldControl
-          savedDocument={savedDocument}
-          field={SEX_FIELD}
-          value={values.recipientSex ?? ''}
-          onChange={changeValue}
-        />
-
-        <div>
-          <div className={styles.fieldLabel}>Возраст</div>
-          <div className={styles.calculatedValue}>
-            {(savedDocument
-              ? values.recipientAge
-              : formatRecipientAge(values.recipientBirthDate)) || '—'}
-          </div>
-        </div>
-
-        <ProtocolFieldControl
-          savedDocument={savedDocument}
-          field={MEDICAL_RECORD_FIELD}
-          value={values.medicalRecordNumber ?? ''}
-          onChange={changeValue}
-        />
-
-        <ProtocolFieldControl
-          savedDocument={savedDocument}
-          field={DIAGNOSIS_FIELD}
-          value={values.diagnosis ?? ''}
-          onChange={changeValue}
-        />
-      </div>
-      {children && <div className={styles.examination}>{children}</div>}
-    </Modal>
-  );
-};
+}: Props) => (
+  <Modal title="Данные реципиента" onClose={onClose} className={styles.modal}>
+    {topContent && <div className={styles.topContent}>{topContent}</div>}
+    <PatientDetailsFields
+      savedDocument={savedDocument}
+      values={values}
+      onChange={(changes) => void onRecipientChange(changes)}
+      onOpenRecipients={onOpenRecipients}
+      onSelectRecipient={onSelectRecipient}
+    />
+    {children && <div className={styles.examination}>{children}</div>}
+  </Modal>
+);

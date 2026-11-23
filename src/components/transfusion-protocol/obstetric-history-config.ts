@@ -21,7 +21,7 @@ export const obstetricHistoryFields: ProtocolFieldConfig[] = [
     name: 'recipientHemolyticDiseaseNewbornHistory',
     label: 'Гемолитическая болезнь новорождённого в анамнезе',
     type: 'select',
-    options: [OBSTETRIC_UNKNOWN, 'Нет', 'Да'],
+    options: [OBSTETRIC_UNKNOWN, 'Не было', 'Было'],
     required: true,
   },
 ];

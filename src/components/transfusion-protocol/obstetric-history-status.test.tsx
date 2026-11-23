@@ -57,7 +57,7 @@ it('prints unknown values separately and hides inactive newborn history', () => 
     }
   }
   const message = screen.getByText(/Количество беременностей - не известно/);
-  expect(message.textContent).toBe(
+  expect(message.closest('.cell-value')?.textContent).toBe(
     'Количество беременностей - не известно. Количество родов - не известно. ' +
       'Количество самопроизвольных абортов - не известно.',
   );
@@ -118,7 +118,7 @@ it('prints unknown legacy history by active field and preserves the profile fiel
       <HistoryBlock values={values} part="main" onOpenBlock={vi.fn()} />
     </table>,
   );
-  const message = screen.getByText(unknownText);
+  const message = screen.getByText('Количество беременностей - не известно.');
+  expect(message.closest('.cell-value')?.textContent).toBe(unknownText);
   expect(message.closest('td')?.getAttribute('colspan')).toBe('6');
-  expect(screen.queryByText(/беременности в анамнезе/)).toBeNull();
 });

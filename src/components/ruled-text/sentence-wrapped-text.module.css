@@ -1,0 +1,12 @@
+.text {
+  white-space: normal;
+}
+
+.sentence {
+  display: inline-block;
+  width: max-content;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+  white-space: normal;
+}

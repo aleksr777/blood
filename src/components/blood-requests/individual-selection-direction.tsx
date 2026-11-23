@@ -782,6 +782,7 @@ export const IndividualSelectionDirection = () => {
           >
             <AdaptiveRuledField
               label="Акушерский анамнез у женщин:"
+              wrapSentences={hasStructuredObstetricHistory(examinationValues)}
               value={
                 hasStructuredObstetricHistory(examinationValues)
                   ? formatObstetricHistory(examinationValues)

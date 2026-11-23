@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 type LabeledCellProps = {
   label: string;
-  value?: string;
+  value?: ReactNode;
   className?: string;
   centered?: boolean;
   inline?: boolean;

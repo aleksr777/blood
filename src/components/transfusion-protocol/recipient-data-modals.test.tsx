@@ -83,7 +83,7 @@ it('keeps the full draft when reviewing name matches before creating a separate 
   fireEvent.click(await screen.findByRole('button', { name: 'Посмотреть данные совпадений' }));
   expect(onCreate).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Вернуться к созданию нового' }));
-  expect((screen.getByLabelText('Дата рождения') as HTMLInputElement).value).toBe('1990-02-03');
+  expect((screen.getByLabelText('Дата рождения') as HTMLInputElement).value).toBe('03.02.1990');
   fireEvent.click(screen.getByRole('button', { name: 'Создать' }));
   await waitFor(() =>
     expect(onCreate).toHaveBeenCalledWith(

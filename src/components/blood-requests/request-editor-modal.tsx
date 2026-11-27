@@ -83,6 +83,12 @@ export const RequestEditorModal = ({ title, fields, values, onChange, onClose }:
                     </option>
                   ))}
                 </FormSelect>
+              ) : field.type === 'date' ? (
+                <FormInput
+                  type={field.type}
+                  value={draft[field.name] ?? ''}
+                  onValueChange={(next) => changeValue(field.name, next)}
+                />
               ) : (
                 <FormInput
                   type={field.type ?? 'text'}

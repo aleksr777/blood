@@ -65,7 +65,7 @@ export const PatientDetailsFields = ({
             type="date"
             value={values.recipientBirthDate ?? ''}
             readOnly={savedDocument}
-            onChange={(event) => change('recipientBirthDate', event.target.value)}
+            onValueChange={(next) => change('recipientBirthDate', next)}
           />
         </label>
         <div>

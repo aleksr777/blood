@@ -40,13 +40,21 @@ it('keeps explicit limits, including a zero limit, and limits multiline text sep
   expect((screen.getByLabelText('Короткое описание') as HTMLTextAreaElement).maxLength).toBe(100);
 });
 
-it.each(['number', 'date', 'time', 'datetime-local', 'radio', 'checkbox'])(
+it.each(['number', 'datetime-local', 'radio', 'checkbox'])(
   'does not add a text length limit to %s controls',
   (type) => {
     render(<FormInput aria-label="Поле" type={type} />);
     expect(screen.getByLabelText('Поле').hasAttribute('maxlength')).toBe(false);
   },
 );
+
+it.each([
+  ['date', 10],
+  ['time', 5],
+])('limits the visible %s input to %s characters', (type, length) => {
+  render(<FormInput aria-label="Поле" type={type} />);
+  expect((screen.getByLabelText('Поле') as HTMLInputElement).maxLength).toBe(length);
+});
 
 it('preserves long existing values and does not emit a change while opening', () => {
   const onChange = vi.fn();

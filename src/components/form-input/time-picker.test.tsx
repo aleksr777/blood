@@ -32,9 +32,9 @@ it('shows only numeric hours and minutes and does not fill an incomplete selecti
         type="time"
         aria-label="Время"
         value={value}
-        onChange={(event) => {
-          onChange(event.target.value);
-          setValue(event.target.value);
+        onValueChange={(next) => {
+          onChange(next);
+          setValue(next);
         }}
       />
     );
@@ -68,9 +68,9 @@ it('changes an existing time without replacing the other component and closes on
         type="time"
         aria-label="Время"
         value={value}
-        onChange={(event) => {
-          change(event.target.value);
-          setValue(event.target.value);
+        onValueChange={(next) => {
+          change(next);
+          setValue(next);
         }}
       />
     );
@@ -85,4 +85,18 @@ it('changes an existing time without replacing the other component and closes on
   expect(change).toHaveBeenLastCalledWith('09:37');
   fireEvent.keyDown(screen.getByRole('group', { name: 'Выбор времени' }), { key: 'Escape' });
   expect(screen.queryByRole('group', { name: 'Выбор времени' })).toBeNull();
+});
+
+it('renders the time list above the scrollable area of a modal window', () => {
+  render(
+    <dialog open>
+      <div style={{ overflowY: 'auto' }}>
+        <FormInput type="time" aria-label="Время" value="08:30" />
+      </div>
+    </dialog>,
+  );
+  fireEvent.click(screen.getByRole('button', { name: 'Выбрать время' }));
+  expect(screen.getByRole('group', { name: 'Выбор времени' }).parentElement?.tagName).toBe(
+    'DIALOG',
+  );
 });

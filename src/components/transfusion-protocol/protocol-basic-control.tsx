@@ -38,6 +38,18 @@ export const ProtocolBasicControl = ({ field, value, onChange }: Props) => {
     );
   }
 
+  if (field.type === 'date' || field.type === 'time') {
+    return (
+      <FormInput
+        name={field.name}
+        type={field.type}
+        value={value}
+        readOnly={field.readOnly}
+        onValueChange={(next) => onChange(field.name, next)}
+      />
+    );
+  }
+
   return (
     <FormInput
       name={field.name}

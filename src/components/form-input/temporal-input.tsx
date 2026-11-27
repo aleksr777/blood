@@ -1,27 +1,53 @@
-import { forwardRef, useImperativeHandle, useRef, type ComponentPropsWithoutRef } from 'react';
+import {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+  type ComponentPropsWithoutRef,
+} from 'react';
+import { DatePicker } from './date-picker';
 import { TimePicker } from './time-picker';
+import { formatDateInput, parseDateInput, parseTimeInput } from './temporal-value';
 import styles from './temporal-input.module.css';
 
-type Props = Omit<ComponentPropsWithoutRef<'input'>, 'type'> & { type: 'date' | 'time' };
+type Props = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'onChange'> & {
+  type: 'date' | 'time';
+  onValueChange?: (value: string) => void;
+};
 
 export const TemporalInput = forwardRef<HTMLInputElement, Props>(
-  ({ type, readOnly, disabled, ...props }, ref) => {
+  (
+    {
+      type,
+      value,
+      defaultValue,
+      onValueChange,
+      readOnly,
+      disabled,
+      onFocus,
+      onBlur,
+      onKeyDown,
+      ...props
+    },
+    ref,
+  ) => {
     const inputRef = useRef<HTMLInputElement>(null);
+    const [localValue, setLocalValue] = useState(String(defaultValue ?? ''));
+    const [editing, setEditing] = useState(false);
+    const [draft, setDraft] = useState('');
+    const committed = value === undefined ? localValue : String(value);
+    const display = type === 'date' ? formatDateInput(committed) : committed;
     useImperativeHandle(ref, () => inputRef.current!, []);
 
-    const updateValue = (value: string) => {
-      const input = inputRef.current;
-      if (!input || input.disabled || input.readOnly || input.value === value) return;
-      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-      setter?.call(input, value);
-      input.dispatchEvent(new Event('input', { bubbles: true }));
+    const publish = (next: string) => {
+      if (disabled || readOnly || next === committed) return;
+      if (value === undefined) setLocalValue(next);
+      onValueChange?.(next);
     };
 
-    const clear = () => {
-      const input = inputRef.current;
-      if (!input || input.disabled || input.readOnly) return;
-      updateValue('');
-      input.focus();
+    const choose = (next: string) => {
+      setDraft(type === 'date' ? formatDateInput(next) : next);
+      publish(next);
     };
 
     return (
@@ -29,55 +55,43 @@ export const TemporalInput = forwardRef<HTMLInputElement, Props>(
         <input
           {...props}
           ref={inputRef}
-          type={type}
-          className={[props.className, type === 'time' ? styles.time : styles.date]
-            .filter(Boolean)
-            .join(' ')}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder={type === 'date' ? 'ДД.ММ.ГГГГ' : 'ЧЧ:ММ'}
+          maxLength={type === 'date' ? 10 : 5}
+          className={props.className}
+          value={editing ? draft : display}
           readOnly={readOnly}
           disabled={disabled}
+          onFocus={(event) => {
+            setDraft(display);
+            setEditing(true);
+            onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            setEditing(false);
+            onBlur?.(event);
+          }}
+          onChange={(event) => {
+            const next = event.target.value;
+            setDraft(next);
+            const parsed = type === 'date' ? parseDateInput(next) : parseTimeInput(next);
+            if (parsed !== null) publish(parsed);
+          }}
           onKeyDown={(event) => {
-            if (
-              type === 'time' &&
-              ((event.altKey && event.key === 'ArrowDown') || event.key === 'F4')
-            ) {
-              event.preventDefault();
+            if (event.key === 'Escape') {
+              setEditing(false);
+              event.currentTarget.blur();
             }
-            props.onKeyDown?.(event);
+            onKeyDown?.(event);
           }}
         />
         {type === 'date' && !readOnly && (
-          <button
-            type="button"
-            className={styles.picker}
-            aria-label="Выбрать дату"
-            title="Выбрать дату"
-            disabled={disabled}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              const input = inputRef.current;
-              if (input?.showPicker) input.showPicker();
-              else input?.focus();
-            }}
-          >
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
-              <path d="M7.5 3v4M16.5 3v4M3.5 10h17" strokeLinecap="round" />
-            </svg>
-          </button>
+          <DatePicker disabled={disabled} value={committed} onChange={choose} />
         )}
         {type === 'time' && !readOnly && (
-          <TimePicker
-            disabled={disabled}
-            getValue={() => inputRef.current?.value ?? ''}
-            onChange={updateValue}
-          />
+          <TimePicker disabled={disabled} getValue={() => committed} onChange={choose} />
         )}
         {!readOnly && (
           <button
@@ -89,7 +103,8 @@ export const TemporalInput = forwardRef<HTMLInputElement, Props>(
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
-              clear();
+              inputRef.current?.focus();
+              choose('');
             }}
           >
             <span aria-hidden="true">×</span>

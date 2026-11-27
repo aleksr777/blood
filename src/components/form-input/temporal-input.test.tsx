@@ -21,9 +21,9 @@ it.each(['date', 'time'] as const)(
           aria-label="Значение"
           type={type}
           value={value}
-          onChange={(event) => {
-            onChange(event.target.value);
-            setValue(event.target.value);
+          onValueChange={(next) => {
+            onChange(next);
+            setValue(next);
           }}
         />
       );
@@ -79,12 +79,19 @@ it('respects read-only and disabled date fields', () => {
   expect(onChange).not.toHaveBeenCalled();
 });
 
-it('opens the native date picker from its separate button', () => {
-  render(<FormInput type="date" aria-label="Дата рождения" value="2026-11-18" readOnly={false} />);
-  const input = screen.getByLabelText('Дата рождения') as HTMLInputElement;
-  const showPicker = vi.fn();
-  input.showPicker = showPicker;
-  fireEvent.click(screen.getByRole('button', { name: 'Выбрать дату' }));
-  expect(showPicker).toHaveBeenCalledOnce();
-  expect(input.value).toBe('2026-11-18');
+it('does not save partial or impossible text and restores the last valid value on blur', () => {
+  const onValueChange = vi.fn();
+  render(
+    <FormInput type="date" aria-label="Дата" value="2026-11-18" onValueChange={onValueChange} />,
+  );
+  const input = screen.getByLabelText('Дата') as HTMLInputElement;
+  fireEvent.focus(input);
+  fireEvent.change(input, { target: { value: '31.02.2026' } });
+  expect(input.value).toBe('31.02.2026');
+  expect(onValueChange).not.toHaveBeenCalled();
+  fireEvent.blur(input);
+  expect(input.value).toBe('18.11.2026');
+  fireEvent.focus(input);
+  fireEvent.change(input, { target: { value: '' } });
+  expect(onValueChange).toHaveBeenCalledWith('');
 });

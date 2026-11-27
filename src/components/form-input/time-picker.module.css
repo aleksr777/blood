@@ -24,11 +24,6 @@
   height: 1.1rem;
 }
 
-.trigger:hover:not(:disabled) {
-  border-color: var(--ui-accent);
-  color: var(--ui-text-strong);
-}
-
 .trigger:disabled {
   background: var(--ui-disabled-background);
   color: var(--ui-text-disabled);
@@ -36,10 +31,8 @@
 }
 
 .popup {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 0.3rem);
-  right: 0;
+  position: fixed;
+  z-index: 1000;
   display: grid;
   grid-template-columns: repeat(2, 3.3rem);
   gap: 0.25rem;
@@ -53,15 +46,12 @@
 .column {
   display: block;
   position: relative;
+  max-height: 13rem;
+  max-height: min(13rem, 35vh);
   max-height: min(13rem, 35dvh);
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-}
-
-.above {
-  top: auto;
-  bottom: calc(100% + 0.3rem);
 }
 
 .option {
@@ -87,4 +77,9 @@
 .option:focus-visible {
   outline: 2px solid var(--ui-accent);
   outline-offset: 1px;
+}
+
+.trigger:hover:not(:disabled) {
+  border-color: var(--ui-accent);
+  color: var(--ui-text-strong);
 }

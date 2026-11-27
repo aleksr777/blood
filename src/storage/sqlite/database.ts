@@ -2,7 +2,7 @@ import { initializeSchema } from './database-schema';
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
 import { migrateLegacyOpfsDepartments } from './legacy-opfs-migration';
 import { migrateRecipientNameConstraint } from './recipient-name-migration';
-import { DatabaseError } from './database-errors';
+import { DatabaseError, describeDatabaseError } from './database-errors';
 import type { DatabaseStartupReporter } from './database-startup';
 import { migrateSharedSavedOptions } from './shared-saved-options-migration';
 
@@ -56,24 +56,6 @@ const acquireDatabaseOwnerLock = () => {
   });
 
   return ownerLockPromise;
-};
-
-const describeDatabaseError = (error: unknown) => {
-  const message = error instanceof Error ? error.message : String(error);
-
-  if (
-    message.includes('createSyncAccessHandle') ||
-    message.includes('another open Access Handle') ||
-    message.includes('Writable stream associated with the same file')
-  ) {
-    return new DatabaseError(
-      'Локальная база данных занята другой вкладкой или старой версией приложения. ' +
-        'Закройте все вкладки с приложением, откройте его снова и повторите действие.',
-      'database-in-use',
-    );
-  }
-
-  return error instanceof Error ? error : new Error(message);
 };
 
 const openDatabase = async (onProgress?: DatabaseStartupReporter) => {

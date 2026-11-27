@@ -11,7 +11,7 @@ import Modal from '../modal/modal';
 import styles from './app-startup-gate.module.css';
 
 type StartupState = {
-  status: 'loading' | 'ready' | 'blocked' | 'error';
+  status: 'loading' | 'ready' | 'blocked' | 'unsupported' | 'error';
   retrying: boolean;
   message?: string;
 };
@@ -37,7 +37,9 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
           status:
             error instanceof DatabaseError && error.code === 'database-in-use'
               ? 'blocked'
-              : 'error',
+              : error instanceof DatabaseError && error.code === 'unsupported-opfs'
+                ? 'unsupported'
+                : 'error',
           retrying: false,
           message:
             error instanceof Error ? error.message : 'Не удалось открыть локальную базу данных.',
@@ -66,7 +68,13 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
         </div>
       ) : (
         <Modal
-          title={blocked ? 'Приложение уже открыто' : 'Не удалось открыть приложение'}
+          title={
+            blocked
+              ? 'Приложение уже открыто'
+              : state.status === 'unsupported'
+                ? 'Браузер не поддерживается'
+                : 'Не удалось открыть приложение'
+          }
           onClose={keepOpen}
           dismissible={false}
         >
@@ -79,19 +87,23 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
             ) : (
               <>
                 <p>{state.message}</p>
-                <div className={styles.actions} aria-busy={state.retrying}>
-                  <button
-                    type="button"
-                    className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
-                    disabled={state.retrying}
-                    onClick={retry}
-                  >
-                    {state.retrying ? 'Проверяем…' : 'Повторить'}
-                  </button>
-                </div>
-                <AnimatedReveal open={state.retrying} contentKey={startupStage}>
-                  <p role="status">{databaseStartupMessages[startupStage]}…</p>
-                </AnimatedReveal>
+                {state.status !== 'unsupported' && (
+                  <>
+                    <div className={styles.actions} aria-busy={state.retrying}>
+                      <button
+                        type="button"
+                        className={`${ui.secondaryButton} ${ui.toolbarButton} secondary-button`}
+                        disabled={state.retrying}
+                        onClick={retry}
+                      >
+                        {state.retrying ? 'Проверяем…' : 'Повторить'}
+                      </button>
+                    </div>
+                    <AnimatedReveal open={state.retrying} contentKey={startupStage}>
+                      <p role="status">{databaseStartupMessages[startupStage]}…</p>
+                    </AnimatedReveal>
+                  </>
+                )}
               </>
             )}
           </div>

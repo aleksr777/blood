@@ -1,5 +1,8 @@
 import type { DatabaseRequest, DatabaseResponse } from './database-types';
 import { getDatabase } from './database';
+import { assertBrowserDatabaseHealthy, persistLegacyDatabase } from './browser-database';
+import { isDatabaseWrite } from './database-write-actions';
+import { queueDatabaseRequest } from './serial-request-queue';
 import { DatabaseError } from './database-errors';
 import {
   importDepartments,
@@ -156,24 +159,18 @@ const dispatchRequest = async (request: DatabaseRequest) => {
   }
 };
 
-let requestQueue: Promise<void> = Promise.resolve();
-
-const handleRequest = <T>(callback: () => Promise<T>) => {
-  const run = requestQueue.then(callback, callback);
-  requestQueue = run.then(
-    () => undefined,
-    () => undefined,
-  );
-  return run;
-};
-
 const send = (response: DatabaseResponse) => {
   const scope = globalThis as unknown as { postMessage: (message: DatabaseResponse) => void };
   scope.postMessage(response);
 };
 
 globalThis.addEventListener('message', (event: MessageEvent<DatabaseRequest>) => {
-  void handleRequest(() => dispatchRequest(event.data))
+  void queueDatabaseRequest(async () => {
+    assertBrowserDatabaseHealthy();
+    const result = await dispatchRequest(event.data);
+    if (isDatabaseWrite(event.data.action)) await persistLegacyDatabase();
+    return result;
+  })
     .then((result) => send({ id: event.data.id, ok: true, result }))
     .catch((error: unknown) => {
       const message = error instanceof Error ? error.message : String(error);

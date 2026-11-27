@@ -5,8 +5,8 @@ import { migrateRecipientNameConstraint } from './recipient-name-migration';
 import { DatabaseError, describeDatabaseError } from './database-errors';
 import type { DatabaseStartupReporter } from './database-startup';
 import { migrateSharedSavedOptions } from './shared-saved-options-migration';
+import { activateLegacyDatabase, openBrowserDatabase } from './browser-database';
 
-const DATABASE_FILE = '/blood.sqlite3';
 const DATABASE_OWNER_LOCK = 'blood-opfs-sahpool-owner';
 
 type LockManagerLike = {
@@ -66,12 +66,7 @@ const openDatabase = async (onProgress?: DatabaseStartupReporter) => {
     onProgress?.('sqlite');
     const sqlite3 = await sqlite3InitModule();
     onProgress?.('storage');
-    const pool = await sqlite3.installOpfsSAHPoolVfs({
-      initialCapacity: 6,
-      name: 'blood-opfs-sahpool',
-      directory: '/blood-opfs-sahpool',
-    });
-    const db = new pool.OpfsSAHPoolDb(DATABASE_FILE);
+    const { db, legacy } = await openBrowserDatabase(sqlite3);
 
     onProgress?.('schema');
     initializeSchema(db);
@@ -80,7 +75,8 @@ const openDatabase = async (onProgress?: DatabaseStartupReporter) => {
     migrateRecipientNameConstraint(db);
 
     onProgress?.('migration');
-    await migrateLegacyOpfsDepartments(sqlite3, db);
+    if (!legacy) await migrateLegacyOpfsDepartments(sqlite3, db);
+    if (legacy) await activateLegacyDatabase(sqlite3, db);
     return db;
   } catch (error) {
     throw describeDatabaseError(error);

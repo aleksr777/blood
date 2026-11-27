@@ -52,8 +52,8 @@ it('places age after birth date and groups the transfusion date and times', () =
     'text',
   ]);
   expect(fields.map((field) => field?.querySelector('input')?.placeholder)).toEqual([
-    'ДД.ММ.ГГГГ',
-    'ЧЧ:ММ',
-    'ЧЧ:ММ',
+    '--.--.----',
+    '--:--',
+    '--:--',
   ]);
 });

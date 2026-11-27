@@ -58,7 +58,7 @@ export const TemporalInput = forwardRef<HTMLInputElement, Props>(
           type="text"
           inputMode="numeric"
           autoComplete="off"
-          placeholder={type === 'date' ? 'ДД.ММ.ГГГГ' : 'ЧЧ:ММ'}
+          placeholder={type === 'date' ? '--.--.----' : '--:--'}
           maxLength={type === 'date' ? 10 : 5}
           className={props.className}
           value={editing ? draft : display}

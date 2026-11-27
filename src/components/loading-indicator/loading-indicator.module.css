@@ -1,0 +1,55 @@
+.indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+}
+
+.dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--ui-accent);
+  animation: loading-pulse 1.15s ease-in-out infinite;
+}
+
+.dot:nth-child(2) {
+  background: var(--ui-danger);
+  animation-delay: 0.15s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.compact {
+  gap: 0.35rem;
+  min-height: 1.5rem;
+}
+
+.compact .dot {
+  width: 0.45rem;
+  height: 0.45rem;
+}
+
+@keyframes loading-pulse {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0) scale(0.85);
+    opacity: 0.45;
+  }
+
+  35% {
+    transform: translateY(-0.3rem) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+    opacity: 1;
+  }
+}

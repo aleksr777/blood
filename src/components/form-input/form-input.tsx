@@ -6,15 +6,19 @@ export const TEXTAREA_MAX_LENGTH = 2000;
 
 const textTypes = new Set(['text', 'search', 'email', 'tel', 'url', 'password']);
 
-export const FormInput = forwardRef<HTMLInputElement, ComponentPropsWithoutRef<'input'>>(
-  ({ type = 'text', maxLength, ...props }, ref) => {
+type FormInputProps = ComponentPropsWithoutRef<'input'> & {
+  onValueChange?: (value: string) => void;
+};
+
+export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
+  ({ type = 'text', maxLength, onValueChange, ...props }, ref) => {
     if (type === 'date' || type === 'time') {
       return (
         <TemporalInput
           {...props}
           ref={ref}
           type={type === 'date' ? 'date' : 'time'}
-          maxLength={maxLength}
+          onValueChange={onValueChange}
         />
       );
     }

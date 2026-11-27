@@ -23,7 +23,7 @@ export const DateTimeInputs = ({ name, label, value, readOnly, onChange }: Props
             type="date"
             value={date}
             readOnly={readOnly}
-            onChange={(event) => onChange(joinLocalDateTime(event.target.value, time))}
+            onValueChange={(next) => onChange(joinLocalDateTime(next, time))}
           />
         </div>
         <div>
@@ -33,7 +33,7 @@ export const DateTimeInputs = ({ name, label, value, readOnly, onChange }: Props
             type="time"
             value={time}
             readOnly={readOnly}
-            onChange={(event) => onChange(joinLocalDateTime(date, event.target.value))}
+            onValueChange={(next) => onChange(joinLocalDateTime(date, next))}
           />
         </div>
       </div>

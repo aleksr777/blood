@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { getPickerPosition } from './picker-position';
 import styles from './time-picker.module.css';
-import { TimePickerColumn } from './time-picker-column';
+import { TimePickerPanel } from './time-picker-panel';
+import { hours, minutes } from './time-picker-values';
 
 type Props = {
   disabled?: boolean;
@@ -8,29 +11,43 @@ type Props = {
   onChange: (value: string) => void;
 };
 
-const hours = Array.from({ length: 24 }, (_, index) => String(index).padStart(2, '0'));
-const minutes = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
-
 export const TimePicker = ({ disabled, getValue, onChange }: Props) => {
   const [open, setOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState('');
   const [selectedMinute, setSelectedMinute] = useState('');
-  const [openAbove, setOpenAbove] = useState(false);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const [container, setContainer] = useState<HTMLElement | null>(null);
   const rootRef = useRef<HTMLSpanElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const popupRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const outside = (event: PointerEvent) => {
-      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) setOpen(false);
+      if (
+        event.target instanceof Node &&
+        !rootRef.current?.contains(event.target) &&
+        !popupRef.current?.contains(event.target)
+      )
+        setOpen(false);
+    };
+    const hideOnScroll = (event: Event) => {
+      if (event.target instanceof Node && popupRef.current?.contains(event.target)) return;
+      setOpen(false);
     };
     window.addEventListener('pointerdown', outside, true);
-    return () => window.removeEventListener('pointerdown', outside, true);
+    window.addEventListener('scroll', hideOnScroll, true);
+    window.addEventListener('resize', hideOnScroll);
+    return () => {
+      window.removeEventListener('pointerdown', outside, true);
+      window.removeEventListener('scroll', hideOnScroll, true);
+      window.removeEventListener('resize', hideOnScroll);
+    };
   }, [open]);
 
   useEffect(() => {
     if (!open) return;
-    rootRef.current
+    popupRef.current
       ?.querySelectorAll<HTMLElement>('[role="option"][aria-selected="true"]')
       .forEach((option) => {
         const list = option.parentElement;
@@ -40,18 +57,10 @@ export const TimePicker = ({ disabled, getValue, onChange }: Props) => {
 
   const toggle = () => {
     if (!open) {
-      const bounds = rootRef.current?.getBoundingClientRect();
-      const dialog = rootRef.current?.closest('dialog');
-      const top = Math.max(0, dialog?.getBoundingClientRect().top ?? 0);
-      const bottom = Math.min(
-        window.innerHeight,
-        dialog?.getBoundingClientRect().bottom ?? window.innerHeight,
-      );
-      setOpenAbove(
-        Boolean(
-          bounds && bottom - bounds.bottom < 240 && bounds.top - top > bottom - bounds.bottom,
-        ),
-      );
+      if (rootRef.current) {
+        setPosition(getPickerPosition(rootRef.current, 124, 240));
+        setContainer(rootRef.current.closest('dialog') ?? document.body);
+      }
       const [hour = '', minute = ''] = getValue().split(':');
       setSelectedHour(hours.includes(hour) ? hour : '');
       setSelectedMinute(minutes.includes(minute) ? minute : '');
@@ -91,34 +100,23 @@ export const TimePicker = ({ disabled, getValue, onChange }: Props) => {
           <path d="M12 7v5l3.5 2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      {open && (
-        <span
-          className={`${styles.popup} ${openAbove ? styles.above : ''}`}
-          role="group"
-          aria-label="Выбор времени"
-          onKeyDown={(event) => {
-            if (event.key === 'Escape') {
-              event.preventDefault();
-              event.stopPropagation();
+      {open &&
+        container &&
+        createPortal(
+          <TimePickerPanel
+            ref={popupRef}
+            position={position}
+            selectedHour={selectedHour}
+            selectedMinute={selectedMinute}
+            onSelectHour={(hour) => choose(hour, selectedMinute)}
+            onSelectMinute={(minute) => choose(selectedHour, minute)}
+            onEscape={() => {
               setOpen(false);
               triggerRef.current?.focus();
-            }
-          }}
-        >
-          <TimePickerColumn
-            label="Часы"
-            values={hours}
-            selected={selectedHour}
-            onSelect={(hour) => choose(hour, selectedMinute)}
-          />
-          <TimePickerColumn
-            label="Минуты"
-            values={minutes}
-            selected={selectedMinute}
-            onSelect={(minute) => choose(selectedHour, minute)}
-          />
-        </span>
-      )}
+            }}
+          />,
+          container,
+        )}
     </span>
   );
 };

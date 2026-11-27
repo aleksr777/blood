@@ -95,7 +95,7 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
                     type="date"
                     name={reagent.expiration}
                     value={values[reagent.expiration] ?? ''}
-                    onChange={(event) => change(reagent.expiration, event.target.value)}
+                    onValueChange={(next) => change(reagent.expiration, next)}
                   />
                 </label>
                 <ProtocolFieldControl

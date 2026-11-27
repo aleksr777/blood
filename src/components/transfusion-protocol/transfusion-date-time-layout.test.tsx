@@ -47,8 +47,13 @@ it('places age after birth date and groups the transfusion date and times', () =
   expect(grid?.classList.contains(styles.transfusionGrid)).toBe(true);
   expect(fields.every((field) => field?.parentElement === grid)).toBe(true);
   expect(fields.map((field) => field?.querySelector('input')?.type)).toEqual([
-    'date',
-    'time',
-    'time',
+    'text',
+    'text',
+    'text',
+  ]);
+  expect(fields.map((field) => field?.querySelector('input')?.placeholder)).toEqual([
+    'ДД.ММ.ГГГГ',
+    'ЧЧ:ММ',
+    'ЧЧ:ММ',
   ]);
 });

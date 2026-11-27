@@ -100,4 +100,18 @@ describe('application startup', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Повторить' }));
     expect(await screen.findByRole('textbox')).toBeTruthy();
   });
+
+  it('explains an old OPFS implementation without offering a useless retry', async () => {
+    initialize.mockRejectedValue(
+      new DatabaseError('Обновите браузер. Не очищайте данные сайта.', 'unsupported-opfs'),
+    );
+    localStorage.setItem('draft', 'saved');
+    renderApp();
+
+    await screen.findByRole('dialog', { name: 'Браузер не поддерживается' });
+    expect(screen.getByText('Обновите браузер. Не очищайте данные сайта.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Повторить' })).toBeNull();
+    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(localStorage.getItem('draft')).toBe('saved');
+  });
 });

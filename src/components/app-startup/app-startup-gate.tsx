@@ -8,6 +8,7 @@ import {
   type DatabaseStartupStage,
 } from '../../storage/sqlite/database-startup';
 import Modal from '../modal/modal';
+import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import styles from './app-startup-gate.module.css';
 
 type StartupState = {
@@ -62,10 +63,9 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
   return (
     <main className={styles.screen}>
       {state.status === 'loading' ? (
-        <div className={styles.message} role="status">
-          <p>Открываем приложение…</p>
-          <p>{databaseStartupMessages[startupStage]}…</p>
-        </div>
+        <LoadingIndicator
+          label={`Открываем приложение. ${databaseStartupMessages[startupStage]}.`}
+        />
       ) : (
         <Modal
           title={
@@ -96,11 +96,14 @@ export const AppStartupGate = ({ children }: PropsWithChildren) => {
                         disabled={state.retrying}
                         onClick={retry}
                       >
-                        {state.retrying ? 'Проверяем…' : 'Повторить'}
+                        Повторить
                       </button>
                     </div>
-                    <AnimatedReveal open={state.retrying} contentKey={startupStage}>
-                      <p role="status">{databaseStartupMessages[startupStage]}…</p>
+                    <AnimatedReveal open={state.retrying}>
+                      <LoadingIndicator
+                        label={`${databaseStartupMessages[startupStage]}.`}
+                        compact
+                      />
                     </AnimatedReveal>
                   </>
                 )}

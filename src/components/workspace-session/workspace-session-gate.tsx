@@ -2,6 +2,7 @@ import { useEffect, useState, type PropsWithChildren } from 'react';
 import { prepareWorkspaceSession } from '../../storage/repositories/workspace-session';
 import ui from '../../styles/ui';
 import Modal from '../modal/modal';
+import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import styles from '../app-startup/app-startup-gate.module.css';
 import { watchWorkspaceActivity } from './watch-workspace-activity';
 
@@ -54,9 +55,11 @@ export const WorkspaceSessionGate = ({ children }: PropsWithChildren) => {
           </div>
         </Modal>
       ) : (
-        <p role="status">
-          {state.status === 'resetting' ? 'Очищаем рабочие бланки…' : 'Открываем рабочие бланки…'}
-        </p>
+        <LoadingIndicator
+          label={
+            state.status === 'resetting' ? 'Очищаем рабочие бланки.' : 'Открываем рабочие бланки.'
+          }
+        />
       )}
     </main>
   );

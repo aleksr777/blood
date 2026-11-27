@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useSavedOptions } from './use-saved-options';
 import { SavedOptionItem } from './saved-option-item';
 import { EmptyInputOption } from './empty-input-option';
+import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import { useOverlayDropdown } from './use-overlay-dropdown';
 import styles from './protocol-editor.module.css';
 const normalizeValue = (value: string) =>
@@ -48,11 +49,7 @@ export const SavedOptionsField = ({
   });
 
   const emptyText =
-    status === 'loading'
-      ? 'Загрузка...'
-      : status === 'error'
-        ? 'Не удалось загрузить список'
-        : 'Сохранённых вариантов нет';
+    status === 'error' ? 'Не удалось загрузить список' : 'Сохранённых вариантов нет';
 
   const normalizedFixedOptions = new Set(fixedOptions.map(normalizeValue));
   const isFixed = (option: string) => normalizedFixedOptions.has(normalizeValue(option));
@@ -111,7 +108,13 @@ export const SavedOptionsField = ({
           />
         )}
         {editableItems.length === 0 && fixedOptions.length === 0 ? (
-          <div className={styles.historyEmpty}>{emptyText}</div>
+          <div className={styles.historyEmpty}>
+            {status === 'loading' ? (
+              <LoadingIndicator label="Загрузка сохранённых вариантов." compact />
+            ) : (
+              emptyText
+            )}
+          </div>
         ) : (
           editableItems.map((item) => (
             <SavedOptionItem

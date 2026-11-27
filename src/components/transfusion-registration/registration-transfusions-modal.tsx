@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { listProtocolRecords, type ProtocolRecord } from '../../storage/repositories/recipients';
 import { transfusionOrderKey } from '../../domain/date-time';
 import Modal from '../modal/modal';
+import { LoadingIndicator } from '../loading-indicator/loading-indicator';
 import { TransfusionRecordSummary } from '../transfusion-record-summary/transfusion-record-summary';
 import {
   buildRegistrationTransfusionRow,
@@ -14,7 +15,6 @@ import styles from './registration-transfusions-modal.module.css';
 import type { ProtocolValues } from '../transfusion-protocol/protocol-types';
 
 const MAX_ROWS = 14;
-
 type Props = {
   recipientId: number | null;
   values: ProtocolValues;
@@ -119,7 +119,7 @@ export const RegistrationTransfusionsModal = ({ recipientId, values, onApply, on
 
             <div className={styles.list}>
               {loading ? (
-                <div className={styles.empty}>Загрузка...</div>
+                <LoadingIndicator label="Загрузка протоколов" compact className={styles.empty} />
               ) : records.length === 0 ? (
                 <div className={styles.empty}>{emptyText}</div>
               ) : (

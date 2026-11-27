@@ -66,6 +66,7 @@ describe('workspace session gate', () => {
       }),
     );
     renderApp();
+    expect(screen.getByRole('status', { name: 'Открываем рабочие бланки.' }).textContent).toBe('');
     expect(screen.queryByRole('textbox')).toBeNull();
     await waitFor(() => expect(mocks.reset).toHaveBeenCalledTimes(1));
     await act(async () => finish());

@@ -54,7 +54,8 @@ describe('application startup', () => {
     });
     initialize.mockReturnValue(opening);
     renderApp();
-    expect(screen.getByRole('status').textContent).toContain('Открываем');
+    const loading = screen.getByRole('status', { name: /Открываем приложение/ });
+    expect(loading.textContent).toBe('');
     expect(screen.queryByRole('textbox')).toBeNull();
     expect(localStorage.getItem('draft')).toBeNull();
     await act(async () => finish());

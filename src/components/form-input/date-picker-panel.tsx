@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DatePickerDays } from './date-picker-days';
-import { dateParts } from './temporal-value';
+import { dateParts, formatDateInput } from './temporal-value';
 import styles from './date-picker.module.css';
 
 const months = [
@@ -21,11 +21,14 @@ const months = [
 export const DatePickerPanel = ({
   value,
   onSelect,
+  showToday = true,
 }: {
   value: string;
   onSelect: (value: string) => void;
+  showToday?: boolean;
 }) => {
   const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const initial = dateParts(value);
   const [year, setYear] = useState(initial?.year ?? today.getFullYear());
   const [month, setMonth] = useState((initial?.month ?? today.getMonth() + 1) - 1);
@@ -49,6 +52,11 @@ export const DatePickerPanel = ({
 
   return (
     <>
+      {showToday && (
+        <button type="button" className={styles.today} onClick={() => onSelect(todayIso)}>
+          Сегодня {formatDateInput(todayIso)}
+        </button>
+      )}
       <div className={styles.header}>
         <button type="button" aria-label="Предыдущий месяц" onClick={() => navigate(-1)}>
           ‹
@@ -72,18 +80,6 @@ export const DatePickerPanel = ({
         </button>
       </div>
       <DatePickerDays year={year} month={month} value={value} onSelect={onSelect} />
-      <button
-        type="button"
-        className={styles.today}
-        onClick={() => {
-          const now = new Date();
-          onSelect(
-            `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
-          );
-        }}
-      >
-        Сегодня
-      </button>
     </>
   );
 };

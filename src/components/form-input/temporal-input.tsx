@@ -19,6 +19,7 @@ import styles from './temporal-input.module.css';
 type Props = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'onChange'> & {
   type: 'date' | 'time';
   onValueChange?: (value: string) => void;
+  showToday?: boolean;
 };
 
 export const TemporalInput = forwardRef<HTMLInputElement, Props>(
@@ -28,6 +29,7 @@ export const TemporalInput = forwardRef<HTMLInputElement, Props>(
       value,
       defaultValue,
       onValueChange,
+      showToday,
       readOnly,
       disabled,
       onFocus,
@@ -136,7 +138,12 @@ export const TemporalInput = forwardRef<HTMLInputElement, Props>(
           }}
         />
         {type === 'date' && !readOnly && (
-          <DatePicker disabled={disabled} value={committed} onChange={choose} />
+          <DatePicker
+            disabled={disabled}
+            value={committed}
+            onChange={choose}
+            showToday={showToday}
+          />
         )}
         {type === 'time' && !readOnly && (
           <TimePicker disabled={disabled} getValue={() => committed} onChange={choose} />

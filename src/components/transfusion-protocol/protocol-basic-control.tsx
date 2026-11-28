@@ -45,6 +45,7 @@ export const ProtocolBasicControl = ({ field, value, onChange }: Props) => {
         type={field.type}
         value={value}
         readOnly={field.readOnly}
+        showToday={field.showToday}
         onValueChange={(next) => onChange(field.name, next)}
       />
     );

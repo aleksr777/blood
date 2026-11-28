@@ -8,10 +8,11 @@ const textTypes = new Set(['text', 'search', 'email', 'tel', 'url', 'password'])
 
 type FormInputProps = ComponentPropsWithoutRef<'input'> & {
   onValueChange?: (value: string) => void;
+  showToday?: boolean;
 };
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
-  ({ type = 'text', maxLength, onValueChange, ...props }, ref) => {
+  ({ type = 'text', maxLength, onValueChange, showToday, ...props }, ref) => {
     if (type === 'date' || type === 'time') {
       return (
         <TemporalInput
@@ -19,6 +20,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           ref={ref}
           type={type === 'date' ? 'date' : 'time'}
           onValueChange={onValueChange}
+          showToday={showToday}
         />
       );
     }

@@ -40,3 +40,17 @@ export const parseTimeInput = (value: string) => {
   if (!match || Number(match[1]) > 23) return null;
   return `${pad(Number(match[1]))}:${match[2]}`;
 };
+
+export const formatTemporalDraft = (type: 'date' | 'time', value: string) => {
+  if (type === 'date') {
+    const parsed = parseDateInput(value);
+    if (parsed && (value.includes('-') || value.replace(/\D/g, '').length !== 8))
+      return formatDateInput(parsed);
+    const digits = value.replace(/\D/g, '').slice(0, 8);
+    return `${digits.slice(0, 2)}${digits.length >= 2 ? '.' : ''}${digits.slice(2, 4)}${digits.length >= 4 ? '.' : ''}${digits.slice(4)}`;
+  }
+  const parsed = parseTimeInput(value);
+  if (parsed && value.includes(':')) return parsed;
+  const digits = value.replace(/\D/g, '').slice(0, 4);
+  return `${digits.slice(0, 2)}${digits.length >= 2 ? ':' : ''}${digits.slice(2)}`;
+};

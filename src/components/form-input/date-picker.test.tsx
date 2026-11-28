@@ -34,19 +34,25 @@ it('opens a custom calendar and stores the selected date in ISO format', () => {
   expect(screen.queryByRole('dialog', { name: 'Выбор даты' })).toBeNull();
 });
 
-it('changes the calendar year without clicking through many months and supports escape', () => {
+it('selects a year by mouse without typing and supports escape', () => {
   const onValueChange = vi.fn();
   render(
-    <FormInput type="date" aria-label="Дата рождения" value="" onValueChange={onValueChange} />,
+    <FormInput
+      type="date"
+      aria-label="Дата рождения"
+      value="2026-11-18"
+      onValueChange={onValueChange}
+    />,
   );
   fireEvent.click(screen.getByRole('button', { name: 'Выбрать дату' }));
   const picker = screen.getByRole('dialog', { name: 'Выбор даты' });
-  fireEvent.change(within(picker).getByRole('textbox', { name: 'Год календаря' }), {
-    target: { value: '2005' },
-  });
-  fireEvent.keyDown(within(picker).getByRole('textbox', { name: 'Год календаря' }), {
-    key: 'Enter',
-  });
+  fireEvent.click(within(picker).getByRole('button', { name: 'Выбрать год' }));
+  const years = within(picker).getByRole('group', { name: 'Выбор года' });
+  expect(within(years).getAllByRole('button')).toHaveLength(20);
+  fireEvent.click(within(picker).getByRole('button', { name: 'Предыдущие 20 лет' }));
+  fireEvent.click(within(years).getByRole('button', { name: '2005' }));
+  expect(within(picker).queryByRole('group', { name: 'Выбор года' })).toBeNull();
+  expect(within(picker).getByRole('button', { name: 'Выбрать год' }).textContent).toBe('2005');
   expect(within(picker).getAllByRole('button', { name: /2005 г\./ }).length).toBeGreaterThan(0);
   fireEvent.click(within(picker).getAllByRole('button', { name: /2005 г\./ })[5]);
   expect(onValueChange).toHaveBeenCalledWith(expect.stringMatching(/^2005-\d{2}-\d{2}$/));

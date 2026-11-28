@@ -184,8 +184,8 @@ export const firstPageBlockConfigs: ProtocolBlockConfig[] = [
         min: '10',
         max: '999',
       },
-      { name: 'collectionDate', label: 'Дата заготовки', type: 'date' },
-      { name: 'expirationDate', label: 'Срок годности', type: 'date' },
+      { name: 'collectionDate', label: 'Дата заготовки', type: 'date', showToday: false },
+      { name: 'expirationDate', label: 'Срок годности', type: 'date', showToday: false },
     ],
   },
 ];

@@ -26,6 +26,7 @@ export type ProtocolFieldConfig = {
   max?: string;
   required?: boolean;
   readOnly?: boolean;
+  showToday?: boolean;
 };
 
 type ProtocolBlockSize = 'small' | 'medium' | 'large' | 'xlarge';

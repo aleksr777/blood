@@ -6,11 +6,12 @@ import styles from './date-picker.module.css';
 
 type Props = {
   disabled?: boolean;
+  showToday?: boolean;
   value: string;
   onChange: (value: string) => void;
 };
 
-export const DatePicker = ({ disabled, value, onChange }: Props) => {
+export const DatePicker = ({ disabled, showToday, value, onChange }: Props) => {
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [container, setContainer] = useState<HTMLElement | null>(null);
@@ -105,7 +106,7 @@ export const DatePicker = ({ disabled, value, onChange }: Props) => {
               triggerRef.current?.focus();
             }}
           >
-            <DatePickerPanel value={value} onSelect={choose} />
+            <DatePickerPanel value={value} onSelect={choose} showToday={showToday} />
           </div>,
           container,
         )}

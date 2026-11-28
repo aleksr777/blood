@@ -94,3 +94,26 @@ it('renders the calendar above the scrollable area of a modal window', () => {
   fireEvent.click(screen.getByRole('button', { name: 'Выбрать дату' }));
   expect(screen.getByRole('dialog', { name: 'Выбор даты' }).parentElement?.tagName).toBe('DIALOG');
 });
+
+it('places the current date button above the month controls and selects today', () => {
+  const onValueChange = vi.fn();
+  render(<FormInput type="date" value="" onValueChange={onValueChange} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Выбрать дату' }));
+  const picker = screen.getByRole('dialog', { name: 'Выбор даты' });
+  const today = new Date();
+  const date = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.${today.getFullYear()}`;
+  const button = within(picker).getByRole('button', { name: `Сегодня ${date}` });
+  expect(picker.querySelector('button')).toBe(button);
+  fireEvent.click(button);
+  expect(onValueChange).toHaveBeenCalledWith(
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`,
+  );
+});
+
+it('can hide today for expiry and preparation dates', () => {
+  render(<FormInput type="date" value="" showToday={false} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Выбрать дату' }));
+  const picker = screen.getByRole('dialog', { name: 'Выбор даты' });
+  expect(within(picker).queryByRole('button', { name: /^Сегодня/ })).toBeNull();
+  expect(within(picker).getByRole('button', { name: 'Следующий месяц' })).toBeTruthy();
+});

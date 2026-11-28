@@ -93,6 +93,7 @@ export const CompatibilityTestsFields = ({ values, onChange, applyDefaults = tru
                   <span>Годен до</span>
                   <FormInput
                     type="date"
+                    showToday={false}
                     name={reagent.expiration}
                     value={values[reagent.expiration] ?? ''}
                     onValueChange={(next) => change(reagent.expiration, next)}

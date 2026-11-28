@@ -17,6 +17,8 @@ const months = [
   'Ноябрь',
   'Декабрь',
 ];
+const yearsPerPage = 20;
+const yearPageStart = (year: number) => Math.floor((year - 1) / yearsPerPage) * yearsPerPage + 1;
 
 export const DatePickerPanel = ({
   value,
@@ -32,7 +34,10 @@ export const DatePickerPanel = ({
   const initial = dateParts(value);
   const [year, setYear] = useState(initial?.year ?? today.getFullYear());
   const [month, setMonth] = useState((initial?.month ?? today.getMonth() + 1) - 1);
-  const [yearDraft, setYearDraft] = useState(String(initial?.year ?? today.getFullYear()));
+  const [choosingYear, setChoosingYear] = useState(false);
+  const [firstYear, setFirstYear] = useState(() =>
+    yearPageStart(initial?.year ?? today.getFullYear()),
+  );
 
   const navigate = (delta: number) => {
     const date = new Date(0);
@@ -41,13 +46,6 @@ export const DatePickerPanel = ({
     if (nextYear < 1 || nextYear > 9999) return;
     setYear(nextYear);
     setMonth(date.getUTCMonth());
-    setYearDraft(String(nextYear));
-  };
-
-  const applyYear = () => {
-    const next = Number(yearDraft);
-    if (/^\d{1,4}$/.test(yearDraft) && next >= 1 && next <= 9999) setYear(next);
-    else setYearDraft(String(year));
   };
 
   return (
@@ -58,28 +56,76 @@ export const DatePickerPanel = ({
         </button>
       )}
       <div className={styles.header}>
-        <button type="button" aria-label="Предыдущий месяц" onClick={() => navigate(-1)}>
-          ‹
-        </button>
-        <span>{months[month]}</span>
-        <input
-          aria-label="Год календаря"
-          inputMode="numeric"
-          value={yearDraft}
-          onChange={(event) => setYearDraft(event.target.value.replace(/\D/g, '').slice(0, 4))}
-          onBlur={applyYear}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              applyYear();
-            }
-          }}
-        />
-        <button type="button" aria-label="Следующий месяц" onClick={() => navigate(1)}>
-          ›
-        </button>
+        {choosingYear ? (
+          <>
+            <button
+              type="button"
+              aria-label="Предыдущие 20 лет"
+              disabled={firstYear === 1}
+              onClick={() => setFirstYear(firstYear - yearsPerPage)}
+            >
+              ‹
+            </button>
+            <span className={styles.yearRange}>
+              {firstYear}–{Math.min(firstYear + yearsPerPage - 1, 9999)}
+            </span>
+            <button
+              type="button"
+              aria-label="Следующие 20 лет"
+              disabled={firstYear + yearsPerPage > 9999}
+              onClick={() => setFirstYear(firstYear + yearsPerPage)}
+            >
+              ›
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" aria-label="Предыдущий месяц" onClick={() => navigate(-1)}>
+              ‹
+            </button>
+            <span>{months[month]}</span>
+            <button
+              type="button"
+              className={styles.yearTrigger}
+              aria-label="Выбрать год"
+              aria-expanded={choosingYear}
+              onClick={() => {
+                setFirstYear(yearPageStart(year));
+                setChoosingYear(true);
+              }}
+            >
+              {year}
+            </button>
+            <button type="button" aria-label="Следующий месяц" onClick={() => navigate(1)}>
+              ›
+            </button>
+          </>
+        )}
       </div>
-      <DatePickerDays year={year} month={month} value={value} onSelect={onSelect} />
+      {choosingYear ? (
+        <div className={styles.years} role="group" aria-label="Выбор года">
+          {Array.from({ length: yearsPerPage }, (_, index) => firstYear + index)
+            .filter((option) => option <= 9999)
+            .map((option) => (
+              <button
+                key={option}
+                type="button"
+                className={styles.year}
+                aria-pressed={option === year}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setYear(option);
+                  setChoosingYear(false);
+                }}
+              >
+                {option}
+              </button>
+            ))}
+        </div>
+      ) : (
+        <DatePickerDays year={year} month={month} value={value} onSelect={onSelect} />
+      )}
     </>
   );
 };

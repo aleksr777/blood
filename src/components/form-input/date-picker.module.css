@@ -67,12 +67,40 @@
   font-size: 1.4rem;
 }
 
-.header input {
+.header .yearTrigger {
   width: 100%;
-  height: 2rem;
-  min-height: 2rem;
-  padding: 0 0.2rem;
-  text-align: center;
+  font-size: var(--ui-font-control);
+}
+
+.header button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.yearRange {
+  grid-column: 2 / 4;
+}
+
+.years {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+.year {
+  min-height: 2.2rem;
+  border: 1px solid transparent;
+  border-radius: var(--ui-radius-small);
+  background: transparent;
+  color: var(--ui-text-strong);
+  font: inherit;
+  cursor: pointer;
+}
+
+.year[aria-pressed='true'] {
+  border-color: var(--ui-accent);
+  background: var(--ui-accent);
+  color: var(--ui-on-accent);
 }
 
 .days {
@@ -134,14 +162,16 @@
 .trigger:focus-visible,
 .header button:focus-visible,
 .day:focus-visible,
+.year:focus-visible,
 .today:focus-visible {
   outline: 2px solid var(--ui-accent);
   outline-offset: 1px;
 }
 
 .trigger:hover:not(:disabled),
-.header button:hover,
+.header button:hover:not(:disabled),
 .day:hover:not([aria-pressed='true']),
+.year:hover:not([aria-pressed='true']),
 .today:hover {
   border-color: var(--ui-accent);
   color: var(--ui-text-strong);
